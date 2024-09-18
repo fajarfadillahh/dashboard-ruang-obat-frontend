@@ -20,7 +20,7 @@ export default function Sidebar() {
         <div className="grid gap-1">
           <ButtonSidebar
             label="Dashboard"
-            path="/"
+            path="/dashboard"
             icon={<House weight="bold" size={20} />}
           />
 
