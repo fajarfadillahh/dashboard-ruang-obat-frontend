@@ -21,13 +21,13 @@ export default function ButtonSidebar({
       href={path}
       className={`flex h-10 items-center justify-between rounded-xl px-3 py-2 ${
         router.asPath.includes(path)
-          ? "bg-purple hover:bg-purple/90 text-white"
-          : "text-gray hover:bg-gray-20 bg-transparent"
+          ? "bg-purple text-white hover:bg-purple/90"
+          : "bg-transparent text-gray hover:bg-gray/10"
       } ${className}`}
     >
       <div className="flex flex-1 items-center gap-2">
         <>{icon}</>
-        <div className="text-sm font-semibold">{label}</div>
+        <div className="text-sm font-bold">{label}</div>
       </div>
     </Link>
   );

@@ -1,11 +1,8 @@
 import { Button, Input } from "@nextui-org/react";
 import { EnvelopeSimple, Lock } from "@phosphor-icons/react";
 import Head from "next/head";
-import { useRouter } from "next/router";
 
 export default function LoginPage() {
-  const router = useRouter();
-
   return (
     <>
       <Head>
@@ -18,7 +15,7 @@ export default function LoginPage() {
             <h1 className="text-[42px] font-bold -tracking-wide text-black">
               Hi, admin Ruangobat 👋
             </h1>
-            <p className="text-gray font-medium">
+            <p className="font-medium text-gray">
               Silakan login dulu untuk bisa mengatur semuanya
             </p>
           </div>
@@ -55,7 +52,12 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button variant="solid" color="secondary" className="font-bold">
+          <Button
+            variant="solid"
+            color="secondary"
+            onClick={() => (window.location.href = "/dashboard")}
+            className="font-bold"
+          >
             Masuk Sekarang
           </Button>
         </div>

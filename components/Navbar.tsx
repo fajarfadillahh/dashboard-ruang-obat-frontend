@@ -27,11 +27,9 @@ export default function Navbar() {
               />
 
               <div>
-                <h6 className="text-sm font-bold text-black">
-                  Fajar Fadillah Agustian
-                </h6>
-                <p className="text-gray text-[12px] font-semibold uppercase">
-                  ROUFFA125638
+                <h6 className="text-sm font-bold text-black">Admin</h6>
+                <p className="text-[12px] font-semibold uppercase text-gray">
+                  Ruangobat.id
                 </p>
               </div>
             </div>
