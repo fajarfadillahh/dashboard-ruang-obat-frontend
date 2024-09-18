@@ -17,15 +17,16 @@ import {
 } from "@nextui-org/react";
 import { Eye, MagnifyingGlass, Trash } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function UsersPage() {
+  const router = useRouter();
   const { page, pages, data, setPage } = usePagination(users, 5);
 
   const columnsUser = [
     { name: "ID Pengguna", uid: "id" },
     { name: "Nama Lengkap", uid: "name" },
     { name: "Email", uid: "email" },
-    { name: "No Telpon", uid: "no_telp" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -45,18 +46,29 @@ export default function UsersPage() {
         );
       case "email":
         return <div className="w-max font-medium text-black">{user.email}</div>;
-      case "no_telp":
-        return (
-          <div className="w-max font-medium text-black">{user.no_telp}</div>
-        );
       case "action":
         return (
           <div className="flex max-w-[150px] items-center gap-1">
-            <Button isIconOnly variant="light" size="sm">
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              onClick={() =>
+                router.push(
+                  `/users/details/${encodeURIComponent(user.id_pengguna)}`,
+                )
+              }
+            >
               <Eye weight="bold" size={18} className="text-gray" />
             </Button>
 
-            <Button isIconOnly variant="light" color="danger" size="sm">
+            <Button
+              isIconOnly
+              variant="light"
+              color="danger"
+              size="sm"
+              onClick={() => confirm("Apakah anda yakin?")}
+            >
               <Trash weight="bold" size={18} />
             </Button>
           </div>
