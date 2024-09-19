@@ -4,8 +4,11 @@ import { formatRupiah } from "@/utils/formatRupiah";
 import { Button, Chip, Tooltip } from "@nextui-org/react";
 import { ClipboardText, PencilLine, Tag, Trash } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function CardProgram(program: ProgramType) {
+  const router = useRouter();
+
   return (
     <div className="grid grid-cols-[1fr_repeat(2,150px)_200px_68px] items-center gap-4 rounded-xl border-2 border-gray/20 p-6 hover:cursor-pointer hover:border-gray/40 hover:bg-gray/10">
       <div className="flex items-center gap-4 justify-self-start">
@@ -62,7 +65,13 @@ export default function CardProgram(program: ProgramType) {
       </div>
 
       <div className="inline-flex items-center gap-1">
-        <Button isIconOnly variant="light" size="sm" className="text-gray">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          onClick={() => router.push(`/programs/edit/${program.id_program}`)}
+          className="text-gray"
+        >
           <PencilLine weight="bold" size={18} />
         </Button>
 

@@ -14,19 +14,19 @@ import {
 import { FloppyDisk } from "@phosphor-icons/react";
 import { useState } from "react";
 
-export default function CreateProgramPage() {
+export default function EditProgramPage() {
   const [selected, setSelected] = useState<string>("");
   const [values, setValues] = useState<Selection>(new Set([]));
 
   return (
-    <Layout title="Create Program Page">
+    <Layout title="Edit Program Page">
       <Container>
         <section className="grid">
           <ButtonBack />
 
           <div className="border-gray/200 grid gap-1 border-b-2 border-dashed py-8">
             <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Buat Program ✏️
+              Edit Program ✏️
             </h1>
             <p className="font-medium text-gray">
               Buatlah program yang menarik untuk para mahasiswa.
