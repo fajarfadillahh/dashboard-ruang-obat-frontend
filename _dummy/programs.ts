@@ -3,7 +3,7 @@ import { ProgramType } from "@/types/program.type";
 export const programs: ProgramType[] = [
   {
     id_program: "ROP817629",
-    title_proram: "Tryout Internal Ruangobat Part 1",
+    title_proram: "Kelas Ruangobat Tatap Muka: Mandiri Agustus 2024 Part 1",
     amout_proram: 9,
     status_program: "free",
     price_program: 0,
@@ -11,7 +11,7 @@ export const programs: ProgramType[] = [
   },
   {
     id_program: "ROP192039",
-    title_proram: "Tryout Internal Ruangobat Part 2",
+    title_proram: "Kelas Ruangobat Tatap Muka: Mandiri Agustus 2024 Part 2",
     amout_proram: 6,
     status_program: "paid",
     price_program: 500000,
@@ -19,7 +19,7 @@ export const programs: ProgramType[] = [
   },
   {
     id_program: "ROP338201",
-    title_proram: "Tryout Internal Ruangobat Part 3",
+    title_proram: "Kelas Ruangobat Tatap Muka: Mandiri Agustus 2024 Part 3",
     amout_proram: 7,
     status_program: "paid",
     price_program: 450000,

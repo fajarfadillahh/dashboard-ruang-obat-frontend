@@ -1,25 +1,33 @@
 import { ProgramType } from "@/types/program.type";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
-import { Button, Chip } from "@nextui-org/react";
+import { Button, Chip, Tooltip } from "@nextui-org/react";
 import { ClipboardText, PencilLine, Tag, Trash } from "@phosphor-icons/react";
 import Link from "next/link";
 
 export default function CardProgram(program: ProgramType) {
   return (
-    <div className="relative grid grid-cols-[1fr_repeat(2,150px)_200px_68px] items-center justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/20 p-6 hover:cursor-pointer hover:border-gray/40 hover:bg-gray/10">
+    <div className="grid grid-cols-[1fr_repeat(2,150px)_200px_68px] items-center gap-4 rounded-xl border-2 border-gray/20 p-6 hover:cursor-pointer hover:border-gray/40 hover:bg-gray/10">
       <div className="flex items-center gap-4 justify-self-start">
         <div className="flex size-10 items-center justify-center rounded-full bg-gray/20 text-gray">
           <ClipboardText weight="bold" size={20} />
         </div>
 
         <div>
-          <Link
-            href="#"
-            className="text-sm font-bold leading-[120%] text-black hover:text-purple"
+          <Tooltip
+            content={program.title_proram}
+            placement="top-start"
+            classNames={{
+              content: "max-w-[350px] font-semibold text-black",
+            }}
           >
-            {program.title_proram}
-          </Link>
+            <Link
+              href={`/programs/details/${encodeURIComponent(program.id_program)}`}
+              className="line-clamp-1 text-sm font-bold leading-[120%] text-black hover:text-purple"
+            >
+              {program.title_proram}
+            </Link>
+          </Tooltip>
           <p className="mt-1 text-[12px] font-semibold text-gray">
             ID Program : {program.id_program}
           </p>

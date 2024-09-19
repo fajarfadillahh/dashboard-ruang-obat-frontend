@@ -19,7 +19,7 @@ const user: UserType = {
   university: "Universitas Indonesia",
 };
 
-export default function DetailsUser() {
+export default function DetailsUserPage() {
   return (
     <Layout title="Details User Page">
       <Container>
