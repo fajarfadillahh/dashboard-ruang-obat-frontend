@@ -4,8 +4,12 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { Button, Input } from "@nextui-org/react";
 import { MagnifyingGlass, Plus } from "@phosphor-icons/react";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function ProgramsPage() {
+  const router = useRouter();
+
   return (
     <Layout title="Users Page">
       <Container>
@@ -15,7 +19,14 @@ export default function ProgramsPage() {
               Daftar Program 📋
             </h1>
             <p className="font-medium text-gray">
-              Buat program yang menarik untuk para mahasiswa.
+              Program yang sudah dibuat oleh{" "}
+              <Link
+                href="https://ruangobat.id"
+                target="_blank"
+                className="font-bold text-purple"
+              >
+                ruangobat.id
+              </Link>
             </p>
           </div>
 
@@ -44,6 +55,7 @@ export default function ProgramsPage() {
                 variant="solid"
                 color="secondary"
                 startContent={<Plus weight="bold" size={18} />}
+                onClick={() => router.push("/programs/create")}
                 className="font-semibold"
               >
                 Tambah Program
