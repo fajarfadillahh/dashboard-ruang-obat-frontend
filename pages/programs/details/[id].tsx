@@ -88,7 +88,7 @@ export default function DetailsProgramPage() {
                 Daftar Ujian 📋
               </h4>
 
-              <div className="grid gap-4">
+              <div className="grid gap-2">
                 {tests.map((test) => (
                   <CardTest key={test.id} {...test} />
                 ))}
