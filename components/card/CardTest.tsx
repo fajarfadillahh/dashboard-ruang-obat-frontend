@@ -89,7 +89,13 @@ export default function CardTest(test: TestType) {
 
         {router.pathname === "/tests" ? (
           <>
-            <Button isIconOnly variant="light" size="sm" color="secondary">
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              color="secondary"
+              onClick={() => router.push(`/tests/edit/${test.id}`)}
+            >
               <PencilLine weight="bold" size={18} />
             </Button>
 
