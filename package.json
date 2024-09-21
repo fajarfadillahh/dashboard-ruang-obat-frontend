@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-react": "^9.2.0",
     "@internationalized/date": "^3.5.5",
     "@nextui-org/react": "^2.4.8",
     "@phosphor-icons/react": "^2.1.7",
