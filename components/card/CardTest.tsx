@@ -1,6 +1,11 @@
 import { TestType } from "@/types/test.type";
 import { Button, Chip } from "@nextui-org/react";
-import { ClipboardText, ClockCountdown, Trash } from "@phosphor-icons/react";
+import {
+  ClipboardText,
+  ClockCountdown,
+  PencilLine,
+  Trash,
+} from "@phosphor-icons/react";
 import { useRouter } from "next/router";
 
 export default function CardTest(test: TestType) {
@@ -83,15 +88,21 @@ export default function CardTest(test: TestType) {
         </Button>
 
         {router.pathname === "/tests" ? (
-          <Button
-            isIconOnly
-            variant="flat"
-            size="sm"
-            color="danger"
-            onClick={() => confirm("Apakah anda yakin?")}
-          >
-            <Trash weight="bold" size={18} className="text-danger" />
-          </Button>
+          <>
+            <Button isIconOnly variant="light" size="sm" color="secondary">
+              <PencilLine weight="bold" size={18} />
+            </Button>
+
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              color="danger"
+              onClick={() => confirm("Apakah anda yakin?")}
+            >
+              <Trash weight="bold" size={18} />
+            </Button>
+          </>
         ) : null}
       </div>
     </div>
