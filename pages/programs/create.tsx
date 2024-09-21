@@ -40,7 +40,7 @@ export default function CreateProgramPage() {
               variant="flat"
               label="Judul Program"
               labelPlacement="outside"
-              placeholder="Contoh: Tryout Internal Ruangobat"
+              placeholder="Contoh: Kelas Ruangobat Tatap Muka"
               classNames={{
                 input:
                   "font-semibold placeholder:font-normal placeholder:text-default-600",

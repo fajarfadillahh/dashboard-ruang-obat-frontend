@@ -4,8 +4,11 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { Button, Input } from "@nextui-org/react";
 import { MagnifyingGlass, Plus } from "@phosphor-icons/react";
+import { useRouter } from "next/router";
 
 export default function TestsPage() {
+  const router = useRouter();
+
   return (
     <Layout title="Tests Page">
       <Container>
@@ -44,6 +47,7 @@ export default function TestsPage() {
                 variant="solid"
                 color="secondary"
                 startContent={<Plus weight="bold" size={18} />}
+                onClick={() => router.push("/tests/create")}
                 className="font-semibold"
               >
                 Tambah Ujian
