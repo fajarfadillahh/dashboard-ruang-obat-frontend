@@ -52,7 +52,7 @@ export default function CardTest(test: TestType) {
 
             <div className="grid gap-[2px]">
               <span className="text-[12px] font-medium text-gray">
-                Status Program:
+                Status Ujian:
               </span>
 
               <Chip
@@ -82,6 +82,7 @@ export default function CardTest(test: TestType) {
           variant="solid"
           size="sm"
           color="secondary"
+          onClick={() => router.push(`/tests/details/${test.id}`)}
           className="px-6 font-bold"
         >
           Lihat Ujian
