@@ -10,6 +10,7 @@ import { customStyleTable } from "@/utils/customStyleTable";
 import {
   Chip,
   Pagination,
+  Snippet,
   Table,
   TableBody,
   TableCell,
@@ -69,17 +70,34 @@ export default function DetailsProgramPage() {
                   Kelas Ruangobat Tatap Muka: Mandiri Agustus 2024 Part 1
                 </h4>
 
-                <Chip
-                  variant="flat"
-                  color="default"
-                  startContent={<Tag weight="bold" size={18} />}
-                  classNames={{
-                    base: "px-4 gap-1",
-                    content: "font-bold text-black",
-                  }}
-                >
-                  Program Gratis
-                </Chip>
+                <div className="flex items-start gap-12">
+                  <Chip
+                    variant="flat"
+                    color="default"
+                    startContent={
+                      <Tag weight="bold" size={18} className="text-black" />
+                    }
+                    classNames={{
+                      base: "px-3 gap-1",
+                      content: "font-bold text-black",
+                    }}
+                  >
+                    Gratis
+                  </Chip>
+
+                  <Snippet
+                    symbol="#"
+                    variant="flat"
+                    color="default"
+                    size="sm"
+                    className="w-[300px]"
+                    classNames={{
+                      pre: "font-bold text-black font-sans text-sm",
+                    }}
+                  >
+                    ROAK01haRNui715TagP
+                  </Snippet>
+                </div>
               </div>
             </div>
 
