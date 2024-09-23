@@ -23,61 +23,53 @@ export default function DashboardPage() {
           <div className="grid gap-6 rounded-xl border-[2px] border-gray/20 px-16 py-8">
             <h4 className="font-bold text-black">Ringkasan Aplikasi CBT</h4>
 
-            <div className="grid grid-cols-2 divide-x-2 divide-gray/20">
-              <div className="grid divide-y-2 divide-gray/20 pr-24">
-                <div className="grid pb-8">
-                  <p className="text-sm font-medium text-gray">
-                    Total Pengguna
-                  </p>
-                  <h6 className="text-[32px] font-extrabold text-black">
-                    1200
-                  </h6>
-                </div>
-
-                <div className="grid pt-8">
-                  <p className="text-sm font-medium text-gray">
-                    Total Program Ruangobat
-                  </p>
-                  <h6 className="text-[32px] font-extrabold text-black">24</h6>
-                  <Link
-                    href="#"
-                    className="mt-2 inline-flex w-max items-center gap-2 text-sm font-bold text-purple hover:text-purple/80"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      alert("dalam proses pengembangan");
-                    }}
-                  >
-                    Lihat Detail
-                    <ArrowRight weight="bold" size={16} />
-                  </Link>
-                </div>
+            <div className="grid grid-cols-3 divide-x-2 divide-gray/20">
+              <div className="grid pr-12">
+                <p className="text-sm font-medium text-gray">Total Pengguna</p>
+                <h6 className="text-[32px] font-extrabold text-black">1471</h6>
+                <Link
+                  href="#"
+                  className="mt-2 inline-flex w-max items-center gap-2 text-sm font-semibold text-purple hover:text-purple/80"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    alert("dalam proses pengembangan");
+                  }}
+                >
+                  Lihat Detail
+                  <ArrowRight weight="bold" size={16} />
+                </Link>
               </div>
 
-              <div className="grid divide-y-2 divide-gray/20 pl-24">
-                <div className="grid pb-8">
-                  <p className="text-sm font-medium text-gray">
-                    Total Pengguna Aktif
-                  </p>
-                  <h6 className="text-[32px] font-extrabold text-black">800</h6>
-                </div>
+              <div className="grid px-12">
+                <p className="text-sm font-medium text-gray">Total Program</p>
+                <h6 className="text-[32px] font-extrabold text-black">24</h6>
+                <Link
+                  href="#"
+                  className="mt-2 inline-flex w-max items-center gap-2 text-sm font-semibold text-purple hover:text-purple/80"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    alert("dalam proses pengembangan");
+                  }}
+                >
+                  Lihat Detail
+                  <ArrowRight weight="bold" size={16} />
+                </Link>
+              </div>
 
-                <div className="grid pt-8">
-                  <p className="text-sm font-medium text-gray">
-                    Total Ujian Ruangobat
-                  </p>
-                  <h6 className="text-[32px] font-extrabold text-black">254</h6>
-                  <Link
-                    href="#"
-                    className="mt-2 inline-flex w-max items-center gap-2 text-sm font-bold text-purple hover:text-purple/80"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      alert("dalam proses pengembangan");
-                    }}
-                  >
-                    Lihat Detail
-                    <ArrowRight weight="bold" size={16} />
-                  </Link>
-                </div>
+              <div className="grid pl-12">
+                <p className="text-sm font-medium text-gray">Total Ujian</p>
+                <h6 className="text-[32px] font-extrabold text-black">254</h6>
+                <Link
+                  href="#"
+                  className="mt-2 inline-flex w-max items-center gap-2 text-sm font-semibold text-purple hover:text-purple/80"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    alert("dalam proses pengembangan");
+                  }}
+                >
+                  Lihat Detail
+                  <ArrowRight weight="bold" size={16} />
+                </Link>
               </div>
             </div>
           </div>
