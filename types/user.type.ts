@@ -4,4 +4,6 @@ export type UserType = {
   email: string;
   no_telp: number | string;
   asal_kampus: string;
+  kode_akses: string;
+  dibuat_pada: string;
 };

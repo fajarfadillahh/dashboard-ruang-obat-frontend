@@ -11,6 +11,7 @@ import {
   Button,
   Chip,
   Pagination,
+  Snippet,
   Table,
   TableBody,
   TableCell,
@@ -21,9 +22,12 @@ import {
 import {
   BookBookmark,
   Certificate,
+  Check,
+  Copy,
   Notepad,
   Plus,
   Tag,
+  Trash,
 } from "@phosphor-icons/react";
 import React from "react";
 
@@ -33,8 +37,10 @@ export default function DetailsProgramPage() {
   const columnsUser = [
     { name: "ID Pengguna", uid: "id" },
     { name: "Nama Lengkap", uid: "name" },
-    { name: "Email", uid: "email" },
+    { name: "Kode Akses", uid: "code_access" },
     { name: "Asal Kampus", uid: "university" },
+    { name: "Dibuat Pada", uid: "created_at" },
+    { name: "Aksi", uid: "action" },
   ];
 
   function renderCellUsers(user: UserType, columnKey: React.Key) {
@@ -51,9 +57,40 @@ export default function DetailsProgramPage() {
             {user.nama_lengkap}
           </div>
         );
+      case "code_access":
+        return (
+          <Snippet
+            symbol=""
+            copyIcon={
+              <Copy weight="regular" size={16} className="text-black" />
+            }
+            checkIcon={
+              <Check weight="regular" size={16} className="text-black" />
+            }
+            className="w-max"
+            classNames={{
+              base: "text-black bg-transparent border-none p-0",
+              pre: "font-medium text-black font-sans text-[14px]",
+            }}
+          >
+            {user.kode_akses}
+          </Snippet>
+        );
       case "university":
         return (
           <div className="w-max font-medium text-black">{user.asal_kampus}</div>
+        );
+      case "created_at":
+        return (
+          <div className="w-max font-medium text-black">{user.dibuat_pada}</div>
+        );
+      case "action":
+        return (
+          <div className="grid w-[60px]">
+            <Button isIconOnly variant="light" color="danger" size="sm">
+              <Trash weight="bold" size={18} className="text-danger" />
+            </Button>
+          </div>
         );
 
       default:
@@ -133,32 +170,34 @@ export default function DetailsProgramPage() {
                 </Button>
               </div>
 
-              <Table
-                isHeaderSticky
-                aria-label="users table"
-                color="secondary"
-                selectionMode="single"
-                classNames={customStyleTable}
-                className="scrollbar-hide"
-              >
-                <TableHeader columns={columnsUser}>
-                  {(column) => (
-                    <TableColumn key={column.uid}>{column.name}</TableColumn>
-                  )}
-                </TableHeader>
+              <div className="overflow-x-scroll">
+                <Table
+                  isHeaderSticky
+                  aria-label="users table"
+                  color="secondary"
+                  selectionMode="single"
+                  classNames={customStyleTable}
+                  className="scrollbar-hide"
+                >
+                  <TableHeader columns={columnsUser}>
+                    {(column) => (
+                      <TableColumn key={column.uid}>{column.name}</TableColumn>
+                    )}
+                  </TableHeader>
 
-                <TableBody items={data}>
-                  {(item) => (
-                    <TableRow key={item.id_pengguna}>
-                      {(columnKey) => (
-                        <TableCell>
-                          {renderCellUsers(item, columnKey)}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  <TableBody items={data}>
+                    {(item) => (
+                      <TableRow key={item.id_pengguna}>
+                        {(columnKey) => (
+                          <TableCell>
+                            {renderCellUsers(item, columnKey)}
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
 
               <Pagination
                 isCompact

@@ -7,6 +7,8 @@ export const users: UserType[] = [
     email: "arya.pratama@mail.com",
     no_telp: 6281234567890,
     asal_kampus: "Universitas Indonesia",
+    kode_akses: "ROAKlaN591KJne652Mn",
+    dibuat_pada: "Selasa, 24 September 2024 19:25",
   },
   {
     id_pengguna: "ROUBS654321",
@@ -14,6 +16,8 @@ export const users: UserType[] = [
     email: "bima.suhendra@mail.com",
     no_telp: 6281234567891,
     asal_kampus: "Institut Teknologi Bandung",
+    kode_akses: "ROAK7HbfLL30aDG2lJH",
+    dibuat_pada: "Selasa, 24 September 2024 19:25",
   },
   {
     id_pengguna: "ROUCM987654",
@@ -21,6 +25,8 @@ export const users: UserType[] = [
     email: "citra.maharani@mail.com",
     no_telp: 6281234567892,
     asal_kampus: "Universitas Gadjah Mada",
+    kode_akses: "ROAKuIe98Pls13MneKl",
+    dibuat_pada: "Selasa, 24 September 2024 19:25",
   },
   {
     id_pengguna: "ROUDK123987",
@@ -28,6 +34,8 @@ export const users: UserType[] = [
     email: "dewi.kartika@mail.com",
     no_telp: 6281234567893,
     asal_kampus: "Universitas Brawijaya",
+    kode_akses: "ROAK66RtenKJ38WqkaH",
+    dibuat_pada: "Selasa, 24 September 2024 19:25",
   },
   {
     id_pengguna: "ROUES234765",
@@ -35,6 +43,8 @@ export const users: UserType[] = [
     email: "eko.santoso@mail.com",
     no_telp: 6281234567894,
     asal_kampus: "Institut Pertanian Bogor",
+    kode_akses: "ROAKIj48Yyr3Oan4599",
+    dibuat_pada: "Selasa, 24 September 2024 19:25",
   },
   {
     id_pengguna: "ROUFN098765",
@@ -42,6 +52,8 @@ export const users: UserType[] = [
     email: "fajar.nugroho@mail.com",
     no_telp: 6281234567895,
     asal_kampus: "Universitas Airlangga",
+    kode_akses: "ROAK83UyxmmA36A81O9",
+    dibuat_pada: "Selasa, 24 September 2024 19:25",
   },
   {
     id_pengguna: "ROUGP765432",
@@ -49,6 +61,8 @@ export const users: UserType[] = [
     email: "gilang.permadi@mail.com",
     no_telp: 6281234567896,
     asal_kampus: "Universitas Diponegoro",
+    kode_akses: "ROAKX82jJkDi2A82kan",
+    dibuat_pada: "Selasa, 24 September 2024 19:25",
   },
   {
     id_pengguna: "ROUHP234567",
@@ -56,6 +70,8 @@ export const users: UserType[] = [
     email: "hana.pertiwi@mail.com",
     no_telp: 6281234567897,
     asal_kampus: "Universitas Padjadjaran",
+    kode_akses: "ROAKoNtl7Ay61M03Lkks",
+    dibuat_pada: "Selasa, 24 September 2024 19:25",
   },
   {
     id_pengguna: "ROUIS876543",
@@ -63,6 +79,8 @@ export const users: UserType[] = [
     email: "indra.saputra@mail.com",
     no_telp: 6281234567898,
     asal_kampus: "Universitas Sebelas Maret",
+    kode_akses: "ROAK27UiamePP92bFks",
+    dibuat_pada: "Selasa, 24 September 2024 19:25",
   },
   {
     id_pengguna: "ROUJL654987",
@@ -70,5 +88,7 @@ export const users: UserType[] = [
     email: "jihan.larasati@mail.com",
     no_telp: 6281234567899,
     asal_kampus: "Universitas Hasanuddin",
+    kode_akses: "ROAKjh72MkHlR98vnzl",
+    dibuat_pada: "Selasa, 24 September 2024 19:25",
   },
 ];
