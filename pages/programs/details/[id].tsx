@@ -2,6 +2,7 @@ import { tests } from "@/_dummy/tests";
 import { users } from "@/_dummy/users";
 import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
+import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import usePagination from "@/hooks/usepagination";
@@ -25,7 +26,6 @@ import {
   Check,
   Copy,
   Notepad,
-  Plus,
   Tag,
   Trash,
 } from "@phosphor-icons/react";
@@ -159,15 +159,7 @@ export default function DetailsProgramPage() {
                   Daftar Partisipan 🧑🏻‍🤝‍🧑🏻
                 </h4>
 
-                <Button
-                  variant="solid"
-                  color="secondary"
-                  size="sm"
-                  startContent={<Plus weight="bold" size={16} />}
-                  className="w-max font-bold"
-                >
-                  Tambah Partisipan
-                </Button>
+                <ModalAddParticipant />
               </div>
 
               <div className="overflow-x-scroll">
