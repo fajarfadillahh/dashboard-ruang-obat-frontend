@@ -8,9 +8,9 @@ import usePagination from "@/hooks/usepagination";
 import { UserType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import {
+  Button,
   Chip,
   Pagination,
-  Snippet,
   Table,
   TableBody,
   TableCell,
@@ -18,7 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { BookBookmark, Tag } from "@phosphor-icons/react";
+import {
+  BookBookmark,
+  Certificate,
+  Notepad,
+  Plus,
+  Tag,
+} from "@phosphor-icons/react";
 import React from "react";
 
 export default function DetailsProgramPage() {
@@ -70,7 +76,7 @@ export default function DetailsProgramPage() {
                   Kelas Ruangobat Tatap Muka: Mandiri Agustus 2024 Part 1
                 </h4>
 
-                <div className="flex items-start gap-12">
+                <div className="flex items-center gap-12">
                   <Chip
                     variant="flat"
                     color="default"
@@ -85,18 +91,15 @@ export default function DetailsProgramPage() {
                     Gratis
                   </Chip>
 
-                  <Snippet
-                    symbol="#"
-                    variant="flat"
-                    color="default"
-                    size="sm"
-                    className="w-[300px]"
-                    classNames={{
-                      pre: "font-bold text-black font-sans text-sm",
-                    }}
-                  >
-                    ROAK01haRNui715TagP
-                  </Snippet>
+                  <div className="inline-flex items-center gap-1 text-gray">
+                    <Certificate weight="bold" size={18} />
+                    <p className="text-sm font-bold">ID: ROP817629</p>
+                  </div>
+
+                  <div className="inline-flex items-center gap-1 text-gray">
+                    <Notepad weight="bold" size={18} />
+                    <p className="text-sm font-bold">9 Modul Ujian</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -114,9 +117,21 @@ export default function DetailsProgramPage() {
             </div>
 
             <div className="grid gap-4 pt-8">
-              <h4 className="text-[20px] font-bold -tracking-wide text-black">
-                Daftar Pengikut 🧑🏻‍🤝‍🧑🏻
-              </h4>
+              <div className="flex items-end justify-between gap-4">
+                <h4 className="text-[20px] font-bold -tracking-wide text-black">
+                  Daftar Partisipan 🧑🏻‍🤝‍🧑🏻
+                </h4>
+
+                <Button
+                  variant="solid"
+                  color="secondary"
+                  size="sm"
+                  startContent={<Plus weight="bold" size={16} />}
+                  className="w-max font-bold"
+                >
+                  Tambah Partisipan
+                </Button>
+              </div>
 
               <Table
                 isHeaderSticky

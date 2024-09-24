@@ -16,7 +16,7 @@ export default function CardProgram(program: ProgramType) {
           <ClipboardText weight="bold" size={20} />
         </div>
 
-        <div>
+        <div className="grid flex-1 gap-1">
           <Tooltip
             content={program.title_proram}
             placement="top-start"
@@ -31,7 +31,7 @@ export default function CardProgram(program: ProgramType) {
               {program.title_proram}
             </Link>
           </Tooltip>
-          <p className="mt-1 text-[12px] font-semibold text-gray">
+          <p className="text-[12px] font-semibold text-gray">
             ID Program : {program.id_program}
           </p>
         </div>
