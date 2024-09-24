@@ -10,8 +10,8 @@ export default function CardProgram(program: ProgramType) {
   const router = useRouter();
 
   return (
-    <div className="grid grid-cols-[1fr_repeat(2,150px)_200px_68px] items-center gap-4 rounded-xl border-2 border-gray/20 p-6 hover:cursor-pointer hover:border-gray/40 hover:bg-gray/10">
-      <div className="flex items-center gap-4 justify-self-start">
+    <div className="grid grid-cols-[repeat(2,1fr)_80px] items-center gap-6 rounded-xl border-2 border-gray/20 p-6 hover:cursor-pointer hover:border-gray/40 hover:bg-gray/10">
+      <div className="flex items-center gap-4">
         <div className="flex size-10 items-center justify-center rounded-full bg-gray/20 text-gray">
           <ClipboardText weight="bold" size={20} />
         </div>
@@ -37,31 +37,35 @@ export default function CardProgram(program: ProgramType) {
         </div>
       </div>
 
-      <div className="text-sm font-semibold text-black">
-        {program.amout_proram} Modul Ujian
-      </div>
-
-      {program.status_program == "free" ? (
-        <Chip
-          variant="flat"
-          color="default"
-          size="sm"
-          startContent={<Tag weight="bold" size={16} />}
-          classNames={{
-            base: "px-2 gap-1",
-            content: "font-bold",
-          }}
-        >
-          Program Gratis
-        </Chip>
-      ) : (
-        <div className="text-sm font-bold text-purple">
-          {formatRupiah(program.price_program)}
+      <div className="grid grid-cols-[120px_150px_1fr] items-center gap-2">
+        <div className="text-sm font-semibold text-black">
+          {program.amout_proram} Modul Ujian
         </div>
-      )}
 
-      <div className="text-sm font-semibold text-black">
-        {formatDate(program.created_at)}
+        {program.status_program == "free" ? (
+          <Chip
+            variant="flat"
+            color="default"
+            size="sm"
+            startContent={
+              <Tag weight="bold" size={16} className="text-black" />
+            }
+            classNames={{
+              base: "px-2 gap-1",
+              content: "font-bold text-black",
+            }}
+          >
+            Program Gratis
+          </Chip>
+        ) : (
+          <div className="text-sm font-bold text-purple">
+            {formatRupiah(program.price_program)}
+          </div>
+        )}
+
+        <div className="text-sm font-semibold text-black">
+          {formatDate(program.created_at)}
+        </div>
       </div>
 
       <div className="inline-flex items-center gap-1">
@@ -69,8 +73,8 @@ export default function CardProgram(program: ProgramType) {
           isIconOnly
           variant="light"
           size="sm"
+          color="secondary"
           onClick={() => router.push(`/programs/edit/${program.id_program}`)}
-          className="text-gray"
         >
           <PencilLine weight="bold" size={18} />
         </Button>
