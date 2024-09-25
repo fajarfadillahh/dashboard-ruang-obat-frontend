@@ -1,12 +1,6 @@
 import ButtonSidebar from "@/components/button/ButtonSidebar";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
-import {
-  ClipboardText,
-  House,
-  ListChecks,
-  User,
-  Users,
-} from "@phosphor-icons/react";
+import { ClipboardText, House, ListChecks, User } from "@phosphor-icons/react";
 import Link from "next/link";
 
 export default function Sidebar() {
@@ -48,11 +42,11 @@ export default function Sidebar() {
             icon={<User weight="bold" size={20} />}
           />
 
-          <ButtonSidebar
+          {/* <ButtonSidebar
             label="Admin"
             path="/admins"
             icon={<Users weight="bold" size={20} />}
-          />
+          /> */}
         </div>
       </div>
     </div>
