@@ -27,9 +27,11 @@ export default function Navbar() {
               />
 
               <div>
-                <h6 className="text-sm font-bold text-black">Admin</h6>
+                <h6 className="text-sm font-bold text-black">
+                  Fajar Fadillah A
+                </h6>
                 <p className="text-[12px] font-semibold uppercase text-gray">
-                  Ruangobat.id
+                  ROA928401
                 </p>
               </div>
             </div>
@@ -51,7 +53,7 @@ export default function Navbar() {
                 startContent={<SignOut weight="bold" size={18} />}
                 onClick={() => {
                   if (confirm("apakah anda yakin?")) {
-                    window.location.href = "/login";
+                    window.location.href = "/";
                   }
                 }}
                 className="text-danger-600"

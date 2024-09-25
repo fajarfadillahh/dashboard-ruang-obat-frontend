@@ -42,7 +42,7 @@ export default function ModalAddParticipant() {
 
               <ModalBody>
                 <div className="grid gap-6">
-                  <p className="text-medium leading-[170%] text-gray">
+                  <p className="text-sm font-medium leading-[170%] text-gray">
                     Silakan cari pengguna untuk ditambahkan pada program ini,
                     pastikan ID pengguna yang anda cari itu sudah benar!
                   </p>

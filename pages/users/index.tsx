@@ -53,13 +53,14 @@ export default function UsersPage() {
               isIconOnly
               variant="light"
               size="sm"
+              color="secondary"
               onClick={() =>
                 router.push(
                   `/users/details/${encodeURIComponent(user.id_pengguna)}`,
                 )
               }
             >
-              <Eye weight="bold" size={18} className="text-gray" />
+              <Eye weight="bold" size={18} />
             </Button>
 
             <Button
