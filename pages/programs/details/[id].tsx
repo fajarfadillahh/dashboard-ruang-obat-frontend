@@ -167,7 +167,7 @@ export default function DetailsProgramPage() {
                   isHeaderSticky
                   aria-label="users table"
                   color="secondary"
-                  selectionMode="single"
+                  selectionMode="none"
                   classNames={customStyleTable}
                   className="scrollbar-hide"
                 >

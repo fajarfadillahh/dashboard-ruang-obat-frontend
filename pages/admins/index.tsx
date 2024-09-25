@@ -101,7 +101,7 @@ export default function AdminsPage() {
             isHeaderSticky
             aria-label="admins table"
             color="secondary"
-            selectionMode="single"
+            selectionMode="none"
             classNames={customStyleTable}
             className="scrollbar-hide"
           >
