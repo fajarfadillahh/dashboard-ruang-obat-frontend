@@ -1,5 +1,5 @@
 import { Button, Input } from "@nextui-org/react";
-import { EnvelopeSimple, Lock } from "@phosphor-icons/react";
+import { Lock, User } from "@phosphor-icons/react";
 import Head from "next/head";
 
 export default function LoginPage() {
@@ -22,13 +22,13 @@ export default function LoginPage() {
 
           <div className="grid gap-2">
             <Input
-              type="email"
+              type="text"
               variant="flat"
               color="default"
               labelPlacement="outside"
-              placeholder="Alamat Email"
+              placeholder="Username"
               startContent={
-                <EnvelopeSimple weight="bold" size={18} className="text-gray" />
+                <User weight="bold" size={18} className="text-gray" />
               }
               classNames={{
                 input:

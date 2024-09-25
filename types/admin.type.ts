@@ -1,7 +1,7 @@
 export type AdminType = {
   id: string;
-  email: string;
   name: string;
+  username: string;
   password: string;
   created_at: string;
 };

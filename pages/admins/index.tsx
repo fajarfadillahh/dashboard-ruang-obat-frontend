@@ -20,7 +20,7 @@ export default function AdminsPage() {
   const columnsUser = [
     { name: "ID Admin", uid: "id" },
     { name: "Nama Lengkap", uid: "name" },
-    { name: "Email", uid: "email" },
+    { name: "Username", uid: "username" },
     { name: "Kata Sandi", uid: "password" },
     { name: "Dibuat Pada", uid: "created_at" },
     { name: "Aksi", uid: "action" },
@@ -34,9 +34,9 @@ export default function AdminsPage() {
         return <div className="w-max font-medium text-black">{admin.id}</div>;
       case "name":
         return <div className="w-max font-medium text-black">{admin.name}</div>;
-      case "email":
+      case "username":
         return (
-          <div className="w-max font-medium text-black">{admin.email}</div>
+          <div className="w-max font-medium text-black">{admin.username}</div>
         );
       case "password":
         return (
