@@ -1,8 +1,22 @@
+import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input } from "@nextui-org/react";
 import { Lock, User } from "@phosphor-icons/react";
 import Head from "next/head";
+import { useState } from "react";
 
 export default function LoginPage() {
+  const [input, setInput] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  function handleLogin() {
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      window.location.href = "/dashboard";
+    }, 3000);
+  }
+
   return (
     <>
       <Head>
@@ -13,7 +27,7 @@ export default function LoginPage() {
         <div className="grid w-[480px] gap-8 justify-self-center">
           <div className="text-center">
             <h1 className="text-[42px] font-bold -tracking-wide text-black">
-              Hi, admin Ruangobat 👋
+              Hi, Admin Ruangobat 👋
             </h1>
             <p className="font-medium text-gray">
               Silakan login dulu untuk bisa mengatur semuanya
@@ -27,6 +41,13 @@ export default function LoginPage() {
               color="default"
               labelPlacement="outside"
               placeholder="Username"
+              name="username"
+              onChange={(e) =>
+                setInput({
+                  ...input,
+                  [e.target.name]: e.target.value,
+                })
+              }
               startContent={
                 <User weight="bold" size={18} className="text-gray" />
               }
@@ -42,6 +63,14 @@ export default function LoginPage() {
               color="default"
               labelPlacement="outside"
               placeholder="Kata Sandi"
+              name="password"
+              onChange={(e) =>
+                setInput({
+                  ...input,
+                  [e.target.name]: e.target.value,
+                })
+              }
+              onKeyDown={(e) => handleKeyDown(e, handleLogin)}
               startContent={
                 <Lock weight="bold" size={18} className="text-gray" />
               }
@@ -53,12 +82,14 @@ export default function LoginPage() {
           </div>
 
           <Button
+            isLoading={loading ? true : false}
+            isDisabled={Object.keys(input).length < 2 || loading ? true : false}
             variant="solid"
             color="secondary"
-            onClick={() => (window.location.href = "/dashboard")}
+            onClick={handleLogin}
             className="font-bold"
           >
-            Masuk Sekarang
+            {loading ? "Tunggu Sebentar..." : "Masuk Sekarang"}
           </Button>
         </div>
       </main>
