@@ -54,7 +54,13 @@ export default function AdminsPage() {
       case "action":
         return (
           <div className="inline-flex w-max items-center gap-1">
-            <Button isIconOnly variant="light" color="secondary" size="sm">
+            <Button
+              isIconOnly
+              variant="light"
+              color="secondary"
+              size="sm"
+              onClick={() => router.push(`/admins/edit/${admin.id}`)}
+            >
               <PencilLine weight="bold" size={18} />
             </Button>
 
