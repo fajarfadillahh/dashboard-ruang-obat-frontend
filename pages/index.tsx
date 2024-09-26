@@ -82,8 +82,8 @@ export default function LoginPage() {
           </div>
 
           <Button
-            isLoading={loading ? true : false}
-            isDisabled={Object.keys(input).length < 2 || loading ? true : false}
+            isLoading={loading}
+            isDisabled={Object.keys(input).length < 2 || loading}
             variant="solid"
             color="secondary"
             onClick={handleLogin}
