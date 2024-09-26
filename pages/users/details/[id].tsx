@@ -21,7 +21,7 @@ const user: UserType = {
 
 export default function DetailsUserPage() {
   return (
-    <Layout title="Details User Page">
+    <Layout title="Detail Pengguna">
       <Container>
         <section className="grid gap-8">
           <ButtonBack />

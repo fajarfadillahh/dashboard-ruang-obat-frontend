@@ -6,7 +6,7 @@ export default function LoginPage() {
   return (
     <>
       <Head>
-        <title>Login Admin Page</title>
+        <title>Login | Ruangobat.id</title>
       </Head>
 
       <main className="mx-auto flex h-screen max-w-[1200px] items-center justify-center py-20">

@@ -5,7 +5,7 @@ import Link from "next/link";
 
 export default function DashboardPage() {
   return (
-    <Layout title="Dashboard Page">
+    <Layout title="Dashboard">
       <Container>
         <section className="grid gap-8">
           <div className="grid gap-1">

@@ -6,7 +6,7 @@ import { FloppyDisk, Lock, User } from "@phosphor-icons/react";
 
 export default function EditAdminPage() {
   return (
-    <Layout title="Edit Admin Page">
+    <Layout title="Edit Admin">
       <Container>
         <section className="grid">
           <ButtonBack />

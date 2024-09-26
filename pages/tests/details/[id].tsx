@@ -12,7 +12,7 @@ import { ClockCountdown } from "@phosphor-icons/react";
 
 export default function DetailsTestPage() {
   return (
-    <Layout title="Details Test Page">
+    <Layout title={`Tryout Internal Ruangobat Part 1`}>
       <Container>
         <section className="grid gap-8">
           <ButtonBack />

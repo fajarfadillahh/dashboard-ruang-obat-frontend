@@ -22,7 +22,7 @@ export default function EditTestPage() {
   if (!client) return null;
 
   return (
-    <Layout title="Edit Test Page">
+    <Layout title="Edit Ujian">
       <Container>
         <section className="grid">
           <ButtonBack />
@@ -122,7 +122,7 @@ export default function EditTestPage() {
                   startContent={<FloppyDisk weight="bold" size={18} />}
                   className="w-max justify-self-end font-bold"
                 >
-                  Simpan Ujian
+                  Simpan Perubahan
                 </Button>
               </div>
 

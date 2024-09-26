@@ -19,7 +19,7 @@ export default function EditProgramPage() {
   const [values, setValues] = useState<Selection>(new Set([]));
 
   return (
-    <Layout title="Edit Program Page">
+    <Layout title="Edit Program">
       <Container>
         <section className="grid">
           <ButtonBack />
@@ -131,7 +131,7 @@ export default function EditProgramPage() {
             startContent={<FloppyDisk weight="bold" size={18} />}
             className="w-max justify-self-end font-bold"
           >
-            Simpan Program
+            Simpan Perubahan
           </Button>
         </section>
       </Container>

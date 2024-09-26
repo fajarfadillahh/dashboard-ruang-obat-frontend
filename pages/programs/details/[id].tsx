@@ -99,7 +99,7 @@ export default function DetailsProgramPage() {
   }
 
   return (
-    <Layout title="Details Program Page">
+    <Layout title={`Kelas Ruangobat Tatap Muka: Mandiri Agustus 2024 Part 1`}>
       <Container>
         <section className="grid gap-8">
           <ButtonBack />

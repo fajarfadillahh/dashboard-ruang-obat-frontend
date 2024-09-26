@@ -22,7 +22,7 @@ export default function CreateTestPage() {
   if (!client) return null;
 
   return (
-    <Layout title="Create Test Page">
+    <Layout title="Buat Ujian">
       <Container>
         <section className="grid">
           <ButtonBack />

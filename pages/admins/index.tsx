@@ -82,7 +82,7 @@ export default function AdminsPage() {
   }
 
   return (
-    <Layout title="Admins Page">
+    <Layout title="Daftar Admin">
       <Container>
         <section className="grid gap-6">
           <div className="flex items-end justify-between gap-2">

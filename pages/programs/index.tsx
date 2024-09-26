@@ -11,7 +11,7 @@ export default function ProgramsPage() {
   const router = useRouter();
 
   return (
-    <Layout title="Users Page">
+    <Layout title="Daftar Program">
       <Container>
         <section className="grid gap-8">
           <div className="grid gap-1">

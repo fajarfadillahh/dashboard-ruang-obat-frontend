@@ -19,7 +19,7 @@ export default function CreateProgramPage() {
   const [values, setValues] = useState<Selection>(new Set([]));
 
   return (
-    <Layout title="Create Program Page">
+    <Layout title="Buat Program">
       <Container>
         <section className="grid">
           <ButtonBack />

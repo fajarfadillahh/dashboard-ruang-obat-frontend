@@ -81,7 +81,7 @@ export default function UsersPage() {
   }
 
   return (
-    <Layout title="Users Page">
+    <Layout title="Daftar Pengguna">
       <Container>
         <section className="grid gap-8">
           <div className="grid gap-1">

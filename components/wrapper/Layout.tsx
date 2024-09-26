@@ -13,7 +13,7 @@ export default function Layout({ title, children }: LayoutProps) {
   return (
     <>
       <Head>
-        <title>{title}</title>
+        <title>{`${title} | Ruangobat.id`}</title>
       </Head>
 
       <main className="flex h-screen">
@@ -22,7 +22,7 @@ export default function Layout({ title, children }: LayoutProps) {
         <div className="grid w-full">
           <Navbar />
 
-          <div className="scrollbar-hide overflow-y-scroll">
+          <div className="overflow-y-scroll scrollbar-hide">
             <div className="mx-auto w-full max-w-[1200px] p-6">{children}</div>
 
             <Footer />

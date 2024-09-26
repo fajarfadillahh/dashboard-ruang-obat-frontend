@@ -10,7 +10,7 @@ export default function TestsPage() {
   const router = useRouter();
 
   return (
-    <Layout title="Tests Page">
+    <Layout title="Daftar Ujian">
       <Container>
         <section className="grid gap-8">
           <div className="grid gap-1">
