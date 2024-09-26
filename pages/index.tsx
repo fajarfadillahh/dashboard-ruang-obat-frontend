@@ -3,6 +3,7 @@ import { Button, Input } from "@nextui-org/react";
 import { Lock, User } from "@phosphor-icons/react";
 import Head from "next/head";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const [input, setInput] = useState({});
@@ -10,6 +11,7 @@ export default function LoginPage() {
 
   function handleLogin() {
     setLoading(true);
+    toast.success("Yeay, Anda Berhasil Login!");
 
     setTimeout(() => {
       setLoading(false);
