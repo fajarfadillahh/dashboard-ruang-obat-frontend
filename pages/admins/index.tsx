@@ -13,10 +13,13 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Plus, Trash } from "@phosphor-icons/react";
+import { PencilLine, Plus, Trash } from "@phosphor-icons/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function AdminsPage() {
+  const router = useRouter();
+
   const columnsUser = [
     { name: "ID Admin", uid: "id" },
     { name: "Nama Lengkap", uid: "name" },
@@ -50,15 +53,21 @@ export default function AdminsPage() {
         );
       case "action":
         return (
-          <Button
-            isIconOnly
-            variant="light"
-            color="danger"
-            size="sm"
-            onClick={() => confirm("Apakah anda yakin?")}
-          >
-            <Trash weight="bold" size={18} />
-          </Button>
+          <div className="inline-flex w-max items-center gap-1">
+            <Button isIconOnly variant="light" color="secondary" size="sm">
+              <PencilLine weight="bold" size={18} />
+            </Button>
+
+            <Button
+              isIconOnly
+              variant="light"
+              color="danger"
+              size="sm"
+              onClick={() => confirm("Apakah anda yakin?")}
+            >
+              <Trash weight="bold" size={18} />
+            </Button>
+          </div>
         );
 
       default:
@@ -91,6 +100,7 @@ export default function AdminsPage() {
               variant="solid"
               color="secondary"
               startContent={<Plus weight="bold" size={16} />}
+              onClick={() => router.push("/admins/create")}
               className="w-max font-bold"
             >
               Tambah Admin
