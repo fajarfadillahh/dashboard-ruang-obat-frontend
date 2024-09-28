@@ -5,8 +5,16 @@ import Head from "next/head";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+type InputType = {
+  id_admin: string;
+  password: string;
+};
+
 export default function LoginPage() {
-  const [input, setInput] = useState({});
+  const [input, setInput] = useState<InputType>({
+    id_admin: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
 
   function handleLogin() {
@@ -17,6 +25,10 @@ export default function LoginPage() {
       setLoading(false);
       window.location.href = "/dashboard";
     }, 3000);
+  }
+
+  function isFormEmpty() {
+    return Object.values(input).every((value) => value.trim() !== "");
   }
 
   return (
@@ -42,8 +54,8 @@ export default function LoginPage() {
               variant="flat"
               color="default"
               labelPlacement="outside"
-              placeholder="Username"
-              name="username"
+              placeholder="ID Admin"
+              name="id_admin"
               onChange={(e) =>
                 setInput({
                   ...input,
@@ -85,7 +97,7 @@ export default function LoginPage() {
 
           <Button
             isLoading={loading}
-            isDisabled={Object.keys(input).length < 2 || loading}
+            isDisabled={!isFormEmpty() || loading}
             variant="solid"
             color="secondary"
             onClick={handleLogin}
