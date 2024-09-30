@@ -24,10 +24,12 @@ import {
   BookBookmark,
   Certificate,
   Check,
+  CheckCircle,
   Copy,
   Notepad,
   Tag,
   Trash,
+  XCircle,
 } from "@phosphor-icons/react";
 import React from "react";
 
@@ -39,7 +41,8 @@ export default function DetailsProgramPage() {
     { name: "Nama Lengkap", uid: "name" },
     { name: "Kode Akses", uid: "code_access" },
     { name: "Asal Kampus", uid: "university" },
-    { name: "Dibuat Pada", uid: "created_at" },
+    { name: "Status", uid: "joined_status" },
+    { name: "Bergabung Pada", uid: "joined_at" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -80,9 +83,40 @@ export default function DetailsProgramPage() {
         return (
           <div className="w-max font-medium text-black">{user.asal_kampus}</div>
         );
-      case "created_at":
+      case "joined_status":
         return (
-          <div className="w-max font-medium text-black">{user.dibuat_pada}</div>
+          <div className="w-max font-medium text-black">
+            <Chip
+              variant="flat"
+              size="sm"
+              color={
+                user.status_bergabung === "mengikuti" ? "success" : "danger"
+              }
+              startContent={
+                user.status_bergabung === "mengikuti" ? (
+                  <CheckCircle
+                    weight="fill"
+                    size={16}
+                    className="text-success"
+                  />
+                ) : (
+                  <XCircle weight="fill" size={16} className="text-danger" />
+                )
+              }
+              classNames={{
+                base: "px-2 gap-1",
+                content: "font-semibold capitalize",
+              }}
+            >
+              {user.status_bergabung}
+            </Chip>
+          </div>
+        );
+      case "joined_at":
+        return (
+          <div className="w-max font-medium text-black">
+            {user.bergabung_pada}
+          </div>
         );
       case "action":
         return (

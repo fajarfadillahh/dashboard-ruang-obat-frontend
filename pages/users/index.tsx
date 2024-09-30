@@ -86,7 +86,7 @@ export default function UsersPage() {
         <section className="grid gap-8">
           <div className="grid gap-1">
             <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Pengguna 🧑🏽‍💻
+              Daftar Pengguna 🧑🏽‍💻
             </h1>
             <p className="font-medium text-gray">
               Tabel pengguna yang sudah terdaftar di{" "}
