@@ -1,16 +1,21 @@
+import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import { TestType } from "@/types/test.type";
 import { Button, Chip } from "@nextui-org/react";
 import {
   ClipboardText,
   ClockCountdown,
   PencilLine,
-  Trash,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/router";
 
-export default function CardTest(test: TestType) {
+export default function CardTest({
+  test,
+  handleDeleteTest,
+}: {
+  test: TestType;
+  handleDeleteTest: () => void;
+}) {
   const router = useRouter();
-  const { id } = router.query;
 
   return (
     <div className="group flex items-center justify-between gap-4 rounded-xl border-2 border-gray/20 bg-transparent p-6 hover:bg-gray/10">
@@ -100,15 +105,12 @@ export default function CardTest(test: TestType) {
               <PencilLine weight="bold" size={18} />
             </Button>
 
-            <Button
-              isIconOnly
-              variant="light"
-              size="sm"
-              color="danger"
-              onClick={() => confirm("Apakah anda yakin?")}
-            >
-              <Trash weight="bold" size={18} />
-            </Button>
+            <ModalConfirmDelete
+              id={test.id}
+              header="Ujian"
+              title={test.title}
+              handleDelete={handleDeleteTest}
+            />
           </>
         ) : null}
       </div>

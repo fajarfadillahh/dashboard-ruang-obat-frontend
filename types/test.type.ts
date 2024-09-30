@@ -1,5 +1,5 @@
 export type TestType = {
-  id: string | number;
+  id: string;
   title: string;
   start_test: string;
   end_test: string;
