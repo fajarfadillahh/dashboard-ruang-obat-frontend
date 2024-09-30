@@ -3,13 +3,13 @@ import { users } from "@/_dummy/users";
 import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
 import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
+import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import usePagination from "@/hooks/usepagination";
 import { UserType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import {
-  Button,
   Chip,
   Pagination,
   Snippet,
@@ -28,7 +28,6 @@ import {
   Copy,
   Notepad,
   Tag,
-  Trash,
   XCircle,
 } from "@phosphor-icons/react";
 import React from "react";
@@ -45,6 +44,10 @@ export default function DetailsProgramPage() {
     { name: "Bergabung Pada", uid: "joined_at" },
     { name: "Aksi", uid: "action" },
   ];
+
+  function handleDeleteProgram(id: string) {
+    console.log(`Partisipan dengan ID: ${id} berhasil terhapus!`);
+  }
 
   function renderCellUsers(user: UserType, columnKey: React.Key) {
     const cellValue = user[columnKey as keyof UserType];
@@ -121,9 +124,12 @@ export default function DetailsProgramPage() {
       case "action":
         return (
           <div className="grid w-[60px]">
-            <Button isIconOnly variant="light" color="danger" size="sm">
-              <Trash weight="bold" size={18} className="text-danger" />
-            </Button>
+            <ModalConfirmDelete
+              id={user.id_pengguna}
+              header="Partisipan"
+              title={user.nama_lengkap}
+              handleDelete={handleDeleteProgram}
+            />
           </div>
         );
 
