@@ -13,7 +13,7 @@ export default function CardTest({
   handleDeleteTest,
 }: {
   test: TestType;
-  handleDeleteTest: () => void;
+  handleDeleteTest?: () => void;
 }) {
   const router = useRouter();
 
@@ -109,7 +109,7 @@ export default function CardTest({
               id={test.id}
               header="Ujian"
               title={test.title}
-              handleDelete={handleDeleteTest}
+              handleDelete={() => handleDeleteTest?.()}
             />
           </>
         ) : null}
