@@ -1,11 +1,11 @@
 import { sessions } from "@/_dummy/sessions";
+import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import usePagination from "@/hooks/usepagination";
 import { SessionType } from "@/types/session.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import {
-  Button,
   Pagination,
   Table,
   TableBody,
@@ -14,7 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Trash } from "@phosphor-icons/react";
 import Link from "next/link";
 
 export default function SessionPage() {
@@ -28,6 +27,10 @@ export default function SessionPage() {
     { name: "Sistem Operasi", uid: "os" },
     { name: "Aksi", uid: "action" },
   ];
+
+  function handleSessionLoginUser(id: string) {
+    console.log(`Session pengguna dengan ID: ${id} berhasil terhapus!`);
+  }
 
   function renderCellUsers(user: SessionType, columnKey: React.Key) {
     const cellValue = user[columnKey as keyof SessionType];
@@ -59,15 +62,12 @@ export default function SessionPage() {
         );
       case "action":
         return (
-          <Button
-            isIconOnly
-            variant="light"
-            color="danger"
-            size="sm"
-            onClick={() => confirm("Apakah anda yakin?")}
-          >
-            <Trash weight="bold" size={18} />
-          </Button>
+          <ModalConfirmDelete
+            id={user.id_pengguna}
+            header="Session"
+            title={`Session: ${user.nama_lengkap}`}
+            handleDelete={() => handleSessionLoginUser(user.id_pengguna)}
+          />
         );
 
       default:
