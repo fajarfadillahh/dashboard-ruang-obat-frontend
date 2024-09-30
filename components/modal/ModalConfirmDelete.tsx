@@ -30,7 +30,6 @@ export default function ModalConfirmDelete({
         color="danger"
         size="sm"
         onPress={onOpen}
-        onClick={() => handleDelete(id)}
       >
         <Trash weight="bold" size={18} className="text-danger" />
       </Button>
@@ -77,7 +76,7 @@ export default function ModalConfirmDelete({
                   }}
                   className="font-bold"
                 >
-                  Ya, Hapus {title}
+                  Ya, Hapus {header}
                 </Button>
               </ModalFooter>
             </>

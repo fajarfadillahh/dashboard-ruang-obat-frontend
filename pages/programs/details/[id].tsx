@@ -45,7 +45,7 @@ export default function DetailsProgramPage() {
     { name: "Aksi", uid: "action" },
   ];
 
-  function handleDeleteProgram(id: string) {
+  function handleDeleteParticipant(id: string) {
     console.log(`Partisipan dengan ID: ${id} berhasil terhapus!`);
   }
 
@@ -128,7 +128,7 @@ export default function DetailsProgramPage() {
               id={user.id_pengguna}
               header="Partisipan"
               title={user.nama_lengkap}
-              handleDelete={handleDeleteProgram}
+              handleDelete={handleDeleteParticipant}
             />
           </div>
         );

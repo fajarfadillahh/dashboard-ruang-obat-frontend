@@ -2,11 +2,18 @@ import { ProgramType } from "@/types/program.type";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import { Button, Chip, Tooltip } from "@nextui-org/react";
-import { ClipboardText, PencilLine, Tag, Trash } from "@phosphor-icons/react";
+import { ClipboardText, PencilLine, Tag } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import ModalConfirmDelete from "../modal/ModalConfirmDelete";
 
-export default function CardProgram(program: ProgramType) {
+export default function CardProgram({
+  program,
+  handleDeleteProgram,
+}: {
+  program: ProgramType;
+  handleDeleteProgram: () => void;
+}) {
   const router = useRouter();
 
   return (
@@ -79,15 +86,12 @@ export default function CardProgram(program: ProgramType) {
           <PencilLine weight="bold" size={18} />
         </Button>
 
-        <Button
-          isIconOnly
-          variant="light"
-          size="sm"
-          color="danger"
-          onClick={() => confirm("Apakah anda yakin?")}
-        >
-          <Trash weight="bold" size={18} />
-        </Button>
+        <ModalConfirmDelete
+          id={program.id_program}
+          header="Program"
+          title={program.title_proram}
+          handleDelete={handleDeleteProgram}
+        />
       </div>
     </div>
   );
