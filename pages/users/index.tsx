@@ -1,4 +1,5 @@
 import { users } from "@/_dummy/users";
+import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import usePagination from "@/hooks/usepagination";
@@ -15,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, MagnifyingGlass, Trash } from "@phosphor-icons/react";
+import { Eye, MagnifyingGlass } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -29,6 +30,10 @@ export default function UsersPage() {
     { name: "Email", uid: "email" },
     { name: "Aksi", uid: "action" },
   ];
+
+  function handleDeleteUser(id: string) {
+    console.log(`Pengguna dengan ID: ${id} berhasil terhapus!`);
+  }
 
   function renderCellUsers(user: UserType, columnKey: React.Key) {
     const cellValue = user[columnKey as keyof UserType];
@@ -63,15 +68,12 @@ export default function UsersPage() {
               <Eye weight="bold" size={18} />
             </Button>
 
-            <Button
-              isIconOnly
-              variant="light"
-              color="danger"
-              size="sm"
-              onClick={() => confirm("Apakah anda yakin?")}
-            >
-              <Trash weight="bold" size={18} />
-            </Button>
+            <ModalConfirmDelete
+              id={user.id_pengguna}
+              header="Pengguna"
+              title={user.nama_lengkap}
+              handleDelete={() => handleDeleteUser(user.id_pengguna)}
+            />
           </div>
         );
 
