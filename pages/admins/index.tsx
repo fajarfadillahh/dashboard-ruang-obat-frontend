@@ -1,4 +1,5 @@
 import { admins } from "@/_dummy/admins";
+import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import ModalSeePasswordAdmin from "@/components/modal/ModalSeePasswordAdmin";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
@@ -13,7 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { PencilLine, Plus, Trash } from "@phosphor-icons/react";
+import { PencilLine, Plus } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -28,6 +29,10 @@ export default function AdminsPage() {
     { name: "Dibuat Pada", uid: "created_at" },
     { name: "Aksi", uid: "action" },
   ];
+
+  function handleDeleteAdmin(id: string) {
+    console.log(`Admin dengan ID: ${id} berhasil terhapus!`);
+  }
 
   function renderCellUsers(admin: AdminType, columnKey: React.Key) {
     const cellValue = admin[columnKey as keyof AdminType];
@@ -64,15 +69,12 @@ export default function AdminsPage() {
               <PencilLine weight="bold" size={18} />
             </Button>
 
-            <Button
-              isIconOnly
-              variant="light"
-              color="danger"
-              size="sm"
-              onClick={() => confirm("Apakah anda yakin?")}
-            >
-              <Trash weight="bold" size={18} />
-            </Button>
+            <ModalConfirmDelete
+              id={admin.id}
+              header="Admin"
+              title={admin.name}
+              handleDelete={() => handleDeleteAdmin(admin.id)}
+            />
           </div>
         );
 
@@ -88,7 +90,7 @@ export default function AdminsPage() {
           <div className="flex items-end justify-between gap-2">
             <div className="grid gap-1">
               <h1 className="text-[22px] font-bold -tracking-wide text-black">
-                Admin Ruangobat.id 🧑🏽
+                Daftar Admin 🧑🏽
               </h1>
               <p className="font-medium text-gray">
                 Tabel admin yang terdaftar di{" "}

@@ -9,6 +9,10 @@ import { useRouter } from "next/router";
 export default function TestsPage() {
   const router = useRouter();
 
+  function handleDeleteTest(id: string) {
+    console.log(`Ujian dengan ID: ${id} berhasil terhapus!`);
+  }
+
   return (
     <Layout title="Daftar Ujian">
       <Container>
@@ -56,7 +60,11 @@ export default function TestsPage() {
 
             <div className="grid gap-2">
               {tests.map((test) => (
-                <CardTest key={test.id} {...test} />
+                <CardTest
+                  key={test.id}
+                  test={test}
+                  handleDeleteTest={() => handleDeleteTest(test.id)}
+                />
               ))}
             </div>
           </div>

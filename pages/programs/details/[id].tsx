@@ -3,13 +3,13 @@ import { users } from "@/_dummy/users";
 import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
 import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
+import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import usePagination from "@/hooks/usepagination";
 import { UserType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import {
-  Button,
   Chip,
   Pagination,
   Snippet,
@@ -24,10 +24,11 @@ import {
   BookBookmark,
   Certificate,
   Check,
+  CheckCircle,
   Copy,
   Notepad,
   Tag,
-  Trash,
+  XCircle,
 } from "@phosphor-icons/react";
 import React from "react";
 
@@ -39,9 +40,14 @@ export default function DetailsProgramPage() {
     { name: "Nama Lengkap", uid: "name" },
     { name: "Kode Akses", uid: "code_access" },
     { name: "Asal Kampus", uid: "university" },
-    { name: "Dibuat Pada", uid: "created_at" },
+    { name: "Status", uid: "joined_status" },
+    { name: "Bergabung Pada", uid: "joined_at" },
     { name: "Aksi", uid: "action" },
   ];
+
+  function handleDeleteParticipant(id: string) {
+    console.log(`Partisipan dengan ID: ${id} berhasil terhapus!`);
+  }
 
   function renderCellUsers(user: UserType, columnKey: React.Key) {
     const cellValue = user[columnKey as keyof UserType];
@@ -80,16 +86,50 @@ export default function DetailsProgramPage() {
         return (
           <div className="w-max font-medium text-black">{user.asal_kampus}</div>
         );
-      case "created_at":
+      case "joined_status":
         return (
-          <div className="w-max font-medium text-black">{user.dibuat_pada}</div>
+          <div className="w-max font-medium text-black">
+            <Chip
+              variant="flat"
+              size="sm"
+              color={
+                user.status_bergabung === "mengikuti" ? "success" : "danger"
+              }
+              startContent={
+                user.status_bergabung === "mengikuti" ? (
+                  <CheckCircle
+                    weight="fill"
+                    size={16}
+                    className="text-success"
+                  />
+                ) : (
+                  <XCircle weight="fill" size={16} className="text-danger" />
+                )
+              }
+              classNames={{
+                base: "px-2 gap-1",
+                content: "font-semibold capitalize",
+              }}
+            >
+              {user.status_bergabung}
+            </Chip>
+          </div>
+        );
+      case "joined_at":
+        return (
+          <div className="w-max font-medium text-black">
+            {user.bergabung_pada}
+          </div>
         );
       case "action":
         return (
           <div className="grid w-[60px]">
-            <Button isIconOnly variant="light" color="danger" size="sm">
-              <Trash weight="bold" size={18} className="text-danger" />
-            </Button>
+            <ModalConfirmDelete
+              id={user.id_pengguna}
+              header="Partisipan"
+              title={user.nama_lengkap}
+              handleDelete={handleDeleteParticipant}
+            />
           </div>
         );
 
@@ -148,7 +188,7 @@ export default function DetailsProgramPage() {
 
               <div className="grid gap-2">
                 {tests.map((test) => (
-                  <CardTest key={test.id} {...test} />
+                  <CardTest key={test.id} test={test} />
                 ))}
               </div>
             </div>

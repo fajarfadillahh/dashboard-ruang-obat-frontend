@@ -5,5 +5,6 @@ export type UserType = {
   no_telp: number | string;
   asal_kampus: string;
   kode_akses: string;
-  dibuat_pada: string;
+  status_bergabung: "mengikuti" | "belum mengikuti";
+  bergabung_pada: string;
 };

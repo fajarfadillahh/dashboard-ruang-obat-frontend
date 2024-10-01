@@ -10,6 +10,10 @@ import { useRouter } from "next/router";
 export default function ProgramsPage() {
   const router = useRouter();
 
+  function handleDeleteProgram(id: string) {
+    console.log(`Program dengan ID: ${id} berhasil terhapus!`);
+  }
+
   return (
     <Layout title="Daftar Program">
       <Container>
@@ -64,7 +68,13 @@ export default function ProgramsPage() {
 
             <div className="grid gap-2">
               {programs.map((program) => (
-                <CardProgram key={program.id_program} {...program} />
+                <CardProgram
+                  key={program.id_program}
+                  program={program}
+                  handleDeleteProgram={() =>
+                    handleDeleteProgram(program.id_program)
+                  }
+                />
               ))}
             </div>
           </div>
