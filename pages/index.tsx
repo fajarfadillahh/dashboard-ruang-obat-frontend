@@ -1,30 +1,44 @@
 import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input } from "@nextui-org/react";
 import { Lock, User } from "@phosphor-icons/react";
+import { signIn } from "next-auth/react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 type InputType = {
-  id_admin: string;
+  admin_id: string;
   password: string;
 };
 
 export default function LoginPage() {
   const [input, setInput] = useState<InputType>({
-    id_admin: "",
+    admin_id: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
-  function handleLogin() {
+  async function handleLogin() {
     setLoading(true);
-    toast.success("Yeay, Anda Berhasil Login!");
 
-    setTimeout(() => {
+    const response = await signIn("credentials", {
+      ...input,
+      redirect: false,
+    });
+
+    if (response?.error) {
       setLoading(false);
-      window.location.href = "/dashboard";
-    }, 3000);
+      const { error } = JSON.parse(response?.error);
+
+      toast.error(error.message);
+    }
+
+    if (response?.ok) {
+      toast.success("Yeay, Anda Berhasil Login!");
+      return router.push("/dashboard");
+    }
   }
 
   function isFormEmpty() {
@@ -55,7 +69,7 @@ export default function LoginPage() {
               color="default"
               labelPlacement="outside"
               placeholder="ID Admin"
-              name="id_admin"
+              name="admin_id"
               onChange={(e) =>
                 setInput({
                   ...input,

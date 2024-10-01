@@ -1,14 +1,28 @@
+import ErrorPage from "@/components/ErrorPage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { SuccessResponse } from "@/types/global.type";
+import { fetcher } from "@/utils/fetcher";
 import { formatDayWithoutTime } from "@/utils/formatDate";
 import { ArrowRight } from "@phosphor-icons/react";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-export default function DashboardPage() {
+type DashboardType = {
+  total_programs: number;
+  total_tests: number;
+  total_online_users: number;
+  total_users: number;
+};
+
+export default function DashboardPage({
+  dashboard,
+  error,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [time, setTime] = useState(new Date());
   const [client, setClient] = useState(false);
-  const formatTime = (num: any) => String(num).padStart(2, "0");
+  const formatTime = (num: number) => String(num).padStart(2, "0");
 
   useEffect(() => {
     setClient(true);
@@ -22,6 +36,22 @@ export default function DashboardPage() {
 
   if (!client) {
     return;
+  }
+
+  if (error) {
+    return (
+      <Layout title="Dashboard">
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
   }
 
   return (
@@ -51,7 +81,7 @@ export default function DashboardPage() {
                     Total Pengguna
                   </p>
                   <h6 className="text-[32px] font-extrabold text-black">
-                    1471
+                    {dashboard?.total_users}
                   </h6>
                   <Link
                     href="/users"
@@ -64,7 +94,9 @@ export default function DashboardPage() {
 
                 <div className="grid pt-8">
                   <p className="text-sm font-medium text-gray">Total Program</p>
-                  <h6 className="text-[32px] font-extrabold text-black">24</h6>
+                  <h6 className="text-[32px] font-extrabold text-black">
+                    {dashboard?.total_programs}
+                  </h6>
                   <Link
                     href="/programs"
                     className="mt-2 inline-flex w-max items-center gap-2 text-sm font-semibold text-purple hover:text-purple/80"
@@ -80,7 +112,9 @@ export default function DashboardPage() {
                   <p className="text-sm font-medium text-gray">
                     Pengguna Aktif
                   </p>
-                  <h6 className="text-[32px] font-extrabold text-black">529</h6>
+                  <h6 className="text-[32px] font-extrabold text-black">
+                    {dashboard?.total_online_users}
+                  </h6>
                   <Link
                     href="/session"
                     className="mt-2 inline-flex w-max items-center gap-2 text-sm font-semibold text-purple hover:text-purple/80"
@@ -92,7 +126,9 @@ export default function DashboardPage() {
 
                 <div className="grid pt-8">
                   <p className="text-sm font-medium text-gray">Total Ujian</p>
-                  <h6 className="text-[32px] font-extrabold text-black">254</h6>
+                  <h6 className="text-[32px] font-extrabold text-black">
+                    {dashboard?.total_tests}
+                  </h6>
                   <Link
                     href="/tests"
                     className="mt-2 inline-flex w-max items-center gap-2 text-sm font-semibold text-purple hover:text-purple/80"
@@ -109,3 +145,48 @@ export default function DashboardPage() {
     </Layout>
   );
 }
+
+type DataProps = {
+  dashboard?: DashboardType;
+  error?: ErrorType;
+};
+
+type ErrorType = {
+  success: boolean;
+  status_code: number;
+  error: {
+    name: string;
+    message: string;
+    errors?: {
+      code: string;
+      meta: string;
+      stack: string;
+    };
+  };
+};
+
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+  req,
+}) => {
+  const token = req.headers["access_token"] as string;
+
+  try {
+    const response = (await fetcher({
+      url: "/admin/dashboard",
+      method: "GET",
+      token,
+    })) as SuccessResponse<DashboardType>;
+
+    return {
+      props: {
+        dashboard: response.data,
+      },
+    };
+  } catch (error: any) {
+    return {
+      props: {
+        error,
+      },
+    };
+  }
+};
