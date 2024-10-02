@@ -34,8 +34,8 @@ export default function ProgramsPage() {
             </p>
           </div>
 
-          <div className="grid gap-4">
-            <div className="flex items-center gap-4">
+          <div className="grid">
+            <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white pb-4">
               <Input
                 type="text"
                 variant="flat"
