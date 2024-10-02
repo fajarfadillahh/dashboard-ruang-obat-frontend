@@ -1,3 +1,4 @@
+import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import { ProgramType } from "@/types/program.type";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
@@ -5,7 +6,6 @@ import { Button, Chip } from "@nextui-org/react";
 import { ClipboardText, PencilLine, Tag } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import ModalConfirmDelete from "../modal/ModalConfirmDelete";
 
 export default function CardProgram({
   program,
@@ -25,10 +25,10 @@ export default function CardProgram({
 
         <div className="grid gap-4">
           <Link
-            href={`/programs/details/${encodeURIComponent(program.id_program)}`}
+            href={`/programs/details/${encodeURIComponent(program.program_id)}`}
             className="line-clamp-1 text-[20px] font-bold leading-[120%] text-black hover:text-purple"
           >
-            {program.title_program}
+            {program.title}
           </Link>
 
           <div className="grid grid-cols-[repeat(2,160px),max-content] items-start">
@@ -36,7 +36,7 @@ export default function CardProgram({
               <span className="text-[12px] font-medium text-gray">
                 Harga Program:
               </span>
-              {program.status_program == "free" ? (
+              {program.type == "free" ? (
                 <Chip
                   variant="flat"
                   color="default"
@@ -49,11 +49,11 @@ export default function CardProgram({
                     content: "font-semibold text-black",
                   }}
                 >
-                  Program Gratis
+                  Gratis
                 </Chip>
               ) : (
                 <h5 className="text-sm font-extrabold text-purple">
-                  {formatRupiah(program.price_program)}
+                  {formatRupiah(program.price)}
                 </h5>
               )}
             </div>
@@ -63,7 +63,7 @@ export default function CardProgram({
                 Jumlah Ujian:
               </span>
               <h5 className="text-sm font-semibold text-black">
-                {program.amount_test} Modul Ujian
+                {program.total_tests} Modul Ujian
               </h5>
             </div>
 
@@ -85,15 +85,15 @@ export default function CardProgram({
           variant="light"
           size="sm"
           color="secondary"
-          onClick={() => router.push(`/programs/edit/${program.id_program}`)}
+          onClick={() => router.push(`/programs/edit/${program.program_id}`)}
         >
           <PencilLine weight="bold" size={18} />
         </Button>
 
         <ModalConfirmDelete
-          id={program.id_program}
+          id={program.program_id}
           header="Program"
-          title={program.title_program}
+          title={program.title}
           handleDelete={handleDeleteProgram}
         />
       </div>

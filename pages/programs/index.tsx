@@ -1,13 +1,17 @@
-import { programs } from "@/_dummy/programs";
 import CardProgram from "@/components/card/CardProgram";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { ProgramType } from "@/types/program.type";
+import { fetcher } from "@/utils/fetcher";
 import { Button, Input } from "@nextui-org/react";
 import { MagnifyingGlass, Plus } from "@phosphor-icons/react";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-export default function ProgramsPage() {
+export default function ProgramsPage({
+  programs,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
 
   function handleDeleteProgram(id: string) {
@@ -67,12 +71,12 @@ export default function ProgramsPage() {
             </div>
 
             <div className="grid gap-2">
-              {programs.map((program) => (
+              {programs.programs?.map((program: ProgramType) => (
                 <CardProgram
-                  key={program.id_program}
+                  key={program.program_id}
                   program={program}
                   handleDeleteProgram={() =>
-                    handleDeleteProgram(program.id_program)
+                    handleDeleteProgram(program.program_id)
                   }
                 />
               ))}
@@ -83,3 +87,23 @@ export default function ProgramsPage() {
     </Layout>
   );
 }
+
+export const getServerSideProps = (async ({ req }) => {
+  const token = req.headers["access_token"] as string;
+
+  const response = await fetcher({
+    url: "/admin/programs",
+    method: "GET",
+    token,
+  });
+
+  if (!response.data) {
+    throw new Error("Data not found");
+  }
+
+  return {
+    props: {
+      programs: response.data,
+    },
+  };
+}) satisfies GetServerSideProps<{ programs: ProgramType[] }>;
