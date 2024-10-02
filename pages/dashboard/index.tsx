@@ -185,7 +185,7 @@ export default function DashboardPage({
                         Total Ujian
                       </p>
                       <h6 className="text-[32px] font-extrabold text-black">
-                        249
+                        {dashboard?.total_tests}
                       </h6>
                     </div>
                   </div>
