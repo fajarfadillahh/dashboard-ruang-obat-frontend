@@ -1,14 +1,12 @@
-import { users } from "@/_dummy/users";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import usePagination from "@/hooks/usepagination";
-import { UserType } from "@/types/user.type";
+import { User } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import {
   Button,
   Input,
-  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -17,43 +15,45 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import { Eye, MagnifyingGlass } from "@phosphor-icons/react";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-export default function UsersPage() {
+export default function UsersPage({
+  users,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { page, pages, data, setPage } = usePagination(users, 5);
+  const session = useSession();
+
+  console.log(session.data?.user.access_token);
 
   const columnsUser = [
-    { name: "ID Pengguna", uid: "id" },
-    { name: "Nama Lengkap", uid: "name" },
-    { name: "Email", uid: "email" },
+    { name: "ID Pengguna", uid: "user_id" },
+    { name: "Nama Lengkap", uid: "fullname" },
+    { name: "Asal Kampus", uid: "university" },
     { name: "Aksi", uid: "action" },
   ];
 
-  function handleDeleteUser(id: string) {
-    console.log(`Pengguna dengan ID: ${id} berhasil terhapus!`);
-  }
-
-  function renderCellUsers(user: UserType, columnKey: React.Key) {
-    const cellValue = user[columnKey as keyof UserType];
+  function renderCellUsers(user: User, columnKey: React.Key) {
+    const cellValue = user[columnKey as keyof User];
 
     switch (columnKey) {
-      case "id":
+      case "user_id":
         return (
-          <div className="w-max font-medium text-black">{user.id_pengguna}</div>
+          <div className="w-max font-medium text-black">{user.user_id}</div>
         );
-      case "name":
+      case "fullname":
         return (
-          <div className="w-max font-medium text-black">
-            {user.nama_lengkap}
-          </div>
+          <div className="w-max font-medium text-black">{user.fullname}</div>
         );
-      case "email":
-        return <div className="w-max font-medium text-black">{user.email}</div>;
+      case "university":
+        return (
+          <div className="w-max font-medium text-black">{user.university}</div>
+        );
       case "action":
         return (
-          <div className="flex max-w-[150px] items-center gap-1">
+          <div className="flex w-max items-center gap-1">
             <Button
               isIconOnly
               variant="light"
@@ -61,7 +61,7 @@ export default function UsersPage() {
               color="secondary"
               onClick={() =>
                 router.push(
-                  `/users/details/${encodeURIComponent(user.id_pengguna)}`,
+                  `/users/details/${encodeURIComponent(user.user_id)}`,
                 )
               }
             >
@@ -69,10 +69,10 @@ export default function UsersPage() {
             </Button>
 
             <ModalConfirmDelete
-              id={user.id_pengguna}
+              id={user.user_id}
               header="Pengguna"
-              title={user.nama_lengkap}
-              handleDelete={() => handleDeleteUser(user.id_pengguna)}
+              title={user.fullname}
+              handleDelete={() => handleDeleteUser(user.user_id)}
             />
           </div>
         );
@@ -80,6 +80,10 @@ export default function UsersPage() {
       default:
         return cellValue;
     }
+  }
+
+  function handleDeleteUser(id: string) {
+    console.log(`Pengguna dengan ID: ${id} berhasil terhapus!`);
   }
 
   return (
@@ -122,44 +126,63 @@ export default function UsersPage() {
               className="max-w-[500px]"
             />
 
-            <Table
-              isHeaderSticky
-              aria-label="users table"
-              color="secondary"
-              selectionMode="none"
-              classNames={customStyleTable}
-              className="scrollbar-hide"
-            >
-              <TableHeader columns={columnsUser}>
-                {(column) => (
-                  <TableColumn key={column.uid}>{column.name}</TableColumn>
-                )}
-              </TableHeader>
+            <div className="overflow-x-scroll">
+              <Table
+                isHeaderSticky
+                aria-label="users table"
+                color="secondary"
+                selectionMode="none"
+                classNames={customStyleTable}
+                className="scrollbar-hide"
+              >
+                <TableHeader columns={columnsUser}>
+                  {(column) => (
+                    <TableColumn key={column.uid}>{column.name}</TableColumn>
+                  )}
+                </TableHeader>
 
-              <TableBody items={data}>
-                {(item) => (
-                  <TableRow key={item.id_pengguna}>
-                    {(columnKey) => (
-                      <TableCell>{renderCellUsers(item, columnKey)}</TableCell>
-                    )}
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-
-            <Pagination
-              isCompact
-              showControls
-              showShadow
-              color="secondary"
-              page={page}
-              total={pages}
-              onChange={setPage}
-              className="justify-self-center"
-            />
+                <TableBody
+                  emptyContent={
+                    <span className="text-sm font-semibold italic text-gray">
+                      Pengguna tidak ditemukan!
+                    </span>
+                  }
+                >
+                  {users.users?.map((user: User) => (
+                    <TableRow key={user.user_id}>
+                      {(columnKey) => (
+                        <TableCell>
+                          {renderCellUsers(user, columnKey)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </section>
       </Container>
     </Layout>
   );
 }
+
+export const getServerSideProps = (async ({ req }) => {
+  const token = req.headers["access_token"] as string;
+
+  const response = await fetcher({
+    url: "/admin/users",
+    method: "GET",
+    token,
+  });
+
+  if (!response.data) {
+    throw new Error("Data not found");
+  }
+
+  return {
+    props: {
+      users: response.data,
+    },
+  };
+}) satisfies GetServerSideProps<{ users: User }>;
