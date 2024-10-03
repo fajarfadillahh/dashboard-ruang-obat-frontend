@@ -23,21 +23,26 @@ export default function LoginPage() {
   async function handleLogin() {
     setLoading(true);
 
-    const response = await signIn("credentials", {
-      ...input,
-      redirect: false,
-    });
+    try {
+      const response = await signIn("credentials", {
+        ...input,
+        redirect: false,
+      });
 
-    if (response?.error) {
+      if (response?.error) {
+        setLoading(false);
+        const { error } = JSON.parse(response?.error);
+
+        toast.error(error.message);
+      }
+
+      if (response?.ok) {
+        toast.success("Yeay, Anda Berhasil Login!");
+        return router.push("/dashboard");
+      }
+    } catch (error) {
       setLoading(false);
-      const { error } = JSON.parse(response?.error);
-
-      toast.error(error.message);
-    }
-
-    if (response?.ok) {
-      toast.success("Yeay, Anda Berhasil Login!");
-      return router.push("/dashboard");
+      toast.error("Terjadi kesalahan, coba lagi nanti!");
     }
   }
 
