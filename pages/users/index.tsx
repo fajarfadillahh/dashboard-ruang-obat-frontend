@@ -16,7 +16,6 @@ import {
 } from "@nextui-org/react";
 import { Eye, MagnifyingGlass } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
@@ -24,9 +23,6 @@ export default function UsersPage({
   users,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const session = useSession();
-
-  console.log(session.data?.user.access_token);
 
   const columnsUser = [
     { name: "ID Pengguna", uid: "user_id" },
@@ -148,7 +144,7 @@ export default function UsersPage({
                     </span>
                   }
                 >
-                  {users.users?.map((user: User) => (
+                  {users.users.map((user: User) => (
                     <TableRow key={user.user_id}>
                       {(columnKey) => (
                         <TableCell>

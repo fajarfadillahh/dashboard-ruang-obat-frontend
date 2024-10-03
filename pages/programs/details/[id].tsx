@@ -6,7 +6,7 @@ import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import usePagination from "@/hooks/usepagination";
+import usePagination from "@/hooks/usePagination";
 import { UserType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import {

@@ -2,7 +2,7 @@ import { sessions } from "@/_dummy/sessions";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import usePagination from "@/hooks/usepagination";
+import usePagination from "@/hooks/usePagination";
 import { SessionType } from "@/types/session.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import {
