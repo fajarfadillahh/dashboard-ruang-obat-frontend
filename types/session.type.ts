@@ -1,7 +1,8 @@
 export type SessionType = {
-  id_pengguna: string;
-  nama_lengkap: string;
-  asal_kampus: string;
+  user_id: string;
+  fullname: string;
+  university: string;
   browser: string;
-  sistem_operasi: string;
+  os: string;
+  created_at: string;
 };
