@@ -1,6 +1,6 @@
-import { UserType } from "@/types/user.type";
+import { ParticipantType } from "@/types/user.type";
 
-export const users: UserType[] = [
+export const participants: ParticipantType[] = [
   {
     id_pengguna: "ROUAP123456",
     nama_lengkap: "Arya Pratama",

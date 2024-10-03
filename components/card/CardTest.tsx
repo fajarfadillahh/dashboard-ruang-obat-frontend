@@ -1,9 +1,12 @@
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import { TestType } from "@/types/test.type";
+import { formatDate } from "@/utils/formatDate";
 import { Button, Chip } from "@nextui-org/react";
 import {
+  CheckCircle,
   ClipboardText,
   ClockCountdown,
+  HourglassLow,
   PencilLine,
 } from "@phosphor-icons/react";
 import { useRouter } from "next/router";
@@ -33,7 +36,7 @@ export default function CardTest({
                 Tanggal Mulai:
               </span>
               <h1 className="text-sm font-semibold text-black">
-                {test.start_test}
+                {formatDate(test.start)}
               </h1>
             </div>
 
@@ -42,7 +45,7 @@ export default function CardTest({
                 Tanggal Selesai:
               </span>
               <h1 className="text-sm font-semibold text-black">
-                {test.end_test}
+                {formatDate(test.end)}
               </h1>
             </div>
 
@@ -51,7 +54,7 @@ export default function CardTest({
                 Durasi Pengerjaan:
               </span>
               <h1 className="text-sm font-semibold text-black">
-                {test.duration_test} Menit
+                {test.duration} Menit
               </h1>
             </div>
 
@@ -62,20 +65,28 @@ export default function CardTest({
 
               <Chip
                 variant="flat"
-                color="default"
+                color={
+                  test.status === "Belum Mulai"
+                    ? "default"
+                    : test.status === "Berlangsung"
+                      ? "warning"
+                      : "success"
+                }
                 startContent={
-                  <ClockCountdown
-                    weight="bold"
-                    size={18}
-                    className="text-black"
-                  />
+                  test.status === "Belum Mulai" ? (
+                    <ClockCountdown weight="fill" size={18} />
+                  ) : test.status === "Berlangsung" ? (
+                    <HourglassLow weight="fill" size={18} />
+                  ) : (
+                    <CheckCircle weight="fill" size={18} />
+                  )
                 }
                 classNames={{
-                  base: "px-3 gap-1",
-                  content: "font-semibold text-black capitalize",
+                  base: "px-2",
+                  content: "font-semibold capitalize",
                 }}
               >
-                {test.status_test}
+                {test.status}
               </Chip>
             </div>
           </div>
@@ -87,7 +98,7 @@ export default function CardTest({
           variant="solid"
           size="sm"
           color="secondary"
-          onClick={() => router.push(`/tests/details/${test.id}`)}
+          onClick={() => router.push(`/tests/details/${test.test_id}`)}
           className="px-6 font-bold"
         >
           Lihat Ujian
@@ -100,13 +111,13 @@ export default function CardTest({
               variant="light"
               size="sm"
               color="secondary"
-              onClick={() => router.push(`/tests/edit/${test.id}`)}
+              onClick={() => router.push(`/tests/edit/${test.test_id}`)}
             >
               <PencilLine weight="bold" size={18} />
             </Button>
 
             <ModalConfirmDelete
-              id={test.id}
+              id={test.test_id}
               header="Ujian"
               title={test.title}
               handleDelete={() => handleDeleteTest?.()}

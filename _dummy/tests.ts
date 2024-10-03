@@ -1,6 +1,4 @@
-import { TestType } from "@/types/test.type";
-
-export const tests: TestType[] = [
+export const tests = [
   {
     id: "ROT728291",
     title: "Tryout Internal Ruangobat Part 1",

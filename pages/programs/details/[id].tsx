@@ -1,17 +1,19 @@
-import { tests } from "@/_dummy/tests";
-import { users } from "@/_dummy/users";
+import { participants } from "@/_dummy/users";
 import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
+import ErrorPage from "@/components/ErrorPage";
 import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import usePagination from "@/hooks/usePagination";
-import { UserType } from "@/types/user.type";
+import { ErrorDataType } from "@/types/global.type";
+import { TestType } from "@/types/test.type";
+import { ParticipantType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
+import { formatRupiah } from "@/utils/formatRupiah";
 import {
   Chip,
-  Pagination,
   Snippet,
   Table,
   TableBody,
@@ -30,12 +32,14 @@ import {
   Tag,
   XCircle,
 } from "@phosphor-icons/react";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import React from "react";
 
-export default function DetailsProgramPage() {
-  const { page, pages, data, setPage } = usePagination(users, 10);
-
-  const columnsUser = [
+export default function DetailsProgramPage({
+  programs,
+  error,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const columnsParticipant = [
     { name: "ID Pengguna", uid: "id" },
     { name: "Nama Lengkap", uid: "name" },
     { name: "Kode Akses", uid: "code_access" },
@@ -45,22 +49,23 @@ export default function DetailsProgramPage() {
     { name: "Aksi", uid: "action" },
   ];
 
-  function handleDeleteParticipant(id: string) {
-    console.log(`Partisipan dengan ID: ${id} berhasil terhapus!`);
-  }
-
-  function renderCellUsers(user: UserType, columnKey: React.Key) {
-    const cellValue = user[columnKey as keyof UserType];
+  function renderCellParticipants(
+    participant: ParticipantType,
+    columnKey: React.Key,
+  ) {
+    const cellValue = participant[columnKey as keyof ParticipantType];
 
     switch (columnKey) {
       case "id":
         return (
-          <div className="w-max font-medium text-black">{user.id_pengguna}</div>
+          <div className="w-max font-medium text-black">
+            {participant.id_pengguna}
+          </div>
         );
       case "name":
         return (
           <div className="w-max font-medium text-black">
-            {user.nama_lengkap}
+            {participant.nama_lengkap}
           </div>
         );
       case "code_access":
@@ -79,12 +84,14 @@ export default function DetailsProgramPage() {
               pre: "font-medium text-black font-sans text-[14px]",
             }}
           >
-            {user.kode_akses}
+            {participant.kode_akses}
           </Snippet>
         );
       case "university":
         return (
-          <div className="w-max font-medium text-black">{user.asal_kampus}</div>
+          <div className="w-max font-medium text-black">
+            {participant.asal_kampus}
+          </div>
         );
       case "joined_status":
         return (
@@ -93,10 +100,12 @@ export default function DetailsProgramPage() {
               variant="flat"
               size="sm"
               color={
-                user.status_bergabung === "mengikuti" ? "success" : "danger"
+                participant.status_bergabung === "mengikuti"
+                  ? "success"
+                  : "danger"
               }
               startContent={
-                user.status_bergabung === "mengikuti" ? (
+                participant.status_bergabung === "mengikuti" ? (
                   <CheckCircle
                     weight="fill"
                     size={16}
@@ -111,23 +120,23 @@ export default function DetailsProgramPage() {
                 content: "font-semibold capitalize",
               }}
             >
-              {user.status_bergabung}
+              {participant.status_bergabung}
             </Chip>
           </div>
         );
       case "joined_at":
         return (
           <div className="w-max font-medium text-black">
-            {user.bergabung_pada}
+            {participant.bergabung_pada}
           </div>
         );
       case "action":
         return (
           <div className="grid w-[60px]">
             <ModalConfirmDelete
-              id={user.id_pengguna}
+              id={participant.id_pengguna}
               header="Partisipan"
-              title={user.nama_lengkap}
+              title={participant.nama_lengkap}
               handleDelete={handleDeleteParticipant}
             />
           </div>
@@ -138,8 +147,28 @@ export default function DetailsProgramPage() {
     }
   }
 
+  function handleDeleteParticipant(id: string) {
+    console.log(`Partisipan dengan ID: ${id} berhasil terhapus!`);
+  }
+
+  if (error) {
+    return (
+      <Layout title={`${programs.title}`}>
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
+  }
+
   return (
-    <Layout title={`Kelas Ruangobat Tatap Muka: Mandiri Agustus 2024 Part 1`}>
+    <Layout title={`${programs.title}`}>
       <Container>
         <section className="grid gap-8">
           <ButtonBack />
@@ -150,32 +179,42 @@ export default function DetailsProgramPage() {
 
               <div className="grid gap-4">
                 <h4 className="max-w-[700px] text-[28px] font-bold leading-[120%] -tracking-wide text-black">
-                  Kelas Ruangobat Tatap Muka: Mandiri Agustus 2024 Part 1
+                  {programs.title}
                 </h4>
 
                 <div className="flex items-center gap-12">
-                  <Chip
-                    variant="flat"
-                    color="default"
-                    startContent={
-                      <Tag weight="bold" size={18} className="text-black" />
-                    }
-                    classNames={{
-                      base: "px-3 gap-1",
-                      content: "font-bold text-black",
-                    }}
-                  >
-                    Gratis
-                  </Chip>
+                  {programs.type === "free" ? (
+                    <Chip
+                      variant="flat"
+                      color="default"
+                      startContent={
+                        <Tag weight="bold" size={18} className="text-black" />
+                      }
+                      classNames={{
+                        base: "px-3 gap-1",
+                        content: "font-bold text-black",
+                      }}
+                    >
+                      Gratis
+                    </Chip>
+                  ) : (
+                    <h5 className="font-extrabold text-purple">
+                      {formatRupiah(programs.price)}
+                    </h5>
+                  )}
 
                   <div className="inline-flex items-center gap-1 text-gray">
                     <Certificate weight="bold" size={18} />
-                    <p className="text-sm font-bold">ID: ROP817629</p>
+                    <p className="text-sm font-bold">
+                      ID: {programs.program_id}
+                    </p>
                   </div>
 
                   <div className="inline-flex items-center gap-1 text-gray">
                     <Notepad weight="bold" size={18} />
-                    <p className="text-sm font-bold">9 Modul Ujian</p>
+                    <p className="text-sm font-bold">
+                      {programs.total_tests} Modul Ujian
+                    </p>
                   </div>
                 </div>
               </div>
@@ -187,8 +226,8 @@ export default function DetailsProgramPage() {
               </h4>
 
               <div className="grid gap-2">
-                {tests.map((test) => (
-                  <CardTest key={test.id} test={test} />
+                {programs.tests.map((test: TestType) => (
+                  <CardTest key={test.test_id} test={test} />
                 ))}
               </div>
             </div>
@@ -211,18 +250,18 @@ export default function DetailsProgramPage() {
                   classNames={customStyleTable}
                   className="scrollbar-hide"
                 >
-                  <TableHeader columns={columnsUser}>
+                  <TableHeader columns={columnsParticipant}>
                     {(column) => (
                       <TableColumn key={column.uid}>{column.name}</TableColumn>
                     )}
                   </TableHeader>
 
-                  <TableBody items={data}>
+                  <TableBody items={participants}>
                     {(item) => (
                       <TableRow key={item.id_pengguna}>
                         {(columnKey) => (
                           <TableCell>
-                            {renderCellUsers(item, columnKey)}
+                            {renderCellParticipants(item, columnKey)}
                           </TableCell>
                         )}
                       </TableRow>
@@ -230,17 +269,6 @@ export default function DetailsProgramPage() {
                   </TableBody>
                 </Table>
               </div>
-
-              <Pagination
-                isCompact
-                showControls
-                showShadow
-                color="secondary"
-                page={page}
-                total={pages}
-                onChange={setPage}
-                className="justify-self-center"
-              />
             </div>
           </div>
         </section>
@@ -248,3 +276,35 @@ export default function DetailsProgramPage() {
     </Layout>
   );
 }
+
+type DataProps = {
+  programs?: any;
+  error?: ErrorDataType;
+};
+
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+  req,
+  params,
+}) => {
+  const token = req.headers["access_token"] as string;
+
+  try {
+    const response = await fetcher({
+      url: `/admin/programs/${encodeURIComponent(params?.id as string)}`,
+      method: "GET",
+      token,
+    });
+
+    return {
+      props: {
+        programs: response.data,
+      },
+    };
+  } catch (error: any) {
+    return {
+      props: {
+        error,
+      },
+    };
+  }
+};

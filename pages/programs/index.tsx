@@ -1,6 +1,8 @@
 import CardProgram from "@/components/card/CardProgram";
+import ErrorPage from "@/components/ErrorPage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { ProgramType } from "@/types/program.type";
 import { fetcher } from "@/utils/fetcher";
 import { Button, Input } from "@nextui-org/react";
@@ -11,11 +13,28 @@ import { useRouter } from "next/router";
 
 export default function ProgramsPage({
   programs,
+  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
 
   function handleDeleteProgram(id: string) {
     console.log(`Program dengan ID: ${id} berhasil terhapus!`);
+  }
+
+  if (error) {
+    return (
+      <Layout title="Daftar Programs">
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
   }
 
   return (
@@ -71,7 +90,7 @@ export default function ProgramsPage({
             </div>
 
             <div className="grid gap-2">
-              {programs.programs?.map((program: ProgramType) => (
+              {programs?.programs.map((program: ProgramType) => (
                 <CardProgram
                   key={program.program_id}
                   program={program}
@@ -88,22 +107,33 @@ export default function ProgramsPage({
   );
 }
 
-export const getServerSideProps = (async ({ req }) => {
+type DataProps = {
+  programs?: any;
+  error?: ErrorDataType;
+};
+
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+  req,
+}) => {
   const token = req.headers["access_token"] as string;
 
-  const response = await fetcher({
-    url: "/admin/programs",
-    method: "GET",
-    token,
-  });
+  try {
+    const response = (await fetcher({
+      url: "/admin/programs",
+      method: "GET",
+      token,
+    })) as SuccessResponse<ProgramType[]>;
 
-  if (!response.data) {
-    throw new Error("Data not found");
+    return {
+      props: {
+        programs: response.data,
+      },
+    };
+  } catch (error: any) {
+    return {
+      props: {
+        error,
+      },
+    };
   }
-
-  return {
-    props: {
-      programs: response.data,
-    },
-  };
-}) satisfies GetServerSideProps<{ programs: ProgramType[] }>;
+};

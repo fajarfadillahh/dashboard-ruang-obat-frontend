@@ -1,10 +1,10 @@
-export type User = {
+export type UserType = {
   user_id: string;
   fullname: string;
   university: string;
 };
 
-export type UserType = {
+export type ParticipantType = {
   id_pengguna: string;
   nama_lengkap: string;
   email: string;
