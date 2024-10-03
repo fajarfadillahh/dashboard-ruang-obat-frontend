@@ -144,11 +144,11 @@ export default function UsersPage({
                     </span>
                   }
                 >
-                  {users.users.map((user: User) => (
-                    <TableRow key={user.user_id}>
+                  {users.users.map((item: User) => (
+                    <TableRow key={item.user_id}>
                       {(columnKey) => (
                         <TableCell>
-                          {renderCellUsers(user, columnKey)}
+                          {renderCellUsers(item, columnKey)}
                         </TableCell>
                       )}
                     </TableRow>
