@@ -26,7 +26,7 @@ import { useRouter } from "next/router";
 interface ProgramProps {
   program: ProgramType;
   handleDeleteProgram: () => void;
-  onStatusChange?: () => void;
+  onStatusChange: () => void;
 }
 
 export default function CardProgram({
@@ -166,7 +166,7 @@ export default function CardProgram({
               >
                 {program.is_active
                   ? "Non-aktifkan Program"
-                  : "Aktifkan Programs"}
+                  : "Aktifkan Program"}
               </DropdownItem>
             </DropdownSection>
           </DropdownMenu>
