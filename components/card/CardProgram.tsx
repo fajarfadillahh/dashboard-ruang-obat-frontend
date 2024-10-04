@@ -2,18 +2,38 @@ import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import { ProgramType } from "@/types/program.type";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
-import { Button, Chip } from "@nextui-org/react";
-import { ClipboardText, PencilLine, Tag } from "@phosphor-icons/react";
+import {
+  Button,
+  Chip,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownSection,
+  DropdownTrigger,
+} from "@nextui-org/react";
+import {
+  CheckCircle,
+  ClipboardText,
+  PencilLine,
+  Power,
+  Tag,
+  XCircle,
+} from "@phosphor-icons/react";
+import { DotsThreeOutlineVertical } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { useRouter } from "next/router";
+
+interface ProgramProps {
+  program: ProgramType;
+  handleDeleteProgram: () => void;
+  onStatusChange?: () => void;
+}
 
 export default function CardProgram({
   program,
   handleDeleteProgram,
-}: {
-  program: ProgramType;
-  handleDeleteProgram: () => void;
-}) {
+  onStatusChange,
+}: ProgramProps) {
   const router = useRouter();
 
   return (
@@ -31,7 +51,7 @@ export default function CardProgram({
             {program.title}
           </Link>
 
-          <div className="grid grid-cols-[repeat(2,160px),max-content] items-start">
+          <div className="grid grid-cols-[repeat(3,120px),max-content] items-start gap-2">
             <div className="grid gap-1">
               <span className="text-[12px] font-medium text-gray">
                 Harga Program:
@@ -69,6 +89,30 @@ export default function CardProgram({
 
             <div className="grid gap-1">
               <span className="text-[12px] font-medium text-gray">
+                Status Program:
+              </span>
+              <Chip
+                variant="flat"
+                color={program.is_active ? "success" : "danger"}
+                size="sm"
+                startContent={
+                  program.is_active ? (
+                    <CheckCircle weight="fill" size={16} />
+                  ) : (
+                    <XCircle weight="fill" size={16} />
+                  )
+                }
+                classNames={{
+                  base: "px-2 gap-1",
+                  content: "font-semibold",
+                }}
+              >
+                {program.is_active ? "Aktif" : "Tidak Aktif"}
+              </Chip>
+            </div>
+
+            <div className="grid gap-1">
+              <span className="text-[12px] font-medium text-gray">
                 Dibuat Pada:
               </span>
               <h5 className="text-sm font-semibold text-black">
@@ -96,6 +140,37 @@ export default function CardProgram({
           title={program.title}
           handleDelete={handleDeleteProgram}
         />
+
+        <Dropdown>
+          <DropdownTrigger>
+            <Button isIconOnly variant="light" size="sm">
+              <DotsThreeOutlineVertical
+                weight="fill"
+                size={18}
+                className="text-black"
+              />
+            </Button>
+          </DropdownTrigger>
+
+          <DropdownMenu
+            aria-label="Actions"
+            itemClasses={{
+              base: "font-semibold",
+            }}
+          >
+            <DropdownSection aria-label="action zone" title="Anda Yakin?">
+              <DropdownItem
+                startContent={<Power weight="bold" size={18} />}
+                onClick={onStatusChange}
+                className="text-black"
+              >
+                {program.is_active
+                  ? "Non-aktifkan Program"
+                  : "Aktifkan Programs"}
+              </DropdownItem>
+            </DropdownSection>
+          </DropdownMenu>
+        </Dropdown>
       </div>
     </div>
   );

@@ -14,11 +14,33 @@ import { useRouter } from "next/router";
 export default function ProgramsPage({
   programs,
   error,
+  token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
 
   function handleDeleteProgram(id: string) {
     console.log(`Program dengan ID: ${id} berhasil terhapus!`);
+  }
+
+  async function handleUpdateStatus(
+    program_id: string,
+    is_active: boolean = true,
+  ) {
+    try {
+      await fetcher({
+        url: "/admin/programs/status",
+        method: "PATCH",
+        token,
+        data: {
+          program_id: program_id,
+          is_active: !is_active,
+        },
+      });
+
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   if (error) {
@@ -97,6 +119,9 @@ export default function ProgramsPage({
                   handleDeleteProgram={() =>
                     handleDeleteProgram(program.program_id)
                   }
+                  onStatusChange={() =>
+                    handleUpdateStatus(program.program_id, program.is_active)
+                  }
                 />
               ))}
             </div>
@@ -110,6 +135,7 @@ export default function ProgramsPage({
 type DataProps = {
   programs?: any;
   error?: ErrorDataType;
+  token?: string;
 };
 
 export const getServerSideProps: GetServerSideProps<DataProps> = async ({
@@ -127,6 +153,7 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
     return {
       props: {
         programs: response.data,
+        token,
       },
     };
   } catch (error: any) {
