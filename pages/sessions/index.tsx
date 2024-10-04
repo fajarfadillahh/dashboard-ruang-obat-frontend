@@ -1,6 +1,8 @@
+import ErrorPage from "@/components/ErrorPage";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { SessionType } from "@/types/session.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
@@ -17,6 +19,7 @@ import Link from "next/link";
 
 export default function SessionPage({
   sessions,
+  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const columnsSession = [
     { name: "ID Pengguna", uid: "user_id" },
@@ -78,6 +81,22 @@ export default function SessionPage({
     console.log(`Session pengguna dengan ID: ${id} berhasil terhapus!`);
   }
 
+  if (error) {
+    return (
+      <Layout title="Daftar Aktifitas Login Pengguna">
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
+  }
+
   return (
     <Layout title="Daftar Aktifitas Login Pengguna">
       <Container>
@@ -113,7 +132,13 @@ export default function SessionPage({
                 )}
               </TableHeader>
 
-              <TableBody>
+              <TableBody
+                emptyContent={
+                  <span className="text-sm font-semibold italic text-gray">
+                    Aktifitas pengguna tidak ditemukan!
+                  </span>
+                }
+              >
                 {sessions.map((item: SessionType) => (
                   <TableRow key={item.user_id}>
                     {(columnKey) => (
@@ -132,22 +157,33 @@ export default function SessionPage({
   );
 }
 
-export const getServerSideProps = (async ({ req }) => {
+type DataProps = {
+  sessions?: any;
+  error?: ErrorDataType;
+};
+
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+  req,
+}) => {
   const token = req.headers["access_token"] as string;
 
-  const response = await fetcher({
-    url: "/admin/sessions",
-    method: "GET",
-    token,
-  });
+  try {
+    const response = (await fetcher({
+      url: "/admin/sessions",
+      method: "GET",
+      token,
+    })) as SuccessResponse<SessionType[]>;
 
-  if (!response.data) {
-    throw new Error("Data not found!");
+    return {
+      props: {
+        sessions: response.data,
+      },
+    };
+  } catch (error: any) {
+    return {
+      props: {
+        error,
+      },
+    };
   }
-
-  return {
-    props: {
-      sessions: response.data,
-    },
-  };
-}) satisfies GetServerSideProps<{ sessions: SessionType }>;
+};

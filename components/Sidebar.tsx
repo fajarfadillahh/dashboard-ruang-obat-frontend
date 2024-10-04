@@ -50,7 +50,7 @@ export default function Sidebar() {
 
           <ButtonSidebar
             label="Session"
-            path="/session"
+            path="/sessions"
             icon={<ClockClockwise weight="bold" size={18} />}
           />
 
