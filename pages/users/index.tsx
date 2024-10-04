@@ -1,7 +1,9 @@
+import ErrorPage from "@/components/ErrorPage";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { User } from "@/types/user.type";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { UserType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import {
@@ -21,6 +23,7 @@ import { useRouter } from "next/router";
 
 export default function UsersPage({
   users,
+  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
 
@@ -31,8 +34,8 @@ export default function UsersPage({
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellUsers(user: User, columnKey: React.Key) {
-    const cellValue = user[columnKey as keyof User];
+  function renderCellUsers(user: UserType, columnKey: React.Key) {
+    const cellValue = user[columnKey as keyof UserType];
 
     switch (columnKey) {
       case "user_id":
@@ -80,6 +83,22 @@ export default function UsersPage({
 
   function handleDeleteUser(id: string) {
     console.log(`Pengguna dengan ID: ${id} berhasil terhapus!`);
+  }
+
+  if (error) {
+    return (
+      <Layout title="Daftar Pengguna">
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
   }
 
   return (
@@ -144,7 +163,7 @@ export default function UsersPage({
                     </span>
                   }
                 >
-                  {users.users.map((item: User) => (
+                  {users.users.map((item: UserType) => (
                     <TableRow key={item.user_id}>
                       {(columnKey) => (
                         <TableCell>
@@ -163,22 +182,33 @@ export default function UsersPage({
   );
 }
 
-export const getServerSideProps = (async ({ req }) => {
+type DataProps = {
+  users?: any;
+  error?: ErrorDataType;
+};
+
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+  req,
+}) => {
   const token = req.headers["access_token"] as string;
 
-  const response = await fetcher({
-    url: "/admin/users",
-    method: "GET",
-    token,
-  });
+  try {
+    const response = (await fetcher({
+      url: "/admin/users",
+      method: "GET",
+      token,
+    })) as SuccessResponse<UserType[]>;
 
-  if (!response.data) {
-    throw new Error("Data not found");
+    return {
+      props: {
+        users: response.data,
+      },
+    };
+  } catch (error: any) {
+    return {
+      props: {
+        error,
+      },
+    };
   }
-
-  return {
-    props: {
-      users: response.data,
-    },
-  };
-}) satisfies GetServerSideProps<{ users: User }>;
+};
