@@ -1,7 +1,7 @@
 import ErrorPage from "@/components/ErrorPage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { SuccessResponse } from "@/types/global.type";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
 import { formatDayWithoutTime } from "@/utils/formatDate";
 import { Button } from "@nextui-org/react";
@@ -212,21 +212,7 @@ export default function DashboardPage({
 
 type DataProps = {
   dashboard?: DashboardType;
-  error?: ErrorType;
-};
-
-type ErrorType = {
-  success: boolean;
-  status_code: number;
-  error: {
-    name: string;
-    message: string;
-    errors?: {
-      code: string;
-      meta: string;
-      stack: string;
-    };
-  };
+  error?: ErrorDataType;
 };
 
 export const getServerSideProps: GetServerSideProps<DataProps> = async ({
