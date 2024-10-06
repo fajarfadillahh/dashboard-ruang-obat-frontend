@@ -6,10 +6,14 @@ import {
   House,
   ListChecks,
   User,
+  Users,
 } from "@phosphor-icons/react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 
 export default function Sidebar() {
+  const session = useSession();
+
   return (
     <div className="static left-0 top-0 z-50 grid h-screen min-w-[250px] grid-rows-[24px_1fr] gap-[30px] border-r border-gray/10 bg-gray/5 px-[20px] py-[30px] shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
       <Link
@@ -54,11 +58,13 @@ export default function Sidebar() {
             icon={<ClockClockwise weight="bold" size={18} />}
           />
 
-          {/* <ButtonSidebar
-            label="Admin"
-            path="/admins"
-            icon={<Users weight="bold" size={18} />}
-          /> */}
+          {session.data?.user.admin_id.startsWith("ROSA") ? (
+            <ButtonSidebar
+              label="Admin"
+              path="/admins"
+              icon={<Users weight="bold" size={18} />}
+            />
+          ) : null}
         </div>
       </div>
     </div>
