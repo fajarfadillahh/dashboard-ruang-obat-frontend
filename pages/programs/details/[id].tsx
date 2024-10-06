@@ -1,4 +1,4 @@
-import { participants } from "@/_dummy/users";
+// import { participants } from "@/_dummy/users";
 import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
 import ErrorPage from "@/components/ErrorPage";
@@ -11,6 +11,7 @@ import { TestType } from "@/types/test.type";
 import { ParticipantType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
+import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import {
   Chip,
@@ -40,9 +41,9 @@ export default function DetailsProgramPage({
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const columnsParticipant = [
-    { name: "ID Pengguna", uid: "id" },
-    { name: "Nama Lengkap", uid: "name" },
-    { name: "Kode Akses", uid: "code_access" },
+    { name: "ID Partisipan", uid: "user_id" },
+    { name: "Nama Lengkap", uid: "fullname" },
+    { name: "Kode Akses", uid: "code" },
     { name: "Asal Kampus", uid: "university" },
     { name: "Status", uid: "joined_status" },
     { name: "Bergabung Pada", uid: "joined_at" },
@@ -56,19 +57,19 @@ export default function DetailsProgramPage({
     const cellValue = participant[columnKey as keyof ParticipantType];
 
     switch (columnKey) {
-      case "id":
+      case "user_id":
         return (
           <div className="w-max font-medium text-black">
-            {participant.id_pengguna}
+            {participant.user_id}
           </div>
         );
-      case "name":
+      case "fullname":
         return (
           <div className="w-max font-medium text-black">
-            {participant.nama_lengkap}
+            {participant.fullname}
           </div>
         );
-      case "code_access":
+      case "code":
         return (
           <Snippet
             symbol=""
@@ -84,13 +85,13 @@ export default function DetailsProgramPage({
               pre: "font-medium text-black font-sans text-[14px]",
             }}
           >
-            {participant.kode_akses}
+            {participant.code ?? "-"}
           </Snippet>
         );
       case "university":
         return (
           <div className="w-max font-medium text-black">
-            {participant.asal_kampus}
+            {participant.university}
           </div>
         );
       case "joined_status":
@@ -99,13 +100,9 @@ export default function DetailsProgramPage({
             <Chip
               variant="flat"
               size="sm"
-              color={
-                participant.status_bergabung === "mengikuti"
-                  ? "success"
-                  : "danger"
-              }
+              color={participant.joined_at ? "success" : "danger"}
               startContent={
-                participant.status_bergabung === "mengikuti" ? (
+                participant.joined_at ? (
                   <CheckCircle
                     weight="fill"
                     size={16}
@@ -120,23 +117,23 @@ export default function DetailsProgramPage({
                 content: "font-semibold capitalize",
               }}
             >
-              {participant.status_bergabung}
+              {participant.joined_at ? "Mengikuti" : "Belum Mengikuti"}
             </Chip>
           </div>
         );
       case "joined_at":
         return (
           <div className="w-max font-medium text-black">
-            {participant.bergabung_pada}
+            {formatDate(participant.joined_at)}
           </div>
         );
       case "action":
         return (
           <div className="grid w-[60px]">
             <ModalConfirmDelete
-              id={participant.id_pengguna}
+              id={participant.user_id}
               header="Partisipan"
-              title={participant.nama_lengkap}
+              title={participant.fullname}
               handleDelete={handleDeleteParticipant}
             />
           </div>
@@ -256,9 +253,16 @@ export default function DetailsProgramPage({
                     )}
                   </TableHeader>
 
-                  <TableBody items={participants}>
-                    {(item) => (
-                      <TableRow key={item.id_pengguna}>
+                  <TableBody
+                    items={programs.participants}
+                    emptyContent={
+                      <span className="text-sm font-semibold italic text-gray">
+                        Partisipan tidak ditemukan!
+                      </span>
+                    }
+                  >
+                    {(item: ParticipantType) => (
+                      <TableRow key={item.user_id}>
                         {(columnKey) => (
                           <TableCell>
                             {renderCellParticipants(item, columnKey)}
