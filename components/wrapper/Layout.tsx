@@ -23,7 +23,9 @@ export default function Layout({ title, children }: LayoutProps) {
           <Navbar />
 
           <div className="overflow-y-scroll scrollbar-hide">
-            <div className="mx-auto w-full max-w-[1200px] p-6">{children}</div>
+            <div className="mx-auto w-full max-w-[1200px] p-[1.5rem_1.5rem_6rem]">
+              {children}
+            </div>
 
             <Footer />
           </div>

@@ -1,4 +1,4 @@
-import { users } from "@/_dummy/users";
+import { UserType } from "@/types/user.type";
 import {
   Autocomplete,
   AutocompleteItem,
@@ -12,7 +12,11 @@ import {
 } from "@nextui-org/react";
 import { ArrowRight, Plus, UserCircle } from "@phosphor-icons/react";
 
-export default function ModalAddParticipant() {
+type UserProps = {
+  users: any;
+};
+
+export default function ModalAddParticipant({ users }: UserProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
@@ -51,7 +55,7 @@ export default function ModalAddParticipant() {
                     variant="flat"
                     labelPlacement="outside"
                     placeholder="Cari Pengguna Berdasarkan ID..."
-                    defaultItems={users}
+                    defaultItems={users.users}
                     inputProps={{
                       classNames: {
                         input:
@@ -62,10 +66,10 @@ export default function ModalAddParticipant() {
                       emptyContent: "ID pengguna tidak ditemukan!",
                     }}
                   >
-                    {(user) => (
+                    {(user: UserType) => (
                       <AutocompleteItem
-                        key={user.id_pengguna}
-                        textValue={user.id_pengguna}
+                        key={user.user_id}
+                        textValue={user.user_id}
                       >
                         <div className="flex items-center gap-3">
                           <UserCircle
@@ -76,10 +80,10 @@ export default function ModalAddParticipant() {
 
                           <div className="flex flex-col">
                             <h5 className="text-sm font-bold text-black">
-                              {user.nama_lengkap}
+                              {user.fullname}
                             </h5>
                             <span className="text-[12px] font-medium text-gray">
-                              {user.id_pengguna}
+                              {user.user_id}
                             </span>
                           </div>
                         </div>

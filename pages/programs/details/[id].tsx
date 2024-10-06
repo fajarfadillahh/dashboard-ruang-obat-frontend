@@ -1,4 +1,3 @@
-// import { participants } from "@/_dummy/users";
 import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
 import ErrorPage from "@/components/ErrorPage";
@@ -38,6 +37,7 @@ import React from "react";
 
 export default function DetailsProgramPage({
   programs,
+  users,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const columnsParticipant = [
@@ -235,7 +235,7 @@ export default function DetailsProgramPage({
                   Daftar Partisipan 🧑🏻‍🤝‍🧑🏻
                 </h4>
 
-                <ModalAddParticipant />
+                <ModalAddParticipant users={users} />
               </div>
 
               <div className="overflow-x-scroll">
@@ -283,6 +283,7 @@ export default function DetailsProgramPage({
 
 type DataProps = {
   programs?: any;
+  users?: any;
   error?: ErrorDataType;
 };
 
@@ -293,15 +294,23 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   const token = req.headers["access_token"] as string;
 
   try {
-    const response = await fetcher({
-      url: `/admin/programs/${encodeURIComponent(params?.id as string)}`,
-      method: "GET",
-      token,
-    });
+    const [responsePrograms, responseUsers] = await Promise.all([
+      fetcher({
+        url: `/admin/programs/${encodeURIComponent(params?.id as string)}`,
+        method: "GET",
+        token,
+      }),
+      fetcher({
+        url: `/admin/users`,
+        method: "GET",
+        token,
+      }),
+    ]);
 
     return {
       props: {
-        programs: response.data,
+        programs: responsePrograms.data,
+        users: responseUsers.data,
       },
     };
   } catch (error: any) {
