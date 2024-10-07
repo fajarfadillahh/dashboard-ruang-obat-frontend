@@ -112,7 +112,7 @@ export default function ProgramsPage({
             </div>
 
             <div className="grid gap-2">
-              {programs?.programs.map((program: ProgramType) => (
+              {programs?.map((program: ProgramType) => (
                 <CardProgram
                   key={program.program_id}
                   program={program}
@@ -133,7 +133,7 @@ export default function ProgramsPage({
 }
 
 type DataProps = {
-  programs?: any;
+  programs?: ProgramType[];
   error?: ErrorDataType;
   token?: string;
 };
@@ -148,11 +148,11 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
       url: "/admin/programs",
       method: "GET",
       token,
-    })) as SuccessResponse<ProgramType[]>;
+    })) as SuccessResponse<{ programs: ProgramType[] }>;
 
     return {
       props: {
-        programs: response.data,
+        programs: response.data.programs,
         token,
       },
     };
