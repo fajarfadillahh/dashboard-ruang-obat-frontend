@@ -5,9 +5,9 @@ import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType } from "@/types/global.type";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
-import { ParticipantType } from "@/types/user.type";
+import { ParticipantType, UserType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
@@ -35,8 +35,26 @@ import {
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import React from "react";
 
+type DetailsProgramType = {
+  program_id: string;
+  title: string;
+  type: string;
+  price: number | any;
+  is_active: boolean;
+  total_tests: number;
+  total_users: number;
+  tests: TestType[];
+  participants: ParticipantType[];
+};
+
+type UsersType = {
+  users: UserType[];
+  total_users: number;
+  total_pages: number;
+};
+
 export default function DetailsProgramPage({
-  programs,
+  program,
   users,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -124,7 +142,9 @@ export default function DetailsProgramPage({
       case "joined_at":
         return (
           <div className="w-max font-medium text-black">
-            {formatDate(participant.joined_at)}
+            {participant.joined_at === null
+              ? "-"
+              : formatDate(participant.joined_at)}
           </div>
         );
       case "action":
@@ -150,7 +170,7 @@ export default function DetailsProgramPage({
 
   if (error) {
     return (
-      <Layout title={`${programs.title}`}>
+      <Layout title={`${program?.title}`}>
         <Container>
           <ErrorPage
             {...{
@@ -165,7 +185,7 @@ export default function DetailsProgramPage({
   }
 
   return (
-    <Layout title={`${programs.title}`}>
+    <Layout title={`${program?.title}`}>
       <Container>
         <section className="grid gap-8">
           <ButtonBack />
@@ -176,11 +196,11 @@ export default function DetailsProgramPage({
 
               <div className="grid gap-4">
                 <h4 className="max-w-[700px] text-[28px] font-bold leading-[120%] -tracking-wide text-black">
-                  {programs.title}
+                  {program?.title}
                 </h4>
 
                 <div className="flex items-center gap-12">
-                  {programs.type === "free" ? (
+                  {program?.type === "free" ? (
                     <Chip
                       variant="flat"
                       color="default"
@@ -196,23 +216,43 @@ export default function DetailsProgramPage({
                     </Chip>
                   ) : (
                     <h5 className="font-extrabold text-purple">
-                      {formatRupiah(programs.price)}
+                      {formatRupiah(program?.price)}
                     </h5>
                   )}
 
                   <div className="inline-flex items-center gap-1 text-gray">
                     <Certificate weight="bold" size={18} />
                     <p className="text-sm font-bold">
-                      ID: {programs.program_id}
+                      ID: {program?.program_id}
                     </p>
                   </div>
 
                   <div className="inline-flex items-center gap-1 text-gray">
                     <Notepad weight="bold" size={18} />
                     <p className="text-sm font-bold">
-                      {programs.total_tests} Modul Ujian
+                      {program?.total_tests} Modul Ujian
                     </p>
                   </div>
+
+                  <Chip
+                    variant="flat"
+                    color={program?.is_active ? "success" : "danger"}
+                    startContent={
+                      program?.is_active ? (
+                        <CheckCircle weight="fill" size={16} />
+                      ) : (
+                        <XCircle weight="fill" size={16} />
+                      )
+                    }
+                    classNames={{
+                      base: "px-2 gap-1",
+                      content: "font-bold",
+                    }}
+                  >
+                    {program?.is_active
+                      ? "Program Aktif"
+                      : "Program Tidak Aktif"}
+                  </Chip>
                 </div>
               </div>
             </div>
@@ -223,7 +263,7 @@ export default function DetailsProgramPage({
               </h4>
 
               <div className="grid gap-2">
-                {programs.tests.map((test: TestType) => (
+                {program?.tests.map((test: TestType) => (
                   <CardTest key={test.test_id} test={test} />
                 ))}
               </div>
@@ -254,7 +294,7 @@ export default function DetailsProgramPage({
                   </TableHeader>
 
                   <TableBody
-                    items={programs.participants}
+                    items={program?.participants}
                     emptyContent={
                       <span className="text-sm font-semibold italic text-gray">
                         Partisipan tidak ditemukan!
@@ -282,8 +322,8 @@ export default function DetailsProgramPage({
 }
 
 type DataProps = {
-  programs?: any;
-  users?: any;
+  program?: DetailsProgramType;
+  users?: UsersType;
   error?: ErrorDataType;
 };
 
@@ -294,22 +334,23 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   const token = req.headers["access_token"] as string;
 
   try {
-    const [responsePrograms, responseUsers] = await Promise.all([
+    const [responseProgram, responseUsers] = await Promise.all([
       fetcher({
         url: `/admin/programs/${encodeURIComponent(params?.id as string)}`,
         method: "GET",
         token,
-      }),
+      }) as Promise<SuccessResponse<DetailsProgramType>>,
+
       fetcher({
-        url: `/admin/users`,
+        url: "/admin/users",
         method: "GET",
         token,
-      }),
+      }) as Promise<SuccessResponse<UsersType>>,
     ]);
 
     return {
       props: {
-        programs: responsePrograms.data,
+        program: responseProgram.data,
         users: responseUsers.data,
       },
     };

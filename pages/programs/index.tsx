@@ -11,16 +11,18 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+export type ProgramsType = {
+  programs: ProgramType[];
+  total_programs: number;
+  total_pages: number;
+};
+
 export default function ProgramsPage({
   programs,
   error,
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-
-  function handleDeleteProgram(id: string) {
-    console.log(`Program dengan ID: ${id} berhasil terhapus!`);
-  }
 
   async function handleUpdateStatus(
     program_id: string,
@@ -41,6 +43,10 @@ export default function ProgramsPage({
     } catch (error) {
       console.error(error);
     }
+  }
+
+  function handleDeleteProgram(id: string) {
+    console.log(`Program dengan ID: ${id} berhasil terhapus!`);
   }
 
   if (error) {
@@ -112,7 +118,7 @@ export default function ProgramsPage({
             </div>
 
             <div className="grid gap-2">
-              {programs?.map((program: ProgramType) => (
+              {programs?.programs.map((program: ProgramType) => (
                 <CardProgram
                   key={program.program_id}
                   program={program}
@@ -133,7 +139,7 @@ export default function ProgramsPage({
 }
 
 type DataProps = {
-  programs?: ProgramType[];
+  programs?: ProgramsType;
   error?: ErrorDataType;
   token?: string;
 };
@@ -148,11 +154,11 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
       url: "/admin/programs",
       method: "GET",
       token,
-    })) as SuccessResponse<{ programs: ProgramType[] }>;
+    })) as SuccessResponse<ProgramsType>;
 
     return {
       props: {
-        programs: response.data.programs,
+        programs: response.data,
         token,
       },
     };
