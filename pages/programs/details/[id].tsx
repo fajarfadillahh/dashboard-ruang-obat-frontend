@@ -56,6 +56,7 @@ type UsersType = {
 export default function DetailsProgramPage({
   program,
   users,
+  token,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const columnsParticipant = [
@@ -154,7 +155,12 @@ export default function DetailsProgramPage({
               id={participant.user_id}
               header="Partisipan"
               title={participant.fullname}
-              handleDelete={handleDeleteParticipant}
+              handleDelete={() =>
+                handleDeleteParticipant(
+                  program?.program_id,
+                  participant.user_id,
+                )
+              }
             />
           </div>
         );
@@ -164,8 +170,21 @@ export default function DetailsProgramPage({
     }
   }
 
-  function handleDeleteParticipant(id: string) {
-    console.log(`Partisipan dengan ID: ${id} berhasil terhapus!`);
+  async function handleDeleteParticipant(
+    program_id: string | undefined,
+    user_id: string,
+  ) {
+    try {
+      await fetcher({
+        url: `/admin/programs/unfollow/${program_id}/${user_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   if (error) {
@@ -324,6 +343,7 @@ export default function DetailsProgramPage({
 type DataProps = {
   program?: DetailsProgramType;
   users?: UsersType;
+  token?: string;
   error?: ErrorDataType;
 };
 
@@ -352,6 +372,7 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
       props: {
         program: responseProgram.data,
         users: responseUsers.data,
+        token,
       },
     };
   } catch (error: any) {

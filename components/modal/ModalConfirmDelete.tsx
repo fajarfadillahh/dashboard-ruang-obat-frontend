@@ -9,17 +9,19 @@ import {
 } from "@nextui-org/react";
 import { Trash } from "@phosphor-icons/react";
 
+type ModalProps = {
+  id: string;
+  header: string;
+  title: string;
+  handleDelete: () => void;
+};
+
 export default function ModalConfirmDelete({
   id,
   header,
   title,
   handleDelete,
-}: {
-  id: string;
-  header: string;
-  title: string;
-  handleDelete: (id: string) => void;
-}) {
+}: ModalProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   return (
@@ -71,7 +73,7 @@ export default function ModalConfirmDelete({
                 <Button
                   color="danger"
                   onPress={() => {
-                    handleDelete(id);
+                    handleDelete();
                     onClose();
                   }}
                   className="font-bold"
