@@ -13,7 +13,9 @@ import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import {
+  Button,
   Chip,
+  Selection,
   Snippet,
   Table,
   TableBody,
@@ -29,11 +31,13 @@ import {
   CheckCircle,
   Copy,
   Notepad,
+  Plus,
   Tag,
   XCircle,
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import React from "react";
+import { useSession } from "next-auth/react";
+import React, { useState } from "react";
 
 type DetailsProgramType = {
   program_id: string;
@@ -59,6 +63,10 @@ export default function DetailsProgramPage({
   token,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const session = useSession();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<Selection>(new Set([]));
+
   const columnsParticipant = [
     { name: "ID Partisipan", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
@@ -167,6 +175,25 @@ export default function DetailsProgramPage({
 
       default:
         return cellValue;
+    }
+  }
+
+  async function handleInviteParticipant() {
+    try {
+      await fetcher({
+        url: "/admin/programs/invite",
+        method: "POST",
+        token,
+        data: {
+          program_id: program?.program_id,
+          by: session.data?.user.fullname,
+          users: Array.from(selectedUser),
+        },
+      });
+
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -294,7 +321,24 @@ export default function DetailsProgramPage({
                   Daftar Partisipan 🧑🏻‍🤝‍🧑🏻
                 </h4>
 
-                <ModalAddParticipant users={users} />
+                <Button
+                  variant="solid"
+                  color="secondary"
+                  startContent={<Plus weight="bold" size={18} />}
+                  onPress={() => setIsModalOpen(true)}
+                  className="w-max font-bold"
+                >
+                  Tambah Partisipan
+                </Button>
+
+                <ModalAddParticipant
+                  users={users}
+                  isOpen={isModalOpen}
+                  value={selectedUser}
+                  setValue={setSelectedUser}
+                  handleInviteParticipant={handleInviteParticipant}
+                  onClose={() => setIsModalOpen(false)}
+                />
               </div>
 
               <div className="overflow-x-scroll">
