@@ -21,6 +21,12 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+type UsersType = {
+  users: UserType[];
+  total_users: number;
+  total_pages: number;
+};
+
 export default function UsersPage({
   users,
   error,
@@ -157,13 +163,14 @@ export default function UsersPage({
                 </TableHeader>
 
                 <TableBody
+                  items={users?.users}
                   emptyContent={
                     <span className="text-sm font-semibold italic text-gray">
                       Pengguna tidak ditemukan!
                     </span>
                   }
                 >
-                  {users.users.map((item: UserType) => (
+                  {(item: UserType) => (
                     <TableRow key={item.user_id}>
                       {(columnKey) => (
                         <TableCell>
@@ -171,7 +178,7 @@ export default function UsersPage({
                         </TableCell>
                       )}
                     </TableRow>
-                  ))}
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -183,7 +190,7 @@ export default function UsersPage({
 }
 
 type DataProps = {
-  users?: any;
+  users?: UsersType;
   error?: ErrorDataType;
 };
 
@@ -197,7 +204,7 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
       url: "/admin/users",
       method: "GET",
       token,
-    })) as SuccessResponse<UserType[]>;
+    })) as SuccessResponse<UsersType>;
 
     return {
       props: {
