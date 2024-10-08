@@ -51,7 +51,7 @@ export default function ProgramsPage({
 
   if (error) {
     return (
-      <Layout title="Daftar Programs">
+      <Layout title="Daftar Program">
         <Container>
           <ErrorPage
             {...{
