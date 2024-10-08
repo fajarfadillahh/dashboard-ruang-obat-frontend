@@ -43,7 +43,7 @@ type DetailsProgramType = {
   program_id: string;
   title: string;
   type: string;
-  price: number | any;
+  price: number;
   is_active: boolean;
   total_tests: number;
   total_users: number;
@@ -260,11 +260,11 @@ export default function DetailsProgramPage({
                     >
                       Gratis
                     </Chip>
-                  ) : (
+                  ) : program?.price ? (
                     <h5 className="font-extrabold text-purple">
                       {formatRupiah(program?.price)}
                     </h5>
-                  )}
+                  ) : null}
 
                   <div className="inline-flex items-center gap-1 text-gray">
                     <Certificate weight="bold" size={18} />

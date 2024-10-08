@@ -1,25 +1,45 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ErrorPage from "@/components/ErrorPage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import Image from "next/image";
+import { LogoRuangobat } from "@/public/img/LogoRuangobat";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { fetcher } from "@/utils/fetcher";
+import { formatDate } from "@/utils/formatDate";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
-type UserType = {
-  id: string | number;
-  name: string;
+type DetailsUserType = {
+  user_id: string;
+  fullname: string;
   email: string;
-  no_telp: number;
+  phone_number: string;
+  gender: string;
   university: string;
+  created_at: string;
 };
 
-const user: UserType = {
-  id: "ROUFFA152683",
-  name: "Fajar Fadillah Agustian",
-  email: "fajar.fadillah@mail.com",
-  no_telp: 62812345678987,
-  university: "Universitas Indonesia",
-};
+export default function DetailsUserPage({
+  user,
+  error,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  console.log(user);
 
-export default function DetailsUserPage() {
+  if (error) {
+    return (
+      <Layout title="Detail Pengguna">
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
+  }
+
   return (
     <Layout title="Detail Pengguna">
       <Container>
@@ -36,36 +56,66 @@ export default function DetailsUserPage() {
           </div>
 
           <div className="grid grid-cols-2 items-center gap-16">
-            <div className="grid gap-2 rounded-xl border-2 border-l-8 border-gray/20 p-8">
+            <div className="grid gap-[6px] rounded-xl border-2 border-l-8 border-gray/20 p-8">
               {[
-                ["ID Pengguna", `${user.id}`],
-                ["Nama Lengkap", `${user.name}`],
-                ["Email", `${user.email}`],
-                ["No. Telpon", `${user.no_telp}`],
-                ["Asal Kampus", `${user.university}`],
+                ["ID Pengguna", `${user?.user_id}`],
+                ["Nama Lengkap", `${user?.fullname}`],
+                ["Email", `${user?.email}`],
+                [
+                  "Jenis Kelamin",
+                  `${user?.gender === "M" ? "Laki-Laki" : "Perempuan"}`,
+                ],
+                ["No. Telpon", `${user?.phone_number}`],
+                ["Asal Kampus", `${user?.university}`],
+                ["Dibuat Pada", `${formatDate(user?.created_at ?? "-")}`],
               ].map(([label, value], index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-[150px_2px_1fr] gap-4 font-medium text-black"
+                  className="grid grid-cols-[150px_2px_1fr] gap-4 text-sm font-medium text-black"
                 >
                   <p>{label}</p>
                   <span>:</span>
-                  <p className="font-extrabold text-purple">{value}</p>
+                  <p className="font-bold">{value}</p>
                 </div>
               ))}
             </div>
 
-            <Image
-              priority
-              src="/img/detail-user-img.svg"
-              alt="detail user image"
-              width={1000}
-              height={500}
-              className="h-auto w-[250px]"
-            />
+            <LogoRuangobat className="h-[200px] w-auto justify-self-center text-gray/20 grayscale" />
           </div>
         </section>
       </Container>
     </Layout>
   );
 }
+
+type DataProps = {
+  user?: DetailsUserType;
+  error?: ErrorDataType;
+};
+
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+  req,
+  params,
+}) => {
+  const token = req.headers["access_token"] as string;
+
+  try {
+    const response = (await fetcher({
+      url: `/admin/users/${encodeURIComponent(params?.id as string)}`,
+      method: "GET",
+      token,
+    })) as SuccessResponse<DetailsUserType>;
+
+    return {
+      props: {
+        user: response.data,
+      },
+    };
+  } catch (error: any) {
+    return {
+      props: {
+        error,
+      },
+    };
+  }
+};
