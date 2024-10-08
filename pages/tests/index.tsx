@@ -1,7 +1,8 @@
 import CardTest from "@/components/card/CardTest";
+import ErrorPage from "@/components/ErrorPage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { SuccessResponse } from "@/types/global.type";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
 import { fetcher } from "@/utils/fetcher";
 import { Button, Input } from "@nextui-org/react";
@@ -9,13 +10,37 @@ import { MagnifyingGlass, Plus } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 
+type TestsType = {
+  tests: TestType[];
+  page: any;
+  total_tests: number;
+  total_pages: number;
+};
+
 export default function TestsPage({
   tests,
+  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
 
   function handleDeleteTest(id: string) {
     console.log(`Ujian dengan ID: ${id} berhasil terhapus!`);
+  }
+
+  if (error) {
+    return (
+      <Layout title="Daftar Ujian">
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
   }
 
   return (
@@ -64,7 +89,7 @@ export default function TestsPage({
             </div>
 
             <div className="grid gap-2">
-              {tests?.map((test: TestType) => (
+              {tests?.tests.map((test: TestType) => (
                 <CardTest
                   key={test.test_id}
                   test={test}
@@ -79,17 +104,22 @@ export default function TestsPage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps<{
-  tests?: TestType[];
-}> = async ({ req }) => {
+type DataProps = {
+  tests?: TestsType;
+  error?: ErrorDataType;
+};
+
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+  req,
+}) => {
   const token = req.headers["access_token"] as string;
 
   try {
     const response = (await fetcher({
-      url: "/admin/tests?page=all",
+      url: "/admin/tests",
       method: "GET",
       token,
-    })) as SuccessResponse<TestType[]>;
+    })) as SuccessResponse<TestsType>;
 
     return {
       props: {
