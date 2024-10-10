@@ -1,22 +1,95 @@
-import { tests } from "@/_dummy/tests";
 import ButtonBack from "@/components/button/ButtonBack";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { TestType } from "@/types/test.type";
+import { ParticipantType } from "@/types/user.type";
+import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import {
   Button,
+  getKeyValue,
   Input,
   Radio,
   RadioGroup,
-  Select,
   Selection,
-  SelectItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
 } from "@nextui-org/react";
-import { FloppyDisk } from "@phosphor-icons/react";
+import { FloppyDisk, MagnifyingGlass } from "@phosphor-icons/react";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
-export default function EditProgramPage() {
-  const [selected, setSelected] = useState<string>("");
-  const [values, setValues] = useState<Selection>(new Set([]));
+type DetailsProgramType = {
+  program_id: string;
+  title: string;
+  type: string;
+  price: number;
+  is_active: boolean;
+  total_tests: number;
+  total_users: number;
+  tests: TestType[];
+  participants: ParticipantType[];
+};
+
+export default function EditProgramPage({
+  program,
+  allTest,
+  token,
+  error,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const session = useSession();
+  const [input, setInput] = useState<{
+    title: string;
+    price: number;
+  }>({
+    title: program?.title || "",
+    price: program?.price || 0,
+  });
+  const [selectedType, setSelectedType] = useState<string>(program?.type || "");
+  const [loading, setLoading] = useState(false);
+
+  const testId = program?.tests.map((test) => test.test_id);
+  const [value, setValue] = useState<Selection>(new Set(testId));
+
+  const columnsTest = [
+    { name: "ID Ujian", uid: "test_id" },
+    { name: "Judul Ujian", uid: "title" },
+  ];
+
+  async function handleEditProgram() {
+    setLoading(true);
+
+    try {
+      const data = {
+        program_id: program?.program_id,
+        title: input.title,
+        type: selectedType,
+        ...(selectedType === "paid" && { price: input.price }),
+        tests: Array.from(value),
+        by: session.data?.user.fullname,
+      };
+
+      await fetcher({
+        url: "/admin/programs",
+        method: "PATCH",
+        token,
+        data: data,
+      });
+
+      window.location.href = "/programs";
+    } catch (error) {
+      setLoading(false);
+      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
+      console.error(error);
+    }
+  }
 
   return (
     <Layout title="Edit Program">
@@ -24,117 +97,196 @@ export default function EditProgramPage() {
         <section className="grid">
           <ButtonBack />
 
-          <div className="border-gray/200 grid gap-1 border-b-2 border-dashed py-8">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Edit Program ✏️
-            </h1>
-            <p className="font-medium text-gray">
-              Buatlah program yang menarik untuk para mahasiswa.
-            </p>
-          </div>
+          <div className="divide-gray/200 mt-8 divide-y-2 divide-dashed">
+            <div className="grid gap-1 pb-8">
+              <h1 className="text-[22px] font-bold -tracking-wide text-black">
+                Edit Program ✏️
+              </h1>
+              <p className="font-medium text-gray">
+                Anda bebas menyesuaikan program agar lebih menarik
+              </p>
+            </div>
 
-          <div className="grid gap-6 py-8">
-            <Input
-              isRequired
-              type="text"
-              variant="flat"
-              label="Judul Program"
-              labelPlacement="outside"
-              placeholder="Contoh: Kelas Ruangobat Tatap Muka"
-              classNames={{
-                input:
-                  "font-semibold placeholder:font-normal placeholder:text-default-600",
-              }}
-              className="flex-1"
-            />
-
-            <div className="grid grid-cols-[300px_1fr] items-start gap-4">
-              <RadioGroup
+            <div className="grid gap-6 py-8">
+              <Input
                 isRequired
-                aria-label="select program type"
-                label={
-                  <span className="text-sm font-normal text-foreground">
-                    Tipe Program
-                  </span>
-                }
-                color="secondary"
-                value={selected}
-                onValueChange={setSelected}
+                type="text"
+                variant="flat"
+                label="Judul Program"
+                labelPlacement="outside"
+                placeholder="Contoh: Kelas Ruangobat Tatap Muka"
+                name="title"
+                value={input.title}
+                onChange={(e) => setInput({ ...input, title: e.target.value })}
                 classNames={{
-                  base: "font-semibold text-black",
+                  input:
+                    "font-semibold placeholder:font-normal placeholder:text-default-600",
                 }}
-              >
-                <Radio value="free">Gratis</Radio>
-                <Radio value="paid">Berbayar</Radio>
-              </RadioGroup>
+                className="flex-1"
+              />
 
-              {selected == "paid" ? (
-                <Input
+              <div className="grid grid-cols-[300px_1fr] items-start gap-4">
+                <RadioGroup
                   isRequired
-                  type="number"
-                  variant="flat"
-                  label="Harga Program"
-                  labelPlacement="outside"
-                  placeholder="Contoh: 500.000"
-                  startContent={
-                    <span className="text-sm font-semibold text-default-600">
-                      Rp
+                  aria-label="select program type"
+                  label={
+                    <span className="text-sm font-normal text-foreground">
+                      Tipe Program
                     </span>
+                  }
+                  color="secondary"
+                  value={selectedType}
+                  onValueChange={setSelectedType}
+                  classNames={{
+                    base: "font-semibold text-black",
+                  }}
+                >
+                  <Radio value="free">Gratis</Radio>
+                  <Radio value="paid">Berbayar</Radio>
+                </RadioGroup>
+
+                {selectedType == "paid" ? (
+                  <Input
+                    isRequired
+                    type="number"
+                    variant="flat"
+                    label="Harga Program"
+                    labelPlacement="outside"
+                    placeholder="Contoh: 500.000"
+                    name="price"
+                    value={input.price.toString()}
+                    onChange={(e) =>
+                      setInput({ ...input, price: Number(e.target.value) })
+                    }
+                    startContent={
+                      <span className="text-sm font-semibold text-default-600">
+                        Rp
+                      </span>
+                    }
+                    classNames={{
+                      input:
+                        "font-semibold placeholder:font-semibold placeholder:text-gray",
+                    }}
+                    className="flex-1"
+                  />
+                ) : null}
+              </div>
+            </div>
+
+            <div className="grid pt-12">
+              <div className="sticky left-0 top-0 z-50 grid grid-cols-[1fr_400px] gap-6 bg-white pb-4">
+                <Input
+                  type="text"
+                  variant="flat"
+                  labelPlacement="outside"
+                  placeholder="Cari Ujian Berdasarkan ID..."
+                  startContent={
+                    <MagnifyingGlass
+                      weight="bold"
+                      size={18}
+                      className="text-gray"
+                    />
                   }
                   classNames={{
                     input:
                       "font-semibold placeholder:font-semibold placeholder:text-gray",
                   }}
-                  className="flex-1"
                 />
-              ) : null}
-            </div>
 
-            <div className="grid gap-4">
-              <Select
-                isRequired
-                aria-label="select test"
-                label="Pilih Ujian"
-                labelPlacement="outside"
-                placeholder="Silakan Pilih Ujian..."
-                items={tests}
-                selectedKeys={values}
-                onSelectionChange={setValues}
-                selectionMode="multiple"
-                classNames={{
-                  value: "placeholder:font-black placeholder:text-gray",
-                }}
-              >
-                {(test) => (
-                  <SelectItem key={test.title}>{test.title}</SelectItem>
-                )}
-              </Select>
-
-              <div className="grid gap-2 pl-16">
-                <h6 className="text-sm font-semibold text-black">
-                  Ujian yang sudah dipilih:
-                </h6>
-                <ul className="grid list-inside list-disc gap-[2px]">
-                  {Array.from(values).map((value, index) => (
-                    <li key={index} className="text-sm font-medium text-gray">
-                      {value}
-                    </li>
-                  ))}
-                </ul>
+                <Button
+                  isLoading={loading}
+                  variant="solid"
+                  color="secondary"
+                  startContent={<FloppyDisk weight="bold" size={18} />}
+                  onClick={handleEditProgram}
+                  className="w-max justify-self-end font-bold"
+                >
+                  {loading ? "Tunggu Sebentar..." : "Simpan Perubahan"}
+                </Button>
               </div>
+
+              <Table
+                isHeaderSticky
+                aria-label="tests table"
+                color="secondary"
+                selectionMode="multiple"
+                selectedKeys={value}
+                onSelectionChange={setValue}
+                defaultSelectedKeys={value}
+                classNames={customStyleTable}
+                className="scrollbar-hide"
+              >
+                <TableHeader columns={columnsTest}>
+                  {(column) => (
+                    <TableColumn key={column.uid}>{column.name}</TableColumn>
+                  )}
+                </TableHeader>
+
+                <TableBody
+                  items={allTest}
+                  emptyContent={
+                    <span className="text-sm font-semibold italic text-gray">
+                      Ujian tidak ditemukan!
+                    </span>
+                  }
+                >
+                  {(item: TestType) => (
+                    <TableRow key={item.test_id}>
+                      {(columnKey) => (
+                        <TableCell>{getKeyValue(item, columnKey)}</TableCell>
+                      )}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
           </div>
-
-          <Button
-            variant="solid"
-            color="secondary"
-            startContent={<FloppyDisk weight="bold" size={18} />}
-            className="w-max justify-self-end font-bold"
-          >
-            Simpan Perubahan
-          </Button>
         </section>
       </Container>
     </Layout>
   );
 }
+
+type DataProps = {
+  program?: DetailsProgramType;
+  allTest?: TestType[];
+  token?: string;
+  error?: ErrorDataType;
+};
+
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+  req,
+  params,
+}) => {
+  const token = req.headers["access_token"] as string;
+
+  try {
+    const [responseProgram, responseTests] = await Promise.all([
+      fetcher({
+        url: `/admin/programs/${encodeURIComponent(params?.id as string)}`,
+        method: "GET",
+        token,
+      }) as Promise<SuccessResponse<DetailsProgramType>>,
+
+      fetcher({
+        url: "/admin/tests?page=all",
+        method: "GET",
+        token,
+      }) as Promise<SuccessResponse<TestType[]>>,
+    ]);
+
+    return {
+      props: {
+        program: responseProgram.data,
+        allTest: responseTests.data,
+        token,
+      },
+    };
+  } catch (error: any) {
+    return {
+      props: {
+        error,
+      },
+    };
+  }
+};
