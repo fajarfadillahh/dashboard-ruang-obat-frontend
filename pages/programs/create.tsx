@@ -4,17 +4,23 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
+import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import {
   Button,
+  getKeyValue,
   Input,
   Radio,
   RadioGroup,
-  Select,
   Selection,
-  SelectItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
 } from "@nextui-org/react";
-import { FloppyDisk } from "@phosphor-icons/react";
+import { FloppyDisk, MagnifyingGlass } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -26,29 +32,39 @@ export default function CreateProgramPage({
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
-  const [input, setInput] = useState<{ title: string; price?: number }>({
+  const [input, setInput] = useState<{
+    title: string;
+    price: number;
+  }>({
     title: "",
-    price: undefined,
+    price: 0,
   });
   const [selectedType, setSelectedType] = useState<string>("");
   const [value, setValue] = useState<Selection>(new Set([]));
   const [loading, setLoading] = useState(false);
 
+  const columnsTest = [
+    { name: "ID Ujian", uid: "test_id" },
+    { name: "Judul Ujian", uid: "title" },
+  ];
+
   async function handleCreateProgram() {
     setLoading(true);
 
     try {
+      const data = {
+        title: input.title,
+        type: selectedType,
+        ...(selectedType === "paid" && { price: input.price }),
+        tests: Array.from(value),
+        by: session.data?.user.fullname,
+      };
+
       await fetcher({
         url: "/admin/programs",
         method: "POST",
         token,
-        data: {
-          title: input.title,
-          type: selectedType,
-          price: input.price,
-          tests: Array.from(value),
-          by: session.data?.user.fullname,
-        },
+        data: data,
       });
 
       window.location.href = "/programs";
@@ -81,131 +97,149 @@ export default function CreateProgramPage({
         <section className="grid">
           <ButtonBack />
 
-          <div className="border-gray/200 grid gap-1 border-b-2 border-dashed py-8">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Buat Program ✏️
-            </h1>
-            <p className="font-medium text-gray">
-              Buatlah program yang menarik untuk para mahasiswa.
-            </p>
-          </div>
+          <div className="divide-gray/200 mt-8 divide-y-2 divide-dashed">
+            <div className="grid gap-1 pb-8">
+              <h1 className="text-[22px] font-bold -tracking-wide text-black">
+                Buat Program ✏️
+              </h1>
+              <p className="font-medium text-gray">
+                Buatlah program yang menarik untuk para mahasiswa.
+              </p>
+            </div>
 
-          <div className="grid gap-6 py-8">
-            <Input
-              isRequired
-              type="text"
-              variant="flat"
-              label="Judul Program"
-              labelPlacement="outside"
-              placeholder="Contoh: Kelas Ruangobat Tatap Muka"
-              name="title"
-              onChange={(e) =>
-                setInput({
-                  ...input,
-                  [e.target.name]: e.target.value,
-                })
-              }
-              classNames={{
-                input:
-                  "font-semibold placeholder:font-normal placeholder:text-default-600",
-              }}
-              className="flex-1"
-            />
-
-            <div className="grid grid-cols-[300px_1fr] items-start gap-4">
-              <RadioGroup
+            <div className="grid gap-6 py-8">
+              <Input
                 isRequired
-                aria-label="select program type"
-                label={
-                  <span className="text-sm font-normal text-foreground">
-                    Tipe Program
-                  </span>
-                }
-                color="secondary"
-                value={selectedType}
-                onValueChange={setSelectedType}
+                type="text"
+                variant="flat"
+                label="Judul Program"
+                labelPlacement="outside"
+                placeholder="Contoh: Kelas Ruangobat Tatap Muka"
+                name="title"
+                value={input.title}
+                onChange={(e) => setInput({ ...input, title: e.target.value })}
                 classNames={{
-                  base: "font-semibold text-black",
+                  input:
+                    "font-semibold placeholder:font-normal placeholder:text-default-600",
                 }}
-              >
-                <Radio value="free">Gratis</Radio>
-                <Radio value="paid">Berbayar</Radio>
-              </RadioGroup>
+                className="flex-1"
+              />
 
-              {selectedType == "paid" ? (
-                <Input
+              <div className="grid grid-cols-[300px_1fr] items-start gap-4">
+                <RadioGroup
                   isRequired
-                  type="number"
-                  variant="flat"
-                  label="Harga Program"
-                  labelPlacement="outside"
-                  placeholder="Contoh: 500.000"
-                  name="price"
-                  onChange={(e) =>
-                    setInput({
-                      ...input,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  startContent={
-                    <span className="text-sm font-semibold text-default-600">
-                      Rp
+                  aria-label="select program type"
+                  label={
+                    <span className="text-sm font-normal text-foreground">
+                      Tipe Program
                     </span>
+                  }
+                  color="secondary"
+                  value={selectedType}
+                  onValueChange={setSelectedType}
+                  classNames={{
+                    base: "font-semibold text-black",
+                  }}
+                >
+                  <Radio value="free">Gratis</Radio>
+                  <Radio value="paid">Berbayar</Radio>
+                </RadioGroup>
+
+                {selectedType == "paid" ? (
+                  <Input
+                    isRequired
+                    type="number"
+                    variant="flat"
+                    label="Harga Program"
+                    labelPlacement="outside"
+                    placeholder="Contoh: 500.000"
+                    name="price"
+                    value={input.price.toString()}
+                    onChange={(e) =>
+                      setInput({ ...input, price: Number(e.target.value) })
+                    }
+                    startContent={
+                      <span className="text-sm font-semibold text-default-600">
+                        Rp
+                      </span>
+                    }
+                    classNames={{
+                      input:
+                        "font-semibold placeholder:font-semibold placeholder:text-gray",
+                    }}
+                    className="flex-1"
+                  />
+                ) : null}
+              </div>
+            </div>
+
+            <div className="grid pt-12">
+              <div className="sticky left-0 top-0 z-50 grid grid-cols-[1fr_400px] gap-6 bg-white pb-4">
+                <Input
+                  type="text"
+                  variant="flat"
+                  labelPlacement="outside"
+                  placeholder="Cari Ujian Berdasarkan ID..."
+                  startContent={
+                    <MagnifyingGlass
+                      weight="bold"
+                      size={18}
+                      className="text-gray"
+                    />
                   }
                   classNames={{
                     input:
                       "font-semibold placeholder:font-semibold placeholder:text-gray",
                   }}
-                  className="flex-1"
                 />
-              ) : null}
-            </div>
 
-            <div className="grid gap-4">
-              <Select
-                isRequired
-                aria-label="select test"
-                label="Pilih Ujian"
-                labelPlacement="outside"
-                placeholder="Silakan Pilih Ujian..."
-                items={tests}
+                <Button
+                  isLoading={loading}
+                  variant="solid"
+                  color="secondary"
+                  startContent={<FloppyDisk weight="bold" size={18} />}
+                  onClick={handleCreateProgram}
+                  className="w-max justify-self-end font-bold"
+                >
+                  {loading ? "Tunggu Sebentar..." : "Buat Program"}
+                </Button>
+              </div>
+
+              <Table
+                isHeaderSticky
+                aria-label="users table"
+                color="secondary"
+                selectionMode="multiple"
                 selectedKeys={value}
                 onSelectionChange={setValue}
-                selectionMode="multiple"
-                classNames={{
-                  value: "placeholder:font-black placeholder:text-gray",
-                }}
+                classNames={customStyleTable}
+                className="scrollbar-hide"
               >
-                {(test) => (
-                  <SelectItem key={test.test_id}>{test.title}</SelectItem>
-                )}
-              </Select>
+                <TableHeader columns={columnsTest}>
+                  {(column) => (
+                    <TableColumn key={column.uid}>{column.name}</TableColumn>
+                  )}
+                </TableHeader>
 
-              <div className="grid gap-2 pl-16 text-sm">
-                <h6 className="font-semibold text-black">
-                  Ujian (ID) Yang Sudah Dipilih:
-                </h6>
-                <ul className="grid list-inside list-disc gap-[2px]">
-                  {Array.from(value).map((test, index) => (
-                    <li key={index} className="font-bold text-purple">
-                      {test}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                <TableBody
+                  items={tests}
+                  emptyContent={
+                    <span className="text-sm font-semibold italic text-gray">
+                      Pengguna tidak ditemukan!
+                    </span>
+                  }
+                >
+                  {(item: TestType) => (
+                    <TableRow key={item.test_id}>
+                      {(columnKey) => (
+                        <TableCell>{getKeyValue(item, columnKey)}</TableCell>
+                      )}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
           </div>
-
-          <Button
-            isLoading={loading}
-            variant="solid"
-            color="secondary"
-            startContent={<FloppyDisk weight="bold" size={18} />}
-            onClick={handleCreateProgram}
-            className="w-max justify-self-end font-bold"
-          >
-            {loading ? "Tunggu Sebentar..." : "Buat Program"}
-          </Button>
         </section>
       </Container>
     </Layout>
