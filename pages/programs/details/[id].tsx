@@ -38,6 +38,7 @@ import {
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 
 type DetailsProgramType = {
   program_id: string;
@@ -64,8 +65,9 @@ export default function DetailsProgramPage({
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState<Selection>(new Set([]));
+  const [loading, setLoading] = useState<boolean>(false);
 
   const columnsParticipant = [
     { name: "ID Partisipan", uid: "user_id" },
@@ -179,6 +181,8 @@ export default function DetailsProgramPage({
   }
 
   async function handleInviteParticipant() {
+    setLoading(true);
+
     try {
       await fetcher({
         url: "/admin/programs/invite",
@@ -193,6 +197,8 @@ export default function DetailsProgramPage({
 
       window.location.reload();
     } catch (error) {
+      setLoading(false);
+      toast.error("Gagal Menambah Partisipan, Silakan Coba Lagi");
       console.error(error);
     }
   }
@@ -210,6 +216,7 @@ export default function DetailsProgramPage({
 
       window.location.reload();
     } catch (error) {
+      toast.error("Gagal Menghapus Partisipan, Silakan Coba Lagi");
       console.error(error);
     }
   }
@@ -336,6 +343,7 @@ export default function DetailsProgramPage({
                   isOpen={isModalOpen}
                   value={selectedUser}
                   setValue={setSelectedUser}
+                  loading={loading}
                   handleInviteParticipant={handleInviteParticipant}
                   onClose={() => setIsModalOpen(false)}
                 />

@@ -16,6 +16,7 @@ import { Dispatch, SetStateAction } from "react";
 type ModalAddParticipantProps = {
   users: any;
   isOpen: boolean;
+  loading: boolean;
   value?: Selection;
   setValue?: Dispatch<SetStateAction<Selection>>;
   handleInviteParticipant?: () => void;
@@ -25,6 +26,7 @@ type ModalAddParticipantProps = {
 export default function ModalAddParticipant({
   users,
   isOpen,
+  loading,
   value,
   setValue,
   handleInviteParticipant,
@@ -98,6 +100,7 @@ export default function ModalAddParticipant({
               </Button>
 
               <Button
+                isLoading={loading}
                 color="secondary"
                 onClick={handleInviteParticipant}
                 className="font-bold"
