@@ -45,10 +45,6 @@ export default function ProgramsPage({
     }
   }
 
-  function handleDeleteProgram(id: string) {
-    console.log(`Program dengan ID: ${id} berhasil terhapus!`);
-  }
-
   if (error) {
     return (
       <Layout title="Daftar Program">
@@ -122,9 +118,6 @@ export default function ProgramsPage({
                 <CardProgram
                   key={program.program_id}
                   program={program}
-                  handleDeleteProgram={() =>
-                    handleDeleteProgram(program.program_id)
-                  }
                   onStatusChange={() =>
                     handleUpdateStatus(program.program_id, program.is_active)
                   }

@@ -13,7 +13,7 @@ type ModalProps = {
   id: string;
   header: string;
   title: string;
-  handleDelete: () => void;
+  handleDelete?: () => void;
 };
 
 export default function ModalConfirmDelete({
@@ -73,7 +73,7 @@ export default function ModalConfirmDelete({
                 <Button
                   color="danger"
                   onPress={() => {
-                    handleDelete();
+                    handleDelete?.();
                     onClose();
                   }}
                   className="font-bold"

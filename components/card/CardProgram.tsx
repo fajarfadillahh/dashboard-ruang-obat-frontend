@@ -1,4 +1,3 @@
-import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import { ProgramType } from "@/types/program.type";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
@@ -19,21 +18,15 @@ import {
   Tag,
   XCircle,
 } from "@phosphor-icons/react";
-import { DotsThreeOutlineVertical } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 interface ProgramProps {
   program: ProgramType;
-  handleDeleteProgram: () => void;
   onStatusChange: () => void;
 }
 
-export default function CardProgram({
-  program,
-  handleDeleteProgram,
-  onStatusChange,
-}: ProgramProps) {
+export default function CardProgram({ program, onStatusChange }: ProgramProps) {
   const router = useRouter();
 
   return (
@@ -71,11 +64,11 @@ export default function CardProgram({
                 >
                   Gratis
                 </Chip>
-              ) : (
+              ) : program.price ? (
                 <h5 className="text-sm font-extrabold text-purple">
                   {formatRupiah(program.price)}
                 </h5>
-              )}
+              ) : null}
             </div>
 
             <div className="grid gap-1">
@@ -134,36 +127,21 @@ export default function CardProgram({
           <PencilLine weight="bold" size={18} />
         </Button>
 
-        <ModalConfirmDelete
-          id={program.program_id}
-          header="Program"
-          title={program.title}
-          handleDelete={handleDeleteProgram}
-        />
-
         <Dropdown>
           <DropdownTrigger>
             <Button isIconOnly variant="light" size="sm">
-              <DotsThreeOutlineVertical
-                weight="fill"
-                size={18}
-                className="text-black"
-              />
+              <Power weight="bold" size={18} className="text-danger" />
             </Button>
           </DropdownTrigger>
 
           <DropdownMenu
-            aria-label="Actions"
+            aria-label="actions"
             itemClasses={{
-              base: "font-semibold",
+              title: "font-semibold text-black",
             }}
           >
             <DropdownSection aria-label="action zone" title="Anda Yakin?">
-              <DropdownItem
-                startContent={<Power weight="bold" size={18} />}
-                onClick={onStatusChange}
-                className="text-black"
-              >
+              <DropdownItem onClick={onStatusChange}>
                 {program.is_active
                   ? "Non-aktifkan Program"
                   : "Aktifkan Program"}
