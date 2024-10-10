@@ -47,7 +47,7 @@ export default function Navbar() {
           <DropdownMenu
             aria-label="profile actions"
             itemClasses={{
-              base: "text-black",
+              title: "font-semibold",
             }}
           >
             <DropdownSection

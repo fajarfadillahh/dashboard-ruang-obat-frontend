@@ -9,6 +9,7 @@ import {
   HourglassLow,
   PencilLine,
 } from "@phosphor-icons/react";
+import Link from "next/link";
 import { useRouter } from "next/router";
 
 export default function CardTest({
@@ -26,9 +27,12 @@ export default function CardTest({
         <ClipboardText weight="bold" size={28} className="text-purple" />
 
         <div className="grid gap-6">
-          <h4 className="line-clamp-2 max-w-[620px] text-[20px] font-bold leading-[120%] -tracking-wide text-black">
+          <Link
+            href={`/tests/details/${test.test_id}`}
+            className="line-clamp-1 text-[20px] font-bold leading-[120%] text-black hover:text-purple"
+          >
             {test.title}
-          </h4>
+          </Link>
 
           <div className="inline-flex items-start gap-6">
             <div className="grid gap-[2px]">
@@ -94,16 +98,6 @@ export default function CardTest({
       </div>
 
       <div className="inline-flex items-center gap-2">
-        <Button
-          variant="solid"
-          size="sm"
-          color="secondary"
-          onClick={() => router.push(`/tests/details/${test.test_id}`)}
-          className="px-6 font-bold"
-        >
-          Lihat Ujian
-        </Button>
-
         {router.pathname === "/tests" ? (
           <>
             <Button
@@ -124,6 +118,15 @@ export default function CardTest({
             />
           </>
         ) : null}
+
+        <Button
+          variant="solid"
+          size="sm"
+          color="secondary"
+          className="px-6 font-bold"
+        >
+          Lihat Nilai
+        </Button>
       </div>
     </div>
   );
