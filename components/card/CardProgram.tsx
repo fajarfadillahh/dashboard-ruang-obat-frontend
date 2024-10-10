@@ -32,7 +32,7 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
 
   return (
     <div
-      className={`grid grid-cols-[1fr_max-content] items-center gap-6 rounded-xl border-2 p-6 ${
+      className={`grid grid-cols-[1fr_max-content] items-center gap-12 rounded-xl border-2 p-6 ${
         program.is_active
           ? "border-purple/10 hover:border-purple hover:bg-purple/10"
           : "border-danger bg-danger/5 hover:bg-danger/10"

@@ -22,7 +22,7 @@ export default function CardTest({
   const router = useRouter();
 
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl border-2 border-purple/10 p-6 hover:border-purple hover:bg-purple/10">
+    <div className="flex items-center justify-between gap-12 rounded-xl border-2 border-purple/10 p-6 hover:border-purple hover:bg-purple/10">
       <div className="inline-flex flex-1 items-start gap-3">
         <ClipboardText weight="bold" size={28} className="text-purple" />
 
@@ -123,6 +123,7 @@ export default function CardTest({
           variant="solid"
           size="sm"
           color="secondary"
+          onClick={() => router.push(`/tests/grades/${test.test_id}`)}
           className="px-6 font-bold"
         >
           Lihat Nilai
