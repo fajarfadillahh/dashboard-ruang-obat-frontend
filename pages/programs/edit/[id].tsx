@@ -1,4 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ErrorPage from "@/components/ErrorPage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
@@ -89,6 +90,22 @@ export default function EditProgramPage({
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
+  }
+
+  if (error) {
+    return (
+      <Layout title="Edit Program">
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
   }
 
   return (
