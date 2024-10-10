@@ -15,6 +15,7 @@ import {
   ClipboardText,
   PencilLine,
   Power,
+  Prohibit,
   Tag,
   XCircle,
 } from "@phosphor-icons/react";
@@ -31,21 +32,23 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
 
   return (
     <div
-      className={`grid grid-cols-[1fr_max-content] items-center gap-6 rounded-xl border-2 p-6 hover:cursor-pointer ${
+      className={`grid grid-cols-[1fr_max-content] items-center gap-6 rounded-xl border-2 p-6 ${
         program.is_active
           ? "border-purple/10 hover:border-purple hover:bg-purple/10"
           : "border-danger bg-danger/5 hover:bg-danger/10"
       }`}
     >
       <div className="flex items-start gap-6">
-        <div className="flex size-10 items-center justify-center rounded-full bg-gray/20 text-gray">
-          <ClipboardText weight="bold" size={20} />
-        </div>
+        {program.is_active ? (
+          <ClipboardText weight="bold" size={28} className="text-purple" />
+        ) : (
+          <Prohibit weight="bold" size={28} className="text-danger" />
+        )}
 
         <div className="grid gap-4">
           <Link
             href={`/programs/details/${encodeURIComponent(program.program_id)}`}
-            className="line-clamp-1 text-[20px] font-bold leading-[120%] text-black hover:text-purple"
+            className={`line-clamp-1 text-[20px] font-bold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
           >
             {program.title}
           </Link>
@@ -71,7 +74,9 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
                   Gratis
                 </Chip>
               ) : program.price ? (
-                <h5 className="text-sm font-extrabold text-purple">
+                <h5
+                  className={`text-sm font-extrabold ${program.is_active ? "text-purple" : "text-danger"}`}
+                >
                   {formatRupiah(program.price)}
                 </h5>
               ) : null}
