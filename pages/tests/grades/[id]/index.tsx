@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import { Eye, XCircle } from "@phosphor-icons/react";
+import { useRouter } from "next/router";
 import React from "react";
 
 const users: UserType[] = [
@@ -32,6 +33,9 @@ const users: UserType[] = [
 ];
 
 export default function GradeUsersPage() {
+  const router = useRouter();
+  const { id } = router.query;
+
   const columnsGrade = [
     { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
@@ -84,6 +88,7 @@ export default function GradeUsersPage() {
             color="secondary"
             size="sm"
             startContent={<Eye weight="bold" size={16} />}
+            onClick={() => router.push(`/tests/grades/${id}/answer`)}
             className="w-max font-bold"
           >
             Lihat Jawaban
