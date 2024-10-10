@@ -30,7 +30,13 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
   const router = useRouter();
 
   return (
-    <div className="grid grid-cols-[1fr_max-content] items-center gap-6 rounded-xl border-2 border-gray/20 p-6 hover:cursor-pointer hover:border-gray/40 hover:bg-gray/10">
+    <div
+      className={`grid grid-cols-[1fr_max-content] items-center gap-6 rounded-xl border-2 p-6 hover:cursor-pointer ${
+        program.is_active
+          ? "border-purple/10 hover:border-purple hover:bg-purple/10"
+          : "border-danger bg-danger/5 hover:bg-danger/10"
+      }`}
+    >
       <div className="flex items-start gap-6">
         <div className="flex size-10 items-center justify-center rounded-full bg-gray/20 text-gray">
           <ClipboardText weight="bold" size={20} />
