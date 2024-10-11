@@ -165,7 +165,7 @@ export default function DashboardPage({
                     color="secondary"
                     size="sm"
                     endContent={<ArrowRight weight="bold" size={16} />}
-                    onClick={() => router.push("/session")}
+                    onClick={() => router.push("/sessions")}
                     className="mt-2 w-max px-4 font-bold"
                   >
                     Lihat Detail
