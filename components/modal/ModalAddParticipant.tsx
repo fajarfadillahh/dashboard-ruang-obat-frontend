@@ -1,37 +1,64 @@
 import { UserType } from "@/types/user.type";
+import { fetcher } from "@/utils/fetcher";
 import {
+  Autocomplete,
+  AutocompleteItem,
   Button,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Select,
-  Selection,
-  SelectItem,
 } from "@nextui-org/react";
-import { UserCircle } from "@phosphor-icons/react";
-import { Dispatch, SetStateAction } from "react";
+import { CaretUpDown } from "@phosphor-icons/react";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 type ModalAddParticipantProps = {
   users: any;
+  session: string;
+  token: string;
+  program_id: string;
   isOpen: boolean;
-  loading: boolean;
-  value?: Selection;
-  setValue?: Dispatch<SetStateAction<Selection>>;
-  handleInviteParticipant?: () => void;
   onClose: () => void;
 };
 
 export default function ModalAddParticipant({
   users,
+  session,
+  token,
+  program_id,
   isOpen,
-  loading,
-  value,
-  setValue,
-  handleInviteParticipant,
   onClose,
 }: ModalAddParticipantProps) {
+  const [value, setValue] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+
+  async function handleInviteParticipant() {
+    setLoading(true);
+
+    const data = {
+      program_id: program_id,
+      by: session,
+      users: [value],
+    };
+
+    try {
+      await fetcher({
+        url: "/admin/programs/invite",
+        method: "POST",
+        token,
+        data: data,
+      });
+
+      window.location.reload();
+    } catch (error) {
+      setLoading(false);
+      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
+      console.error(error);
+    }
+  }
+
   return (
     <Modal
       isDismissable={false}
@@ -49,43 +76,51 @@ export default function ModalAddParticipant({
             <ModalBody>
               <div className="grid gap-6">
                 <p className="text-sm font-medium leading-[170%] text-gray">
-                  Silakan cari pengguna untuk ditambahkan pada program ini,
-                  pastikan ID pengguna yang anda cari itu sudah benar!
+                  Cari pengguna untuk ditambahkan pada program ini, pastikan ID
+                  pengguna yang anda cari sudah benar!
                 </p>
 
-                <Select
+                <Autocomplete
+                  disableSelectorIconRotation
                   aria-label="select user"
-                  variant="flat"
                   labelPlacement="outside"
-                  placeholder="Cari Pengguna Berdasarkan ID..."
-                  items={users.users}
-                  selectedKeys={value}
-                  onSelectionChange={setValue}
-                  classNames={{
-                    value: "font-medium text-gray",
+                  placeholder="Cari ID Pengguna..."
+                  defaultItems={users.users}
+                  selectedKey={value}
+                  onSelectionChange={(key) => {
+                    key !== null ? setValue(key.toString()) : setValue("");
+                  }}
+                  selectorIcon={<CaretUpDown weight="bold" size={16} />}
+                  inputProps={{
+                    classNames: {
+                      input:
+                        "placeholder:font-medium placeholder:text-gray font-semibold text-black",
+                    },
+                  }}
+                  listboxProps={{
+                    emptyContent: (
+                      <span className="font-medium text-gray">
+                        ID pengguna tidak ditemukan.
+                      </span>
+                    ),
                   }}
                 >
                   {(user: UserType) => (
-                    <SelectItem key={user.user_id} textValue={user.user_id}>
-                      <div className="flex items-center gap-3">
-                        <UserCircle
-                          weight="fill"
-                          size={28}
-                          className="text-purple"
-                        />
-
-                        <div className="flex flex-col">
-                          <h5 className="text-sm font-bold text-black">
-                            {user.fullname}
-                          </h5>
-                          <span className="text-[12px] font-medium text-gray">
-                            {user.user_id}
-                          </span>
-                        </div>
+                    <AutocompleteItem
+                      key={user.user_id}
+                      textValue={user.user_id}
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold text-black">
+                          {user.fullname}
+                        </span>
+                        <span className="text-xs text-gray">
+                          {user.user_id}
+                        </span>
                       </div>
-                    </SelectItem>
+                    </AutocompleteItem>
                   )}
-                </Select>
+                </Autocomplete>
               </div>
             </ModalBody>
 
