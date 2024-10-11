@@ -9,6 +9,7 @@ import { fetcher } from "@/utils/fetcher";
 import {
   Button,
   Input,
+  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -20,9 +21,13 @@ import { Eye, MagnifyingGlass } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
+import { useEffect, useState } from "react";
+import { useDebounce } from "use-debounce";
 
 type UsersType = {
   users: UserType[];
+  page: number;
   total_users: number;
   total_pages: number;
 };
@@ -32,6 +37,8 @@ export default function UsersPage({
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const [search, setSearch] = useState("");
+  const [searchValue] = useDebounce(search, 800);
 
   const columnsUser = [
     { name: "ID Pengguna", uid: "user_id" },
@@ -86,6 +93,18 @@ export default function UsersPage({
         return cellValue;
     }
   }
+
+  useEffect(() => {
+    if (searchValue) {
+      router.push({
+        query: {
+          q: searchValue,
+        },
+      });
+    } else {
+      router.push("/users");
+    }
+  }, [searchValue]);
 
   function handleDeleteUser(id: string) {
     console.log(`Pengguna dengan ID: ${id} berhasil terhapus!`);
@@ -145,6 +164,7 @@ export default function UsersPage({
                   "font-semibold placeholder:font-semibold placeholder:text-gray",
               }}
               className="max-w-[500px]"
+              onChange={(e) => setSearch(e.target.value)}
             />
 
             <div className="overflow-x-scroll">
@@ -182,6 +202,23 @@ export default function UsersPage({
                 </TableBody>
               </Table>
             </div>
+            <Pagination
+              isCompact
+              showControls
+              page={users?.page as number}
+              total={users?.total_pages as number}
+              onChange={(e) => {
+                router.push({
+                  query: {
+                    page: e,
+                  },
+                });
+              }}
+              className="justify-self-center"
+              classNames={{
+                cursor: "bg-purple text-white",
+              }}
+            />
           </div>
         </section>
       </Container>
@@ -196,12 +233,21 @@ type DataProps = {
 
 export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   req,
+  query,
 }) => {
   const token = req.headers["access_token"] as string;
 
+  function getUrl(query: ParsedUrlQuery) {
+    if (query.q) {
+      return `/admin/users?q=${query.q}&page=${query.page ? query.page : 1}`;
+    }
+
+    return `/admin/users?page=${query.page ? query.page : 1}`;
+  }
+
   try {
     const response = (await fetcher({
-      url: "/admin/users",
+      url: getUrl(query) as string,
       method: "GET",
       token,
     })) as SuccessResponse<UsersType>;
