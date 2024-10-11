@@ -11,4 +11,5 @@ export type ParticipantType = {
   university: string;
   code: string;
   joined_at: string;
+  status?: string;
 };

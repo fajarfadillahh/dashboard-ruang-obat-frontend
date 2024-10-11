@@ -28,7 +28,9 @@ import {
   Certificate,
   Check,
   CheckCircle,
+  ClockCountdown,
   Copy,
+  Eye,
   Notepad,
   Plus,
   Tag,
@@ -66,13 +68,21 @@ export default function DetailsProgramPage({
   const session = useSession();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const columnsParticipant = [
+  const columnsParticipantPaid = [
     { name: "ID Partisipan", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
     { name: "Kode Akses", uid: "code" },
     { name: "Asal Kampus", uid: "university" },
     { name: "Status", uid: "joined_status" },
     { name: "Bergabung Pada", uid: "joined_at" },
+    { name: "Aksi", uid: "action" },
+  ];
+
+  const columnsParticipantFree = [
+    { name: "ID Partisipan", uid: "user_id" },
+    { name: "Nama Lengkap", uid: "fullname" },
+    { name: "Asal Kampus", uid: "university" },
+    { name: "Status", uid: "status" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -120,9 +130,32 @@ export default function DetailsProgramPage({
             {participant.university}
           </div>
         );
+      case "status":
+        return (
+          <div className="w-max">
+            <Chip
+              variant="flat"
+              size="sm"
+              color="warning"
+              startContent={
+                <ClockCountdown
+                  weight="fill"
+                  size={18}
+                  className="text-warning"
+                />
+              }
+              classNames={{
+                base: "px-2 gap-1",
+                content: "font-semibold capitalize",
+              }}
+            >
+              Menunggu konfirmasi
+            </Chip>
+          </div>
+        );
       case "joined_status":
         return (
-          <div className="w-max font-medium text-black">
+          <div className="w-max">
             <Chip
               variant="flat"
               size="sm"
@@ -131,11 +164,11 @@ export default function DetailsProgramPage({
                 participant.joined_at ? (
                   <CheckCircle
                     weight="fill"
-                    size={16}
+                    size={18}
                     className="text-success"
                   />
                 ) : (
-                  <XCircle weight="fill" size={16} className="text-danger" />
+                  <XCircle weight="fill" size={18} className="text-danger" />
                 )
               }
               classNames={{
@@ -157,7 +190,19 @@ export default function DetailsProgramPage({
         );
       case "action":
         return (
-          <div className="grid w-[60px]">
+          <div className="flex max-w-max items-center gap-2">
+            {program?.type === "free" ? (
+              <Button
+                variant="light"
+                color="secondary"
+                size="sm"
+                startContent={<Eye weight="bold" size={16} />}
+                className="font-bold"
+              >
+                Lihat Persyaratan
+              </Button>
+            ) : null}
+
             <ModalConfirmDelete
               id={participant.user_id}
               header="Partisipan"
@@ -302,15 +347,17 @@ export default function DetailsProgramPage({
                   Daftar Partisipan 🧑🏻‍🤝‍🧑🏻
                 </h4>
 
-                <Button
-                  variant="solid"
-                  color="secondary"
-                  startContent={<Plus weight="bold" size={18} />}
-                  onPress={() => setIsModalOpen(true)}
-                  className="w-max font-bold"
-                >
-                  Tambah Partisipan
-                </Button>
+                {program?.type === "paid" ? (
+                  <Button
+                    variant="solid"
+                    color="secondary"
+                    startContent={<Plus weight="bold" size={18} />}
+                    onPress={() => setIsModalOpen(true)}
+                    className="w-max font-bold"
+                  >
+                    Tambah Partisipan
+                  </Button>
+                ) : null}
 
                 <ModalAddParticipant
                   users={users}
@@ -331,7 +378,13 @@ export default function DetailsProgramPage({
                   classNames={customStyleTable}
                   className="scrollbar-hide"
                 >
-                  <TableHeader columns={columnsParticipant}>
+                  <TableHeader
+                    columns={
+                      program?.type === "paid"
+                        ? columnsParticipantPaid
+                        : columnsParticipantFree
+                    }
+                  >
                     {(column) => (
                       <TableColumn key={column.uid}>{column.name}</TableColumn>
                     )}
