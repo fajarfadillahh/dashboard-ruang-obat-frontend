@@ -3,6 +3,7 @@ import CardTest from "@/components/card/CardTest";
 import ErrorPage from "@/components/ErrorPage";
 import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
+import ModalJoiningRequirement from "@/components/modal/ModalJoiningRequirement";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
@@ -30,7 +31,6 @@ import {
   CheckCircle,
   ClockCountdown,
   Copy,
-  Eye,
   Notepad,
   Plus,
   Tag,
@@ -192,15 +192,7 @@ export default function DetailsProgramPage({
         return (
           <div className="flex max-w-max items-center gap-2">
             {program?.type === "free" ? (
-              <Button
-                variant="light"
-                color="secondary"
-                size="sm"
-                startContent={<Eye weight="bold" size={16} />}
-                className="font-bold"
-              >
-                Lihat Persyaratan
-              </Button>
+              <ModalJoiningRequirement {...participant} />
             ) : null}
 
             <ModalConfirmDelete
