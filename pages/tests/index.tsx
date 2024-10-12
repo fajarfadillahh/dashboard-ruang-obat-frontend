@@ -40,10 +40,6 @@ export default function TestsPage({
     }
   }, [searchValue]);
 
-  function handleDeleteTest(id: string) {
-    console.log(`Ujian dengan ID: ${id} berhasil terhapus!`);
-  }
-
   if (error) {
     return (
       <Layout title="Daftar Ujian">
@@ -108,11 +104,7 @@ export default function TestsPage({
 
             <div className="grid gap-2">
               {tests?.tests.map((test: TestType) => (
-                <CardTest
-                  key={test.test_id}
-                  test={test}
-                  handleDeleteTest={() => handleDeleteTest(test.test_id)}
-                />
+                <CardTest key={test.test_id} test={test} />
               ))}
             </div>
 

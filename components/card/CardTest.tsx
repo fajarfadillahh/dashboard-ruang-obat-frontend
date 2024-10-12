@@ -1,24 +1,30 @@
-import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import { TestType } from "@/types/test.type";
 import { formatDate } from "@/utils/formatDate";
-import { Button, Chip } from "@nextui-org/react";
+import {
+  Button,
+  Chip,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownSection,
+  DropdownTrigger,
+} from "@nextui-org/react";
 import {
   CheckCircle,
   ClipboardText,
   ClockCountdown,
   HourglassLow,
   PencilLine,
+  Power,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-export default function CardTest({
-  test,
-  handleDeleteTest,
-}: {
+interface TestProps {
   test: TestType;
-  handleDeleteTest?: () => void;
-}) {
+}
+
+export default function CardTest({ test }: TestProps) {
   const router = useRouter();
 
   return (
@@ -67,31 +73,47 @@ export default function CardTest({
                 Status Ujian:
               </span>
 
-              <Chip
-                variant="flat"
-                color={
-                  test.status === "Belum Mulai"
-                    ? "default"
-                    : test.status === "Berlangsung"
-                      ? "warning"
-                      : "success"
-                }
-                startContent={
-                  test.status === "Belum Mulai" ? (
-                    <ClockCountdown weight="fill" size={18} />
-                  ) : test.status === "Berlangsung" ? (
-                    <HourglassLow weight="fill" size={18} />
-                  ) : (
-                    <CheckCircle weight="fill" size={18} />
-                  )
-                }
-                classNames={{
-                  base: "px-2",
-                  content: "font-semibold capitalize",
-                }}
-              >
-                {test.status}
-              </Chip>
+              <div className="inline-flex items-center gap-2">
+                <Chip
+                  variant="flat"
+                  color={
+                    test.status === "Belum Mulai"
+                      ? "default"
+                      : test.status === "Berlangsung"
+                        ? "warning"
+                        : "success"
+                  }
+                  size="sm"
+                  startContent={
+                    test.status === "Belum Mulai" ? (
+                      <ClockCountdown weight="fill" size={16} />
+                    ) : test.status === "Berlangsung" ? (
+                      <HourglassLow weight="fill" size={16} />
+                    ) : (
+                      <CheckCircle weight="fill" size={16} />
+                    )
+                  }
+                  classNames={{
+                    base: "px-2 gap-1",
+                    content: "font-semibold capitalize",
+                  }}
+                >
+                  {test.status}
+                </Chip>
+
+                <Chip
+                  variant="flat"
+                  color="success"
+                  size="sm"
+                  startContent={<CheckCircle weight="fill" size={16} />}
+                  classNames={{
+                    base: "px-2 gap-1",
+                    content: "font-semibold capitalize",
+                  }}
+                >
+                  Aktif
+                </Chip>
+              </div>
             </div>
           </div>
         </div>
@@ -110,12 +132,24 @@ export default function CardTest({
               <PencilLine weight="bold" size={18} />
             </Button>
 
-            <ModalConfirmDelete
-              id={test.test_id}
-              header="Ujian"
-              title={test.title}
-              handleDelete={() => handleDeleteTest?.()}
-            />
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly variant="light" size="sm">
+                  <Power weight="bold" size={18} className="text-danger" />
+                </Button>
+              </DropdownTrigger>
+
+              <DropdownMenu
+                aria-label="actions"
+                itemClasses={{
+                  title: "font-semibold text-black",
+                }}
+              >
+                <DropdownSection aria-label="action zone" title="Anda Yakin?">
+                  <DropdownItem>Non-aktifkan Ujian</DropdownItem>
+                </DropdownSection>
+              </DropdownMenu>
+            </Dropdown>
           </>
         ) : null}
 
