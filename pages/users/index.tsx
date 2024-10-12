@@ -151,7 +151,7 @@ export default function UsersPage({
               type="text"
               variant="flat"
               labelPlacement="outside"
-              placeholder="Cari Pengguna..."
+              placeholder="Cari User ID atau Nama User..."
               startContent={
                 <MagnifyingGlass
                   weight="bold"
@@ -202,23 +202,26 @@ export default function UsersPage({
                 </TableBody>
               </Table>
             </div>
-            <Pagination
-              isCompact
-              showControls
-              page={users?.page as number}
-              total={users?.total_pages as number}
-              onChange={(e) => {
-                router.push({
-                  query: {
-                    page: e,
-                  },
-                });
-              }}
-              className="justify-self-center"
-              classNames={{
-                cursor: "bg-purple text-white",
-              }}
-            />
+
+            {users?.users.length ? (
+              <Pagination
+                isCompact
+                showControls
+                page={users?.page as number}
+                total={users?.total_pages as number}
+                onChange={(e) => {
+                  router.push({
+                    query: {
+                      page: e,
+                    },
+                  });
+                }}
+                className="justify-self-center"
+                classNames={{
+                  cursor: "bg-purple text-white",
+                }}
+              />
+            ) : null}
           </div>
         </section>
       </Container>
@@ -231,19 +234,19 @@ type DataProps = {
   error?: ErrorDataType;
 };
 
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/users?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/users?page=${query.page ? query.page : 1}`;
+}
+
 export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   req,
   query,
 }) => {
   const token = req.headers["access_token"] as string;
-
-  function getUrl(query: ParsedUrlQuery) {
-    if (query.q) {
-      return `/admin/users?q=${query.q}&page=${query.page ? query.page : 1}`;
-    }
-
-    return `/admin/users?page=${query.page ? query.page : 1}`;
-  }
 
   try {
     const response = (await fetcher({
