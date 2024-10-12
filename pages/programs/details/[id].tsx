@@ -351,10 +351,32 @@ export default function DetailsProgramPage({
             </div>
 
             <div className="grid gap-4 pt-8">
-              <div className="flex items-end justify-between gap-4">
-                <h4 className="text-[20px] font-bold -tracking-wide text-black">
-                  Daftar Partisipan 🧑🏻‍🤝‍🧑🏻
-                </h4>
+              <h4 className="text-[20px] font-bold -tracking-wide text-black">
+                Daftar Partisipan 🧑🏻‍🤝‍🧑🏻
+              </h4>
+
+              <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white">
+                <Input
+                  type="text"
+                  variant="flat"
+                  labelPlacement="outside"
+                  placeholder="Cari User ID atau Nama User"
+                  startContent={
+                    <MagnifyingGlass
+                      weight="bold"
+                      size={18}
+                      className="text-gray"
+                    />
+                  }
+                  classNames={{
+                    input:
+                      "font-semibold placeholder:font-semibold placeholder:text-gray",
+                  }}
+                  className={
+                    program?.type === "paid" ? "flex-1" : "max-w-[500px]"
+                  }
+                  onChange={(e) => setSearch(e.target.value)}
+                />
 
                 {program?.type === "paid" ? (
                   <Button
@@ -377,26 +399,6 @@ export default function DetailsProgramPage({
                   onClose={() => setIsModalOpen(false)}
                 />
               </div>
-
-              <Input
-                type="text"
-                variant="flat"
-                labelPlacement="outside"
-                placeholder="Cari User ID atau Nama User"
-                startContent={
-                  <MagnifyingGlass
-                    weight="bold"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-semibold placeholder:text-gray",
-                }}
-                className="flex-1"
-                onChange={(e) => setSearch(e.target.value)}
-              />
 
               <div className="overflow-x-scroll">
                 <Table
