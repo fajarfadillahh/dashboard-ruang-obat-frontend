@@ -62,6 +62,10 @@ export default function TestsPage({
     }
   }
 
+  const filteredTests = tests?.tests.filter((test) =>
+    test.title.toLowerCase().includes(`${searchValue}`),
+  );
+
   if (error) {
     return (
       <Layout title="Daftar Ujian">
@@ -124,17 +128,30 @@ export default function TestsPage({
               </Button>
             </div>
 
-            <div className="grid gap-2">
-              {tests?.tests.map((test: TestType) => (
-                <CardTest
-                  key={test.test_id}
-                  test={test}
-                  onStatusChange={() =>
-                    handleUpdateStatus(test.test_id, test.is_active)
-                  }
+            {searchValue && filteredTests?.length === 0 ? (
+              <div className="flex items-center justify-center gap-2 py-16">
+                <MagnifyingGlass
+                  weight="bold"
+                  size={20}
+                  className="text-gray"
                 />
-              ))}
-            </div>
+                <p className="font-semibold capitalize text-gray">
+                  Ujian tidak ditemukan!
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                {tests?.tests.map((test: TestType) => (
+                  <CardTest
+                    key={test.test_id}
+                    test={test}
+                    onStatusChange={() =>
+                      handleUpdateStatus(test.test_id, test.is_active)
+                    }
+                  />
+                ))}
+              </div>
+            )}
 
             {tests?.tests.length ? (
               <Pagination
