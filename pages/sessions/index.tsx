@@ -137,25 +137,27 @@ export default function SessionPage({
           </div>
 
           <div className="grid gap-4">
-            <Input
-              type="text"
-              variant="flat"
-              labelPlacement="outside"
-              placeholder="Cari User ID atau Nama Pengguna"
-              startContent={
-                <MagnifyingGlass
-                  weight="bold"
-                  size={18}
-                  className="text-gray"
-                />
-              }
-              classNames={{
-                input:
-                  "font-semibold placeholder:font-semibold placeholder:text-gray",
-              }}
-              className="flex-1"
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white">
+              <Input
+                type="text"
+                variant="flat"
+                labelPlacement="outside"
+                placeholder="Cari User ID atau Nama Pengguna"
+                startContent={
+                  <MagnifyingGlass
+                    weight="bold"
+                    size={18}
+                    className="text-gray"
+                  />
+                }
+                classNames={{
+                  input:
+                    "font-semibold placeholder:font-semibold placeholder:text-gray",
+                }}
+                className="max-w-[500px] flex-1"
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
 
             <Table
               isHeaderSticky
