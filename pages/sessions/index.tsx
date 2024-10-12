@@ -2,11 +2,14 @@ import ErrorPage from "@/components/ErrorPage";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import usePagination from "@/hooks/usePagination";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { SessionType } from "@/types/session.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import {
+  Input,
+  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -14,13 +17,21 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
+import { MagnifyingGlass } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
+import { useState } from "react";
 
 export default function SessionPage({
   sessions,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const [search, setSearch] = useState("");
+  const { data, page, pages, setPage } = usePagination(
+    sessions as SessionType[],
+    10,
+  );
+
   const columnsSession = [
     { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
@@ -97,6 +108,14 @@ export default function SessionPage({
     );
   }
 
+  const filter = data.length
+    ? data.filter(
+        (session) =>
+          session.user_id.toLowerCase().includes(search.toLowerCase()) ||
+          session.fullname.toLowerCase().includes(search.toLowerCase()),
+      )
+    : [];
+
   return (
     <Layout title="Daftar Aktifitas Login Pengguna">
       <Container>
@@ -118,6 +137,26 @@ export default function SessionPage({
           </div>
 
           <div className="grid gap-4">
+            <Input
+              type="text"
+              variant="flat"
+              labelPlacement="outside"
+              placeholder="Cari User ID atau Nama Pengguna"
+              startContent={
+                <MagnifyingGlass
+                  weight="bold"
+                  size={18}
+                  className="text-gray"
+                />
+              }
+              classNames={{
+                input:
+                  "font-semibold placeholder:font-semibold placeholder:text-gray",
+              }}
+              className="flex-1"
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
             <Table
               isHeaderSticky
               aria-label="users table"
@@ -139,7 +178,7 @@ export default function SessionPage({
                   </span>
                 }
               >
-                {sessions.map((item: SessionType) => (
+                {filter.map((item: SessionType) => (
                   <TableRow key={item.user_id}>
                     {(columnKey) => (
                       <TableCell>
@@ -151,6 +190,20 @@ export default function SessionPage({
               </TableBody>
             </Table>
           </div>
+
+          {filter.length ? (
+            <Pagination
+              isCompact
+              showControls
+              page={page}
+              total={pages}
+              onChange={setPage}
+              className="justify-self-center"
+              classNames={{
+                cursor: "bg-purple text-white",
+              }}
+            />
+          ) : null}
         </section>
       </Container>
     </Layout>
@@ -158,7 +211,7 @@ export default function SessionPage({
 }
 
 type DataProps = {
-  sessions?: any;
+  sessions?: SessionType[];
   error?: ErrorDataType;
 };
 
