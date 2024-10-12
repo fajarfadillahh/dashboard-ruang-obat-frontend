@@ -6,6 +6,7 @@ import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import ModalJoiningRequirement from "@/components/modal/ModalJoiningRequirement";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import usePagination from "@/hooks/usePagination";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
 import { ParticipantType, UserType } from "@/types/user.type";
@@ -16,6 +17,8 @@ import { formatRupiah } from "@/utils/formatRupiah";
 import {
   Button,
   Chip,
+  Input,
+  Pagination,
   Snippet,
   Table,
   TableBody,
@@ -31,6 +34,7 @@ import {
   CheckCircle,
   ClockCountdown,
   Copy,
+  MagnifyingGlass,
   Notepad,
   Plus,
   Tag,
@@ -67,6 +71,11 @@ export default function DetailsProgramPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [search, setSearch] = useState("");
+  const { data, page, pages, setPage } = usePagination(
+    program?.participants as ParticipantType[],
+    10,
+  );
 
   const columnsParticipantPaid = [
     { name: "ID Partisipan", uid: "user_id" },
@@ -248,6 +257,14 @@ export default function DetailsProgramPage({
     );
   }
 
+  const filterParticipants = data.length
+    ? data.filter(
+        (participant) =>
+          participant.user_id.toLowerCase().includes(search.toLowerCase()) ||
+          participant.fullname.toLowerCase().includes(search.toLowerCase()),
+      )
+    : [];
+
   return (
     <Layout title={`${program?.title}`}>
       <Container>
@@ -361,6 +378,26 @@ export default function DetailsProgramPage({
                 />
               </div>
 
+              <Input
+                type="text"
+                variant="flat"
+                labelPlacement="outside"
+                placeholder="Cari User ID atau Nama User"
+                startContent={
+                  <MagnifyingGlass
+                    weight="bold"
+                    size={18}
+                    className="text-gray"
+                  />
+                }
+                classNames={{
+                  input:
+                    "font-semibold placeholder:font-semibold placeholder:text-gray",
+                }}
+                className="flex-1"
+                onChange={(e) => setSearch(e.target.value)}
+              />
+
               <div className="overflow-x-scroll">
                 <Table
                   isHeaderSticky
@@ -383,7 +420,7 @@ export default function DetailsProgramPage({
                   </TableHeader>
 
                   <TableBody
-                    items={program?.participants}
+                    items={filterParticipants}
                     emptyContent={
                       <span className="text-sm font-semibold italic text-gray">
                         Partisipan tidak ditemukan!
@@ -402,6 +439,20 @@ export default function DetailsProgramPage({
                   </TableBody>
                 </Table>
               </div>
+
+              {filterParticipants.length ? (
+                <Pagination
+                  isCompact
+                  showControls
+                  page={page}
+                  total={pages}
+                  onChange={setPage}
+                  className="justify-self-center"
+                  classNames={{
+                    cursor: "bg-purple text-white",
+                  }}
+                />
+              ) : null}
             </div>
           </div>
         </section>
