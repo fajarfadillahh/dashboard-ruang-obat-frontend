@@ -16,6 +16,7 @@ import {
   HourglassLow,
   PencilLine,
   Power,
+  Prohibit,
   XCircle,
 } from "@phosphor-icons/react";
 import Link from "next/link";
@@ -30,9 +31,19 @@ export default function CardTest({ test, onStatusChange }: TestProps) {
   const router = useRouter();
 
   return (
-    <div className="flex items-center justify-between gap-12 rounded-xl border-2 border-purple/10 p-6 hover:border-purple hover:bg-purple/10">
+    <div
+      className={`flex items-center justify-between gap-12 rounded-xl border-2 p-6 ${
+        test.is_active
+          ? "border-purple/10 hover:border-purple hover:bg-purple/10"
+          : "border-danger bg-danger/5 hover:bg-danger/10"
+      }`}
+    >
       <div className="inline-flex flex-1 items-start gap-3">
-        <ClipboardText weight="bold" size={28} className="text-purple" />
+        {test.is_active ? (
+          <ClipboardText weight="bold" size={28} className="text-purple" />
+        ) : (
+          <Prohibit weight="bold" size={28} className="text-danger" />
+        )}
 
         <div className="grid gap-6">
           <Link
