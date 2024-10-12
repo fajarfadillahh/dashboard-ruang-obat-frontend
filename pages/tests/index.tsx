@@ -22,6 +22,7 @@ type TestsType = {
 
 export default function TestsPage({
   tests,
+  token,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
@@ -39,6 +40,27 @@ export default function TestsPage({
       router.push("/tests");
     }
   }, [searchValue]);
+
+  async function handleUpdateStatus(
+    test_id: string,
+    is_active: boolean = true,
+  ) {
+    try {
+      await fetcher({
+        url: "/admin/tests/status",
+        method: "PATCH",
+        token,
+        data: {
+          test_id: test_id,
+          is_active: !is_active,
+        },
+      });
+
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   if (error) {
     return (
@@ -104,7 +126,13 @@ export default function TestsPage({
 
             <div className="grid gap-2">
               {tests?.tests.map((test: TestType) => (
-                <CardTest key={test.test_id} test={test} />
+                <CardTest
+                  key={test.test_id}
+                  test={test}
+                  onStatusChange={() =>
+                    handleUpdateStatus(test.test_id, test.is_active)
+                  }
+                />
               ))}
             </div>
 
@@ -136,6 +164,7 @@ export default function TestsPage({
 
 type DataProps = {
   tests?: TestsType;
+  token?: string;
   error?: ErrorDataType;
 };
 
@@ -163,6 +192,7 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
     return {
       props: {
         tests: response.data,
+        token,
       },
     };
   } catch (error: any) {

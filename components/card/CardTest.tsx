@@ -16,15 +16,17 @@ import {
   HourglassLow,
   PencilLine,
   Power,
+  XCircle,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
 interface TestProps {
   test: TestType;
+  onStatusChange: () => void;
 }
 
-export default function CardTest({ test }: TestProps) {
+export default function CardTest({ test, onStatusChange }: TestProps) {
   const router = useRouter();
 
   return (
@@ -103,15 +105,21 @@ export default function CardTest({ test }: TestProps) {
 
                 <Chip
                   variant="flat"
-                  color="success"
+                  color={test.is_active ? "success" : "danger"}
                   size="sm"
-                  startContent={<CheckCircle weight="fill" size={16} />}
+                  startContent={
+                    test.is_active ? (
+                      <CheckCircle weight="fill" size={16} />
+                    ) : (
+                      <XCircle weight="fill" size={16} />
+                    )
+                  }
                   classNames={{
                     base: "px-2 gap-1",
                     content: "font-semibold capitalize",
                   }}
                 >
-                  Aktif
+                  {test.is_active ? "Aktif" : "Tidak Aktif"}
                 </Chip>
               </div>
             </div>
@@ -146,7 +154,9 @@ export default function CardTest({ test }: TestProps) {
                 }}
               >
                 <DropdownSection aria-label="action zone" title="Anda Yakin?">
-                  <DropdownItem>Non-aktifkan Ujian</DropdownItem>
+                  <DropdownItem onClick={onStatusChange}>
+                    {test.is_active ? "Non-aktifkan Ujian" : "Aktifkan Ujian"}
+                  </DropdownItem>
                 </DropdownSection>
               </DropdownMenu>
             </Dropdown>
