@@ -63,6 +63,10 @@ export default function ProgramsPage({
     }
   }
 
+  const filteredPrograms = programs?.programs.filter((program) =>
+    program.title.toLowerCase().includes(`${searchValue}`),
+  );
+
   if (error) {
     return (
       <Layout title="Daftar Program">
@@ -132,17 +136,30 @@ export default function ProgramsPage({
               </Button>
             </div>
 
-            <div className="grid gap-2">
-              {programs?.programs.map((program: ProgramType) => (
-                <CardProgram
-                  key={program.program_id}
-                  program={program}
-                  onStatusChange={() =>
-                    handleUpdateStatus(program.program_id, program.is_active)
-                  }
+            {searchValue && filteredPrograms?.length === 0 ? (
+              <div className="flex items-center justify-center gap-2 py-16">
+                <MagnifyingGlass
+                  weight="bold"
+                  size={20}
+                  className="text-gray"
                 />
-              ))}
-            </div>
+                <p className="font-semibold capitalize text-gray">
+                  Program tidak ditemukan!
+                </p>
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                {programs?.programs.map((program: ProgramType) => (
+                  <CardProgram
+                    key={program.program_id}
+                    program={program}
+                    onStatusChange={() =>
+                      handleUpdateStatus(program.program_id, program.is_active)
+                    }
+                  />
+                ))}
+              </div>
+            )}
 
             {programs?.programs.length ? (
               <Pagination
