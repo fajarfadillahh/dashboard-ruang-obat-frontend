@@ -25,6 +25,7 @@ export default function CreateAdminPage({
     access_key: "",
   });
   const [loading, setLoading] = useState<boolean>(false);
+  const [errors, setErrors] = useState<any>();
 
   async function handleCreateAdmin() {
     setLoading(true);
@@ -126,11 +127,29 @@ export default function CreateAdminPage({
                 labelPlacement="outside"
                 placeholder="Masukan Kata Sandi"
                 name="password"
-                onChange={(e) =>
+                onChange={(e) => {
                   setInput({
                     ...input,
                     [e.target.name]: e.target.value,
-                  })
+                  });
+
+                  if (e.target.value.length < 8) {
+                    setErrors({
+                      ...errors,
+                      password: "Minimal 8 karakter",
+                    });
+                  } else {
+                    setErrors({
+                      ...errors,
+                      password: null,
+                    });
+                  }
+                }}
+                isInvalid={
+                  errors ? (errors.password ? true : false) : undefined
+                }
+                errorMessage={
+                  errors ? (errors.password ? errors.password : null) : null
                 }
                 startContent={
                   <Lock weight="bold" size={18} className="text-default-600" />
