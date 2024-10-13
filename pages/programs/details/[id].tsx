@@ -145,20 +145,28 @@ export default function DetailsProgramPage({
             <Chip
               variant="flat"
               size="sm"
-              color="warning"
+              color={participant.is_approved ? "success" : "warning"}
               startContent={
-                <ClockCountdown
-                  weight="fill"
-                  size={18}
-                  className="text-warning"
-                />
+                participant.is_approved ? (
+                  <CheckCircle
+                    weight="fill"
+                    size={18}
+                    className="text-success"
+                  />
+                ) : (
+                  <ClockCountdown
+                    weight="fill"
+                    size={18}
+                    className="text-warning"
+                  />
+                )
               }
               classNames={{
                 base: "px-2 gap-1",
                 content: "font-semibold capitalize",
               }}
             >
-              Menunggu konfirmasi
+              {participant.is_approved ? "Mengikuti" : "Menunggu konfirmasi"}
             </Chip>
           </div>
         );

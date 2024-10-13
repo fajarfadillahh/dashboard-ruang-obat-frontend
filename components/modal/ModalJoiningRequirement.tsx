@@ -1,6 +1,7 @@
 import { SuccessResponse } from "@/types/global.type";
 import { ParticipantType } from "@/types/user.type";
 import { fetcher } from "@/utils/fetcher";
+import { formatDate } from "@/utils/formatDate";
 import {
   Button,
   Image,
@@ -11,9 +12,10 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
-import { Eye } from "@phosphor-icons/react";
+import { CheckCircle, Eye } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 type RequirementProps = {
   program_id: string;
@@ -28,6 +30,7 @@ export default function ModalJoiningRequirement({
 }: RequirementProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [images, setImages] = useState<{ url: string }[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   async function handleGetImagesApproval(program_id: string, user_id: string) {
     try {
@@ -39,6 +42,32 @@ export default function ModalJoiningRequirement({
 
       setImages(response.data);
     } catch (error) {
+      console.error(error);
+    }
+  }
+
+  async function handleApprovalParticipant(
+    program_id: string,
+    user_id: string,
+  ) {
+    setLoading(true);
+
+    try {
+      (await fetcher({
+        url: "/admin/programs/approved",
+        method: "PATCH",
+        token,
+        data: {
+          program_id: program_id,
+          user_id: user_id,
+        },
+      })) as SuccessResponse<ParticipantType>;
+
+      toast.success("Permintaan Berhasil Diterima");
+      window.location.reload();
+    } catch (error) {
+      setLoading(false);
+      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
   }
@@ -78,10 +107,18 @@ export default function ModalJoiningRequirement({
                       ["ID Partisipan", `${participant.user_id}`],
                       ["Nama Lengkap", `${participant.fullname}`],
                       ["Asal Kampus", `${participant.university}`],
+                      [
+                        "Bergabung Pada",
+                        `${
+                          participant.joined_at === null
+                            ? "-"
+                            : formatDate(participant.joined_at)
+                        }`,
+                      ],
                     ].map(([label, value], index) => (
                       <div
                         key={index}
-                        className="grid grid-cols-[100px_2px_1fr] gap-4 text-sm font-medium text-black"
+                        className="grid grid-cols-[120px_2px_1fr] gap-4 text-sm font-medium text-black"
                       >
                         <p>{label}</p>
                         <span>:</span>
@@ -122,9 +159,30 @@ export default function ModalJoiningRequirement({
                   Tutup
                 </Button>
 
-                <Button variant="solid" color="secondary" className="font-bold">
-                  Persyaratan Diterima
-                </Button>
+                {!participant.is_approved ? (
+                  <Button
+                    isLoading={loading}
+                    variant="solid"
+                    color="secondary"
+                    onClick={() =>
+                      handleApprovalParticipant(program_id, participant.user_id)
+                    }
+                    className="font-bold"
+                  >
+                    {loading ? "Tunggu Sebentar..." : "Permintaan Diterima"}
+                  </Button>
+                ) : (
+                  <div className="inline-flex items-center gap-1">
+                    <CheckCircle
+                      weight="fill"
+                      size={20}
+                      className="text-success"
+                    />
+                    <p className="text-sm font-bold text-black">
+                      Telah Diterima
+                    </p>
+                  </div>
+                )}
               </ModalFooter>
             </>
           )}
