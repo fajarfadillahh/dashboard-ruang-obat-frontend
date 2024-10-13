@@ -51,6 +51,7 @@ export default function ModalAddParticipant({
         data: data,
       });
 
+      toast.success("Berhasil Menambahkan Partisipan");
       window.location.reload();
     } catch (error) {
       setLoading(false);
