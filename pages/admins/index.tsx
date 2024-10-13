@@ -9,7 +9,6 @@ import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import {
   Button,
-  Input,
   Table,
   TableBody,
   TableCell,
@@ -17,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, MagnifyingGlass, PencilLine, Plus } from "@phosphor-icons/react";
+import { Eye, PencilLine, Plus } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -137,89 +136,66 @@ export default function AdminsPage({
     <Layout title="Daftar Admin">
       <Container>
         <section className="grid gap-8">
-          <div className="grid gap-1">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Daftar Admin 🧑🏽
-            </h1>
-            <p className="font-medium text-gray">
-              Tabel admin yang terdaftar di{" "}
-              <Link
-                href="https://ruangobat.id"
-                target="_blank"
-                className="font-bold text-purple"
-              >
-                ruangobat.id
-              </Link>
-            </p>
+          <div className="flex items-end justify-between gap-4">
+            <div className="grid gap-1">
+              <h1 className="text-[22px] font-bold -tracking-wide text-black">
+                Daftar Admin 🧑🏽
+              </h1>
+              <p className="font-medium text-gray">
+                Tabel admin yang terdaftar di{" "}
+                <Link
+                  href="https://ruangobat.id"
+                  target="_blank"
+                  className="font-bold text-purple"
+                >
+                  ruangobat.id
+                </Link>
+              </p>
+            </div>
+
+            <Button
+              variant="solid"
+              color="secondary"
+              startContent={<Plus weight="bold" size={16} />}
+              onClick={() => router.push("/admins/create")}
+              className="w-max font-bold"
+            >
+              Tambah Admin
+            </Button>
           </div>
 
-          <div className="grid gap-4">
-            <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white">
-              <Input
-                type="text"
-                variant="flat"
-                labelPlacement="outside"
-                placeholder="Cari Admin ID atau Nama Admin"
-                startContent={
-                  <MagnifyingGlass
-                    weight="bold"
-                    size={18}
-                    className="text-gray"
-                  />
+          <div className="overflow-x-scroll">
+            <Table
+              isHeaderSticky
+              aria-label="admins table"
+              color="secondary"
+              selectionMode="none"
+              classNames={customStyleTable}
+              className="scrollbar-hide"
+            >
+              <TableHeader columns={columnsUser}>
+                {(column) => (
+                  <TableColumn key={column.uid}>{column.name}</TableColumn>
+                )}
+              </TableHeader>
+
+              <TableBody
+                items={admins}
+                emptyContent={
+                  <span className="text-sm font-semibold italic text-gray">
+                    Admin tidak ditemukan!
+                  </span>
                 }
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-semibold placeholder:text-gray",
-                }}
-                className="flex-1"
-              />
-
-              <Button
-                variant="solid"
-                color="secondary"
-                startContent={<Plus weight="bold" size={16} />}
-                onClick={() => router.push("/admins/create")}
-                className="w-max font-bold"
               >
-                Tambah Admin
-              </Button>
-            </div>
-
-            <div className="overflow-x-scroll">
-              <Table
-                isHeaderSticky
-                aria-label="admins table"
-                color="secondary"
-                selectionMode="none"
-                classNames={customStyleTable}
-                className="scrollbar-hide"
-              >
-                <TableHeader columns={columnsUser}>
-                  {(column) => (
-                    <TableColumn key={column.uid}>{column.name}</TableColumn>
-                  )}
-                </TableHeader>
-
-                <TableBody
-                  items={admins}
-                  emptyContent={
-                    <span className="text-sm font-semibold italic text-gray">
-                      Admin tidak ditemukan!
-                    </span>
-                  }
-                >
-                  {(item) => (
-                    <TableRow key={item.admin_id}>
-                      {(columnKey) => (
-                        <TableCell>
-                          {renderCellUsers(item, columnKey)}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                {(item) => (
+                  <TableRow key={item.admin_id}>
+                    {(columnKey) => (
+                      <TableCell>{renderCellUsers(item, columnKey)}</TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </div>
         </section>
       </Container>
