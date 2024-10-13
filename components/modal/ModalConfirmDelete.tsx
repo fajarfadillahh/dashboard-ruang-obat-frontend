@@ -13,6 +13,7 @@ type ModalProps = {
   id: string;
   header: string;
   title: string;
+  loading?: boolean;
   handleDelete?: () => void;
 };
 
@@ -20,6 +21,7 @@ export default function ModalConfirmDelete({
   id,
   header,
   title,
+  loading,
   handleDelete,
 }: ModalProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -71,14 +73,12 @@ export default function ModalConfirmDelete({
                 </Button>
 
                 <Button
+                  isLoading={loading}
                   color="danger"
-                  onPress={() => {
-                    handleDelete?.();
-                    onClose();
-                  }}
+                  onClick={handleDelete}
                   className="font-bold"
                 >
-                  Ya, Hapus {header}
+                  {loading ? "Tunggu Sebentar..." : `Ya, Hapus ${header}`}
                 </Button>
               </ModalFooter>
             </>

@@ -21,12 +21,16 @@ import { Eye, MagnifyingGlass, PencilLine, Plus } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function AdminsPage({
   admins,
+  token,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const [loading, setLoading] = useState<boolean>(false);
 
   const columnsUser = [
     { name: "ID Admin", uid: "admin_id" },
@@ -83,6 +87,7 @@ export default function AdminsPage({
               id={admin.admin_id}
               header="Admin"
               title={admin.fullname}
+              loading={loading}
               handleDelete={() => handleDeleteAdmin(admin.admin_id)}
             />
           </div>
@@ -93,8 +98,23 @@ export default function AdminsPage({
     }
   }
 
-  function handleDeleteAdmin(id: string) {
-    console.log(`Admin dengan ID: ${id} berhasil terhapus!`);
+  async function handleDeleteAdmin(id: string) {
+    setLoading(true);
+
+    try {
+      await fetcher({
+        url: `/admins/${id}`,
+        method: "DELETE",
+        token,
+      });
+
+      toast.success("Berhasil Menghapus Admin");
+      window.location.reload();
+    } catch (error) {
+      setLoading(false);
+      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
+      console.error(error);
+    }
   }
 
   if (error) {
@@ -209,6 +229,7 @@ export default function AdminsPage({
 
 type DataProps = {
   admins?: AdminType[];
+  token?: string;
   error?: ErrorDataType;
 };
 
@@ -227,6 +248,7 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
     return {
       props: {
         admins: response.data,
+        token,
       },
     };
   } catch (error: any) {
