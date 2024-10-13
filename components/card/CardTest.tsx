@@ -24,7 +24,7 @@ import { useRouter } from "next/router";
 
 interface TestProps {
   test: TestType;
-  onStatusChange: () => void;
+  onStatusChange?: () => void;
 }
 
 export default function CardTest({ test, onStatusChange }: TestProps) {

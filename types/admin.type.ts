@@ -1,7 +1,6 @@
 export type AdminType = {
-  id: string;
-  name: string;
-  username: string;
-  password: string;
+  admin_id: string;
+  fullname: string;
+  role: string;
   created_at: string;
 };
