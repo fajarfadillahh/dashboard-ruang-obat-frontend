@@ -201,7 +201,11 @@ export default function DetailsProgramPage({
         return (
           <div className="flex max-w-max items-center gap-2">
             {program?.type === "free" ? (
-              <ModalJoiningRequirement {...participant} />
+              <ModalJoiningRequirement
+                program_id={program.program_id}
+                participant={participant}
+                token={`${token}`}
+              />
             ) : null}
 
             <ModalConfirmDelete
