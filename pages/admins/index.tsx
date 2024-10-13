@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { MagnifyingGlass, PencilLine, Plus } from "@phosphor-icons/react";
+import { Eye, MagnifyingGlass, PencilLine, Plus } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -59,6 +59,16 @@ export default function AdminsPage({
       case "action":
         return (
           <div className="inline-flex w-max items-center gap-1">
+            <Button
+              isIconOnly
+              variant="light"
+              color="secondary"
+              size="sm"
+              onClick={() => router.push(`/admins/details/${admin.admin_id}`)}
+            >
+              <Eye weight="bold" size={18} />
+            </Button>
+
             <Button
               isIconOnly
               variant="light"
