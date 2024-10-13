@@ -11,6 +11,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useDebounce } from "use-debounce";
 
 type TestsType = {
@@ -56,8 +57,12 @@ export default function TestsPage({
         },
       });
 
+      is_active
+        ? toast.success("Berhasil Menonaktifkan Ujian")
+        : toast.success("Berhasil Mengaktifkan Ujian");
       window.location.reload();
     } catch (error) {
+      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
   }
