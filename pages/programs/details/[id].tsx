@@ -57,12 +57,6 @@ type DetailsProgramType = {
   participants: ParticipantType[];
 };
 
-type UsersType = {
-  users: UserType[];
-  total_users: number;
-  total_pages: number;
-};
-
 export default function DetailsProgramPage({
   program,
   users,
@@ -76,6 +70,8 @@ export default function DetailsProgramPage({
     program?.participants as ParticipantType[],
     10,
   );
+
+  console.log(users);
 
   const columnsParticipantPaid = [
     { name: "ID Partisipan", uid: "user_id" },
@@ -477,7 +473,7 @@ export default function DetailsProgramPage({
 
 type DataProps = {
   program?: DetailsProgramType;
-  users?: UsersType;
+  users?: UserType[];
   token?: string;
   error?: ErrorDataType;
 };
@@ -497,10 +493,10 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
       }) as Promise<SuccessResponse<DetailsProgramType>>,
 
       fetcher({
-        url: "/admin/users",
+        url: "/admin/users?page=all",
         method: "GET",
         token,
-      }) as Promise<SuccessResponse<UsersType>>,
+      }) as Promise<SuccessResponse<UserType[]>>,
     ]);
 
     return {

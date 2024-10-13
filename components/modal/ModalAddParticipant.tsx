@@ -85,7 +85,7 @@ export default function ModalAddParticipant({
                   aria-label="select user"
                   labelPlacement="outside"
                   placeholder="Cari ID Pengguna..."
-                  defaultItems={users.users}
+                  defaultItems={users}
                   selectedKey={value}
                   onSelectionChange={(key) => {
                     key !== null ? setValue(key.toString()) : setValue("");
