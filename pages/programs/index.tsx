@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useDebounce } from "use-debounce";
 
 export type ProgramsType = {
@@ -57,8 +58,12 @@ export default function ProgramsPage({
         },
       });
 
+      is_active
+        ? toast.success("Berhasil Menonaktifkan Program")
+        : toast.success("Berhasil Mengaktifkan Program");
       window.location.reload();
     } catch (error) {
+      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
   }
