@@ -48,7 +48,7 @@ export default function CardTest({ test, onStatusChange }: TestProps) {
         <div className="grid gap-6">
           <Link
             href={`/tests/details/${test.test_id}`}
-            className="line-clamp-1 text-[20px] font-bold leading-[120%] text-black hover:text-purple"
+            className={`line-clamp-1 text-[20px] font-bold leading-[120%] text-black ${test.is_active ? "hover:text-purple" : "hover:text-danger"}`}
           >
             {test.title}
           </Link>
