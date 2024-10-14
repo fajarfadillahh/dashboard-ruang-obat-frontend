@@ -2,6 +2,7 @@ import ErrorPage from "@/components/ErrorPage";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import usePagination from "@/hooks/usePagination";
 import { AdminType } from "@/types/admin.type";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
@@ -9,6 +10,8 @@ import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import {
   Button,
+  Input,
+  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -16,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, PencilLine, Plus } from "@phosphor-icons/react";
+import { Eye, MagnifyingGlass, PencilLine, Plus } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -30,6 +33,11 @@ export default function AdminsPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
+  const [search, setSearch] = useState("");
+  const { data, page, pages, setPage } = usePagination(
+    admins as AdminType[],
+    10,
+  );
 
   const columnsUser = [
     { name: "ID Admin", uid: "admin_id" },
@@ -132,70 +140,116 @@ export default function AdminsPage({
     );
   }
 
+  const filteredAdmin = data.length
+    ? data.filter(
+        (admin) =>
+          admin.admin_id.toLowerCase().includes(search.toLowerCase()) ||
+          admin.fullname.toLowerCase().includes(search.toLowerCase()),
+      )
+    : [];
+
   return (
     <Layout title="Daftar Admin">
       <Container>
         <section className="grid gap-8">
-          <div className="flex items-end justify-between gap-4">
-            <div className="grid gap-1">
-              <h1 className="text-[22px] font-bold -tracking-wide text-black">
-                Daftar Admin 🧑🏽
-              </h1>
-              <p className="font-medium text-gray">
-                Tabel admin yang terdaftar di{" "}
-                <Link
-                  href="https://ruangobat.id"
-                  target="_blank"
-                  className="font-bold text-purple"
-                >
-                  ruangobat.id
-                </Link>
-              </p>
-            </div>
-
-            <Button
-              variant="solid"
-              color="secondary"
-              startContent={<Plus weight="bold" size={16} />}
-              onClick={() => router.push("/admins/create")}
-              className="w-max font-bold"
-            >
-              Tambah Admin
-            </Button>
+          <div className="grid gap-1">
+            <h1 className="text-[22px] font-bold -tracking-wide text-black">
+              Daftar Admin 🧑🏽
+            </h1>
+            <p className="font-medium text-gray">
+              Tabel admin yang terdaftar di{" "}
+              <Link
+                href="https://ruangobat.id"
+                target="_blank"
+                className="font-bold text-purple"
+              >
+                ruangobat.id
+              </Link>
+            </p>
           </div>
 
-          <div className="overflow-x-scroll">
-            <Table
-              isHeaderSticky
-              aria-label="admins table"
-              color="secondary"
-              selectionMode="none"
-              classNames={customStyleTable}
-              className="scrollbar-hide"
-            >
-              <TableHeader columns={columnsUser}>
-                {(column) => (
-                  <TableColumn key={column.uid}>{column.name}</TableColumn>
-                )}
-              </TableHeader>
-
-              <TableBody
-                items={admins}
-                emptyContent={
-                  <span className="text-sm font-semibold italic text-gray">
-                    Admin tidak ditemukan!
-                  </span>
+          <div className="grid gap-4">
+            <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white">
+              <Input
+                type="text"
+                variant="flat"
+                labelPlacement="outside"
+                placeholder="Cari Admin ID atau Nama Admin"
+                onChange={(e) => setSearch(e.target.value)}
+                startContent={
+                  <MagnifyingGlass
+                    weight="bold"
+                    size={18}
+                    className="text-gray"
+                  />
                 }
+                classNames={{
+                  input:
+                    "font-semibold placeholder:font-semibold placeholder:text-gray",
+                }}
+                className="flex-1"
+              />
+
+              <Button
+                variant="solid"
+                color="secondary"
+                startContent={<Plus weight="bold" size={16} />}
+                onClick={() => router.push("/admins/create")}
+                className="w-max font-bold"
               >
-                {(item) => (
-                  <TableRow key={item.admin_id}>
-                    {(columnKey) => (
-                      <TableCell>{renderCellUsers(item, columnKey)}</TableCell>
-                    )}
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                Tambah Admin
+              </Button>
+            </div>
+
+            <div className="overflow-x-scroll">
+              <Table
+                isHeaderSticky
+                aria-label="admins table"
+                color="secondary"
+                selectionMode="none"
+                classNames={customStyleTable}
+                className="scrollbar-hide"
+              >
+                <TableHeader columns={columnsUser}>
+                  {(column) => (
+                    <TableColumn key={column.uid}>{column.name}</TableColumn>
+                  )}
+                </TableHeader>
+
+                <TableBody
+                  items={filteredAdmin}
+                  emptyContent={
+                    <span className="text-sm font-semibold italic text-gray">
+                      Admin tidak ditemukan!
+                    </span>
+                  }
+                >
+                  {(item) => (
+                    <TableRow key={item.admin_id}>
+                      {(columnKey) => (
+                        <TableCell>
+                          {renderCellUsers(item, columnKey)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            {filteredAdmin.length > 10 ? (
+              <Pagination
+                isCompact
+                showControls
+                page={page}
+                total={pages}
+                onChange={setPage}
+                className="justify-self-center"
+                classNames={{
+                  cursor: "bg-purple text-white",
+                }}
+              />
+            ) : null}
           </div>
         </section>
       </Container>
