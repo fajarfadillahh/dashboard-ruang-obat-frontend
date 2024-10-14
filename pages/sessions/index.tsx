@@ -207,7 +207,7 @@ export default function SessionPage({
             </Table>
           </div>
 
-          {filter.length ? (
+          {filter.length > 10 ? (
             <Pagination
               isCompact
               showControls
