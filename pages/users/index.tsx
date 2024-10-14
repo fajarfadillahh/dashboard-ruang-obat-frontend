@@ -1,5 +1,4 @@
 import ErrorPage from "@/components/ErrorPage";
-import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
@@ -80,12 +79,12 @@ export default function UsersPage({
               <Eye weight="bold" size={18} />
             </Button>
 
-            <ModalConfirmDelete
+            {/* <ModalConfirmDelete
               id={user.user_id}
               header="Pengguna"
               title={user.fullname}
               handleDelete={() => handleDeleteUser(user.user_id)}
-            />
+            /> */}
           </div>
         );
 
@@ -152,7 +151,7 @@ export default function UsersPage({
                 type="text"
                 variant="flat"
                 labelPlacement="outside"
-                placeholder="Cari User ID atau Nama User..."
+                placeholder="Cari User ID atau Nama User"
                 startContent={
                   <MagnifyingGlass
                     weight="bold"
