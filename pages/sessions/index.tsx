@@ -21,9 +21,11 @@ import { MagnifyingGlass } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function SessionPage({
   sessions,
+  token,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [search, setSearch] = useState("");
@@ -79,7 +81,7 @@ export default function SessionPage({
             id={session.user_id}
             header="Session"
             title={`Session: ${session.fullname}`}
-            handleDelete={() => handleSessionLoginUser(session.user_id)}
+            handleDelete={() => handleDeleteSession(session.user_id)}
           />
         );
 
@@ -88,8 +90,20 @@ export default function SessionPage({
     }
   }
 
-  function handleSessionLoginUser(id: string) {
-    console.log(`Session pengguna dengan ID: ${id} berhasil terhapus!`);
+  async function handleDeleteSession(id: string) {
+    try {
+      await fetcher({
+        url: `/auth/session/${id}`,
+        method: "DELETE",
+        token,
+      });
+
+      toast.success("Session Berhasil Dihapus");
+      window.location.reload();
+    } catch (error) {
+      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
+      console.error(error);
+    }
   }
 
   if (error) {
@@ -214,6 +228,7 @@ export default function SessionPage({
 
 type DataProps = {
   sessions?: SessionType[];
+  token?: string;
   error?: ErrorDataType;
 };
 
@@ -232,6 +247,7 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
     return {
       props: {
         sessions: response.data,
+        token,
       },
     };
   } catch (error: any) {
