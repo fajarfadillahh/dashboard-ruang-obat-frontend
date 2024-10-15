@@ -2,24 +2,188 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CardInputTest from "@/components/card/CardInputTest";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { getLocalTimeZone, now, today } from "@internationalized/date";
+import { fetcher } from "@/utils/fetcher";
+import { getLocalTimeZone, today } from "@internationalized/date";
 import { Button, DatePicker, Input, Textarea } from "@nextui-org/react";
 import {
   Calendar,
   ClockCountdown,
+  Database,
   FloppyDisk,
   Plus,
 } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { useCallback, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
-export default function CreateTestPage() {
-  const [client, setClient] = useState(false);
+export type CreateQuestion = {
+  text: string;
+  options: {
+    text: string;
+    is_correct: boolean;
+  }[];
+  explanation: string;
+};
+
+export default function CreateTestPage({
+  token,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const [input, setInput] = useState({
+    title: "",
+    description: "",
+    start: "",
+    end: "",
+    duration: 0,
+  });
+  const [questions, setQuestions] = useState<CreateQuestion[]>([]);
+  const router = useRouter();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
-    setClient(true);
+    const input = localStorage.getItem("input");
+    const questions = localStorage.getItem("questions");
+
+    if (questions && input) {
+      setQuestions(JSON.parse(questions) as CreateQuestion[]);
+      setInput(
+        JSON.parse(input) as {
+          title: string;
+          description: string;
+          start: string;
+          end: string;
+          duration: number;
+        },
+      );
+    }
   }, []);
 
-  if (!client) return null;
+  function handleAddQuestion() {
+    const question = {
+      text: "",
+      options: Array.from({ length: 5 }).map(() => {
+        return {
+          text: "",
+          is_correct: false,
+        };
+      }),
+      explanation: "",
+    };
+
+    setQuestions((prev) => prev.concat(question));
+  }
+
+  const handleRemoveQuestion = useCallback(
+    (index: number) => {
+      const filters = questions.filter((_, findex) => findex != index);
+
+      setQuestions(filters);
+      localStorage.setItem("questions", JSON.stringify(filters));
+    },
+    [questions],
+  );
+
+  function handleEditorChange({
+    index,
+    text,
+    field,
+  }: {
+    index: number;
+    text: string;
+    field: "explanation" | "text";
+  }) {
+    if (field == "text") {
+      const mapping = [...questions];
+      mapping[index] = {
+        ...mapping[index],
+        text,
+      };
+
+      setQuestions(mapping);
+    }
+
+    if (field == "explanation") {
+      const mapping = [...questions];
+      mapping[index] = {
+        ...mapping[index],
+        explanation: text,
+      };
+
+      setQuestions(mapping);
+    }
+  }
+
+  const handleOptionChange = useCallback(
+    (
+      qIndex: number,
+      oIndex: number,
+      option: {
+        text: string;
+        is_correct: boolean;
+      },
+    ) => {
+      const mapping = [...questions];
+      mapping[qIndex].options[oIndex] = option;
+
+      mapping[qIndex] = {
+        ...mapping[qIndex],
+      };
+
+      setQuestions(mapping);
+    },
+    [questions],
+  );
+
+  const handleCheckboxChange = useCallback(
+    (
+      qIndex: number,
+      oIndex: number,
+      option: {
+        text: string;
+        is_correct: boolean;
+      },
+    ) => {
+      const mapping = [...questions];
+      mapping[qIndex].options[oIndex] = option;
+
+      mapping[qIndex] = {
+        ...mapping[qIndex],
+      };
+
+      setQuestions(mapping);
+    },
+    [questions],
+  );
+
+  async function handleSaveTest() {
+    try {
+      await fetcher({
+        url: "/admin/tests",
+        method: "POST",
+        data: {
+          ...input,
+          questions: questions.map((question, index) => {
+            return {
+              ...question,
+              number: index + 1,
+              type: "text",
+            };
+          }),
+          by: status == "authenticated" ? session.user.fullname : "",
+        },
+        token,
+      });
+
+      toast.success("Berhasil membuat test");
+
+      localStorage.removeItem("input");
+      localStorage.removeItem("questions");
+      router.back();
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <Layout title="Buat Ujian">
@@ -41,6 +205,7 @@ export default function CreateTestPage() {
               <h5 className="font-bold text-black">Data Ujian</h5>
 
               <Input
+                value={input.title}
                 isRequired
                 type="text"
                 variant="flat"
@@ -52,9 +217,16 @@ export default function CreateTestPage() {
                     "font-semibold placeholder:font-normal placeholder:text-default-600",
                 }}
                 className="flex-1"
+                onChange={(e) => {
+                  setInput({
+                    ...input,
+                    title: e.target.value,
+                  });
+                }}
               />
 
               <Textarea
+                value={input.description}
                 isRequired
                 variant="flat"
                 label="Deskripsi Ujian"
@@ -63,6 +235,12 @@ export default function CreateTestPage() {
                 classNames={{
                   input:
                     "font-semibold placeholder:font-normal placeholder:text-default-600",
+                }}
+                onChange={(e) => {
+                  setInput({
+                    ...input,
+                    description: e.target.value,
+                  });
                 }}
               />
 
@@ -77,7 +255,16 @@ export default function CreateTestPage() {
                   endContent={<Calendar weight="bold" size={18} />}
                   hourCycle={24}
                   minValue={today(getLocalTimeZone())}
-                  defaultValue={now(getLocalTimeZone())}
+                  defaultValue={today(getLocalTimeZone())}
+                  onChange={(e) => {
+                    const value = e.toString();
+                    const date = new Date(value);
+                    date.setHours(0, 0, 0, 0);
+                    setInput({
+                      ...input,
+                      start: date.toISOString(),
+                    });
+                  }}
                 />
 
                 <DatePicker
@@ -88,11 +275,21 @@ export default function CreateTestPage() {
                   label="Tanggal Selesai"
                   labelPlacement="outside"
                   endContent={<Calendar weight="bold" size={18} />}
-                  hourCycle={24}
-                  defaultValue={now(getLocalTimeZone())}
+                  minValue={today(getLocalTimeZone()).add({ days: 1 })}
+                  defaultValue={today(getLocalTimeZone()).add({ days: 1 })}
+                  onChange={(e) => {
+                    const value = e.toString();
+                    const date = new Date(value);
+                    date.setHours(23, 59, 59, 999);
+                    setInput({
+                      ...input,
+                      end: date.toISOString(),
+                    });
+                  }}
                 />
 
                 <Input
+                  value={`${input.duration}`}
                   isRequired
                   type="number"
                   variant="flat"
@@ -110,6 +307,12 @@ export default function CreateTestPage() {
                     input:
                       "font-semibold placeholder:font-normal placeholder:text-default-600",
                   }}
+                  onChange={(e) => {
+                    setInput({
+                      ...input,
+                      duration: parseInt(e.target.value),
+                    });
+                  }}
                 />
               </div>
             </div>
@@ -118,21 +321,55 @@ export default function CreateTestPage() {
               <div className="sticky left-0 top-0 z-50 flex items-end justify-between gap-4 bg-white py-4">
                 <h5 className="font-bold text-black">Daftar Soal</h5>
 
-                <Button
-                  variant="solid"
-                  color="secondary"
-                  startContent={<FloppyDisk weight="bold" size={18} />}
-                  className="w-max justify-self-end font-bold"
-                >
-                  Simpan Ujian
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    variant="bordered"
+                    color="secondary"
+                    startContent={<FloppyDisk weight="bold" size={18} />}
+                    className="w-max justify-self-end font-bold"
+                    onClick={() => {
+                      localStorage.setItem(
+                        "questions",
+                        JSON.stringify(questions),
+                      );
+                      localStorage.setItem("input", JSON.stringify(input));
+                      toast.success("Berhasil simpan ke dalam draft");
+                    }}
+                    size="md"
+                  >
+                    Simpan Draft
+                  </Button>
+
+                  <Button
+                    variant="solid"
+                    color="secondary"
+                    startContent={<Database weight="bold" size={18} />}
+                    className="w-max justify-self-end font-bold"
+                    onClick={handleSaveTest}
+                    size="md"
+                  >
+                    Simpan Database
+                  </Button>
+                </div>
               </div>
 
               <div className="grid gap-4 overflow-y-scroll">
                 <div className="grid gap-2">
-                  {Array.from({ length: 2 }, (_, i) => (
-                    <CardInputTest key={i} />
-                  ))}
+                  {questions.map((question, index) => {
+                    return (
+                      <CardInputTest
+                        key={index}
+                        {...{
+                          question,
+                          index,
+                          handleRemoveQuestion,
+                          handleEditorChange,
+                          handleOptionChange,
+                          handleCheckboxChange,
+                        }}
+                      />
+                    );
+                  })}
                 </div>
 
                 <Button
@@ -140,6 +377,7 @@ export default function CreateTestPage() {
                   color="default"
                   startContent={<Plus weight="bold" size={18} />}
                   className="font-bold"
+                  onClick={handleAddQuestion}
                 >
                   Tambah Soal
                 </Button>
@@ -151,3 +389,15 @@ export default function CreateTestPage() {
     </Layout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+}> = async ({ req }) => {
+  const token = req.headers["access_token"] as string;
+
+  return {
+    props: {
+      token,
+    },
+  };
+};

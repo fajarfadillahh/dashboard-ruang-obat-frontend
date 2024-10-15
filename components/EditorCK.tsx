@@ -11,14 +11,14 @@ import {
   Undo,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
-import { Dispatch, SetStateAction } from "react";
+import { memo } from "react";
 
 type EditorCKProps = {
   value: string;
-  onChange: Dispatch<SetStateAction<string>>;
+  onChange: (text: string) => void;
 };
 
-export default function EditorCK({ value, onChange }: EditorCKProps) {
+export default memo(function EditorCK({ value, onChange }: EditorCKProps) {
   return (
     <CKEditor
       editor={ClassicEditor}
@@ -43,4 +43,4 @@ export default function EditorCK({ value, onChange }: EditorCKProps) {
       }}
     />
   );
-}
+});

@@ -1,18 +1,112 @@
+import { CreateQuestion } from "@/pages/tests/create";
 import { Button, Checkbox, Input } from "@nextui-org/react";
 import { X } from "@phosphor-icons/react";
-import dynamic from "next/dynamic";
-import { useState } from "react";
-const EditorCK = dynamic(() => import("@/components/EditorCK"), { ssr: false });
+import { memo, useEffect, useState } from "react";
+import { useDebounce } from "use-debounce";
+import CardSimpleInputTest from "./CardSimpleInputTest";
 
-export default function CardInputTest() {
-  const [questionContent, setQuestionContent] = useState<string>("");
-  const [answerContent, setAnswerContent] = useState<string>("");
+type CardInputTestProps = {
+  question: CreateQuestion;
+  index: number;
+  handleRemoveQuestion: (number: number) => void;
+  handleEditorChange: (params: {
+    index: number;
+    text: string;
+    field: "explanation" | "text";
+  }) => void;
+  handleOptionChange: (
+    qIndex: number,
+    oIndex: number,
+    option: {
+      text: string;
+      is_correct: boolean;
+    },
+  ) => void;
+  handleCheckboxChange: (
+    qIndex: number,
+    oIndex: number,
+    option: {
+      text: string;
+      is_correct: boolean;
+    },
+  ) => void;
+};
+
+export default memo(function CardInputTest({
+  question,
+  handleRemoveQuestion,
+  handleEditorChange,
+  handleOptionChange,
+  handleCheckboxChange,
+  index,
+}: CardInputTestProps) {
+  const [text, setText] = useState("");
+  const [textDebounce] = useDebounce(text, 1000);
+  const [explanation, setExplanation] = useState("");
+  const [explanationDebounce] = useDebounce(explanation, 1000);
+  const [optionChange, setOptionChange] = useState<{
+    text: string;
+    index: null | number;
+  }>({ text: "", index: null });
+
+  const [optionChangeDebounce] = useDebounce(optionChange, 800);
+  const [checkboxChange, setCheckboxChange] = useState<{
+    is_correct: boolean;
+    index: null | number;
+  }>({
+    is_correct: false,
+    index: null,
+  });
+  const [checkboxChangeDebounce] = useDebounce(checkboxChange, 800);
+
+  useEffect(() => {
+    handleEditorChange({
+      index,
+      text: textDebounce,
+      field: "text",
+    });
+  }, [textDebounce]);
+
+  useEffect(() => {
+    handleEditorChange({
+      index,
+      text: explanationDebounce,
+      field: "explanation",
+    });
+  }, [explanationDebounce]);
+
+  useEffect(() => {
+    if (checkboxChangeDebounce.index != null) {
+      const option = (question.options[checkboxChangeDebounce.index as number] =
+        {
+          ...question.options[checkboxChangeDebounce.index as number],
+          is_correct: checkboxChangeDebounce.is_correct,
+        });
+
+      handleCheckboxChange(
+        index,
+        checkboxChangeDebounce.index as number,
+        option,
+      );
+    }
+  }, [checkboxChangeDebounce]);
+
+  useEffect(() => {
+    if (optionChangeDebounce.index != null) {
+      const option = (question.options[optionChangeDebounce.index as number] = {
+        ...question.options[optionChangeDebounce.index as number],
+        text: optionChangeDebounce.text,
+      });
+
+      handleOptionChange(index, optionChangeDebounce.index as number, option);
+    }
+  }, [optionChangeDebounce]);
 
   return (
     <div className="rounded-xl border-2 border-gray/20 p-8">
       <div className="flex items-start gap-8">
         <div className="flex size-8 items-center justify-center rounded-lg bg-gray/20 font-bold text-gray">
-          1
+          {index + 1}
         </div>
 
         <div className="grid flex-1 gap-8">
@@ -21,8 +115,9 @@ export default function CardInputTest() {
               Pertanyaan
             </p>
 
-            <EditorCK
-              {...{ value: questionContent, onChange: setQuestionContent }}
+            <CardSimpleInputTest
+              value={text ? text : question.text}
+              onChange={setText}
             />
           </div>
 
@@ -32,41 +127,80 @@ export default function CardInputTest() {
             </p>
 
             <div className="grid gap-2">
-              {Array.from({ length: 4 }, (_, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Checkbox size="lg" color="secondary"></Checkbox>
+              {question.options.map((option, index) => {
+                return (
+                  <div key={index} className="flex items-center gap-2">
+                    <Checkbox
+                      size="lg"
+                      color="secondary"
+                      isSelected={
+                        checkboxChange.index == index
+                          ? checkboxChange.is_correct
+                          : question.options[index].is_correct
+                      }
+                      onValueChange={(e) =>
+                        setCheckboxChange({ is_correct: e, index })
+                      }
+                    />
 
-                  <Input
-                    type="text"
-                    variant="flat"
-                    color="default"
-                    labelPlacement="outside"
-                    placeholder="Tuliskan Jawaban..."
-                    classNames={{
-                      input:
-                        "font-medium placeholder:font-semibold placeholder:text-gray",
-                    }}
-                  />
-                </div>
-              ))}
+                    <Input
+                      value={
+                        optionChange.index == index
+                          ? optionChange.text
+                          : question.options[index].text
+                      }
+                      type="text"
+                      variant="flat"
+                      color="default"
+                      labelPlacement="outside"
+                      placeholder="Tuliskan Jawaban..."
+                      classNames={{
+                        input:
+                          "font-medium placeholder:font-semibold placeholder:text-gray",
+                      }}
+                      onChange={(e) =>
+                        setOptionChange({ text: e.target.value, index })
+                      }
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
           <div className="grid gap-2">
             <p className="font-medium text-black after:pl-[2px] after:text-danger after:content-['*']">
-              Penjelasan
+              Pembahasan
             </p>
 
-            <EditorCK
-              {...{ value: answerContent, onChange: setAnswerContent }}
+            <CardSimpleInputTest
+              value={explanation ? explanation : question.explanation}
+              onChange={setExplanation}
             />
           </div>
         </div>
 
-        <Button isIconOnly variant="light" size="sm">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          onClick={() => {
+            setText("");
+            setExplanation("");
+            setOptionChange({
+              text: "",
+              index: null,
+            });
+            setCheckboxChange({
+              is_correct: false,
+              index: null,
+            });
+            handleRemoveQuestion(index);
+          }}
+        >
           <X weight="bold" size={16} className="text-black" />
         </Button>
       </div>
     </div>
   );
-}
+});
