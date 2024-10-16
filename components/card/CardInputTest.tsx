@@ -105,15 +105,11 @@ export default memo(function CardInputTest({
   return (
     <div className="rounded-xl border-2 border-gray/20 p-8">
       <div className="flex items-start gap-8">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-gray/20 font-bold text-gray">
-          {index + 1}
-        </div>
+        <div className="font-extrabold text-purple">{index + 1}.</div>
 
         <div className="grid flex-1 gap-8">
           <div className="grid gap-2">
-            <p className="font-medium text-black after:pl-[2px] after:text-danger after:content-['*']">
-              Pertanyaan
-            </p>
+            <p className="font-medium text-black">Pertanyaan</p>
 
             <CardSimpleInputTest
               value={text ? text : question.text}
@@ -122,14 +118,12 @@ export default memo(function CardInputTest({
           </div>
 
           <div className="grid gap-2">
-            <p className="font-medium text-black after:pl-[2px] after:text-danger after:content-['*']">
-              Jawaban
-            </p>
+            <p className="font-medium text-black">Jawaban</p>
 
             <div className="grid gap-2">
               {question.options.map((option, index) => {
                 return (
-                  <div key={index} className="flex items-center gap-2">
+                  <div key={index} className="flex">
                     <Checkbox
                       size="lg"
                       color="secondary"
@@ -149,14 +143,12 @@ export default memo(function CardInputTest({
                           ? optionChange.text
                           : question.options[index].text
                       }
-                      type="text"
-                      variant="flat"
+                      variant="bordered"
                       color="default"
                       labelPlacement="outside"
-                      placeholder="Tuliskan Jawaban..."
+                      placeholder="Tuliskan Jawaban"
                       classNames={{
-                        input:
-                          "font-medium placeholder:font-semibold placeholder:text-gray",
+                        input: "font-medium",
                       }}
                       onChange={(e) =>
                         setOptionChange({ text: e.target.value, index })
@@ -169,9 +161,7 @@ export default memo(function CardInputTest({
           </div>
 
           <div className="grid gap-2">
-            <p className="font-medium text-black after:pl-[2px] after:text-danger after:content-['*']">
-              Pembahasan
-            </p>
+            <p className="font-medium text-black">Pembahasan</p>
 
             <CardSimpleInputTest
               value={explanation ? explanation : question.explanation}
@@ -183,6 +173,7 @@ export default memo(function CardInputTest({
         <Button
           isIconOnly
           variant="light"
+          color="default"
           size="sm"
           onClick={() => {
             setText("");
@@ -198,7 +189,7 @@ export default memo(function CardInputTest({
             handleRemoveQuestion(index);
           }}
         >
-          <X weight="bold" size={16} className="text-black" />
+          <X weight="bold" size={16} />
         </Button>
       </div>
     </div>
