@@ -108,8 +108,8 @@ export default memo(function CardInputTest({
         <div className="font-extrabold text-purple">{index + 1}.</div>
 
         <div className="grid flex-1 gap-8">
-          <div className="grid gap-2">
-            <p className="font-medium text-black">Pertanyaan</p>
+          <div>
+            <p className="mb-2 font-medium text-black">Pertanyaan</p>
 
             <CardSimpleInputTest
               value={text ? text : question.text}
@@ -117,13 +117,13 @@ export default memo(function CardInputTest({
             />
           </div>
 
-          <div className="grid gap-2">
-            <p className="font-medium text-black">Jawaban</p>
+          <div>
+            <p className="mb-2 font-medium text-black">Jawaban</p>
 
-            <div className="grid gap-2">
+            <div>
               {question.options.map((option, index) => {
                 return (
-                  <div key={index} className="flex">
+                  <div key={index} className="flex space-y-2">
                     <Checkbox
                       size="lg"
                       color="secondary"
@@ -160,8 +160,8 @@ export default memo(function CardInputTest({
             </div>
           </div>
 
-          <div className="grid gap-2">
-            <p className="font-medium text-black">Pembahasan</p>
+          <div>
+            <p className="mb-2 font-medium text-black">Pembahasan</p>
 
             <CardSimpleInputTest
               value={explanation ? explanation : question.explanation}
