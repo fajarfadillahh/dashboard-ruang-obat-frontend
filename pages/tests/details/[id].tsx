@@ -1,18 +1,65 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ErrorPage from "@/components/ErrorPage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { fetcher } from "@/utils/fetcher";
+import { formatDate } from "@/utils/formatDate";
+import { Accordion, AccordionItem, Chip } from "@nextui-org/react";
 import {
-  Accordion,
-  AccordionItem,
-  Chip,
-  Radio,
-  RadioGroup,
-} from "@nextui-org/react";
-import { ClockCountdown } from "@phosphor-icons/react";
+  CheckCircle,
+  ClockCountdown,
+  HourglassLow,
+  XCircle,
+} from "@phosphor-icons/react";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
-export default function DetailsTestPage() {
+type DetailsTestType = {
+  status: string;
+  total_questions: number;
+  test_id: string;
+  title: string;
+  description: string;
+  start: string;
+  end: string;
+  duration: number;
+  questions: {
+    question_id: string;
+    number: number;
+    text: string;
+    explanation: string;
+    options: {
+      text: string;
+      option_id: string;
+      is_correct: boolean;
+    }[];
+  }[];
+};
+
+export default function DetailsTestPage({
+  test,
+  error,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  console.log(test);
+
+  if (error) {
+    return (
+      <Layout title={`${test?.title}`}>
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
+  }
+
   return (
-    <Layout title={`Tryout Internal Ruangobat Part 1`}>
+    <Layout title={`${test?.title}`}>
       <Container>
         <section className="grid gap-8">
           <ButtonBack />
@@ -21,13 +68,10 @@ export default function DetailsTestPage() {
             <div className="grid gap-6 pb-8">
               <div>
                 <h4 className="mb-2 text-[28px] font-bold capitalize leading-[120%] -tracking-wide text-black">
-                  Tryout Internal Ruangobat Part 1
+                  {test?.title}
                 </h4>
                 <p className="max-w-[700px] font-medium leading-[170%] text-gray">
-                  Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-                  Deleniti doloremque commodi corrupti doloribus voluptatem in
-                  voluptates voluptate vel a amet maxime nam natus libero nisi
-                  quo, ratione cumque eaque assumenda!
+                  {test?.description}
                 </p>
               </div>
 
@@ -37,7 +81,7 @@ export default function DetailsTestPage() {
                     Tanggal Mulai:
                   </span>
                   <h1 className="font-semibold text-black">
-                    5 Agustus 2024 10:00
+                    {formatDate(`${test?.start}`)}
                   </h1>
                 </div>
 
@@ -46,7 +90,7 @@ export default function DetailsTestPage() {
                     Tanggal Selesai:
                   </span>
                   <h1 className="font-semibold text-black">
-                    10 Agustus 2024 23:59
+                    {formatDate(`${test?.end}`)}
                   </h1>
                 </div>
 
@@ -54,14 +98,18 @@ export default function DetailsTestPage() {
                   <span className="text-sm font-medium text-gray">
                     Durasi Pengerjaan:
                   </span>
-                  <h1 className="font-semibold text-black">200 Menit</h1>
+                  <h1 className="font-semibold text-black">
+                    {test?.duration} Menit
+                  </h1>
                 </div>
 
                 <div className="grid gap-1">
                   <span className="text-sm font-medium text-gray">
                     Jumlah Soal:
                   </span>
-                  <h1 className="font-semibold text-black">100 Butir</h1>
+                  <h1 className="font-semibold text-black">
+                    {test?.total_questions} Butir
+                  </h1>
                 </div>
 
                 <div className="grid gap-1">
@@ -71,20 +119,29 @@ export default function DetailsTestPage() {
 
                   <Chip
                     variant="flat"
-                    color="default"
+                    color={
+                      test?.status === "Belum dimulai"
+                        ? "danger"
+                        : test?.status === "Berlangsung"
+                          ? "warning"
+                          : "success"
+                    }
+                    size="sm"
                     startContent={
-                      <ClockCountdown
-                        weight="bold"
-                        size={18}
-                        className="text-black"
-                      />
+                      test?.status === "Belum dimulai" ? (
+                        <ClockCountdown weight="bold" size={16} />
+                      ) : test?.status === "Berlangsung" ? (
+                        <HourglassLow weight="fill" size={16} />
+                      ) : (
+                        <CheckCircle weight="fill" size={16} />
+                      )
                     }
                     classNames={{
-                      base: "px-3 gap-1",
-                      content: "font-semibold text-black",
+                      base: "px-2 gap-1",
+                      content: "font-semibold capitalize",
                     }}
                   >
-                    Belum Dimulai
+                    {test?.status}
                   </Chip>
                 </div>
               </div>
@@ -96,91 +153,73 @@ export default function DetailsTestPage() {
               </div>
 
               <div className="grid gap-2 overflow-y-scroll">
-                <div className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6">
-                  <div className="flex size-8 items-center justify-center rounded-lg bg-gray/20 font-bold text-gray">
-                    1
-                  </div>
-
-                  <div className="flex-1 divide-y-2 divide-dashed divide-gray/20">
-                    <div className="grid gap-6 pb-6">
-                      <p className="font-semibold leading-[170%] text-black">
-                        Seorang pasien laki-laki berusia 50 tahun datang ke
-                        rumah sakit dengan diagnosa kanker prostat. Setelah
-                        dilakukan pemeriksaan, pasien direkomendasikan terapi
-                        menggunakan Hidroksiurea yang akan dilakukan selama
-                        beberapa siklus.
-                        <br />
-                        <br />
-                        Pada fase manakah agen tersebut bekerja?
-                      </p>
-
-                      <RadioGroup
-                        aria-label="select the answer"
-                        defaultValue="fase-s"
-                        classNames={{
-                          base: "font-semibold text-black",
-                        }}
-                      >
-                        <Radio
-                          isDisabled={false}
-                          value="fase-s"
-                          color="success"
-                          classNames={{
-                            label: "text-success font-extrabold",
-                          }}
-                        >
-                          Fase S
-                        </Radio>
-                        <Radio
-                          isDisabled={true}
-                          value="fase-g1"
-                          color="default"
-                        >
-                          Fase G1
-                        </Radio>
-                        <Radio
-                          isDisabled={true}
-                          value="fase-g2"
-                          color="default"
-                        >
-                          Fase G2
-                        </Radio>
-                        <Radio isDisabled={true} value="fase-m" color="default">
-                          Fase M
-                        </Radio>
-                        <Radio
-                          isDisabled={true}
-                          value="fase-non-spesifik"
-                          color="default"
-                        >
-                          Fase non-spesifik
-                        </Radio>
-                      </RadioGroup>
+                {test?.questions.map((question) => (
+                  <div
+                    key={question.question_id}
+                    className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
+                  >
+                    <div className="flex size-8 items-center justify-center rounded-lg bg-gray/20 font-bold text-gray">
+                      {question.number}
                     </div>
 
-                    <div className="pt-6">
-                      <Accordion variant="bordered">
-                        <AccordionItem
-                          aria-label="accordion answer"
-                          key="answer"
-                          title="Penjelasan:"
-                          classNames={{
-                            title: "font-semibold text-black",
-                            content:
-                              "font-medium text-black leading-[170%] pb-4",
-                          }}
-                        >
-                          Hidroksiurea bekerja pada fase S dari siklus sel. Pada
-                          fase S, sel melakukan replikasi atau duplikasi DNA
-                          sebelum masuk ke tahap pembelahan. Dengan menghambat
-                          sintesis DNA pada fase ini, Hidroksiurea mencegah sel
-                          kanker untuk berkembang biak, sehingga memperlambat
-                          atau menghentikan pertumbuhannya.
-                        </AccordionItem>
-                      </Accordion>
+                    <div className="flex-1 divide-y-2 divide-dashed divide-gray/20">
+                      <div className="grid gap-6 pb-6">
+                        <p className="font-semibold leading-[170%] text-black">
+                          {question.text}
+                        </p>
+
+                        <div className="grid gap-1">
+                          {question.options.map((option) => (
+                            <div
+                              key={option.option_id}
+                              className="inline-flex items-center gap-2"
+                            >
+                              {option.is_correct ? (
+                                <CheckCircle
+                                  weight="bold"
+                                  size={18}
+                                  className="text-success"
+                                />
+                              ) : (
+                                <XCircle
+                                  weight="bold"
+                                  size={18}
+                                  className="text-danger"
+                                />
+                              )}
+                              <p
+                                className={`font-semibold ${
+                                  option.is_correct
+                                    ? "text-success"
+                                    : "text-gray/80"
+                                }`}
+                              >
+                                {option.text}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-6">
+                        <Accordion variant="bordered">
+                          <AccordionItem
+                            aria-label="accordion answer"
+                            key="answer"
+                            title="Penjelasan:"
+                            classNames={{
+                              title: "font-semibold text-black",
+                              content:
+                                "font-medium text-black leading-[170%] pb-4",
+                            }}
+                          >
+                            {question.explanation}
+                          </AccordionItem>
+                        </Accordion>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
@@ -189,3 +228,35 @@ export default function DetailsTestPage() {
     </Layout>
   );
 }
+
+type DataProps = {
+  test?: DetailsTestType;
+  error?: ErrorDataType;
+};
+
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+  req,
+  params,
+}) => {
+  const token = req.headers["access_token"] as string;
+
+  try {
+    const response = (await fetcher({
+      url: `/admin/tests/${encodeURIComponent(params?.id as string)}`,
+      method: "GET",
+      token,
+    })) as SuccessResponse<DetailsTestType>;
+
+    return {
+      props: {
+        test: response.data,
+      },
+    };
+  } catch (error: any) {
+    return {
+      props: {
+        error,
+      },
+    };
+  }
+};

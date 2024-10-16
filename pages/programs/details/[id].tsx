@@ -71,8 +71,6 @@ export default function DetailsProgramPage({
     10,
   );
 
-  console.log(users);
-
   const columnsParticipantPaid = [
     { name: "ID Partisipan", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
