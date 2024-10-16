@@ -10,7 +10,7 @@ export default function AnswerPage() {
   const { id } = router.query;
 
   return (
-    <Layout title="Daftar Semua Jawaban">
+    <Layout title="Daftar Semua Jawaban" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <ButtonBack />
@@ -24,7 +24,7 @@ export default function AnswerPage() {
             </div>
 
             <div className="grid grid-cols-[1fr_260px] items-start gap-4">
-              <div className="h-[500px] overflow-y-scroll rounded-xl border-2 border-gray/20">
+              <div className="h-[500px] overflow-y-scroll rounded-xl border-2 border-gray/20 scrollbar-hide">
                 <div className="sticky left-0 top-0 z-40 bg-white p-6 text-[18px] font-extrabold text-purple">
                   No. 1
                 </div>
@@ -107,7 +107,7 @@ export default function AnswerPage() {
                     Daftar Pertanyaan:
                   </h4>
 
-                  <div className="grid h-full max-h-[400px] grid-cols-5 justify-items-center gap-2 overflow-y-scroll">
+                  <div className="grid h-full max-h-[400px] grid-cols-5 justify-items-center gap-2 overflow-y-scroll scrollbar-hide">
                     {Array.from({ length: 100 }, (_, i) => {
                       const randomAnswer = Math.floor(Math.random() * 3);
                       let answerClass = "";

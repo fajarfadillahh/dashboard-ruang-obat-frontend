@@ -88,7 +88,7 @@ export default function TestsPage({
   }
 
   return (
-    <Layout title="Daftar Ujian">
+    <Layout title="Daftar Ujian" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <div className="grid gap-1">

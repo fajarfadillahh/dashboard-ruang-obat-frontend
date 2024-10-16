@@ -29,7 +29,7 @@ export default function DetailsAdminPage({
   }
 
   return (
-    <Layout title="Detail Admin">
+    <Layout title="Detail Admin" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <ButtonBack />

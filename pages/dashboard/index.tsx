@@ -63,7 +63,7 @@ export default function DashboardPage({
   }
 
   return (
-    <Layout title="Dashboard">
+    <Layout title="Dashboard" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <div className="grid gap-1">

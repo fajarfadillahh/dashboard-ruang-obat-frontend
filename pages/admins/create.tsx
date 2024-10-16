@@ -48,7 +48,7 @@ export default function CreateAdminPage({
   }
 
   return (
-    <Layout title="Buat Admin">
+    <Layout title="Buat Admin" className="scrollbar-hide">
       <Container>
         <section className="grid">
           <ButtonBack />

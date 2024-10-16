@@ -101,7 +101,7 @@ export default function GradeUsersPage() {
   }
 
   return (
-    <Layout title={`Daftar Nilai -- Judul Ujian --`}>
+    <Layout title={`Daftar Nilai -- Judul Ujian --`} className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <ButtonBack />

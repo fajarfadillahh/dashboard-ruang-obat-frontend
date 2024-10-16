@@ -126,7 +126,7 @@ export default function UsersPage({
   }
 
   return (
-    <Layout title="Daftar Pengguna">
+    <Layout title="Daftar Pengguna" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <div className="grid gap-1">
@@ -168,7 +168,7 @@ export default function UsersPage({
               />
             </div>
 
-            <div className="overflow-x-scroll">
+            <div className="overflow-x-scroll scrollbar-hide">
               <Table
                 isHeaderSticky
                 aria-label="users table"

@@ -173,6 +173,7 @@ export default function DetailsTestPage({
                   variant="solid"
                   color="secondary"
                   startContent={<ClipboardText weight="bold" size={18} />}
+                  onClick={() => router.push(`/tests/grades/${test?.test_id}`)}
                   className="px-6 font-bold"
                 >
                   Lihat Nilai
@@ -185,7 +186,7 @@ export default function DetailsTestPage({
                 <h5 className="font-bold text-black">Daftar Soal</h5>
               </div>
 
-              <div className="grid gap-2 overflow-y-scroll">
+              <div className="grid gap-2 overflow-y-scroll scrollbar-hide">
                 {test?.questions.map((question) => (
                   <div
                     key={question.question_id}

@@ -54,7 +54,7 @@ export default function EditAdminPage({
   }
 
   return (
-    <Layout title="Edit Admin">
+    <Layout title="Edit Admin" className="scrollbar-hide">
       <Container>
         <section className="grid">
           <ButtonBack />

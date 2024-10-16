@@ -6,10 +6,11 @@ import { ReactNode } from "react";
 
 interface LayoutProps {
   title?: string;
+  className?: string;
   children: ReactNode;
 }
 
-export default function Layout({ title, children }: LayoutProps) {
+export default function Layout({ title, className, children }: LayoutProps) {
   return (
     <>
       <Head>
@@ -22,7 +23,7 @@ export default function Layout({ title, children }: LayoutProps) {
         <div className="grid w-full">
           <Navbar />
 
-          <div className="overflow-y-scroll">
+          <div className={`overflow-y-scroll ${className}`}>
             <div className="mx-auto w-full max-w-[1200px] p-[1.5rem_1.5rem_6rem]">
               {children}
             </div>

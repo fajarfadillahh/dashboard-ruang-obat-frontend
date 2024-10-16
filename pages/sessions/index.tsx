@@ -131,7 +131,7 @@ export default function SessionPage({
     : [];
 
   return (
-    <Layout title="Daftar Aktifitas Login Pengguna">
+    <Layout title="Daftar Aktifitas Login Pengguna" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <div className="grid gap-1">

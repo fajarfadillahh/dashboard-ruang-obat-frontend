@@ -149,7 +149,7 @@ export default function AdminsPage({
     : [];
 
   return (
-    <Layout title="Daftar Admin">
+    <Layout title="Daftar Admin" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <div className="grid gap-1">
@@ -201,7 +201,7 @@ export default function AdminsPage({
               </Button>
             </div>
 
-            <div className="overflow-x-scroll">
+            <div className="overflow-x-scroll scrollbar-hide">
               <Table
                 isHeaderSticky
                 aria-label="admins table"

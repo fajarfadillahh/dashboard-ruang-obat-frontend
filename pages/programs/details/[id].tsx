@@ -272,7 +272,7 @@ export default function DetailsProgramPage({
     : [];
 
   return (
-    <Layout title={`${program?.title}`}>
+    <Layout title={`${program?.title}`} className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <ButtonBack />
@@ -406,7 +406,7 @@ export default function DetailsProgramPage({
                 />
               </div>
 
-              <div className="overflow-x-scroll">
+              <div className="overflow-x-scroll scrollbar-hide">
                 <Table
                   isHeaderSticky
                   aria-label="users table"

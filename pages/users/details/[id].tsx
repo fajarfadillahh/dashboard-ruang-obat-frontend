@@ -41,7 +41,7 @@ export default function DetailsUserPage({
   }
 
   return (
-    <Layout title="Detail Pengguna">
+    <Layout title="Detail Pengguna" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <ButtonBack />

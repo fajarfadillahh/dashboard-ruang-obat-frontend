@@ -89,7 +89,7 @@ export default function ProgramsPage({
   }
 
   return (
-    <Layout title="Daftar Program">
+    <Layout title="Daftar Program" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <div className="grid gap-1">
