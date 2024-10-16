@@ -5,14 +5,18 @@ import Layout from "@/components/wrapper/Layout";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
-import { Accordion, AccordionItem, Chip } from "@nextui-org/react";
+import { Accordion, AccordionItem, Button, Chip } from "@nextui-org/react";
 import {
   CheckCircle,
+  ClipboardText,
   ClockCountdown,
   HourglassLow,
+  PencilLine,
   XCircle,
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { useRouter } from "next/router";
+import toast from "react-hot-toast";
 
 type DetailsTestType = {
   status: string;
@@ -40,7 +44,7 @@ export default function DetailsTestPage({
   test,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  console.log(test);
+  const router = useRouter();
 
   if (error) {
     return (
@@ -65,85 +69,114 @@ export default function DetailsTestPage({
           <ButtonBack />
 
           <div className="grid divide-y-2 divide-dashed divide-gray/20">
-            <div className="grid gap-6 pb-8">
-              <div>
-                <h4 className="mb-2 text-[28px] font-bold capitalize leading-[120%] -tracking-wide text-black">
-                  {test?.title}
-                </h4>
-                <p className="max-w-[700px] font-medium leading-[170%] text-gray">
-                  {test?.description}
-                </p>
+            <div className="grid grid-cols-[1fr_max-content] items-start gap-16">
+              <div className="grid gap-6 pb-8">
+                <div>
+                  <h4 className="mb-2 text-[28px] font-bold capitalize leading-[120%] -tracking-wide text-black">
+                    {test?.title}
+                  </h4>
+                  <p className="max-w-[700px] font-medium leading-[170%] text-gray">
+                    {test?.description}
+                  </p>
+                </div>
+
+                <div className="flex items-start gap-8">
+                  <div className="grid gap-1">
+                    <span className="text-sm font-medium text-gray">
+                      Tanggal Mulai:
+                    </span>
+                    <h1 className="font-semibold text-black">
+                      {formatDate(`${test?.start}`)}
+                    </h1>
+                  </div>
+
+                  <div className="grid gap-1">
+                    <span className="text-sm font-medium text-gray">
+                      Tanggal Selesai:
+                    </span>
+                    <h1 className="font-semibold text-black">
+                      {formatDate(`${test?.end}`)}
+                    </h1>
+                  </div>
+
+                  <div className="grid gap-1">
+                    <span className="text-sm font-medium text-gray">
+                      Durasi Pengerjaan:
+                    </span>
+                    <h1 className="font-semibold text-black">
+                      {test?.duration} Menit
+                    </h1>
+                  </div>
+
+                  <div className="grid gap-1">
+                    <span className="text-sm font-medium text-gray">
+                      Jumlah Soal:
+                    </span>
+                    <h1 className="font-semibold text-black">
+                      {test?.total_questions} Butir
+                    </h1>
+                  </div>
+
+                  <div className="grid gap-1">
+                    <span className="text-sm font-medium text-gray">
+                      Status Ujian:
+                    </span>
+
+                    <Chip
+                      variant="flat"
+                      color={
+                        test?.status === "Belum dimulai"
+                          ? "danger"
+                          : test?.status === "Berlangsung"
+                            ? "warning"
+                            : "success"
+                      }
+                      size="sm"
+                      startContent={
+                        test?.status === "Belum dimulai" ? (
+                          <ClockCountdown weight="bold" size={16} />
+                        ) : test?.status === "Berlangsung" ? (
+                          <HourglassLow weight="fill" size={16} />
+                        ) : (
+                          <CheckCircle weight="fill" size={16} />
+                        )
+                      }
+                      classNames={{
+                        base: "px-2 gap-1",
+                        content: "font-semibold capitalize",
+                      }}
+                    >
+                      {test?.status}
+                    </Chip>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-start gap-8">
-                <div className="grid gap-1">
-                  <span className="text-sm font-medium text-gray">
-                    Tanggal Mulai:
-                  </span>
-                  <h1 className="font-semibold text-black">
-                    {formatDate(`${test?.start}`)}
-                  </h1>
-                </div>
+              <div className="grid gap-2">
+                <Button
+                  variant="light"
+                  color="secondary"
+                  startContent={<PencilLine weight="bold" size={18} />}
+                  onClick={() =>
+                    test?.status === "Berlangsung"
+                      ? toast.error(
+                          "Tidak Bisa Mengubah Ujian, Jika Ujian Sudah Berlangsung!",
+                        )
+                      : router.push(`/tests/edit/${test?.test_id}`)
+                  }
+                  className="px-6 font-bold"
+                >
+                  Edit Ujian
+                </Button>
 
-                <div className="grid gap-1">
-                  <span className="text-sm font-medium text-gray">
-                    Tanggal Selesai:
-                  </span>
-                  <h1 className="font-semibold text-black">
-                    {formatDate(`${test?.end}`)}
-                  </h1>
-                </div>
-
-                <div className="grid gap-1">
-                  <span className="text-sm font-medium text-gray">
-                    Durasi Pengerjaan:
-                  </span>
-                  <h1 className="font-semibold text-black">
-                    {test?.duration} Menit
-                  </h1>
-                </div>
-
-                <div className="grid gap-1">
-                  <span className="text-sm font-medium text-gray">
-                    Jumlah Soal:
-                  </span>
-                  <h1 className="font-semibold text-black">
-                    {test?.total_questions} Butir
-                  </h1>
-                </div>
-
-                <div className="grid gap-1">
-                  <span className="text-sm font-medium text-gray">
-                    Status Ujian:
-                  </span>
-
-                  <Chip
-                    variant="flat"
-                    color={
-                      test?.status === "Belum dimulai"
-                        ? "danger"
-                        : test?.status === "Berlangsung"
-                          ? "warning"
-                          : "success"
-                    }
-                    size="sm"
-                    startContent={
-                      test?.status === "Belum dimulai" ? (
-                        <ClockCountdown weight="bold" size={16} />
-                      ) : test?.status === "Berlangsung" ? (
-                        <HourglassLow weight="fill" size={16} />
-                      ) : (
-                        <CheckCircle weight="fill" size={16} />
-                      )
-                    }
-                    classNames={{
-                      base: "px-2 gap-1",
-                      content: "font-semibold capitalize",
-                    }}
-                  >
-                    {test?.status}
-                  </Chip>
-                </div>
+                <Button
+                  variant="solid"
+                  color="secondary"
+                  startContent={<ClipboardText weight="bold" size={18} />}
+                  className="px-6 font-bold"
+                >
+                  Lihat Nilai
+                </Button>
               </div>
             </div>
 
