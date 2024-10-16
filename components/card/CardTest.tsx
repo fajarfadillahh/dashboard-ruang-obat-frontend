@@ -21,6 +21,7 @@ import {
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import toast from "react-hot-toast";
 
 interface TestProps {
   test: TestType;
@@ -142,7 +143,13 @@ export default function CardTest({ test, onStatusChange }: TestProps) {
               variant="light"
               size="sm"
               color="secondary"
-              onClick={() => router.push(`/tests/edit/${test.test_id}`)}
+              onClick={() =>
+                test.status === "Berlangsung"
+                  ? toast.error(
+                      "Tidak Bisa Mengubah Ujian, Jika Ujian Sudah Berlangsung!",
+                    )
+                  : router.push(`/tests/edit/${test.test_id}`)
+              }
             >
               <PencilLine weight="bold" size={18} />
             </Button>
