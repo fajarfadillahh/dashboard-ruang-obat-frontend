@@ -85,6 +85,7 @@ export default function EditProgramPage({
         data: data,
       });
 
+      toast.success("Berhasil Memperbarui Program");
       window.location.href = "/programs";
     } catch (error) {
       setLoading(false);
