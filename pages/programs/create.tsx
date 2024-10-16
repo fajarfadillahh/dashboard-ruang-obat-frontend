@@ -68,6 +68,7 @@ export default function CreateProgramPage({
         data: data,
       });
 
+      toast.success("Berhasil Membuat Program");
       window.location.href = "/programs";
     } catch (error) {
       setLoading(false);
@@ -238,7 +239,7 @@ export default function CreateProgramPage({
                   items={filteredTest}
                   emptyContent={
                     <span className="text-sm font-semibold italic text-gray">
-                      Pengguna tidak ditemukan!
+                      Ujian tidak ditemukan!
                     </span>
                   }
                 >
