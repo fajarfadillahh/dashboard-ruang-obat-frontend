@@ -353,7 +353,7 @@ export default function CreateTestPage({
                 </div>
               </div>
 
-              <div className="grid gap-4 overflow-y-scroll">
+              <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
                 <div className="grid gap-2">
                   {questions.map((question, index) => {
                     return (

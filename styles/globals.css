@@ -4,17 +4,15 @@
 @tailwind components;
 @tailwind utilities;
 
-::-webkit-scrollbar {
-  @apply hidden;
-}
-
 ::selection {
   @apply bg-purple text-white;
 }
 
-.ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-blurred,
-.ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-focused {
-  @apply px-8;
+::-webkit-scrollbar {
+  @apply rounded-full bg-gray/10;
+}
+::-webkit-scrollbar-thumb {
+  @apply w-1 rounded-full bg-purple/20 hover:bg-purple/40;
 }
 
 .rsw-ce ul {

@@ -22,7 +22,7 @@ export default function Layout({ title, children }: LayoutProps) {
         <div className="grid w-full">
           <Navbar />
 
-          <div className="overflow-y-scroll scrollbar-hide">
+          <div className="overflow-y-scroll">
             <div className="mx-auto w-full max-w-[1200px] p-[1.5rem_1.5rem_6rem]">
               {children}
             </div>

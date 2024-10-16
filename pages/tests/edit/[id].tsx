@@ -126,7 +126,7 @@ export default function EditTestPage() {
                 </Button>
               </div>
 
-              <div className="grid gap-4 overflow-y-scroll">
+              <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
                 <div className="grid gap-2">
                   {Array.from({ length: 2 }, (_, i) => (
                     <CardInputTest key={i} />
