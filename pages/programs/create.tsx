@@ -39,6 +39,7 @@ export default function CreateProgramPage({
     title: "",
     price: 0,
   });
+  const [search, setSearch] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
   const [value, setValue] = useState<Selection>(new Set([]));
   const [loading, setLoading] = useState(false);
@@ -90,6 +91,14 @@ export default function CreateProgramPage({
       </Layout>
     );
   }
+
+  const filteredTest = tests?.length
+    ? tests.filter(
+        (test) =>
+          test.title.toLowerCase().includes(search.toLowerCase()) ||
+          test.test_id.toLowerCase().includes(search.toLowerCase()),
+      )
+    : [];
 
   return (
     <Layout title="Buat Program">
@@ -179,7 +188,8 @@ export default function CreateProgramPage({
                   type="text"
                   variant="flat"
                   labelPlacement="outside"
-                  placeholder="Cari Ujian Berdasarkan ID..."
+                  placeholder="Cari Ujian ID atau Nama Ujian"
+                  onChange={(e) => setSearch(e.target.value)}
                   startContent={
                     <MagnifyingGlass
                       weight="bold"
@@ -191,13 +201,16 @@ export default function CreateProgramPage({
                     input:
                       "font-semibold placeholder:font-semibold placeholder:text-gray",
                   }}
+                  className="max-w-[500px]"
                 />
 
                 <Button
                   isLoading={loading}
                   variant="solid"
                   color="secondary"
-                  startContent={<FloppyDisk weight="bold" size={18} />}
+                  startContent={
+                    loading ? null : <FloppyDisk weight="bold" size={18} />
+                  }
                   onClick={handleCreateProgram}
                   className="w-max justify-self-end font-bold"
                 >
@@ -222,7 +235,7 @@ export default function CreateProgramPage({
                 </TableHeader>
 
                 <TableBody
-                  items={tests}
+                  items={filteredTest}
                   emptyContent={
                     <span className="text-sm font-semibold italic text-gray">
                       Pengguna tidak ditemukan!
