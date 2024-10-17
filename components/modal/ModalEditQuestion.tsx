@@ -11,40 +11,37 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
-import { FloppyDisk, Plus } from "@phosphor-icons/react";
+import { FloppyDisk, Pencil } from "@phosphor-icons/react";
 import { useState } from "react";
 
 type CardInputTestProps = {
-  handleAddQuestion: (question: CreateQuestion) => void;
+  handleEditQuestion: (question: CreateQuestion, index: number) => void;
+  question: CreateQuestion;
+  index: number;
   type: "create" | "edit";
 };
 
-export default function ModalInputQuestion({
-  handleAddQuestion,
+export default function ModalEditQuestion({
+  handleEditQuestion,
+  question,
+  index,
   type,
 }: CardInputTestProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [text, setText] = useState("");
-  const [explanation, setExplanation] = useState("");
-  const [options, setOptions] = useState([
-    { text: "", is_correct: false },
-    { text: "", is_correct: false },
-    { text: "", is_correct: false },
-    { text: "", is_correct: false },
-    { text: "", is_correct: false },
-  ]);
+  const [text, setText] = useState(question.text);
+  const [explanation, setExplanation] = useState(question.explanation);
+  const [options, setOptions] = useState(question.options);
 
   return (
     <>
       <Button
-        variant="bordered"
-        color="secondary"
-        startContent={<Plus weight="bold" size={18} />}
-        className="w-max justify-self-end font-bold"
+        isIconOnly
+        variant="flat"
+        color="default"
+        size="sm"
         onClick={onOpen}
-        size="md"
       >
-        Tambah Soal
+        <Pencil weight="bold" size={18} className="text-default-600" />
       </Button>
 
       <Modal
@@ -54,22 +51,16 @@ export default function ModalInputQuestion({
         size="3xl"
         scrollBehavior="inside"
         onClose={() => {
-          setText("");
-          setExplanation("");
-          setOptions([
-            { text: "", is_correct: false },
-            { text: "", is_correct: false },
-            { text: "", is_correct: false },
-            { text: "", is_correct: false },
-            { text: "", is_correct: false },
-          ]);
+          setText(question.text);
+          setExplanation(question.explanation);
+          setOptions(question.options);
         }}
       >
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1 font-bold text-black">
-                Buat Soal
+                Edit Soal
               </ModalHeader>
 
               <ModalBody>
@@ -140,15 +131,9 @@ export default function ModalInputQuestion({
                   variant="light"
                   onClick={() => {
                     onClose();
-                    setText("");
-                    setExplanation("");
-                    setOptions([
-                      { text: "", is_correct: false },
-                      { text: "", is_correct: false },
-                      { text: "", is_correct: false },
-                      { text: "", is_correct: false },
-                      { text: "", is_correct: false },
-                    ]);
+                    setText(question.text);
+                    setExplanation(question.explanation);
+                    setOptions(question.options);
                   }}
                   className="font-bold"
                 >
@@ -160,17 +145,18 @@ export default function ModalInputQuestion({
                   color="secondary"
                   startContent={<FloppyDisk weight="bold" size={18} />}
                   onClick={() => {
-                    handleAddQuestion({ text, options, explanation });
+                    handleEditQuestion(
+                      {
+                        text: text ? text : question.text,
+                        options,
+                        explanation: explanation ? explanation : question.text,
+                      },
+                      index,
+                    );
                     onClose();
-                    setText("");
-                    setExplanation("");
-                    setOptions([
-                      { text: "", is_correct: false },
-                      { text: "", is_correct: false },
-                      { text: "", is_correct: false },
-                      { text: "", is_correct: false },
-                      { text: "", is_correct: false },
-                    ]);
+                    setText(question.text);
+                    setExplanation(question.explanation);
+                    setOptions(question.options);
                   }}
                   className="w-max justify-self-end font-bold"
                 >

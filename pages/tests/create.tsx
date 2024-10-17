@@ -1,4 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
@@ -18,6 +19,7 @@ import {
   ClockCountdown,
   Database,
   Trash,
+  XCircle,
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
@@ -52,8 +54,11 @@ export default function CreateTestPage({
     const input = localStorage.getItem("input");
     const questions = localStorage.getItem("questions");
 
-    if (questions && input) {
+    if (questions) {
       setQuestions(JSON.parse(questions) as CreateQuestion[]);
+    }
+
+    if (input) {
       setInput(
         JSON.parse(input) as {
           title: string;
@@ -66,19 +71,23 @@ export default function CreateTestPage({
     }
   }, []);
 
-  function handleAddQuestion() {
-    const question = {
-      text: "",
-      options: Array.from({ length: 5 }).map(() => {
-        return {
-          text: "",
-          is_correct: false,
-        };
-      }),
-      explanation: "",
-    };
-
+  function handleAddQuestion(question: CreateQuestion) {
     setQuestions((prev) => prev.concat(question));
+    localStorage.setItem(
+      "questions",
+      JSON.stringify(questions.concat(question)),
+    );
+    toast.success("Berhasil Menambahkan Ke draft");
+  }
+
+  function handleEditQuestion(question: CreateQuestion, index: number) {
+    const mapping = [...questions];
+
+    mapping[index] = question;
+
+    setQuestions(mapping);
+    localStorage.setItem("questions", JSON.stringify(mapping));
+    toast.success("Berhasil Mengedit Soal");
   }
 
   const handleRemoveQuestion = useCallback(
@@ -91,77 +100,77 @@ export default function CreateTestPage({
     [questions],
   );
 
-  function handleEditorChange({
-    index,
-    text,
-    field,
-  }: {
-    index: number;
-    text: string;
-    field: "explanation" | "text";
-  }) {
-    if (field == "text") {
-      const mapping = [...questions];
-      mapping[index] = {
-        ...mapping[index],
-        text,
-      };
+  // function handleEditorChange({
+  //   index,
+  //   text,
+  //   field,
+  // }: {
+  //   index: number;
+  //   text: string;
+  //   field: "explanation" | "text";
+  // }) {
+  //   if (field == "text") {
+  //     const mapping = [...questions];
+  //     mapping[index] = {
+  //       ...mapping[index],
+  //       text,
+  //     };
 
-      setQuestions(mapping);
-    }
+  //     setQuestions(mapping);
+  //   }
 
-    if (field == "explanation") {
-      const mapping = [...questions];
-      mapping[index] = {
-        ...mapping[index],
-        explanation: text,
-      };
+  //   if (field == "explanation") {
+  //     const mapping = [...questions];
+  //     mapping[index] = {
+  //       ...mapping[index],
+  //       explanation: text,
+  //     };
 
-      setQuestions(mapping);
-    }
-  }
+  //     setQuestions(mapping);
+  //   }
+  // }
 
-  const handleOptionChange = useCallback(
-    (
-      qIndex: number,
-      oIndex: number,
-      option: {
-        text: string;
-        is_correct: boolean;
-      },
-    ) => {
-      const mapping = [...questions];
-      mapping[qIndex].options[oIndex] = option;
+  // const handleOptionChange = useCallback(
+  //   (
+  //     qIndex: number,
+  //     oIndex: number,
+  //     option: {
+  //       text: string;
+  //       is_correct: boolean;
+  //     },
+  //   ) => {
+  //     const mapping = [...questions];
+  //     mapping[qIndex].options[oIndex] = option;
 
-      mapping[qIndex] = {
-        ...mapping[qIndex],
-      };
+  //     mapping[qIndex] = {
+  //       ...mapping[qIndex],
+  //     };
 
-      setQuestions(mapping);
-    },
-    [questions],
-  );
+  //     setQuestions(mapping);
+  //   },
+  //   [questions],
+  // );
 
-  const handleCheckboxChange = useCallback(
-    (
-      qIndex: number,
-      oIndex: number,
-      option: {
-        text: string;
-        is_correct: boolean;
-      },
-    ) => {
-      const mapping = [...questions];
-      mapping[qIndex].options[oIndex] = option;
+  // const handleCheckboxChange = useCallback(
+  //   (
+  //     qIndex: number,
+  //     oIndex: number,
+  //     option: {
+  //       text: string;
+  //       is_correct: boolean;
+  //     },
+  //   ) => {
+  //     const mapping = [...questions];
+  //     mapping[qIndex].options[oIndex] = option;
 
-      mapping[qIndex] = {
-        ...mapping[qIndex],
-      };
+  //     mapping[qIndex] = {
+  //       ...mapping[qIndex],
+  //     };
 
-      setQuestions(mapping);
-    },
-    [questions],
-  );
+  //     setQuestions(mapping);
+  //   },
+  //   [questions],
+  // );
 
   async function handleSaveTest() {
     try {
@@ -330,40 +339,29 @@ export default function CreateTestPage({
                   <h5 className="font-bold text-black">Daftar Soal</h5>
 
                   <div className="inline-flex gap-2">
-                    {/* <Button
-                      variant="bordered"
-                      color="secondary"
-                      startContent={<FloppyDisk weight="bold" size={18} />}
-                      className="w-max justify-self-end font-bold"
-                      onClick={() => {
-                        localStorage.setItem(
-                          "questions",
-                          JSON.stringify(questions),
-                        );
-                        localStorage.setItem("input", JSON.stringify(input));
-                        toast.success("Berhasil simpan ke dalam draft");
-                      }}
-                      size="md"
-                    >
-                      Simpan Draft
-                    </Button> */}
+                    <ModalInputQuestion
+                      {...{ handleAddQuestion, type: "create" }}
+                    />
 
                     <Button
                       variant="solid"
                       color="secondary"
                       startContent={<Database weight="bold" size={18} />}
                       className="w-max justify-self-end font-bold"
+                      onClick={() => {
+                        if (confirm("Apakah Sudah Yakin?")) {
+                          handleSaveTest();
+                        }
+                      }}
                     >
                       Simpan Database
                     </Button>
                   </div>
                 </div>
-
-                <ModalInputQuestion />
               </div>
 
               <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
-                {Array.from({ length: 5 }, (_, index) => (
+                {questions.map((question, index) => (
                   <div
                     key={index}
                     className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
@@ -373,61 +371,43 @@ export default function CreateTestPage({
                     </div>
 
                     <div className="grid flex-1 gap-4">
-                      <p className="font-semibold leading-[170%] text-black">
-                        Apa ibukota Indonesia?
-                      </p>
+                      <p
+                        className="font-semibold leading-[170%] text-black"
+                        dangerouslySetInnerHTML={{ __html: question.text }}
+                      />
 
                       <div className="grid gap-1">
-                        <div className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            weight="bold"
-                            size={18}
-                            className="text-success"
-                          />
-                          <p className={`font-semibold text-success`}>
-                            Jakarta
-                          </p>
-                        </div>
-
-                        <div className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            weight="bold"
-                            size={18}
-                            className="text-danger"
-                          />
-                          <p className={`font-semibold text-gray/80`}>
-                            Palembang
-                          </p>
-                        </div>
-
-                        <div className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            weight="bold"
-                            size={18}
-                            className="text-danger"
-                          />
-                          <p className={`font-semibold text-gray/80`}>Bali</p>
-                        </div>
-
-                        <div className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            weight="bold"
-                            size={18}
-                            className="text-danger"
-                          />
-                          <p className={`font-semibold text-gray/80`}>
-                            Surabaya
-                          </p>
-                        </div>
-
-                        <div className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            weight="bold"
-                            size={18}
-                            className="text-danger"
-                          />
-                          <p className={`font-semibold text-gray/80`}>Depok</p>
-                        </div>
+                        {question.options.map((option, index) => {
+                          return (
+                            <div
+                              className="inline-flex items-center gap-2"
+                              key={index}
+                            >
+                              {option.is_correct ? (
+                                <CheckCircle
+                                  weight="bold"
+                                  size={18}
+                                  className="text-success"
+                                />
+                              ) : (
+                                <XCircle
+                                  weight="bold"
+                                  size={18}
+                                  className="text-danger"
+                                />
+                              )}
+                              <p
+                                className={`font-semibold ${
+                                  option.is_correct
+                                    ? "text-success"
+                                    : "text-gray/80"
+                                }`}
+                              >
+                                {option.text}
+                              </p>
+                            </div>
+                          );
+                        })}
                       </div>
 
                       <Accordion isCompact variant="bordered">
@@ -441,20 +421,42 @@ export default function CreateTestPage({
                               "font-medium text-gray leading-[170%] pb-4",
                           }}
                         >
-                          Jakarta adalah ibukota dari Indonesia
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: question.explanation,
+                            }}
+                          ></div>
                         </AccordionItem>
                       </Accordion>
                     </div>
 
-                    <Button
-                      isIconOnly
-                      variant="flat"
-                      color="danger"
-                      size="sm"
-                      onClick={() => toast.success("Berhasil Menghapus Soal")}
-                    >
-                      <Trash weight="bold" size={18} className="text-danger" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <ModalEditQuestion
+                        {...{
+                          question,
+                          handleEditQuestion,
+                          index,
+                          type: "create",
+                        }}
+                      />
+
+                      <Button
+                        isIconOnly
+                        variant="flat"
+                        color="danger"
+                        size="sm"
+                        onClick={() => {
+                          handleRemoveQuestion(index);
+                          toast.success("Berhasil Menghapus Soal");
+                        }}
+                      >
+                        <Trash
+                          weight="bold"
+                          size={18}
+                          className="text-danger"
+                        />
+                      </Button>
+                    </div>
                   </div>
                 ))}
 

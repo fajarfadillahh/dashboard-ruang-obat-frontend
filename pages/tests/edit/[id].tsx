@@ -1,4 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
@@ -22,8 +23,10 @@ import {
   XCircle,
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
 import toast from "react-hot-toast";
+import { CreateQuestion } from "../create";
 
 type DetailsTestType = {
   status: string;
@@ -50,9 +53,9 @@ type DetailsTestType = {
 export default function EditTestPage({
   test,
   token,
-  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const [client, setClient] = useState(false);
+  const { data: session, status } = useSession();
+
   const [input, setInput] = useState({
     title: test?.title || "",
     description: test?.description || "",
@@ -61,13 +64,96 @@ export default function EditTestPage({
     duration: test?.duration || 0,
   });
 
-  console.log(test);
+  async function handleAddQuestion(question: CreateQuestion) {
+    try {
+      await fetcher({
+        url: "/admin/tests",
+        method: "PATCH",
+        token,
+        data: {
+          test_id: test?.test_id,
+          update_type: "add_question",
+          questions: [{ ...question, type: "text" }],
+          by: status == "authenticated" ? session.user.fullname : "",
+        },
+      });
 
-  useEffect(() => {
-    setClient(true);
-  }, []);
+      toast.success("Berhasil Menambahkan soal");
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+      toast.error("Terjadi kesalahan saat menambahkan soal");
+    }
+  }
 
-  if (!client) return null;
+  async function handleDeleteQuestion(test_id: string, question_id: string) {
+    if (!confirm("Apakah anda yakin ingin menghapus soal?")) return;
+
+    try {
+      await fetcher({
+        url: `/admin/tests/${test_id}/questions/${question_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      toast.success("Berhasil Menghapus soal");
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+      toast.error("Terjadi kesalahan saat menghapus soal");
+    }
+  }
+
+  async function handleEditTestData() {
+    if (!confirm("Apakah anda yakin ingin mengubah data ujian?")) return;
+
+    try {
+      await fetcher({
+        url: "/admin/tests",
+        method: "PATCH",
+        token,
+        data: {
+          test_id: test?.test_id,
+          update_type: "update_test",
+          ...input,
+          by: status == "authenticated" ? session.user.fullname : "",
+        },
+      });
+
+      toast.success("Berhasil Mengubah Data Ujian");
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+      toast.error("Terjadi kesalahan saat mengubah data ujian");
+    }
+  }
+
+  async function handleEditQuestion(question: CreateQuestion, index: number) {
+    if (!confirm("Apakah anda yakin ingin mengubah soal?")) return;
+
+    try {
+      console.log(question);
+      const mappingQuestion = test?.questions[index];
+
+      await fetcher({
+        url: "/admin/tests",
+        method: "PATCH",
+        token,
+        data: {
+          test_id: test?.test_id,
+          update_type: "update_question",
+          questions: [{ ...mappingQuestion, ...question }],
+          by: status == "authenticated" ? session.user.fullname : "",
+        },
+      });
+
+      toast.success("Berhasil Mengubah Soal");
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+      toast.error("Terjadi kesalahan saat mengubah soal");
+    }
+  }
 
   return (
     <Layout title="Edit Ujian">
@@ -200,6 +286,15 @@ export default function EditTestPage({
                   }}
                 />
               </div>
+              <Button
+                variant="solid"
+                color="secondary"
+                startContent={<Database weight="bold" size={18} />}
+                className="w-max justify-self-end font-bold"
+                onClick={handleEditTestData}
+              >
+                Simpan Data Ujian
+              </Button>
             </div>
 
             <div className="grid pt-10">
@@ -207,21 +302,16 @@ export default function EditTestPage({
                 <div className="flex items-end justify-between gap-4">
                   <h5 className="font-bold text-black">Daftar Soal</h5>
 
-                  <Button
-                    variant="solid"
-                    color="secondary"
-                    startContent={<Database weight="bold" size={18} />}
-                    className="w-max justify-self-end font-bold"
-                  >
-                    Simpan Database
-                  </Button>
+                  <div className="inline-flex gap-2">
+                    <ModalInputQuestion
+                      {...{ handleAddQuestion, type: "edit" }}
+                    />
+                  </div>
                 </div>
-
-                <ModalInputQuestion />
               </div>
 
               <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
-                {test?.questions.map((question) => (
+                {test?.questions.map((question, index) => (
                   <div
                     key={question.question_id}
                     className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
@@ -231,9 +321,10 @@ export default function EditTestPage({
                     </div>
 
                     <div className="grid flex-1 gap-4">
-                      <p className="font-semibold leading-[170%] text-black">
-                        {question.text}
-                      </p>
+                      <p
+                        className="font-semibold leading-[170%] text-black"
+                        dangerouslySetInnerHTML={{ __html: question.text }}
+                      />
 
                       <div className="grid gap-1">
                         {question.options.map((option) => (
@@ -278,20 +369,44 @@ export default function EditTestPage({
                               "font-medium text-gray leading-[170%] pb-4",
                           }}
                         >
-                          {question.explanation}
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: question.explanation,
+                            }}
+                          ></div>
                         </AccordionItem>
                       </Accordion>
                     </div>
 
-                    <Button
-                      isIconOnly
-                      variant="flat"
-                      color="danger"
-                      size="sm"
-                      onClick={() => toast.success("Berhasil Menghapus Soal")}
-                    >
-                      <Trash weight="bold" size={18} className="text-danger" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <ModalEditQuestion
+                        {...{
+                          question,
+                          handleEditQuestion,
+                          index,
+                          type: "edit",
+                        }}
+                      />
+
+                      <Button
+                        isIconOnly
+                        variant="flat"
+                        color="danger"
+                        size="sm"
+                        onClick={() =>
+                          handleDeleteQuestion(
+                            test.test_id,
+                            question.question_id,
+                          )
+                        }
+                      >
+                        <Trash
+                          weight="bold"
+                          size={18}
+                          className="text-danger"
+                        />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
