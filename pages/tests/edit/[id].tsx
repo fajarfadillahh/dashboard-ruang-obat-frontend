@@ -2,7 +2,9 @@ import ButtonBack from "@/components/button/ButtonBack";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { getLocalTimeZone, now, today } from "@internationalized/date";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { fetcher } from "@/utils/fetcher";
+import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import {
   Accordion,
   AccordionItem,
@@ -17,12 +19,49 @@ import {
   ClockCountdown,
   Database,
   Trash,
+  XCircle,
 } from "@phosphor-icons/react";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-export default function EditTestPage() {
+type DetailsTestType = {
+  status: string;
+  total_questions: number;
+  test_id: string;
+  title: string;
+  description: string;
+  start: string;
+  end: string;
+  duration: number;
+  questions: {
+    question_id: string;
+    number: number;
+    text: string;
+    explanation: string;
+    options: {
+      text: string;
+      option_id: string;
+      is_correct: boolean;
+    }[];
+  }[];
+};
+
+export default function EditTestPage({
+  test,
+  token,
+  error,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [client, setClient] = useState(false);
+  const [input, setInput] = useState({
+    title: test?.title || "",
+    description: test?.description || "",
+    start: test.start || "",
+    end: test.end || "",
+    duration: test?.duration || 0,
+  });
+
+  console.log(test);
 
   useEffect(() => {
     setClient(true);
@@ -54,6 +93,13 @@ export default function EditTestPage() {
                 label="Judul Ujian"
                 labelPlacement="outside"
                 placeholder="Contoh: Tryout Internal Ruangobat"
+                value={input.title}
+                onChange={(e) => {
+                  setInput({
+                    ...input,
+                    title: e.target.value,
+                  });
+                }}
                 classNames={{
                   input:
                     "font-semibold placeholder:font-normal placeholder:text-default-600",
@@ -67,6 +113,13 @@ export default function EditTestPage() {
                 label="Deskripsi Ujian"
                 labelPlacement="outside"
                 placeholder="Ketikan Deskripsi Ujian..."
+                value={input.description}
+                onChange={(e) => {
+                  setInput({
+                    ...input,
+                    description: e.target.value,
+                  });
+                }}
                 classNames={{
                   input:
                     "font-semibold placeholder:font-normal placeholder:text-default-600",
@@ -84,7 +137,18 @@ export default function EditTestPage() {
                   endContent={<Calendar weight="bold" size={18} />}
                   hourCycle={24}
                   minValue={today(getLocalTimeZone())}
-                  defaultValue={now(getLocalTimeZone())}
+                  defaultValue={parseDate(input.start.substring(0, 10)).add({
+                    days: 1,
+                  })}
+                  onChange={(e) => {
+                    const value = e.toString();
+                    const date = new Date(value);
+                    date.setHours(0, 0, 0, 0);
+                    setInput({
+                      ...input,
+                      start: date.toISOString(),
+                    });
+                  }}
                 />
 
                 <DatePicker
@@ -96,7 +160,17 @@ export default function EditTestPage() {
                   labelPlacement="outside"
                   endContent={<Calendar weight="bold" size={18} />}
                   hourCycle={24}
-                  defaultValue={now(getLocalTimeZone())}
+                  minValue={today(getLocalTimeZone())}
+                  defaultValue={parseDate(input.end.substring(0, 10))}
+                  onChange={(e) => {
+                    const value = e.toString();
+                    const date = new Date(value);
+                    date.setHours(23, 59, 59, 999);
+                    setInput({
+                      ...input,
+                      end: date.toISOString(),
+                    });
+                  }}
                 />
 
                 <Input
@@ -106,6 +180,13 @@ export default function EditTestPage() {
                   label="Durasi Pengerjaan"
                   labelPlacement="outside"
                   placeholder="Satuan Menit..."
+                  value={`${input.duration}`}
+                  onChange={(e) => {
+                    setInput({
+                      ...input,
+                      duration: parseInt(e.target.value),
+                    });
+                  }}
                   endContent={
                     <ClockCountdown
                       weight="bold"
@@ -126,105 +207,64 @@ export default function EditTestPage() {
                 <div className="flex items-end justify-between gap-4">
                   <h5 className="font-bold text-black">Daftar Soal</h5>
 
-                  <div className="inline-flex gap-2">
-                    {/* <Button
-                      variant="bordered"
-                      color="secondary"
-                      startContent={<FloppyDisk weight="bold" size={18} />}
-                      className="w-max justify-self-end font-bold"
-                      onClick={() => {
-                        localStorage.setItem(
-                          "questions",
-                          JSON.stringify(questions),
-                        );
-                        localStorage.setItem("input", JSON.stringify(input));
-                        toast.success("Berhasil simpan ke dalam draft");
-                      }}
-                      size="md"
-                    >
-                      Simpan Draft
-                    </Button> */}
-
-                    <Button
-                      variant="solid"
-                      color="secondary"
-                      startContent={<Database weight="bold" size={18} />}
-                      className="w-max justify-self-end font-bold"
-                    >
-                      Simpan Database
-                    </Button>
-                  </div>
+                  <Button
+                    variant="solid"
+                    color="secondary"
+                    startContent={<Database weight="bold" size={18} />}
+                    className="w-max justify-self-end font-bold"
+                  >
+                    Simpan Database
+                  </Button>
                 </div>
 
                 <ModalInputQuestion />
               </div>
 
               <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
-                {Array.from({ length: 5 }, (_, index) => (
+                {test?.questions.map((question: any) => (
                   <div
-                    key={index}
+                    key={question.question_id}
                     className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
                   >
                     <div className="font-extrabold text-purple">
-                      {index + 1}.
+                      {question.number}.
                     </div>
 
                     <div className="grid flex-1 gap-4">
                       <p className="font-semibold leading-[170%] text-black">
-                        Apa ibukota Indonesia?
+                        {question.text}
                       </p>
 
                       <div className="grid gap-1">
-                        <div className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            weight="bold"
-                            size={18}
-                            className="text-success"
-                          />
-                          <p className={`font-semibold text-success`}>
-                            Jakarta
-                          </p>
-                        </div>
-
-                        <div className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            weight="bold"
-                            size={18}
-                            className="text-danger"
-                          />
-                          <p className={`font-semibold text-gray/80`}>
-                            Palembang
-                          </p>
-                        </div>
-
-                        <div className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            weight="bold"
-                            size={18}
-                            className="text-danger"
-                          />
-                          <p className={`font-semibold text-gray/80`}>Bali</p>
-                        </div>
-
-                        <div className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            weight="bold"
-                            size={18}
-                            className="text-danger"
-                          />
-                          <p className={`font-semibold text-gray/80`}>
-                            Surabaya
-                          </p>
-                        </div>
-
-                        <div className="inline-flex items-center gap-2">
-                          <CheckCircle
-                            weight="bold"
-                            size={18}
-                            className="text-danger"
-                          />
-                          <p className={`font-semibold text-gray/80`}>Depok</p>
-                        </div>
+                        {question.options.map((option: any) => (
+                          <div
+                            key={option.option_id}
+                            className="inline-flex items-center gap-2"
+                          >
+                            {option.is_correct ? (
+                              <CheckCircle
+                                weight="bold"
+                                size={18}
+                                className="text-success"
+                              />
+                            ) : (
+                              <XCircle
+                                weight="bold"
+                                size={18}
+                                className="text-danger"
+                              />
+                            )}
+                            <p
+                              className={`font-semibold ${
+                                option.is_correct
+                                  ? "text-success"
+                                  : "text-gray/80"
+                              }`}
+                            >
+                              {option.text}
+                            </p>
+                          </div>
+                        ))}
                       </div>
 
                       <Accordion isCompact variant="bordered">
@@ -238,7 +278,7 @@ export default function EditTestPage() {
                               "font-medium text-gray leading-[170%] pb-4",
                           }}
                         >
-                          Jakarta adalah ibukota dari Indonesia
+                          {question.explanation}
                         </AccordionItem>
                       </Accordion>
                     </div>
@@ -254,24 +294,6 @@ export default function EditTestPage() {
                     </Button>
                   </div>
                 ))}
-
-                {/* <div className="grid gap-2">
-                  {questions.map((question, index) => {
-                    return (
-                      <CardInputTest
-                        key={index}
-                        {...{
-                          question,
-                          index,
-                          handleRemoveQuestion,
-                          handleEditorChange,
-                          handleOptionChange,
-                          handleCheckboxChange,
-                        }}
-                      />
-                    );
-                  })}
-                </div> */}
               </div>
             </div>
           </div>
@@ -280,3 +302,37 @@ export default function EditTestPage() {
     </Layout>
   );
 }
+
+type DataProps = {
+  test?: DetailsTestType;
+  token?: string;
+  error?: ErrorDataType;
+};
+
+export const getServerSideProps: GetServerSideProps = async ({
+  req,
+  params,
+}) => {
+  const token = req.headers["access_token"] as string;
+
+  try {
+    const response = (await fetcher({
+      url: `/admin/tests/${encodeURIComponent(params?.id as string)}`,
+      method: "GET",
+      token,
+    })) as SuccessResponse<DetailsTestType>;
+
+    return {
+      props: {
+        test: response.data,
+        token,
+      },
+    };
+  } catch (error: any) {
+    return {
+      props: {
+        error,
+      },
+    };
+  }
+};
