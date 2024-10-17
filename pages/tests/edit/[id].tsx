@@ -56,8 +56,8 @@ export default function EditTestPage({
   const [input, setInput] = useState({
     title: test?.title || "",
     description: test?.description || "",
-    start: test.start || "",
-    end: test.end || "",
+    start: test?.start || "",
+    end: test?.end || "",
     duration: test?.duration || 0,
   });
 
@@ -221,7 +221,7 @@ export default function EditTestPage({
               </div>
 
               <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
-                {test?.questions.map((question: any) => (
+                {test?.questions.map((question) => (
                   <div
                     key={question.question_id}
                     className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
@@ -236,7 +236,7 @@ export default function EditTestPage({
                       </p>
 
                       <div className="grid gap-1">
-                        {question.options.map((option: any) => (
+                        {question.options.map((option) => (
                           <div
                             key={option.option_id}
                             className="inline-flex items-center gap-2"
@@ -309,7 +309,7 @@ type DataProps = {
   error?: ErrorDataType;
 };
 
-export const getServerSideProps: GetServerSideProps = async ({
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   req,
   params,
 }) => {
