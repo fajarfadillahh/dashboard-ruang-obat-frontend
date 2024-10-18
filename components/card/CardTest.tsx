@@ -138,21 +138,23 @@ export default function CardTest({ test, onStatusChange }: TestProps) {
       <div className="inline-flex items-center gap-2">
         {router.pathname === "/tests" ? (
           <>
-            <Button
-              isIconOnly
-              variant="light"
-              size="sm"
-              color="secondary"
-              onClick={() =>
-                test.status === "Berlangsung"
-                  ? toast.error(
-                      "Tidak Bisa Mengubah Ujian, Jika Ujian Sudah Berlangsung!",
-                    )
-                  : router.push(`/tests/edit/${test.test_id}`)
-              }
-            >
-              <PencilLine weight="bold" size={18} />
-            </Button>
+            {test.status === "Berakhir" ? null : (
+              <Button
+                isIconOnly
+                variant="light"
+                size="sm"
+                color="secondary"
+                onClick={() =>
+                  test.status === "Berlangsung"
+                    ? toast.error(
+                        "Tidak Bisa Mengubah Ujian, Jika Ujian Sudah Berlangsung!",
+                      )
+                    : router.push(`/tests/edit/${test.test_id}`)
+                }
+              >
+                <PencilLine weight="bold" size={18} />
+              </Button>
+            )}
 
             <Dropdown>
               <DropdownTrigger>
