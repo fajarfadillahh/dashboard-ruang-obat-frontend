@@ -1,11 +1,16 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ErrorPage from "@/components/ErrorPage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { UserType } from "@/types/user.type";
+import usePagination from "@/hooks/usePagination";
+import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import {
   Button,
   Chip,
+  Input,
+  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -13,39 +18,41 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, XCircle } from "@phosphor-icons/react";
+import { Eye, MagnifyingGlass, XCircle } from "@phosphor-icons/react";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import React from "react";
+import { useState } from "react";
 
-const users: UserType[] = [
-  {
-    user_id: "ROUFFA837501",
-    fullname: "Fajar Fadillah Agustian",
-    university: "Stanford",
-    grade: 90,
-  },
-  {
-    user_id: "ROUGAW273329",
-    fullname: "Gufronnaka Arif Wildan",
-    university: "Cambridge",
-    grade: 0,
-  },
-];
+type ResultTestType = {
+  test_id?: string;
+  title?: string;
+  user_id: string;
+  fullname: string;
+  university: string;
+  score: number;
+};
 
-export default function GradeUsersPage() {
+export default function GradeUsersPage({
+  result,
+  error,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { id } = router.query;
+  const [search, setSearch] = useState<string>("");
+  const { data, page, pages, setPage } = usePagination(
+    result as ResultTestType[],
+    10,
+  );
 
   const columnsGrade = [
     { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
     { name: "Asal Kampus", uid: "university" },
-    { name: "Nilai", uid: "grade" },
+    { name: "Nilai", uid: "score" },
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellUsers(user: UserType, columnKey: React.Key) {
-    const cellValue = user[columnKey as keyof UserType];
+  function renderCellUsers(user: ResultTestType, columnKey: React.Key) {
+    const cellValue = user[columnKey as keyof ResultTestType];
 
     switch (columnKey) {
       case "user_id":
@@ -60,10 +67,10 @@ export default function GradeUsersPage() {
         return (
           <div className="w-max font-medium text-black">{user.university}</div>
         );
-      case "grade":
+      case "score":
         return (
           <div className="w-max font-medium text-black">
-            {user.grade === 0 ? (
+            {user.score === 0 ? (
               <Chip
                 variant="flat"
                 color="danger"
@@ -77,7 +84,7 @@ export default function GradeUsersPage() {
                 Belum ada nilai
               </Chip>
             ) : (
-              user.grade
+              user.score
             )}
           </div>
         );
@@ -88,7 +95,6 @@ export default function GradeUsersPage() {
             color="secondary"
             size="sm"
             startContent={<Eye weight="bold" size={16} />}
-            onClick={() => router.push(`/tests/grades/${id}/answer`)}
             className="w-max font-bold"
           >
             Lihat Jawaban
@@ -100,8 +106,35 @@ export default function GradeUsersPage() {
     }
   }
 
+  if (error) {
+    return (
+      <Layout title={`Daftar Nilai ${result?.map((title) => title.title)}`}>
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
+  }
+
+  const filteredUser = data?.length
+    ? data?.filter(
+        (participant) =>
+          participant.user_id.toLowerCase().includes(search.toLowerCase()) ||
+          participant.fullname.toLowerCase().includes(search.toLowerCase()),
+      )
+    : [];
+
   return (
-    <Layout title={`Daftar Nilai -- Judul Ujian --`} className="scrollbar-hide">
+    <Layout
+      title={`Daftar Nilai ${result?.map((title) => title.title)}`}
+      className="scrollbar-hide"
+    >
       <Container>
         <section className="grid gap-8">
           <ButtonBack />
@@ -109,47 +142,119 @@ export default function GradeUsersPage() {
           <div className="grid gap-8">
             <div className="grid gap-1">
               <h1 className="max-w-[550px] text-[24px] font-bold leading-[120%] -tracking-wide text-black">
-                Daftar Nilai Tryout Internal Ruangobat Part 1 🎯
+                Daftar Nilai {result?.map((title) => title.title)} 🎯
               </h1>
               <p className="font-medium text-gray">
                 Lihat semua nilai dari para mahasiswa/i
               </p>
             </div>
 
-            <Table
-              isHeaderSticky
-              aria-label="grade users table"
-              color="secondary"
-              selectionMode="none"
-              classNames={customStyleTable}
-              className="scrollbar-hide"
-            >
-              <TableHeader columns={columnsGrade}>
-                {(column) => (
-                  <TableColumn key={column.uid}>{column.name}</TableColumn>
-                )}
-              </TableHeader>
-
-              <TableBody
-                items={users}
-                emptyContent={
-                  <span className="text-sm font-semibold italic text-gray">
-                    Pengguna tidak ditemukan!
-                  </span>
+            <div className="grid gap-4">
+              <Input
+                type="text"
+                variant="flat"
+                labelPlacement="outside"
+                placeholder="Cari User ID atau Nama User"
+                startContent={
+                  <MagnifyingGlass
+                    weight="bold"
+                    size={18}
+                    className="text-gray"
+                  />
                 }
-              >
-                {(item: UserType) => (
-                  <TableRow key={item.user_id}>
-                    {(columnKey) => (
-                      <TableCell>{renderCellUsers(item, columnKey)}</TableCell>
+                classNames={{
+                  input:
+                    "font-semibold placeholder:font-semibold placeholder:text-gray",
+                }}
+                className="max-w-[500px]"
+                onChange={(e) => setSearch(e.target.value)}
+              />
+
+              <div className="overflow-x-scroll scrollbar-hide">
+                <Table
+                  isHeaderSticky
+                  aria-label="grade users table"
+                  color="secondary"
+                  selectionMode="none"
+                  classNames={customStyleTable}
+                  className="scrollbar-hide"
+                >
+                  <TableHeader columns={columnsGrade}>
+                    {(column) => (
+                      <TableColumn key={column.uid}>{column.name}</TableColumn>
                     )}
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                  </TableHeader>
+
+                  <TableBody
+                    items={filteredUser}
+                    emptyContent={
+                      <span className="text-sm font-semibold italic text-gray">
+                        Nilai pengguna tidak ditemukan!
+                      </span>
+                    }
+                  >
+                    {(item: ResultTestType) => (
+                      <TableRow key={item.user_id}>
+                        {(columnKey) => (
+                          <TableCell>
+                            {renderCellUsers(item, columnKey)}
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+
+            {filteredUser.length > 10 ? (
+              <Pagination
+                isCompact
+                showControls
+                page={page}
+                total={pages}
+                onChange={setPage}
+                className="justify-self-center"
+                classNames={{
+                  cursor: "bg-purple text-white",
+                }}
+              />
+            ) : null}
           </div>
         </section>
       </Container>
     </Layout>
   );
 }
+
+type DataProps = {
+  result?: ResultTestType[];
+  error?: ErrorDataType;
+};
+
+export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+  req,
+  params,
+}) => {
+  const token = req.headers["access_token"] as string;
+
+  try {
+    const response = (await fetcher({
+      url: `/admin/tests/results/${encodeURIComponent(params?.id as string)}`,
+      method: "GET",
+      token,
+    })) as SuccessResponse<ResultTestType[]>;
+
+    return {
+      props: {
+        result: response.data,
+      },
+    };
+  } catch (error: any) {
+    return {
+      props: {
+        error,
+      },
+    };
+  }
+};
