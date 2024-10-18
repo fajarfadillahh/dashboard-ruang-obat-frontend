@@ -4,7 +4,7 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
-import { formatDate } from "@/utils/formatDate";
+import { formatDateWithoutTime } from "@/utils/formatDate";
 import { Accordion, AccordionItem, Button, Chip } from "@nextui-org/react";
 import {
   CheckCircle,
@@ -86,7 +86,7 @@ export default function DetailsTestPage({
                       Tanggal Mulai:
                     </span>
                     <h1 className="font-semibold text-black">
-                      {formatDate(`${test?.start}`)}
+                      {formatDateWithoutTime(`${test?.start}`)}
                     </h1>
                   </div>
 
@@ -95,7 +95,7 @@ export default function DetailsTestPage({
                       Tanggal Selesai:
                     </span>
                     <h1 className="font-semibold text-black">
-                      {formatDate(`${test?.end}`)}
+                      {formatDateWithoutTime(`${test?.end}`)}
                     </h1>
                   </div>
 
