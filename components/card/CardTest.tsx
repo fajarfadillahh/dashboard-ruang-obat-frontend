@@ -1,5 +1,5 @@
 import { TestType } from "@/types/test.type";
-import { formatDate } from "@/utils/formatDate";
+import { formatDateWithoutTime } from "@/utils/formatDate";
 import {
   Button,
   Chip,
@@ -60,7 +60,7 @@ export default function CardTest({ test, onStatusChange }: TestProps) {
                 Tanggal Mulai:
               </span>
               <h1 className="text-sm font-semibold text-black">
-                {formatDate(test.start)}
+                {formatDateWithoutTime(test.start)}
               </h1>
             </div>
 
@@ -69,7 +69,7 @@ export default function CardTest({ test, onStatusChange }: TestProps) {
                 Tanggal Selesai:
               </span>
               <h1 className="text-sm font-semibold text-black">
-                {formatDate(test.end)}
+                {formatDateWithoutTime(test.end)}
               </h1>
             </div>
 
