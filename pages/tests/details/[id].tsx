@@ -198,9 +198,10 @@ export default function DetailsTestPage({
 
                     <div className="flex-1 divide-y-2 divide-dashed divide-gray/20">
                       <div className="grid gap-6 pb-6">
-                        <p className="font-semibold leading-[170%] text-black">
-                          {question.text}
-                        </p>
+                        <p
+                          className="font-semibold leading-[170%] text-black"
+                          dangerouslySetInnerHTML={{ __html: question.text }}
+                        />
 
                         <div className="grid gap-1">
                           {question.options.map((option) => (
@@ -244,10 +245,14 @@ export default function DetailsTestPage({
                             classNames={{
                               title: "font-semibold text-black",
                               content:
-                                "font-medium text-black leading-[170%] pb-4",
+                                "font-medium text-gray leading-[170%] pb-4",
                             }}
                           >
-                            {question.explanation}
+                            <div
+                              dangerouslySetInnerHTML={{
+                                __html: question.explanation,
+                              }}
+                            ></div>
                           </AccordionItem>
                         </Accordion>
                       </div>
