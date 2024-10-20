@@ -237,7 +237,7 @@ export default function AdminsPage({
               </Table>
             </div>
 
-            {filteredAdmin.length > 10 ? (
+            {filteredAdmin.length ? (
               <Pagination
                 isCompact
                 showControls
