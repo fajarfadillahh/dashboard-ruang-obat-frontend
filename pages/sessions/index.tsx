@@ -122,7 +122,7 @@ export default function SessionPage({
     );
   }
 
-  const filter = sessions.length
+  const filter = session.length
     ? sessions.filter(
         (session) =>
           session.user_id.toLowerCase().includes(search.toLowerCase()) ||
@@ -207,7 +207,7 @@ export default function SessionPage({
             </Table>
           </div>
 
-          {filter.length ? (
+{/*           {filter.length ? (
             <Pagination
               isCompact
               showControls
@@ -219,7 +219,7 @@ export default function SessionPage({
                 cursor: "bg-purple text-white",
               }}
             />
-          ) : null}
+          ) : null} */}
         </section>
       </Container>
     </Layout>
