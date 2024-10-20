@@ -122,8 +122,8 @@ export default function SessionPage({
     );
   }
 
-  const filter = data.length
-    ? data.filter(
+  const filter = sessions.length
+    ? sessions.filter(
         (session) =>
           session.user_id.toLowerCase().includes(search.toLowerCase()) ||
           session.fullname.toLowerCase().includes(search.toLowerCase()),
