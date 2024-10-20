@@ -196,66 +196,62 @@ export default function DetailsTestPage({
                       {question.number}
                     </div>
 
-                    <div className="flex-1 divide-y-2 divide-dashed divide-gray/20">
-                      <div className="grid gap-6 pb-6">
-                        <p
-                          className="font-semibold leading-[170%] text-black"
-                          dangerouslySetInnerHTML={{ __html: question.text }}
-                        />
+                    <div className="grid flex-1 gap-4">
+                      <p
+                        className="text-[16px] font-semibold leading-[170%] text-black"
+                        dangerouslySetInnerHTML={{ __html: question.text }}
+                      />
 
-                        <div className="grid gap-1">
-                          {question.options.map((option) => (
-                            <div
-                              key={option.option_id}
-                              className="inline-flex items-center gap-2"
-                            >
-                              {option.is_correct ? (
-                                <CheckCircle
-                                  weight="bold"
-                                  size={18}
-                                  className="text-success"
-                                />
-                              ) : (
-                                <XCircle
-                                  weight="bold"
-                                  size={18}
-                                  className="text-danger"
-                                />
-                              )}
-                              <p
-                                className={`font-semibold ${
-                                  option.is_correct
-                                    ? "text-success"
-                                    : "text-gray/80"
-                                }`}
-                              >
-                                {option.text}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="pt-6">
-                        <Accordion variant="bordered">
-                          <AccordionItem
-                            aria-label="accordion answer"
-                            key="answer"
-                            title="Penjelasan:"
-                            classNames={{
-                              title: "font-semibold text-black",
-                              content:
-                                "font-medium text-gray leading-[170%] pb-4",
-                            }}
+                      <div className="grid gap-1">
+                        {question.options.map((option) => (
+                          <div
+                            key={option.option_id}
+                            className="inline-flex items-center gap-2"
                           >
-                            <div
-                              dangerouslySetInnerHTML={{
-                                __html: question.explanation,
-                              }}
-                            ></div>
-                          </AccordionItem>
-                        </Accordion>
+                            {option.is_correct ? (
+                              <CheckCircle
+                                weight="bold"
+                                size={18}
+                                className="text-success"
+                              />
+                            ) : (
+                              <XCircle
+                                weight="bold"
+                                size={18}
+                                className="text-danger"
+                              />
+                            )}
+                            <p
+                              className={`font-semibold ${
+                                option.is_correct
+                                  ? "text-success"
+                                  : "text-gray/80"
+                              }`}
+                            >
+                              {option.text}
+                            </p>
+                          </div>
+                        ))}
                       </div>
+
+                      <Accordion isCompact variant="bordered">
+                        <AccordionItem
+                          aria-label="accordion answer"
+                          key="answer"
+                          title="Penjelasan:"
+                          classNames={{
+                            title: "font-semibold text-black",
+                            content:
+                              "font-medium text-[16px] text-gray leading-[170%] pb-4",
+                          }}
+                        >
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: question.explanation,
+                            }}
+                          ></div>
+                        </AccordionItem>
+                      </Accordion>
                     </div>
                   </div>
                 ))}
