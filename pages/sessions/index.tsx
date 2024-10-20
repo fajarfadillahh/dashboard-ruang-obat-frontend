@@ -9,7 +9,6 @@ import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import {
   Input,
-  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -53,13 +52,13 @@ export default function SessionPage({
         );
       case "fullname":
         return (
-          <div className="w-max font-medium capitalize text-black">
+          <div className="font-medium capitalize text-black">
             {session.fullname}
           </div>
         );
       case "university":
         return (
-          <div className="w-max font-medium capitalize text-black">
+          <div className="font-medium capitalize text-black">
             {session.university}
           </div>
         );
@@ -122,7 +121,7 @@ export default function SessionPage({
     );
   }
 
-  const filter = sessions.length
+  const filter = sessions?.length
     ? sessions.filter(
         (session) =>
           session.user_id.toLowerCase().includes(search.toLowerCase()) ||
@@ -151,7 +150,7 @@ export default function SessionPage({
           </div>
 
           <div className="grid gap-4">
-            <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white">
+            <div className="sticky left-0 top-0 z-50 bg-white">
               <Input
                 type="text"
                 variant="flat"
@@ -173,41 +172,43 @@ export default function SessionPage({
               />
             </div>
 
-            <Table
-              isHeaderSticky
-              aria-label="users table"
-              color="secondary"
-              selectionMode="none"
-              classNames={customStyleTable}
-              className="scrollbar-hide"
-            >
-              <TableHeader columns={columnsSession}>
-                {(column) => (
-                  <TableColumn key={column.uid}>{column.name}</TableColumn>
-                )}
-              </TableHeader>
-
-              <TableBody
-                emptyContent={
-                  <span className="text-sm font-semibold italic text-gray">
-                    Aktifitas pengguna tidak ditemukan!
-                  </span>
-                }
+            <div className="overflow-x-scroll scrollbar-hide">
+              <Table
+                isHeaderSticky
+                aria-label="sessions table"
+                color="secondary"
+                selectionMode="none"
+                classNames={customStyleTable}
+                className="scrollbar-hide"
               >
-                {filter.map((item: SessionType) => (
-                  <TableRow key={item.user_id}>
-                    {(columnKey) => (
-                      <TableCell>
-                        {renderCellSessions(item, columnKey)}
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                <TableHeader columns={columnsSession}>
+                  {(column) => (
+                    <TableColumn key={column.uid}>{column.name}</TableColumn>
+                  )}
+                </TableHeader>
+
+                <TableBody
+                  emptyContent={
+                    <span className="text-sm font-semibold italic text-gray">
+                      Aktifitas pengguna tidak ditemukan!
+                    </span>
+                  }
+                >
+                  {filter.map((item: SessionType) => (
+                    <TableRow key={item.user_id}>
+                      {(columnKey) => (
+                        <TableCell>
+                          {renderCellSessions(item, columnKey)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
-{/*           {filter.length ? (
+          {/* {filter.length ? (
             <Pagination
               isCompact
               showControls
