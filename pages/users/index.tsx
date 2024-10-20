@@ -55,13 +55,9 @@ export default function UsersPage({
           <div className="w-max font-medium text-black">{user.user_id}</div>
         );
       case "fullname":
-        return (
-          <div className="w-max font-medium text-black">{user.fullname}</div>
-        );
+        return <div className="font-medium text-black">{user.fullname}</div>;
       case "university":
-        return (
-          <div className="w-max font-medium text-black">{user.university}</div>
-        );
+        return <div className="font-medium text-black">{user.university}</div>;
       case "action":
         return (
           <div className="flex w-max items-center gap-1">
@@ -146,7 +142,7 @@ export default function UsersPage({
           </div>
 
           <div className="grid gap-4">
-            <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white">
+            <div className="sticky left-0 top-0 z-50 bg-white">
               <Input
                 type="text"
                 variant="flat"
