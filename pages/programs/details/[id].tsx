@@ -18,7 +18,6 @@ import {
   Button,
   Chip,
   Input,
-  Pagination,
   Snippet,
   Table,
   TableBody,
@@ -104,9 +103,7 @@ export default function DetailsProgramPage({
         );
       case "fullname":
         return (
-          <div className="w-max font-medium text-black">
-            {participant.fullname}
-          </div>
+          <div className="font-medium text-black">{participant.fullname}</div>
         );
       case "code":
         return (
@@ -129,9 +126,7 @@ export default function DetailsProgramPage({
         );
       case "university":
         return (
-          <div className="w-max font-medium text-black">
-            {participant.university}
-          </div>
+          <div className="font-medium text-black">{participant.university}</div>
         );
       case "status":
         return (
@@ -263,8 +258,8 @@ export default function DetailsProgramPage({
     );
   }
 
-  const filterParticipants = data.length
-    ? data.filter(
+  const filterParticipants = program?.participants.length
+    ? program.participants.filter(
         (participant) =>
           participant.user_id.toLowerCase().includes(search.toLowerCase()) ||
           participant.fullname.toLowerCase().includes(search.toLowerCase()),
@@ -272,7 +267,7 @@ export default function DetailsProgramPage({
     : [];
 
   return (
-    <Layout title={`${program?.title}`} className="scrollbar-hide">
+    <Layout title={`${program?.title}`}>
       <Container>
         <section className="grid gap-8">
           <ButtonBack />
@@ -448,7 +443,7 @@ export default function DetailsProgramPage({
                 </Table>
               </div>
 
-              {filterParticipants.length ? (
+              {/* {filterParticipants.length ? (
                 <Pagination
                   isCompact
                   showControls
@@ -460,7 +455,7 @@ export default function DetailsProgramPage({
                     cursor: "bg-purple text-white",
                   }}
                 />
-              ) : null}
+              ) : null} */}
             </div>
           </div>
         </section>
