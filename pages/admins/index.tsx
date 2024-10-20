@@ -11,7 +11,6 @@ import { formatDate } from "@/utils/formatDate";
 import {
   Button,
   Input,
-  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -56,9 +55,7 @@ export default function AdminsPage({
           <div className="w-max font-medium text-black">{admin.admin_id}</div>
         );
       case "fullname":
-        return (
-          <div className="w-max font-medium text-black">{admin.fullname}</div>
-        );
+        return <div className="font-medium text-black">{admin.fullname}</div>;
       case "role":
         return <div className="w-max font-medium text-black">{admin.role}</div>;
       case "created_at":
@@ -140,8 +137,8 @@ export default function AdminsPage({
     );
   }
 
-  const filteredAdmin = data.length
-    ? data.filter(
+  const filteredAdmin = admins?.length
+    ? admins.filter(
         (admin) =>
           admin.admin_id.toLowerCase().includes(search.toLowerCase()) ||
           admin.fullname.toLowerCase().includes(search.toLowerCase()),
@@ -237,7 +234,7 @@ export default function AdminsPage({
               </Table>
             </div>
 
-            {filteredAdmin.length ? (
+            {/* {filteredAdmin.length ? (
               <Pagination
                 isCompact
                 showControls
@@ -249,7 +246,7 @@ export default function AdminsPage({
                   cursor: "bg-purple text-white",
                 }}
               />
-            ) : null}
+            ) : null} */}
           </div>
         </section>
       </Container>
