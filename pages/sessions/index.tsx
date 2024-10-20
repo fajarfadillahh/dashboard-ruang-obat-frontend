@@ -122,7 +122,7 @@ export default function SessionPage({
     );
   }
 
-  const filter = session.length
+  const filter = sessions.length
     ? sessions.filter(
         (session) =>
           session.user_id.toLowerCase().includes(search.toLowerCase()) ||
