@@ -20,7 +20,12 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { FloppyDisk, MagnifyingGlass } from "@phosphor-icons/react";
+import {
+  CheckCircle,
+  FloppyDisk,
+  MagnifyingGlass,
+  Plus,
+} from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -34,7 +39,7 @@ export default function CreateProgramPage({
   const session = useSession();
   const [input, setInput] = useState<{
     title: string;
-    price: number;
+    price: number | any;
   }>({
     title: "",
     price: 0,
@@ -43,31 +48,46 @@ export default function CreateProgramPage({
   const [selectedType, setSelectedType] = useState<string>("");
   const [value, setValue] = useState<Selection>(new Set([]));
   const [loading, setLoading] = useState(false);
+  const [qrcodeFile, setQrcodeFile] = useState<File | null>();
 
   const columnsTest = [
     { name: "ID Ujian", uid: "test_id" },
     { name: "Judul Ujian", uid: "title" },
   ];
 
+  console.log(qrcodeFile);
+
   async function handleCreateProgram() {
     setLoading(true);
 
     try {
-      const data = {
-        title: input.title,
-        type: selectedType,
-        ...(selectedType === "paid" && { price: input.price }),
-        tests: Array.from(value),
-        by: session.data?.user.fullname,
-      };
+      const fullname: any = session.data?.user.fullname;
+
+      const formData = new FormData();
+      formData.append("title", input.title);
+      formData.append("qr_code", qrcodeFile as Blob);
+      formData.append("type", selectedType);
+      selectedType === "paid" ? formData.append("price", input.price) : null;
+      tests?.forEach((test: any) => formData.append("tests[]", test));
+      formData.append("by", fullname);
+
+      // const data = {
+      //   title: input.title,
+      //   files: formData,
+      //   type: selectedType,
+      //   ...(selectedType === "paid" && { price: input.price }),
+      //   tests: Array.from(value),
+      //   by: session.data?.user.fullname,
+      // };
 
       await fetcher({
         url: "/admin/programs",
         method: "POST",
         token,
-        data: data,
+        data: formData,
       });
 
+      setQrcodeFile(null);
       toast.success("Berhasil Membuat Program");
       window.location.href = "/programs";
     } catch (error) {
@@ -118,6 +138,40 @@ export default function CreateProgramPage({
             </div>
 
             <div className="grid gap-6 py-8">
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-sm font-medium leading-[170%] text-gray">
+                  Gambar QR Code (ratio 1:1){" "}
+                  <span className="text-danger">*</span>
+                </p>
+
+                <label className="relative inline-block">
+                  <input
+                    type="file"
+                    accept="image/jpg, image/jpeg, image/png"
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        setQrcodeFile(e.target.files[0]);
+                      } else {
+                        setQrcodeFile(null);
+                      }
+                    }}
+                  />
+
+                  <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-gray/40 p-16 text-gray/50">
+                    {qrcodeFile ? (
+                      <CheckCircle
+                        size={30}
+                        className="text-success"
+                        weight="fill"
+                      />
+                    ) : (
+                      <Plus size={30} weight="bold" />
+                    )}
+                  </div>
+                </label>
+              </div>
+
               <Input
                 isRequired
                 type="text"
