@@ -21,7 +21,12 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { FloppyDisk, MagnifyingGlass } from "@phosphor-icons/react";
+import {
+  CheckCircle,
+  FloppyDisk,
+  MagnifyingGlass,
+  Plus,
+} from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -56,6 +61,7 @@ export default function EditProgramPage({
   const [search, setSearch] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>(program?.type || "");
   const [loading, setLoading] = useState(false);
+  const [qrcodeFile, setQrcodeFile] = useState<File | null>();
 
   const testId = program?.tests.map((test) => test.test_id);
   const [value, setValue] = useState<Selection>(new Set(testId));
@@ -69,20 +75,38 @@ export default function EditProgramPage({
     setLoading(true);
 
     try {
-      const data = {
-        program_id: program?.program_id,
-        title: input.title,
-        type: selectedType,
-        ...(selectedType === "paid" && { price: input.price }),
-        tests: Array.from(value),
-        by: session.data?.user.fullname,
-      };
+      const fullname: any = session.data?.user.fullname;
+
+      const formData = new FormData();
+      formData.append("title", input.title);
+      formData.append("type", selectedType);
+      formData.append("program_id", program?.program_id as string);
+
+      if (selectedType == "paid") {
+        formData.append("price", `${input.price}`);
+      }
+
+      Array.from(value).forEach((test: any) =>
+        formData.append("tests[]", test),
+      );
+      formData.append("by", fullname);
+      formData.append("qr_code", qrcodeFile as File);
+
+      // const data = {
+      //   program_id: program?.program_id,
+      //   title: input.title,
+      //   type: selectedType,
+      //   ...(selectedType === "paid" && { price: input.price }),
+      //   tests: Array.from(value),
+      //   by: session.data?.user.fullname,
+      // };
 
       await fetcher({
         url: "/admin/programs",
         method: "PATCH",
         token,
-        data: data,
+        data: formData,
+        file: true,
       });
 
       toast.success("Berhasil Memperbarui Program");
@@ -135,6 +159,40 @@ export default function EditProgramPage({
             </div>
 
             <div className="grid gap-6 py-8">
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-sm font-medium leading-[170%] text-gray">
+                  Gambar QR Code (ratio 1:1){" "}
+                  <span className="text-danger">*</span>
+                </p>
+
+                <label className="relative inline-block">
+                  <input
+                    type="file"
+                    accept="image/jpg, image/jpeg, image/png"
+                    className="absolute inset-0 cursor-pointer opacity-0"
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        setQrcodeFile(e.target.files[0]);
+                      } else {
+                        setQrcodeFile(null);
+                      }
+                    }}
+                  />
+
+                  <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-gray/40 p-16 text-gray/50">
+                    {qrcodeFile ? (
+                      <CheckCircle
+                        size={30}
+                        className="text-success"
+                        weight="fill"
+                      />
+                    ) : (
+                      <Plus size={30} weight="bold" />
+                    )}
+                  </div>
+                </label>
+              </div>
+
               <Input
                 isRequired
                 type="text"

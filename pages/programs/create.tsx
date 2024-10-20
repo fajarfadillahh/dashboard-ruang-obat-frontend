@@ -55,8 +55,6 @@ export default function CreateProgramPage({
     { name: "Judul Ujian", uid: "title" },
   ];
 
-  console.log(qrcodeFile);
-
   async function handleCreateProgram() {
     setLoading(true);
 
@@ -65,10 +63,16 @@ export default function CreateProgramPage({
 
       const formData = new FormData();
       formData.append("title", input.title);
-      formData.append("qr_code", qrcodeFile as Blob);
+      formData.append("qr_code", qrcodeFile as File);
       formData.append("type", selectedType);
-      selectedType === "paid" ? formData.append("price", input.price) : null;
-      tests?.forEach((test: any) => formData.append("tests[]", test));
+
+      if (selectedType == "paid") {
+        formData.append("price", `${input.price}`);
+      }
+
+      Array.from(value).forEach((test: any) =>
+        formData.append("tests[]", test),
+      );
       formData.append("by", fullname);
 
       // const data = {
@@ -85,6 +89,7 @@ export default function CreateProgramPage({
         method: "POST",
         token,
         data: formData,
+        file: true,
       });
 
       setQrcodeFile(null);
