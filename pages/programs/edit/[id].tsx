@@ -10,6 +10,7 @@ import { fetcher } from "@/utils/fetcher";
 import {
   Button,
   getKeyValue,
+  Image,
   Input,
   Radio,
   RadioGroup,
@@ -21,12 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import {
-  CheckCircle,
-  FloppyDisk,
-  MagnifyingGlass,
-  Plus,
-} from "@phosphor-icons/react";
+import { FloppyDisk, MagnifyingGlass } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -38,6 +34,7 @@ type DetailsProgramType = {
   type: string;
   price: number;
   is_active: boolean;
+  qr_code: string;
   total_tests: number;
   total_users: number;
   tests: TestType[];
@@ -91,15 +88,6 @@ export default function EditProgramPage({
       );
       formData.append("by", fullname);
       formData.append("qr_code", qrcodeFile as File);
-
-      // const data = {
-      //   program_id: program?.program_id,
-      //   title: input.title,
-      //   type: selectedType,
-      //   ...(selectedType === "paid" && { price: input.price }),
-      //   tests: Array.from(value),
-      //   by: session.data?.user.fullname,
-      // };
 
       await fetcher({
         url: "/admin/programs",
@@ -160,38 +148,39 @@ export default function EditProgramPage({
 
             <div className="grid gap-6 py-8">
               <div className="flex flex-col items-center gap-2">
-                <p className="text-sm font-medium leading-[170%] text-gray">
-                  Gambar QR Code (ratio 1:1){" "}
-                  <span className="text-danger">*</span>
+                <p className="text-[12px] font-medium leading-[170%] text-gray/50">
+                  Gambar QR Code Sebelumnya *
                 </p>
 
-                <label className="relative inline-block">
-                  <input
-                    type="file"
-                    accept="image/jpg, image/jpeg, image/png"
-                    className="absolute inset-0 cursor-pointer opacity-0"
-                    onChange={(e) => {
-                      if (e.target.files) {
-                        setQrcodeFile(e.target.files[0]);
-                      } else {
-                        setQrcodeFile(null);
-                      }
-                    }}
-                  />
-
-                  <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-gray/40 p-16 text-gray/50">
-                    {qrcodeFile ? (
-                      <CheckCircle
-                        size={30}
-                        className="text-success"
-                        weight="fill"
-                      />
-                    ) : (
-                      <Plus size={30} weight="bold" />
-                    )}
-                  </div>
-                </label>
+                <Image
+                  isBlurred
+                  src={`${program?.qr_code}`}
+                  alt="qrcode image"
+                  width={180}
+                  height={180}
+                  className="aspect-square rounded-xl border-2 border-dashed border-gray/30 bg-gray/10 object-cover object-center p-1"
+                />
               </div>
+
+              <Input
+                isRequired
+                type="file"
+                accept="image/jpg, image/jpeg, image/png"
+                variant="flat"
+                label="Gambar QR Code Baru"
+                labelPlacement="outside"
+                classNames={{
+                  input:
+                    "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
+                }}
+                onChange={(e) => {
+                  if (e.target.files) {
+                    setQrcodeFile(e.target.files[0]);
+                  } else {
+                    setQrcodeFile(null);
+                  }
+                }}
+              />
 
               <Input
                 isRequired
