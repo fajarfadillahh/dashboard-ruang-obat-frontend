@@ -1,6 +1,7 @@
 import ButtonSidebar from "@/components/button/ButtonSidebar";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
 import {
+  ChatCircleText,
   ClipboardText,
   ClockClockwise,
   House,
@@ -58,11 +59,11 @@ export default function Sidebar() {
             icon={<ClockClockwise weight="bold" size={18} />}
           />
 
-          {/* <ButtonSidebar
+          <ButtonSidebar
             label="Feedback"
             path="/feedback"
             icon={<ChatCircleText weight="bold" size={18} />}
-          /> */}
+          />
 
           {session.data?.user.admin_id.startsWith("ROSA") ? (
             <ButtonSidebar
