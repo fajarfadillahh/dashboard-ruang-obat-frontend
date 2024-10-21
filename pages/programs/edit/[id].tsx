@@ -22,7 +22,11 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { FloppyDisk, MagnifyingGlass } from "@phosphor-icons/react";
+import {
+  FloppyDisk,
+  ImageBroken,
+  MagnifyingGlass,
+} from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -152,14 +156,27 @@ export default function EditProgramPage({
                   Gambar QR Code Sebelumnya *
                 </p>
 
-                <Image
-                  isBlurred
-                  src={`${program?.qr_code}`}
-                  alt="qrcode image"
-                  width={180}
-                  height={180}
-                  className="aspect-square rounded-xl border-2 border-dashed border-gray/30 bg-gray/10 object-cover object-center p-1"
-                />
+                {program?.qr_code ? (
+                  <Image
+                    isBlurred
+                    src={`${program?.qr_code}`}
+                    alt="qrcode image"
+                    width={180}
+                    height={180}
+                    className="aspect-square rounded-xl border-2 border-dashed border-gray/30 bg-gray/10 object-cover object-center p-1"
+                  />
+                ) : (
+                  <div className="flex aspect-square size-[180px] flex-col items-center justify-center gap-2 rounded-xl bg-gray/10">
+                    <ImageBroken
+                      weight="bold"
+                      size={28}
+                      className="text-gray/50"
+                    />
+                    <p className="text-[12px] font-bold text-gray/50">
+                      Belum ada QR!
+                    </p>
+                  </div>
+                )}
               </div>
 
               <Input
