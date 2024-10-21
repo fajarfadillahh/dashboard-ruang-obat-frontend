@@ -17,6 +17,7 @@ import { formatRupiah } from "@/utils/formatRupiah";
 import {
   Button,
   Chip,
+  Image,
   Input,
   Snippet,
   Table,
@@ -33,6 +34,7 @@ import {
   CheckCircle,
   ClockCountdown,
   Copy,
+  ImageBroken,
   MagnifyingGlass,
   Notepad,
   Plus,
@@ -50,6 +52,7 @@ type DetailsProgramType = {
   type: string;
   price: number;
   is_active: boolean;
+  qr_code: string;
   total_tests: number;
   total_users: number;
   tests: TestType[];
@@ -273,70 +276,94 @@ export default function DetailsProgramPage({
           <ButtonBack />
 
           <div className="grid divide-y-2 divide-dashed divide-gray/20">
-            <div className="flex items-start gap-6 pb-8">
-              <BookBookmark weight="bold" size={56} className="text-purple" />
+            <div className="flex items-end justify-between gap-12 pb-8">
+              <div className="flex flex-1 items-start gap-6">
+                <BookBookmark weight="bold" size={56} className="text-purple" />
 
-              <div className="grid gap-4">
-                <h4 className="max-w-[700px] text-[28px] font-bold leading-[120%] -tracking-wide text-black">
-                  {program?.title}
-                </h4>
+                <div className="grid gap-4">
+                  <h4 className="max-w-[700px] text-[28px] font-bold leading-[120%] -tracking-wide text-black">
+                    {program?.title}
+                  </h4>
 
-                <div className="flex items-center gap-12">
-                  {program?.type === "free" ? (
+                  <div className="flex items-center gap-12">
+                    {program?.type === "free" ? (
+                      <Chip
+                        variant="flat"
+                        color="default"
+                        startContent={
+                          <Tag weight="bold" size={18} className="text-black" />
+                        }
+                        classNames={{
+                          base: "px-3 gap-1",
+                          content: "font-bold text-black",
+                        }}
+                      >
+                        Gratis
+                      </Chip>
+                    ) : program?.price ? (
+                      <h5 className="font-extrabold text-purple">
+                        {formatRupiah(program?.price)}
+                      </h5>
+                    ) : null}
+
+                    <div className="inline-flex items-center gap-1 text-gray">
+                      <Certificate weight="bold" size={18} />
+                      <p className="text-sm font-bold">
+                        ID: {program?.program_id}
+                      </p>
+                    </div>
+
+                    <div className="inline-flex items-center gap-1 text-gray">
+                      <Notepad weight="bold" size={18} />
+                      <p className="text-sm font-bold">
+                        {program?.total_tests} Modul Ujian
+                      </p>
+                    </div>
+
                     <Chip
                       variant="flat"
-                      color="default"
+                      color={program?.is_active ? "success" : "danger"}
                       startContent={
-                        <Tag weight="bold" size={18} className="text-black" />
+                        program?.is_active ? (
+                          <CheckCircle weight="fill" size={16} />
+                        ) : (
+                          <XCircle weight="fill" size={16} />
+                        )
                       }
                       classNames={{
-                        base: "px-3 gap-1",
-                        content: "font-bold text-black",
+                        base: "px-2 gap-1",
+                        content: "font-bold",
                       }}
                     >
-                      Gratis
+                      {program?.is_active
+                        ? "Program Aktif"
+                        : "Program Tidak Aktif"}
                     </Chip>
-                  ) : program?.price ? (
-                    <h5 className="font-extrabold text-purple">
-                      {formatRupiah(program?.price)}
-                    </h5>
-                  ) : null}
-
-                  <div className="inline-flex items-center gap-1 text-gray">
-                    <Certificate weight="bold" size={18} />
-                    <p className="text-sm font-bold">
-                      ID: {program?.program_id}
-                    </p>
                   </div>
-
-                  <div className="inline-flex items-center gap-1 text-gray">
-                    <Notepad weight="bold" size={18} />
-                    <p className="text-sm font-bold">
-                      {program?.total_tests} Modul Ujian
-                    </p>
-                  </div>
-
-                  <Chip
-                    variant="flat"
-                    color={program?.is_active ? "success" : "danger"}
-                    startContent={
-                      program?.is_active ? (
-                        <CheckCircle weight="fill" size={16} />
-                      ) : (
-                        <XCircle weight="fill" size={16} />
-                      )
-                    }
-                    classNames={{
-                      base: "px-2 gap-1",
-                      content: "font-bold",
-                    }}
-                  >
-                    {program?.is_active
-                      ? "Program Aktif"
-                      : "Program Tidak Aktif"}
-                  </Chip>
                 </div>
               </div>
+
+              {program?.qr_code ? (
+                <Image
+                  isBlurred
+                  src={`${program?.qr_code}`}
+                  alt="qrcode image"
+                  width={130}
+                  height={130}
+                  className="aspect-square rounded-xl object-cover object-center"
+                />
+              ) : (
+                <div className="flex aspect-square size-[130px] flex-col items-center justify-center gap-2 rounded-xl bg-gray/10">
+                  <ImageBroken
+                    weight="bold"
+                    size={28}
+                    className="text-gray/50"
+                  />
+                  <p className="text-[12px] font-bold text-gray/50">
+                    Belum ada QR!
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="grid gap-4 py-8">
