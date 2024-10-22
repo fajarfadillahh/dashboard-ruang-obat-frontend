@@ -9,6 +9,7 @@ import { fetcher } from "@/utils/fetcher";
 import {
   Button,
   getKeyValue,
+  Image,
   Input,
   Radio,
   RadioGroup,
@@ -21,14 +22,13 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import {
-  CheckCircle,
   FloppyDisk,
+  ImageBroken,
   MagnifyingGlass,
-  Plus,
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CreateProgramPage({
@@ -49,6 +49,7 @@ export default function CreateProgramPage({
   const [value, setValue] = useState<Selection>(new Set([]));
   const [loading, setLoading] = useState(false);
   const [qrcodeFile, setQrcodeFile] = useState<File | null>();
+  const [imagePreview, setImagePreview] = useState<string | null>();
 
   const columnsTest = [
     { name: "ID Ujian", uid: "test_id" },
@@ -118,6 +119,19 @@ export default function CreateProgramPage({
     );
   }
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const file = e.target.files[0];
+      setQrcodeFile(file);
+
+      const imageUrl = URL.createObjectURL(file);
+      setImagePreview(imageUrl);
+    } else {
+      setQrcodeFile(null);
+      setImagePreview(null);
+    }
+  };
+
   const filteredTest = tests?.length
     ? tests.filter(
         (test) =>
@@ -145,37 +159,46 @@ export default function CreateProgramPage({
             <div className="grid gap-6 py-8">
               <div className="flex flex-col items-center gap-2">
                 <p className="text-sm font-medium leading-[170%] text-gray">
-                  Gambar QR Code (ratio 1:1){" "}
+                  Preview QR Code (ratio 1:1){" "}
                   <span className="text-danger">*</span>
                 </p>
 
-                <label className="relative inline-block">
-                  <input
-                    type="file"
-                    accept="image/jpg, image/jpeg, image/png"
-                    className="absolute inset-0 cursor-pointer opacity-0"
-                    onChange={(e) => {
-                      if (e.target.files) {
-                        setQrcodeFile(e.target.files[0]);
-                      } else {
-                        setQrcodeFile(null);
-                      }
-                    }}
+                {imagePreview ? (
+                  <Image
+                    isBlurred
+                    src={`${imagePreview}`}
+                    alt="preview qrcode image"
+                    width={180}
+                    height={180}
+                    className="aspect-square justify-self-center rounded-xl border-2 border-dashed border-gray/30 bg-gray/10 object-cover object-center p-1"
                   />
-
-                  <div className="flex items-center justify-center rounded-lg border-2 border-dashed border-gray/40 p-16 text-gray/50">
-                    {qrcodeFile ? (
-                      <CheckCircle
-                        size={30}
-                        className="text-success"
-                        weight="fill"
-                      />
-                    ) : (
-                      <Plus size={30} weight="bold" />
-                    )}
+                ) : (
+                  <div className="flex aspect-square size-[180px] flex-col items-center justify-center gap-2 justify-self-center rounded-xl bg-gray/10">
+                    <ImageBroken
+                      weight="bold"
+                      size={28}
+                      className="text-gray/50"
+                    />
+                    <p className="text-[12px] font-bold text-gray/50">
+                      Belum ada QR!
+                    </p>
                   </div>
-                </label>
+                )}
               </div>
+
+              <Input
+                isRequired
+                type="file"
+                accept="image/jpg, image/jpeg, image/png"
+                variant="flat"
+                label="Gambar QR Code"
+                labelPlacement="outside"
+                classNames={{
+                  input:
+                    "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
+                }}
+                onChange={handleFileChange}
+              />
 
               <Input
                 isRequired

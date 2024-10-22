@@ -152,8 +152,9 @@ export default function EditProgramPage({
 
             <div className="grid gap-6 py-8">
               <div className="flex flex-col items-center gap-2">
-                <p className="text-[12px] font-medium leading-[170%] text-gray/50">
-                  Gambar QR Code Sebelumnya *
+                <p className="text-sm font-medium leading-[170%] text-gray">
+                  Gambar QR Code Sebelumnya{" "}
+                  <span className="text-danger">*</span>
                 </p>
 
                 {program?.qr_code ? (
