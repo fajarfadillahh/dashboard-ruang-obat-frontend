@@ -232,7 +232,7 @@ export default function DetailsTestPage({
                               />
                             )}
                             <p
-                              className={`font-semibold ${
+                              className={`flex-1 font-semibold ${
                                 option.is_correct
                                   ? "text-success"
                                   : "text-gray/80"
