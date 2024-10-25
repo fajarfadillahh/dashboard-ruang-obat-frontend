@@ -29,7 +29,6 @@ import {
 } from "@nextui-org/react";
 import {
   BookBookmark,
-  Certificate,
   Check,
   CheckCircle,
   ClockCountdown,
@@ -39,10 +38,12 @@ import {
   Notepad,
   Plus,
   Tag,
+  Users,
   XCircle,
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -53,6 +54,7 @@ type DetailsProgramType = {
   price: number;
   is_active: boolean;
   qr_code: string;
+  url_qr_code: string;
   total_tests: number;
   total_users: number;
   tests: TestType[];
@@ -285,7 +287,7 @@ export default function DetailsProgramPage({
                     {program?.title}
                   </h4>
 
-                  <div className="flex items-center gap-12">
+                  <div className="flex items-center gap-10">
                     {program?.type === "free" ? (
                       <Chip
                         variant="flat"
@@ -307,9 +309,9 @@ export default function DetailsProgramPage({
                     ) : null}
 
                     <div className="inline-flex items-center gap-1 text-gray">
-                      <Certificate weight="bold" size={18} />
+                      <Users weight="bold" size={18} />
                       <p className="text-sm font-bold">
-                        ID: {program?.program_id}
+                        {program?.participants.length} Mahasiswa/i
                       </p>
                     </div>
 
@@ -344,14 +346,23 @@ export default function DetailsProgramPage({
               </div>
 
               {program?.qr_code ? (
-                <Image
-                  isBlurred
-                  src={`${program?.qr_code}`}
-                  alt="qrcode image"
-                  width={130}
-                  height={130}
-                  className="aspect-square rounded-xl object-cover object-center"
-                />
+                <div className="grid gap-1">
+                  <Image
+                    src={`${program?.qr_code}`}
+                    alt="qrcode image"
+                    width={130}
+                    height={130}
+                    className="aspect-square rounded-xl object-cover object-center"
+                  />
+
+                  <Link
+                    href={`${program?.url_qr_code}`}
+                    target="_blank"
+                    className="w-max justify-self-center text-sm font-bold leading-[170%] text-purple underline"
+                  >
+                    Link Join Grup!
+                  </Link>
+                </div>
               ) : (
                 <div className="flex aspect-square size-[130px] flex-col items-center justify-center gap-2 rounded-xl bg-gray/10">
                   <ImageBroken
