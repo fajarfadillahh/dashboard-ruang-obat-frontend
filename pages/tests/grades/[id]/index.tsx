@@ -2,8 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import usePagination from "@/hooks/usePagination";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import {
@@ -21,27 +20,31 @@ import {
 import { Eye, MagnifyingGlass, XCircle } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import { useState } from "react";
-
-type ResultTestType = {
-  test_id?: string;
-  title?: string;
-  user_id: string;
-  fullname: string;
-  university: string;
-  score: number;
-};
+import { ParsedUrlQuery } from "querystring";
+import { useEffect, useState } from "react";
+import { useDebounce } from "use-debounce";
 
 export default function GradeUsersPage({
   result,
   error,
+  id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [search, setSearch] = useState<string>("");
-  const { data, page, pages, setPage } = usePagination(
-    result as ResultTestType[],
-    10,
-  );
+  const [searchValue] = useDebounce(search, 800);
+
+  useEffect(() => {
+    if (searchValue) {
+      router.push({
+        pathname: `/tests/grades/${id}`,
+        query: {
+          q: searchValue,
+        },
+      });
+    } else {
+      router.push(`/tests/grades/${id}`);
+    }
+  }, [searchValue]);
 
   const columnsGrade = [
     { name: "ID Pengguna", uid: "user_id" },
@@ -51,8 +54,8 @@ export default function GradeUsersPage({
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellUsers(user: ResultTestType, columnKey: React.Key) {
-    const cellValue = user[columnKey as keyof ResultTestType];
+  function renderCellUsers(user: Result, columnKey: React.Key) {
+    const cellValue = user[columnKey as keyof Result];
 
     switch (columnKey) {
       case "user_id":
@@ -96,6 +99,7 @@ export default function GradeUsersPage({
             size="sm"
             startContent={<Eye weight="bold" size={16} />}
             className="w-max font-bold"
+            onClick={() => alert("dalam tahap pengembangan")}
           >
             Lihat Jawaban
           </Button>
@@ -108,7 +112,7 @@ export default function GradeUsersPage({
 
   if (error) {
     return (
-      <Layout title={`Daftar Nilai ${result?.map((title) => title.title)}`}>
+      <Layout title={`Daftar Nilai ${result?.title}`}>
         <Container>
           <ErrorPage
             {...{
@@ -122,19 +126,8 @@ export default function GradeUsersPage({
     );
   }
 
-  const filteredUser = data?.length
-    ? data?.filter(
-        (participant) =>
-          participant.user_id.toLowerCase().includes(search.toLowerCase()) ||
-          participant.fullname.toLowerCase().includes(search.toLowerCase()),
-      )
-    : [];
-
   return (
-    <Layout
-      title={`Daftar Nilai ${result?.map((title) => title.title)}`}
-      className="scrollbar-hide"
-    >
+    <Layout title={`Daftar Nilai ${result?.title}`} className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <ButtonBack />
@@ -142,7 +135,7 @@ export default function GradeUsersPage({
           <div className="grid gap-8">
             <div className="grid gap-1">
               <h1 className="max-w-[550px] text-[24px] font-bold leading-[120%] -tracking-wide text-black">
-                Daftar Nilai {result?.map((title) => title.title)} 🎯
+                Daftar Nilai {result?.title} 🎯
               </h1>
               <p className="font-medium text-gray">
                 Lihat semua nilai dari para mahasiswa/i
@@ -186,14 +179,14 @@ export default function GradeUsersPage({
                   </TableHeader>
 
                   <TableBody
-                    items={filteredUser}
+                    items={result?.results}
                     emptyContent={
                       <span className="text-sm font-semibold italic text-gray">
                         Nilai pengguna tidak ditemukan!
                       </span>
                     }
                   >
-                    {(item: ResultTestType) => (
+                    {(item: Result) => (
                       <TableRow key={item.user_id}>
                         {(columnKey) => (
                           <TableCell>
@@ -207,13 +200,19 @@ export default function GradeUsersPage({
               </div>
             </div>
 
-            {filteredUser.length > 10 ? (
+            {result?.results.length ? (
               <Pagination
                 isCompact
                 showControls
-                page={page}
-                total={pages}
-                onChange={setPage}
+                page={result.page}
+                total={result.total_pages}
+                onChange={(e) => {
+                  router.push({
+                    query: {
+                      page: e,
+                    },
+                  });
+                }}
                 className="justify-self-center"
                 classNames={{
                   cursor: "bg-purple text-white",
@@ -227,27 +226,49 @@ export default function GradeUsersPage({
   );
 }
 
-type DataProps = {
-  result?: ResultTestType[];
-  error?: ErrorDataType;
+type ResultResponse = {
+  test_id: string;
+  title: string;
+  results: Result[];
+  page: number;
+  total_results: number;
+  total_pages: number;
 };
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  params,
-}) => {
+type Result = {
+  result_id: string;
+  user_id: string;
+  fullname: string;
+  university: string;
+  score: number;
+};
+
+function getUrl(query: ParsedUrlQuery, id: string) {
+  if (query.q) {
+    return `/admin/tests/results/${encodeURIComponent(id)}?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/tests/results/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
+}
+
+export const getServerSideProps: GetServerSideProps<{
+  result?: ResultResponse;
+  error?: any;
+  id?: string;
+}> = async ({ req, params, query }) => {
   const token = req.headers["access_token"] as string;
 
   try {
-    const response = (await fetcher({
-      url: `/admin/tests/results/${encodeURIComponent(params?.id as string)}`,
+    const response: SuccessResponse<ResultResponse> = await fetcher({
+      url: getUrl(query, params?.id as string),
       method: "GET",
       token,
-    })) as SuccessResponse<ResultTestType[]>;
+    });
 
     return {
       props: {
         result: response.data,
+        id: params?.id as string,
       },
     };
   } catch (error: any) {
