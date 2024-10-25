@@ -39,6 +39,7 @@ type DetailsProgramType = {
   price: number;
   is_active: boolean;
   qr_code: string;
+  url_qr_code: string;
   total_tests: number;
   total_users: number;
   tests: TestType[];
@@ -55,9 +56,11 @@ export default function EditProgramPage({
   const [input, setInput] = useState<{
     title: string;
     price: number;
+    url_qr_code?: string;
   }>({
     title: program?.title || "",
     price: program?.price || 0,
+    url_qr_code: program?.url_qr_code || "",
   });
   const [search, setSearch] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>(program?.type || "");
@@ -92,6 +95,7 @@ export default function EditProgramPage({
       );
       formData.append("by", fullname);
       formData.append("qr_code", qrcodeFile as File);
+      formData.append("url_qr_code", input.url_qr_code as string);
 
       await fetcher({
         url: "/admin/programs",
@@ -159,7 +163,6 @@ export default function EditProgramPage({
 
                 {program?.qr_code ? (
                   <Image
-                    isBlurred
                     src={`${program?.qr_code}`}
                     alt="qrcode image"
                     width={180}
@@ -180,25 +183,46 @@ export default function EditProgramPage({
                 )}
               </div>
 
-              <Input
-                isRequired
-                type="file"
-                accept="image/jpg, image/jpeg, image/png"
-                variant="flat"
-                label="Gambar QR Code Baru"
-                labelPlacement="outside"
-                classNames={{
-                  input:
-                    "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
-                }}
-                onChange={(e) => {
-                  if (e.target.files) {
-                    setQrcodeFile(e.target.files[0]);
-                  } else {
-                    setQrcodeFile(null);
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  isRequired
+                  type="text"
+                  variant="flat"
+                  label="Link QR Code"
+                  labelPlacement="outside"
+                  placeholder="Masukan Link QR Code"
+                  name="title"
+                  value={input.url_qr_code}
+                  onChange={(e) =>
+                    setInput({ ...input, url_qr_code: e.target.value })
                   }
-                }}
-              />
+                  classNames={{
+                    input:
+                      "font-semibold placeholder:font-normal placeholder:text-default-600",
+                  }}
+                  className="flex-1"
+                />
+
+                <Input
+                  isRequired
+                  type="file"
+                  accept="image/jpg, image/jpeg, image/png"
+                  variant="flat"
+                  label="Gambar QR Code Baru"
+                  labelPlacement="outside"
+                  classNames={{
+                    input:
+                      "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
+                  }}
+                  onChange={(e) => {
+                    if (e.target.files) {
+                      setQrcodeFile(e.target.files[0]);
+                    } else {
+                      setQrcodeFile(null);
+                    }
+                  }}
+                />
+              </div>
 
               <Input
                 isRequired
@@ -217,7 +241,7 @@ export default function EditProgramPage({
                 className="flex-1"
               />
 
-              <div className="grid grid-cols-[300px_1fr] items-start gap-4">
+              <div className="grid grid-cols-2 items-start gap-4">
                 <RadioGroup
                   isRequired
                   aria-label="select program type"

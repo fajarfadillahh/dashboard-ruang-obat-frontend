@@ -40,9 +40,11 @@ export default function CreateProgramPage({
   const [input, setInput] = useState<{
     title: string;
     price: number | any;
+    url_qr_code?: string;
   }>({
     title: "",
     price: 0,
+    url_qr_code: "",
   });
   const [search, setSearch] = useState<string>("");
   const [selectedType, setSelectedType] = useState<string>("");
@@ -65,6 +67,7 @@ export default function CreateProgramPage({
       const formData = new FormData();
       formData.append("title", input.title);
       formData.append("qr_code", qrcodeFile as File);
+      formData.append("url_qr_code", input.url_qr_code as string);
       formData.append("type", selectedType);
 
       if (selectedType == "paid") {
@@ -75,15 +78,6 @@ export default function CreateProgramPage({
         formData.append("tests[]", test),
       );
       formData.append("by", fullname);
-
-      // const data = {
-      //   title: input.title,
-      //   files: formData,
-      //   type: selectedType,
-      //   ...(selectedType === "paid" && { price: input.price }),
-      //   tests: Array.from(value),
-      //   by: session.data?.user.fullname,
-      // };
 
       await fetcher({
         url: "/admin/programs",
@@ -165,7 +159,6 @@ export default function CreateProgramPage({
 
                 {imagePreview ? (
                   <Image
-                    isBlurred
                     src={`${imagePreview}`}
                     alt="preview qrcode image"
                     width={180}
@@ -186,19 +179,40 @@ export default function CreateProgramPage({
                 )}
               </div>
 
-              <Input
-                isRequired
-                type="file"
-                accept="image/jpg, image/jpeg, image/png"
-                variant="flat"
-                label="Gambar QR Code"
-                labelPlacement="outside"
-                classNames={{
-                  input:
-                    "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
-                }}
-                onChange={handleFileChange}
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  isRequired
+                  type="text"
+                  variant="flat"
+                  label="Link QR Code"
+                  labelPlacement="outside"
+                  placeholder="Masukan Link QR Code"
+                  name="title"
+                  value={input.url_qr_code}
+                  onChange={(e) =>
+                    setInput({ ...input, url_qr_code: e.target.value })
+                  }
+                  classNames={{
+                    input:
+                      "font-semibold placeholder:font-normal placeholder:text-default-600",
+                  }}
+                  className="flex-1"
+                />
+
+                <Input
+                  isRequired
+                  type="file"
+                  accept="image/jpg, image/jpeg, image/png"
+                  variant="flat"
+                  label="Gambar QR Code"
+                  labelPlacement="outside"
+                  classNames={{
+                    input:
+                      "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
+                  }}
+                  onChange={handleFileChange}
+                />
+              </div>
 
               <Input
                 isRequired
@@ -217,7 +231,7 @@ export default function CreateProgramPage({
                 className="flex-1"
               />
 
-              <div className="grid grid-cols-[300px_1fr] items-start gap-4">
+              <div className="grid grid-cols-2 items-start gap-4">
                 <RadioGroup
                   isRequired
                   aria-label="select program type"
