@@ -2,6 +2,8 @@ export type UserType = {
   user_id: string;
   fullname: string;
   university: string;
+  email: string;
+  phone_number: string;
   grade?: number;
 };
 

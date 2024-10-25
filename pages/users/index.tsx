@@ -43,6 +43,8 @@ export default function UsersPage({
     { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
     { name: "Asal Kampus", uid: "university" },
+    { name: "Email", uid: "email" },
+    { name: "No. Telpon", uid: "phone_number" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -58,6 +60,12 @@ export default function UsersPage({
         return <div className="font-medium text-black">{user.fullname}</div>;
       case "university":
         return <div className="font-medium text-black">{user.university}</div>;
+      case "email":
+        return <div className="font-medium text-black">{user.email}</div>;
+      case "phone_number":
+        return (
+          <div className="font-medium text-black">{user.phone_number}</div>
+        );
       case "action":
         return (
           <div className="flex w-max items-center gap-1">
