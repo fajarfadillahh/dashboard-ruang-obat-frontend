@@ -372,7 +372,7 @@ export default function CreateTestPage({
 
                     <div className="grid flex-1 gap-4">
                       <p
-                        className="font-semibold leading-[170%] text-black"
+                        className="preventive-list list-outside text-[16px] font-semibold leading-[170%] text-black"
                         dangerouslySetInnerHTML={{ __html: question.text }}
                       />
 

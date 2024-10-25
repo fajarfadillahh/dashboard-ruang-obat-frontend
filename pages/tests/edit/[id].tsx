@@ -24,7 +24,7 @@ import {
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { CreateQuestion } from "../create";
 
@@ -55,6 +55,7 @@ export default function EditTestPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const { data: session, status } = useSession();
+  const [client, setClient] = useState<boolean>(false);
 
   const [input, setInput] = useState({
     title: test?.title || "",
@@ -153,6 +154,14 @@ export default function EditTestPage({
       console.log(error);
       toast.error("Terjadi kesalahan saat mengubah soal");
     }
+  }
+
+  useEffect(() => {
+    setClient(true);
+  }, []);
+
+  if (!client) {
+    return;
   }
 
   return (
@@ -322,7 +331,7 @@ export default function EditTestPage({
 
                     <div className="grid flex-1 gap-4">
                       <p
-                        className="font-semibold leading-[170%] text-black"
+                        className="preventive-list list-outside text-[16px] font-semibold leading-[170%] text-black"
                         dangerouslySetInnerHTML={{ __html: question.text }}
                       />
 

@@ -15,6 +15,16 @@
   @apply w-1 rounded-full bg-purple/20 hover:bg-purple/40;
 }
 
+.preventive-list ul {
+  @apply list-outside list-disc pl-8;
+}
+.preventive-list ol {
+  @apply list-outside list-decimal pl-8;
+}
+.preventive-list li {
+  @apply list-outside;
+}
+
 .rsw-ce ul {
   list-style: disc;
   padding-left: 2em;

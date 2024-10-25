@@ -16,6 +16,7 @@ import {
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 type DetailsTestType = {
@@ -45,6 +46,7 @@ export default function DetailsTestPage({
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const [client, setClient] = useState<boolean>(false);
 
   if (error) {
     return (
@@ -60,6 +62,14 @@ export default function DetailsTestPage({
         </Container>
       </Layout>
     );
+  }
+
+  useEffect(() => {
+    setClient(true);
+  }, []);
+
+  if (!client) {
+    return;
   }
 
   return (
@@ -198,7 +208,7 @@ export default function DetailsTestPage({
 
                     <div className="grid flex-1 gap-4">
                       <p
-                        className="text-[16px] font-semibold leading-[170%] text-black"
+                        className="preventive-list list-outside text-[16px] font-semibold leading-[170%] text-black"
                         dangerouslySetInnerHTML={{ __html: question.text }}
                       />
 
