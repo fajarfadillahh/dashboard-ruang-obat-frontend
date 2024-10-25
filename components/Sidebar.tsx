@@ -23,7 +23,7 @@ export default function Sidebar() {
       >
         <LogoRuangobat className="h-auto w-[32px] text-gray/20" />
         <h1 className="text-[20px] font-extrabold -tracking-wide text-black">
-          Ruang Obat<span className="text-purple">.</span>
+          RuangObat<span className="text-purple">.</span>
         </h1>
       </Link>
 
