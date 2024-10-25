@@ -5,4 +5,5 @@ export type SessionType = {
   browser: string;
   os: string;
   created_at: string;
+  expired: string;
 };

@@ -2,13 +2,14 @@ import ErrorPage from "@/components/ErrorPage";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import usePagination from "@/hooks/usePagination";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { SessionType } from "@/types/session.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
+import { formatDate } from "@/utils/formatDate";
 import {
   Input,
+  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -19,19 +20,32 @@ import {
 import { MagnifyingGlass } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useDebounce } from "use-debounce";
 
 export default function SessionPage({
   sessions,
   token,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
-  const { data, page, pages, setPage } = usePagination(
-    sessions as SessionType[],
-    10,
-  );
+  const [searchValue] = useDebounce(search, 800);
+
+  useEffect(() => {
+    if (searchValue) {
+      router.push({
+        query: {
+          q: searchValue,
+        },
+      });
+    } else {
+      router.push("/sessions");
+    }
+  }, [searchValue]);
 
   const columnsSession = [
     { name: "ID Pengguna", uid: "user_id" },
@@ -39,6 +53,7 @@ export default function SessionPage({
     { name: "Asal Kampus", uid: "university" },
     { name: "Browser", uid: "browser" },
     { name: "Sistem Operasi", uid: "os" },
+    { name: "Expired", uid: "expired" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -72,6 +87,12 @@ export default function SessionPage({
         return (
           <div className="w-max font-medium capitalize text-black">
             {session.os === "undefined undefined" ? "-" : session.os}
+          </div>
+        );
+      case "expired":
+        return (
+          <div className="w-max font-medium capitalize text-black">
+            {formatDate(session.expired)}
           </div>
         );
       case "action":
@@ -120,14 +141,6 @@ export default function SessionPage({
       </Layout>
     );
   }
-
-  const filter = sessions?.length
-    ? sessions.filter(
-        (session) =>
-          session.user_id.toLowerCase().includes(search.toLowerCase()) ||
-          session.fullname.toLowerCase().includes(search.toLowerCase()),
-      )
-    : [];
 
   return (
     <Layout title="Daftar Aktifitas Login Pengguna" className="scrollbar-hide">
@@ -194,56 +207,74 @@ export default function SessionPage({
                     </span>
                   }
                 >
-                  {filter.map((item: SessionType) => (
-                    <TableRow key={item.user_id}>
-                      {(columnKey) => (
-                        <TableCell>
-                          {renderCellSessions(item, columnKey)}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  ))}
+                  {sessions.sessions.map((item: SessionType) => {
+                    return (
+                      <TableRow key={item.user_id}>
+                        {(columnKey) => (
+                          <TableCell>
+                            {renderCellSessions(item, columnKey)}
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
           </div>
 
-          {/* {filter.length ? (
+          {sessions?.sessions.length ? (
             <Pagination
               isCompact
               showControls
-              page={page}
-              total={pages}
-              onChange={setPage}
+              page={sessions.page as number}
+              total={sessions.total_pages as number}
+              onChange={(e) => {
+                router.push({
+                  query: {
+                    page: e,
+                  },
+                });
+              }}
               className="justify-self-center"
               classNames={{
                 cursor: "bg-purple text-white",
               }}
             />
-          ) : null} */}
+          ) : null}
         </section>
       </Container>
     </Layout>
   );
 }
 
-type DataProps = {
-  sessions?: SessionType[];
-  token?: string;
-  error?: ErrorDataType;
+type SessionResponse = {
+  sessions: SessionType[];
+  page: number;
+  total_sessions: number;
+  total_pages: number;
 };
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/sessions?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/sessions?page=${query.page ? query.page : 1}`;
+}
+
+export const getServerSideProps: GetServerSideProps = async ({
   req,
+  query,
 }) => {
   const token = req.headers["access_token"] as string;
 
   try {
-    const response = (await fetcher({
-      url: "/admin/sessions",
+    const response: SuccessResponse<SessionResponse> = await fetcher({
+      url: getUrl(query) as string,
       method: "GET",
       token,
-    })) as SuccessResponse<SessionType[]>;
+    });
 
     return {
       props: {
