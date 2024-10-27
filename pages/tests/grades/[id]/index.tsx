@@ -17,17 +17,19 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, MagnifyingGlass, XCircle } from "@phosphor-icons/react";
+import { Eye, MagnifyingGlass, Trash, XCircle } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useDebounce } from "use-debounce";
 
 export default function GradeUsersPage({
   result,
   error,
   id,
+  token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [search, setSearch] = useState<string>("");
@@ -93,20 +95,48 @@ export default function GradeUsersPage({
         );
       case "action":
         return (
-          <Button
-            variant="light"
-            color="secondary"
-            size="sm"
-            startContent={<Eye weight="bold" size={16} />}
-            className="w-max font-bold"
-            onClick={() => alert("dalam tahap pengembangan")}
-          >
-            Lihat Jawaban
-          </Button>
+          <div className="inline-flex w-max gap-2">
+            <Button
+              variant="light"
+              color="secondary"
+              size="sm"
+              startContent={<Eye weight="bold" size={16} />}
+              className="w-max font-bold"
+              onClick={() => alert("dalam tahap pengembangan")}
+            >
+              Lihat Jawaban
+            </Button>
+
+            <Button
+              isIconOnly
+              variant="light"
+              color="danger"
+              size="sm"
+              onClick={() => handleDeleteAnswer(user.result_id)}
+            >
+              <Trash weight="bold" size={16} />
+            </Button>
+          </div>
         );
 
       default:
         return cellValue;
+    }
+  }
+
+  async function handleDeleteAnswer(id: string) {
+    try {
+      await fetcher({
+        url: `/admin/results/${id}`,
+        method: "DELETE",
+        token,
+      });
+
+      toast.success("Berhasil Menghapus Nilai");
+      window.location.reload();
+    } catch (error) {
+      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
+      console.error(error);
     }
   }
 
@@ -255,6 +285,7 @@ export const getServerSideProps: GetServerSideProps<{
   result?: ResultResponse;
   error?: any;
   id?: string;
+  token?: string;
 }> = async ({ req, params, query }) => {
   const token = req.headers["access_token"] as string;
 
@@ -269,6 +300,7 @@ export const getServerSideProps: GetServerSideProps<{
       props: {
         result: response.data,
         id: params?.id as string,
+        token,
       },
     };
   } catch (error: any) {
