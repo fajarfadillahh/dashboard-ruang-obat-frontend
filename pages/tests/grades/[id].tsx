@@ -103,7 +103,7 @@ export default function GradeUsersPage({
               size="sm"
               startContent={<Eye weight="bold" size={16} />}
               className="w-max font-bold"
-              onClick={() => alert("dalam tahap pengembangan")}
+              onClick={() => router.push(`/tests/answers/${user.result_id}`)}
             >
               Lihat Jawaban
             </Button>
