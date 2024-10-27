@@ -1,5 +1,6 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
+import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
@@ -17,7 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, MagnifyingGlass, Trash, XCircle } from "@phosphor-icons/react";
+import { Eye, MagnifyingGlass, XCircle } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
@@ -107,15 +108,12 @@ export default function GradeUsersPage({
               Lihat Jawaban
             </Button>
 
-            <Button
-              isIconOnly
-              variant="light"
-              color="danger"
-              size="sm"
-              onClick={() => handleDeleteAnswer(user.result_id)}
-            >
-              <Trash weight="bold" size={16} />
-            </Button>
+            <ModalConfirmDelete
+              header="Nilai"
+              id={user.result_id}
+              title="Nilai Pengguna"
+              handleDelete={() => handleDeleteAnswer(user.result_id)}
+            />
           </div>
         );
 
