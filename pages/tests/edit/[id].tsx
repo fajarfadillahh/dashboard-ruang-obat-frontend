@@ -20,6 +20,7 @@ import {
   ClockCountdown,
   Database,
   Trash,
+  WarningCircle,
   XCircle,
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
@@ -170,6 +171,30 @@ export default function EditTestPage({
         <section className="grid">
           <ButtonBack />
 
+          {test?.status === "Berlangsung" ? (
+            <div className="mt-8 grid rounded-xl border-2 border-warning bg-warning/5 p-6">
+              <h4 className="mb-2 inline-flex items-center text-[20px] font-bold text-warning">
+                <WarningCircle
+                  weight="bold"
+                  size={20}
+                  className="mr-2 inline-flex text-warning"
+                />
+                Perhatian!
+              </h4>
+              <p className="ml-8 font-medium leading-[180%] text-warning">
+                Ketika ujian sedang <strong>Berlangsung</strong>, anda tidak
+                dapat mengubah <strong>Tanggal Mulai</strong> ujian dan{" "}
+                <strong>Menambah/Mengedit</strong> soal-soal ujian.
+                <br />
+                Hal ini bertujuan untuk menjaga <strong>
+                  konsistensi
+                </strong>{" "}
+                soal-soal ujian dan menghindari <strong>berubahnya</strong>{" "}
+                soal-soal ketika user sedang mengerjakan ujian.
+              </p>
+            </div>
+          ) : null}
+
           <div className="divide-y-2 divide-dashed divide-gray/20 py-8">
             <div className="grid gap-1 pb-10">
               <h1 className="text-[22px] font-bold -tracking-wide text-black">
@@ -224,6 +249,12 @@ export default function EditTestPage({
               <div className="grid grid-cols-3 gap-4">
                 <DatePicker
                   isRequired
+                  isDisabled={
+                    test?.status === "Berlangsung" ||
+                    test?.status === "Berakhir"
+                      ? true
+                      : false
+                  }
                   hideTimeZone
                   showMonthAndYearPickers
                   variant="flat"
@@ -231,7 +262,6 @@ export default function EditTestPage({
                   labelPlacement="outside"
                   endContent={<Calendar weight="bold" size={18} />}
                   hourCycle={24}
-                  minValue={today(getLocalTimeZone())}
                   defaultValue={parseDate(input.start.substring(0, 10)).add({
                     days: 1,
                   })}
@@ -311,11 +341,14 @@ export default function EditTestPage({
                 <div className="flex items-end justify-between gap-4">
                   <h5 className="font-bold text-black">Daftar Soal</h5>
 
-                  <div className="inline-flex gap-2">
-                    <ModalInputQuestion
-                      {...{ handleAddQuestion, type: "edit" }}
-                    />
-                  </div>
+                  {test?.status === "Berlangsung" ||
+                  test?.status === "Berakhir" ? null : (
+                    <div className="inline-flex gap-2">
+                      <ModalInputQuestion
+                        {...{ handleAddQuestion, type: "edit" }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -387,35 +420,38 @@ export default function EditTestPage({
                       </Accordion>
                     </div>
 
-                    <div className="flex gap-2">
-                      <ModalEditQuestion
-                        {...{
-                          question,
-                          handleEditQuestion,
-                          index,
-                          type: "edit",
-                        }}
-                      />
-
-                      <Button
-                        isIconOnly
-                        variant="flat"
-                        color="danger"
-                        size="sm"
-                        onClick={() =>
-                          handleDeleteQuestion(
-                            test.test_id,
-                            question.question_id,
-                          )
-                        }
-                      >
-                        <Trash
-                          weight="bold"
-                          size={18}
-                          className="text-danger"
+                    {test?.status === "Berlangsung" ||
+                    test?.status === "Berakhir" ? null : (
+                      <div className="flex gap-2">
+                        <ModalEditQuestion
+                          {...{
+                            question,
+                            handleEditQuestion,
+                            index,
+                            type: "edit",
+                          }}
                         />
-                      </Button>
-                    </div>
+
+                        <Button
+                          isIconOnly
+                          variant="flat"
+                          color="danger"
+                          size="sm"
+                          onClick={() =>
+                            handleDeleteQuestion(
+                              test.test_id,
+                              question.question_id,
+                            )
+                          }
+                        >
+                          <Trash
+                            weight="bold"
+                            size={18}
+                            className="text-danger"
+                          />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
