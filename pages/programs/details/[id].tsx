@@ -8,13 +8,12 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
-import { ParticipantType, UserType } from "@/types/user.type";
+import { ParticipantType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import {
-  Button,
   Chip,
   Image,
   Input,
@@ -35,7 +34,6 @@ import {
   ImageBroken,
   MagnifyingGlass,
   Notepad,
-  Plus,
   Tag,
   Users,
   XCircle,
@@ -69,14 +67,12 @@ type DetailsProgramType = {
 
 export default function DetailsProgramPage({
   program,
-  users,
   token,
   id,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
   const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
   const [searchValue] = useDebounce(search, 800);
 
@@ -463,25 +459,12 @@ export default function DetailsProgramPage({
                 />
 
                 {program?.type === "paid" ? (
-                  <Button
-                    variant="solid"
-                    color="secondary"
-                    startContent={<Plus weight="bold" size={18} />}
-                    onPress={() => setIsModalOpen(true)}
-                    className="w-max font-bold"
-                  >
-                    Tambah Partisipan
-                  </Button>
+                  <ModalAddParticipant
+                    session={`${session.data?.user.fullname}`}
+                    token={`${token}`}
+                    program_id={`${program?.program_id}`}
+                  />
                 ) : null}
-
-                <ModalAddParticipant
-                  users={users}
-                  session={`${session.data?.user.fullname}`}
-                  token={`${token}`}
-                  program_id={`${program?.program_id}`}
-                  isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(false)}
-                />
               </div>
 
               <div className="overflow-x-scroll scrollbar-hide">
@@ -556,7 +539,6 @@ export default function DetailsProgramPage({
 
 type DataProps = {
   program?: DetailsProgramType;
-  users?: UserType[];
   token?: string;
   id?: string;
   error?: ErrorDataType;
@@ -578,24 +560,15 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   const token = req.headers["access_token"] as string;
 
   try {
-    const [responseProgram, responseUsers] = await Promise.all([
-      fetcher({
-        url: getUrlParticipant(query, params?.id as string),
-        method: "GET",
-        token,
-      }) as Promise<SuccessResponse<DetailsProgramType>>,
-
-      fetcher({
-        url: "/admin/users?page=all",
-        method: "GET",
-        token,
-      }) as Promise<SuccessResponse<UserType[]>>,
-    ]);
+    const response = (await fetcher({
+      url: getUrlParticipant(query, params?.id as string),
+      method: "GET",
+      token,
+    })) as SuccessResponse<DetailsProgramType>;
 
     return {
       props: {
-        program: responseProgram.data,
-        users: responseUsers.data,
+        program: response.data,
         id: params?.id as string,
         token,
       },
