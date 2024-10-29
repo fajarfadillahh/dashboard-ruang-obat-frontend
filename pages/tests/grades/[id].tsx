@@ -236,6 +236,7 @@ export default function GradeUsersPage({
                 total={result.total_pages}
                 onChange={(e) => {
                   router.push({
+                    pathname: `/tests/grades/${id}`,
                     query: {
                       page: e,
                     },

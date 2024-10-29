@@ -6,7 +6,6 @@ import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import ModalJoiningRequirement from "@/components/modal/ModalJoiningRequirement";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import usePagination from "@/hooks/usePagination";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
 import { ParticipantType, UserType } from "@/types/user.type";
@@ -19,6 +18,7 @@ import {
   Chip,
   Image,
   Input,
+  Pagination,
   Snippet,
   Table,
   TableBody,
@@ -44,8 +44,11 @@ import {
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useDebounce } from "use-debounce";
 
 type DetailsProgramType = {
   program_id: string;
@@ -57,6 +60,10 @@ type DetailsProgramType = {
   url_qr_code: string;
   total_tests: number;
   total_users: number;
+  page: number;
+  total_participants: number;
+  total_approved_users: number;
+  total_pages: number;
   tests: TestType[];
   participants: ParticipantType[];
 };
@@ -65,15 +72,27 @@ export default function DetailsProgramPage({
   program,
   users,
   token,
+  id,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [search, setSearch] = useState("");
-  const { data, page, pages, setPage } = usePagination(
-    program?.participants as ParticipantType[],
-    10,
-  );
+  const [search, setSearch] = useState<string>("");
+  const [searchValue] = useDebounce(search, 800);
+
+  useEffect(() => {
+    if (searchValue) {
+      router.push({
+        pathname: `/programs/details/${id}`,
+        query: {
+          q: searchValue,
+        },
+      });
+    } else {
+      router.push(`/programs/details/${id}`);
+    }
+  }, [searchValue]);
 
   const columnsParticipantPaid = [
     { name: "ID Partisipan", uid: "user_id" },
@@ -263,14 +282,6 @@ export default function DetailsProgramPage({
     );
   }
 
-  const filterParticipants = program?.participants.length
-    ? program.participants.filter(
-        (participant) =>
-          participant.user_id.toLowerCase().includes(search.toLowerCase()) ||
-          participant.fullname.toLowerCase().includes(search.toLowerCase()),
-      )
-    : [];
-
   return (
     <Layout title={`${program?.title}`}>
       <Container>
@@ -311,7 +322,7 @@ export default function DetailsProgramPage({
                     <div className="inline-flex items-center gap-1 text-gray">
                       <Users weight="bold" size={18} />
                       <p className="text-sm font-bold">
-                        {program?.participants.length} Mahasiswa/i
+                        {program?.total_approved_users} Mahasiswa/i
                       </p>
                     </div>
 
@@ -461,7 +472,7 @@ export default function DetailsProgramPage({
                   </TableHeader>
 
                   <TableBody
-                    items={filterParticipants}
+                    items={program?.participants}
                     emptyContent={
                       <span className="text-sm font-semibold italic text-gray">
                         Partisipan tidak ditemukan!
@@ -481,19 +492,26 @@ export default function DetailsProgramPage({
                 </Table>
               </div>
 
-              {/* {filterParticipants.length ? (
+              {program?.participants.length ? (
                 <Pagination
                   isCompact
                   showControls
-                  page={page}
-                  total={pages}
-                  onChange={setPage}
+                  page={program?.page}
+                  total={program?.total_pages}
+                  onChange={(e) => {
+                    router.push({
+                      pathname: `/programs/details/${id}`,
+                      query: {
+                        page: e,
+                      },
+                    });
+                  }}
                   className="justify-self-center"
                   classNames={{
                     cursor: "bg-purple text-white",
                   }}
                 />
-              ) : null} */}
+              ) : null}
             </div>
           </div>
         </section>
@@ -506,19 +524,29 @@ type DataProps = {
   program?: DetailsProgramType;
   users?: UserType[];
   token?: string;
+  id?: string;
   error?: ErrorDataType;
 };
+
+function getUrl(query: ParsedUrlQuery, id: string) {
+  if (query.q) {
+    return `/admin/programs/${encodeURIComponent(id)}?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/programs/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
+}
 
 export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   req,
   params,
+  query,
 }) => {
   const token = req.headers["access_token"] as string;
 
   try {
     const [responseProgram, responseUsers] = await Promise.all([
       fetcher({
-        url: `/admin/programs/${encodeURIComponent(params?.id as string)}`,
+        url: getUrl(query, params?.id as string),
         method: "GET",
         token,
       }) as Promise<SuccessResponse<DetailsProgramType>>,
@@ -534,6 +562,7 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
       props: {
         program: responseProgram.data,
         users: responseUsers.data,
+        id: params?.id as string,
         token,
       },
     };
