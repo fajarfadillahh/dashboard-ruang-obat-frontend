@@ -28,7 +28,6 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import {
-  BookBookmark,
   Check,
   CheckCircle,
   ClockCountdown,
@@ -289,75 +288,9 @@ export default function DetailsProgramPage({
           <ButtonBack />
 
           <div className="grid divide-y-2 divide-dashed divide-gray/20">
-            <div className="flex items-end justify-between gap-12 pb-8">
-              <div className="flex flex-1 items-start gap-6">
-                <BookBookmark weight="bold" size={56} className="text-purple" />
-
-                <div className="grid gap-4">
-                  <h4 className="max-w-[700px] text-[28px] font-bold leading-[120%] -tracking-wide text-black">
-                    {program?.title}
-                  </h4>
-
-                  <div className="flex items-center gap-10">
-                    {program?.type === "free" ? (
-                      <Chip
-                        variant="flat"
-                        color="default"
-                        startContent={
-                          <Tag weight="bold" size={18} className="text-black" />
-                        }
-                        classNames={{
-                          base: "px-3 gap-1",
-                          content: "font-bold text-black",
-                        }}
-                      >
-                        Gratis
-                      </Chip>
-                    ) : program?.price ? (
-                      <h5 className="font-extrabold text-purple">
-                        {formatRupiah(program?.price)}
-                      </h5>
-                    ) : null}
-
-                    <div className="inline-flex items-center gap-1 text-gray">
-                      <Users weight="bold" size={18} />
-                      <p className="text-sm font-bold">
-                        {program?.total_approved_users} Mahasiswa/i
-                      </p>
-                    </div>
-
-                    <div className="inline-flex items-center gap-1 text-gray">
-                      <Notepad weight="bold" size={18} />
-                      <p className="text-sm font-bold">
-                        {program?.total_tests} Modul Ujian
-                      </p>
-                    </div>
-
-                    <Chip
-                      variant="flat"
-                      color={program?.is_active ? "success" : "danger"}
-                      startContent={
-                        program?.is_active ? (
-                          <CheckCircle weight="fill" size={16} />
-                        ) : (
-                          <XCircle weight="fill" size={16} />
-                        )
-                      }
-                      classNames={{
-                        base: "px-2 gap-1",
-                        content: "font-bold",
-                      }}
-                    >
-                      {program?.is_active
-                        ? "Program Aktif"
-                        : "Program Tidak Aktif"}
-                    </Chip>
-                  </div>
-                </div>
-              </div>
-
+            <div className="inline-flex items-end gap-12 pb-8">
               {program?.qr_code ? (
-                <div className="grid gap-1">
+                <div className="grid gap-2">
                   <Image
                     src={`${program?.qr_code}`}
                     alt="qrcode image"
@@ -386,6 +319,107 @@ export default function DetailsProgramPage({
                   </p>
                 </div>
               )}
+
+              <div className="grid w-max">
+                <h4 className="max-w-[700px] text-[28px] font-bold leading-[120%] -tracking-wide text-black">
+                  {program?.title}
+                </h4>
+
+                <div className="grid grid-rows-2 divide-y-2 divide-dashed divide-gray/10">
+                  <div className="grid grid-cols-3 items-end gap-12 pb-4">
+                    {program?.type === "free" ? (
+                      <Chip
+                        variant="flat"
+                        color="default"
+                        size="sm"
+                        startContent={
+                          <Tag weight="bold" size={16} className="text-black" />
+                        }
+                        classNames={{
+                          base: "px-2 gap-1",
+                          content: "font-bold text-black",
+                        }}
+                      >
+                        Gratis
+                      </Chip>
+                    ) : program?.price ? (
+                      <h5 className="font-extrabold text-purple">
+                        {formatRupiah(program?.price)}
+                      </h5>
+                    ) : null}
+
+                    <div className="inline-flex items-center gap-1 text-gray">
+                      <Notepad weight="bold" size={18} />
+                      <p className="text-sm font-bold">
+                        {program?.total_tests} Modul Ujian
+                      </p>
+                    </div>
+
+                    <Chip
+                      variant="flat"
+                      color={program?.is_active ? "success" : "danger"}
+                      size="sm"
+                      startContent={
+                        program?.is_active ? (
+                          <CheckCircle weight="fill" size={16} />
+                        ) : (
+                          <XCircle weight="fill" size={16} />
+                        )
+                      }
+                      classNames={{
+                        base: "px-2 gap-1",
+                        content: "font-bold",
+                      }}
+                    >
+                      {program?.is_active
+                        ? "Program Aktif"
+                        : "Program Tidak Aktif"}
+                    </Chip>
+                  </div>
+
+                  <div className="grid grid-cols-3 items-end gap-12 pt-2">
+                    <div>
+                      <p className="text-[12px] font-medium text-gray">
+                        Total Partisipan:
+                      </p>
+
+                      <div className="inline-flex items-center gap-1 text-gray">
+                        <Users weight="bold" size={18} />
+                        <p className="text-sm font-bold">
+                          {program?.total_participants}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-[12px] font-medium text-gray">
+                        Partisipan Approved:
+                      </p>
+
+                      <div className="inline-flex items-center gap-1 text-gray">
+                        <Users weight="bold" size={18} />
+                        <p className="text-sm font-bold">
+                          {program?.total_approved_users}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-[12px] font-medium text-gray">
+                        Partisipan Pending:
+                      </p>
+
+                      <div className="inline-flex items-center gap-1 text-gray">
+                        <Users weight="bold" size={18} />
+                        <p className="text-sm font-bold">
+                          {(program?.total_users ?? 0) -
+                            (program?.total_approved_users ?? 0)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div className="grid gap-4 py-8">
@@ -528,7 +562,7 @@ type DataProps = {
   error?: ErrorDataType;
 };
 
-function getUrl(query: ParsedUrlQuery, id: string) {
+function getUrlParticipant(query: ParsedUrlQuery, id: string) {
   if (query.q) {
     return `/admin/programs/${encodeURIComponent(id)}?q=${query.q}&page=${query.page ? query.page : 1}`;
   }
@@ -546,7 +580,7 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   try {
     const [responseProgram, responseUsers] = await Promise.all([
       fetcher({
-        url: getUrl(query, params?.id as string),
+        url: getUrlParticipant(query, params?.id as string),
         method: "GET",
         token,
       }) as Promise<SuccessResponse<DetailsProgramType>>,
