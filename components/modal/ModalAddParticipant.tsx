@@ -1,25 +1,41 @@
 import { SuccessResponse } from "@/types/global.type";
 import { UserType } from "@/types/user.type";
+import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import {
-  Autocomplete,
-  AutocompleteItem,
   Button,
+  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Pagination,
+  Selection,
+  Table,
+  TableBody,
+  TableCell,
+  TableColumn,
+  TableHeader,
+  TableRow,
   useDisclosure,
 } from "@nextui-org/react";
-import { CaretUpDown, Plus } from "@phosphor-icons/react";
-import { useState } from "react";
+import { MagnifyingGlass, Plus } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useDebounce } from "use-debounce";
 
 type ModalAddParticipantProps = {
   session: string;
   token: string;
   program_id: string;
+};
+
+type UsersType = {
+  users: UserType[];
+  page: number;
+  total_users: number;
+  total_pages: number;
 };
 
 export default function ModalAddParticipant({
@@ -28,25 +44,57 @@ export default function ModalAddParticipant({
   program_id,
 }: ModalAddParticipantProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [users, setUsers] = useState<UserType[]>([]);
-  const [value, setValue] = useState<string>("");
+  const [users, setUsers] = useState<UsersType>();
+  const [page, setPage] = useState(1);
+  const [value, setValue] = useState<Selection>(new Set([]));
   const [loading, setLoading] = useState<boolean>(false);
+  const [search, setSearch] = useState("");
+  const [searchValue] = useDebounce(search, 800);
+
+  const fetchUsers = async (url: string) => {
+    try {
+      const response = await fetcher({
+        url,
+        method: "GET",
+        token,
+      });
+
+      setUsers(response.data);
+    } catch (error) {
+      toast.error("Coba Lagi, Data Pengguna Gagal Dimuat");
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  useEffect(() => {
+    const url = searchValue ? `/admin/users?q=${searchValue}` : `/admin/users`;
+
+    setPage(1);
+    fetchUsers(url);
+  }, [searchValue]);
+
+  useEffect(() => {
+    const url = searchValue
+      ? `/admin/users?q=${searchValue}&page=${page}`
+      : `/admin/users?page=${page}`;
+
+    fetchUsers(url);
+  }, [page]);
 
   async function handleGetUsers() {
     try {
       const response = (await fetcher({
-        url: `/admin/users?page=all`,
+        url: `/admin/users`,
         method: "GET",
         token,
-      })) as SuccessResponse<UserType[]>;
+      })) as SuccessResponse<UsersType>;
 
       setUsers(response.data);
     } catch (error) {
+      toast.error("Coba Lagi, Data Pengguna Gagal Dimuat");
       console.error(error);
     }
   }
-
-  console.log(users);
 
   async function handleInviteParticipant() {
     setLoading(true);
@@ -54,7 +102,7 @@ export default function ModalAddParticipant({
     const data = {
       program_id: program_id,
       by: session,
-      users: [value],
+      users: Array.from(value),
     };
 
     try {
@@ -71,6 +119,27 @@ export default function ModalAddParticipant({
       setLoading(false);
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
+    }
+  }
+
+  const columnsUser = [
+    { name: "ID Pengguna", uid: "user_id" },
+    { name: "Nama Lengkap", uid: "fullname" },
+  ];
+
+  function renderCellUsers(user: UserType, columnKey: React.Key) {
+    const cellValue = user[columnKey as keyof UserType];
+
+    switch (columnKey) {
+      case "user_id":
+        return (
+          <div className="w-max font-medium text-black">{user.user_id}</div>
+        );
+      case "fullname":
+        return <div className="font-medium text-black">{user.fullname}</div>;
+
+      default:
+        return cellValue;
     }
   }
 
@@ -92,7 +161,13 @@ export default function ModalAddParticipant({
         isDismissable={false}
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        size="lg"
+        scrollBehavior="inside"
+        onClose={() => {
+          setPage(1);
+          setValue(new Set([]));
+          setSearch("");
+        }}
+        size="xl"
       >
         <ModalContent>
           {(onClose) => (
@@ -101,14 +176,90 @@ export default function ModalAddParticipant({
                 Daftar Pengguna
               </ModalHeader>
 
-              <ModalBody>
+              <ModalBody className="scrollbar-hide">
                 <div className="grid gap-6">
                   <p className="text-sm font-medium leading-[170%] text-gray">
                     Cari pengguna untuk ditambahkan pada program ini, pastikan
                     ID pengguna yang anda cari sudah benar!
                   </p>
 
-                  <Autocomplete
+                  <div className="grid gap-4">
+                    <Input
+                      type="text"
+                      variant="flat"
+                      labelPlacement="outside"
+                      placeholder="Cari User ID atau Nama User"
+                      startContent={
+                        <MagnifyingGlass
+                          weight="bold"
+                          size={18}
+                          className="text-gray"
+                        />
+                      }
+                      classNames={{
+                        input:
+                          "font-semibold placeholder:font-semibold placeholder:text-gray",
+                      }}
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+
+                    <div className="max-h-[300px] overflow-x-scroll scrollbar-hide">
+                      <Table
+                        isHeaderSticky
+                        aria-label="users table"
+                        color="secondary"
+                        selectionMode="multiple"
+                        selectedKeys={value}
+                        onSelectionChange={setValue}
+                        classNames={customStyleTable}
+                        className="scrollbar-hide"
+                      >
+                        <TableHeader columns={columnsUser}>
+                          {(column) => (
+                            <TableColumn key={column.uid}>
+                              {column.name}
+                            </TableColumn>
+                          )}
+                        </TableHeader>
+
+                        <TableBody
+                          items={users?.users ? users.users : []}
+                          emptyContent={
+                            <span className="text-sm font-semibold italic text-gray">
+                              Pengguna tidak ditemukan!
+                            </span>
+                          }
+                        >
+                          {(item: UserType) => (
+                            <TableRow key={item.user_id}>
+                              {(columnKey) => (
+                                <TableCell>
+                                  {renderCellUsers(item, columnKey)}
+                                </TableCell>
+                              )}
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    <Pagination
+                      isCompact
+                      showControls
+                      page={users?.page as number}
+                      total={users?.total_pages as number}
+                      onChange={(e) => {
+                        setPage(e);
+                      }}
+                      className="justify-self-center"
+                      classNames={{
+                        cursor: "bg-purple text-white",
+                      }}
+                    />
+                  </div>
+
+                  {/* <Autocomplete
                     disableSelectorIconRotation
                     aria-label="select user"
                     labelPlacement="outside"
@@ -148,7 +299,7 @@ export default function ModalAddParticipant({
                         </div>
                       </AutocompleteItem>
                     )}
-                  </Autocomplete>
+                  </Autocomplete> */}
                 </div>
               </ModalBody>
 
@@ -156,7 +307,9 @@ export default function ModalAddParticipant({
                 <Button
                   color="danger"
                   variant="light"
-                  onPress={onClose}
+                  onPress={() => {
+                    onClose(), setPage(1), setValue(new Set([])), setSearch("");
+                  }}
                   className="font-bold"
                 >
                   Tutup
