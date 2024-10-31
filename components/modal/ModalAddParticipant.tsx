@@ -26,8 +26,8 @@ import toast from "react-hot-toast";
 import { useDebounce } from "use-debounce";
 
 type ModalAddParticipantProps = {
-  session: string;
   token: string;
+  by: string;
   program_id: string;
 };
 
@@ -39,8 +39,8 @@ type UsersType = {
 };
 
 export default function ModalAddParticipant({
-  session,
   token,
+  by,
   program_id,
 }: ModalAddParticipantProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -51,9 +51,9 @@ export default function ModalAddParticipant({
   const [search, setSearch] = useState("");
   const [searchValue] = useDebounce(search, 800);
 
-  const fetchUsers = async (url: string) => {
+  async function fetchUsers(url: string) {
     try {
-      const response = await fetcher({
+      const response: SuccessResponse<UsersType> = await fetcher({
         url,
         method: "GET",
         token,
@@ -64,53 +64,33 @@ export default function ModalAddParticipant({
       toast.error("Coba Lagi, Data Pengguna Gagal Dimuat");
       console.error("Error fetching users:", error);
     }
-  };
-
-  useEffect(() => {
-    const url = searchValue ? `/admin/users?q=${searchValue}` : `/admin/users`;
-
-    setPage(1);
-    fetchUsers(url);
-  }, [searchValue]);
-
-  useEffect(() => {
-    const url = searchValue
-      ? `/admin/users?q=${searchValue}&page=${page}`
-      : `/admin/users?page=${page}`;
-
-    fetchUsers(url);
-  }, [page]);
-
-  async function handleGetUsers() {
-    try {
-      const response = (await fetcher({
-        url: `/admin/users`,
-        method: "GET",
-        token,
-      })) as SuccessResponse<UsersType>;
-
-      setUsers(response.data);
-    } catch (error) {
-      toast.error("Coba Lagi, Data Pengguna Gagal Dimuat");
-      console.error(error);
-    }
   }
+
+  useEffect(() => {
+    if (searchValue || page) {
+      fetchUsers(`/admin/users?q=${searchValue}&page=${page}`);
+    }
+  }, [searchValue, page]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchUsers(`/admin/users?page=1`);
+    }
+  }, [isOpen]);
 
   async function handleInviteParticipant() {
     setLoading(true);
-
-    const data = {
-      program_id: program_id,
-      by: session,
-      users: Array.from(value),
-    };
 
     try {
       await fetcher({
         url: "/admin/programs/invite",
         method: "POST",
         token,
-        data: data,
+        data: {
+          program_id,
+          by,
+          users: Array.from(value),
+        },
       });
 
       toast.success("Berhasil Menambahkan Partisipan");
@@ -149,9 +129,7 @@ export default function ModalAddParticipant({
         variant="solid"
         color="secondary"
         startContent={<Plus weight="bold" size={18} />}
-        onPress={() => {
-          onOpen(), handleGetUsers();
-        }}
+        onClick={onOpen}
         className="w-max font-bold"
       >
         Tambah Partisipan
@@ -244,19 +222,21 @@ export default function ModalAddParticipant({
                       </Table>
                     </div>
 
-                    <Pagination
-                      isCompact
-                      showControls
-                      page={users?.page as number}
-                      total={users?.total_pages as number}
-                      onChange={(e) => {
-                        setPage(e);
-                      }}
-                      className="justify-self-center"
-                      classNames={{
-                        cursor: "bg-purple text-white",
-                      }}
-                    />
+                    {users ? (
+                      users.users.length ? (
+                        <Pagination
+                          isCompact
+                          showControls
+                          page={users?.page as number}
+                          total={users?.total_pages as number}
+                          onChange={(e) => setPage(e)}
+                          className="justify-self-center"
+                          classNames={{
+                            cursor: "bg-purple text-white",
+                          }}
+                        />
+                      ) : null
+                    ) : null}
                   </div>
 
                   {/* <Autocomplete
@@ -308,7 +288,10 @@ export default function ModalAddParticipant({
                   color="danger"
                   variant="light"
                   onPress={() => {
-                    onClose(), setPage(1), setValue(new Set([])), setSearch("");
+                    onClose();
+                    setPage(1);
+                    setValue(new Set([]));
+                    setSearch("");
                   }}
                   className="font-bold"
                 >

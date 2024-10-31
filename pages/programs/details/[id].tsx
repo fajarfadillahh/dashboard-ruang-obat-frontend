@@ -71,7 +71,7 @@ export default function DetailsProgramPage({
   id,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const session = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const [search, setSearch] = useState<string>("");
   const [searchValue] = useDebounce(search, 800);
@@ -296,8 +296,11 @@ export default function DetailsProgramPage({
                   />
 
                   <Link
-                    href={`${program?.url_qr_code}`}
-                    target="_blank"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.open(program?.url_qr_code, "_blank");
+                    }}
                     className="w-max justify-self-center text-sm font-bold leading-[170%] text-purple underline"
                   >
                     Link Join Grup!
@@ -347,7 +350,7 @@ export default function DetailsProgramPage({
                     <div className="inline-flex items-center gap-1 text-gray">
                       <Notepad weight="bold" size={18} />
                       <p className="text-sm font-bold">
-                        {program?.total_tests} Modul Ujian
+                        {program?.total_tests} Ujian
                       </p>
                     </div>
 
@@ -389,7 +392,7 @@ export default function DetailsProgramPage({
 
                     <div>
                       <p className="text-[12px] font-medium text-gray">
-                        Partisipan Approved:
+                        Approved Partisipan:
                       </p>
 
                       <div className="inline-flex items-center gap-1 text-gray">
@@ -402,7 +405,7 @@ export default function DetailsProgramPage({
 
                     <div>
                       <p className="text-[12px] font-medium text-gray">
-                        Partisipan Pending:
+                        Pending Partisipan:
                       </p>
 
                       <div className="inline-flex items-center gap-1 text-gray">
@@ -460,9 +463,9 @@ export default function DetailsProgramPage({
 
                 {program?.type === "paid" ? (
                   <ModalAddParticipant
-                    session={`${session.data?.user.fullname}`}
-                    token={`${token}`}
-                    program_id={`${program?.program_id}`}
+                    by={status == "authenticated" ? session.user.fullname : ""}
+                    token={token as string}
+                    program_id={program?.program_id as string}
                   />
                 ) : null}
               </div>
