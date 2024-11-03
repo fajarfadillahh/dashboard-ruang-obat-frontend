@@ -171,25 +171,37 @@ export default function GradeUsersPage({
             </div>
 
             <div className="grid gap-4">
-              <Input
-                type="text"
-                variant="flat"
-                labelPlacement="outside"
-                placeholder="Cari User ID atau Nama User"
-                startContent={
-                  <MagnifyingGlass
-                    weight="bold"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-semibold placeholder:text-gray",
-                }}
-                className="max-w-[500px]"
-                onChange={(e) => setSearch(e.target.value)}
-              />
+              <div className="flex items-end justify-between gap-4">
+                <Input
+                  type="text"
+                  variant="flat"
+                  labelPlacement="outside"
+                  placeholder="Cari User ID atau Nama User"
+                  startContent={
+                    <MagnifyingGlass
+                      weight="bold"
+                      size={18}
+                      className="text-gray"
+                    />
+                  }
+                  classNames={{
+                    input:
+                      "font-semibold placeholder:font-semibold placeholder:text-gray",
+                  }}
+                  className="max-w-[500px]"
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+
+                <p className="text-sm font-medium text-gray">
+                  Total Jawaban{" "}
+                  <strong className="font-black text-purple">
+                    {result?.total_results ? result.total_results : ""}/
+                    {result?.total_participants
+                      ? result.total_participants
+                      : "-"}
+                  </strong>
+                </p>
+              </div>
 
               <div className="overflow-x-scroll scrollbar-hide">
                 <Table
@@ -262,6 +274,7 @@ type ResultResponse = {
   page: number;
   total_results: number;
   total_pages: number;
+  total_participants: number;
 };
 
 type Result = {
