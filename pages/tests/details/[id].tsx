@@ -17,7 +17,6 @@ import {
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 
 type DetailsTestType = {
   status: string;
@@ -163,21 +162,17 @@ export default function DetailsTestPage({
               </div>
 
               <div className="grid gap-2">
-                <Button
-                  variant="light"
-                  color="secondary"
-                  startContent={<PencilLine weight="bold" size={18} />}
-                  onClick={() =>
-                    test?.status === "Berlangsung"
-                      ? toast.error(
-                          "Tidak Bisa Mengubah Ujian, Jika Ujian Sudah Berlangsung!",
-                        )
-                      : router.push(`/tests/edit/${test?.test_id}`)
-                  }
-                  className="px-6 font-bold"
-                >
-                  Edit Ujian
-                </Button>
+                {test?.status === "Berakhir" ? null : (
+                  <Button
+                    variant="light"
+                    color="secondary"
+                    startContent={<PencilLine weight="bold" size={18} />}
+                    onClick={() => router.push(`/tests/edit/${test?.test_id}`)}
+                    className="px-6 font-bold"
+                  >
+                    Edit Ujian
+                  </Button>
+                )}
 
                 <Button
                   variant="solid"

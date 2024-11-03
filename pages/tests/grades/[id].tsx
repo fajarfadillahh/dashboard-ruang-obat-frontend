@@ -195,7 +195,7 @@ export default function GradeUsersPage({
                 <p className="text-sm font-medium text-gray">
                   Total Jawaban{" "}
                   <strong className="font-black text-purple">
-                    {result?.total_results ? result.total_results : ""}/
+                    {result?.total_results ? result.total_results : "-"}/
                     {result?.total_participants
                       ? result.total_participants
                       : "-"}
