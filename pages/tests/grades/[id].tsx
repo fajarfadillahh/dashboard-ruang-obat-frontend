@@ -215,7 +215,7 @@ export default function GradeUsersPage({
                     }
                   >
                     {(item: Result) => (
-                      <TableRow key={item.user_id}>
+                      <TableRow key={item.result_id}>
                         {(columnKey) => (
                           <TableCell>
                             {renderCellUsers(item, columnKey)}
