@@ -11,6 +11,7 @@ import {
   getKeyValue,
   Image,
   Input,
+  Pagination,
   Radio,
   RadioGroup,
   Selection,
@@ -28,8 +29,18 @@ import {
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
-import { ChangeEvent, useState } from "react";
+import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
+import { ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useDebounce } from "use-debounce";
+
+type TestsResponse = {
+  tests: TestType[];
+  page: number;
+  total_tests: number;
+  total_pages: number;
+};
 
 export default function CreateProgramPage({
   tests,
@@ -46,12 +57,26 @@ export default function CreateProgramPage({
     price: 0,
     url_qr_code: "",
   });
+  const router = useRouter();
   const [search, setSearch] = useState<string>("");
+  const [searchValue] = useDebounce(search, 800);
   const [selectedType, setSelectedType] = useState<string>("");
   const [value, setValue] = useState<Selection>(new Set([]));
   const [loading, setLoading] = useState(false);
   const [qrcodeFile, setQrcodeFile] = useState<File | null>();
   const [imagePreview, setImagePreview] = useState<string | null>();
+
+  useEffect(() => {
+    if (searchValue) {
+      router.push({
+        query: {
+          q: searchValue,
+        },
+      });
+    } else {
+      router.push("/programs/create");
+    }
+  }, [searchValue]);
 
   const columnsTest = [
     { name: "ID Ujian", uid: "test_id" },
@@ -125,14 +150,6 @@ export default function CreateProgramPage({
       setImagePreview(null);
     }
   };
-
-  const filteredTest = tests?.length
-    ? tests.filter(
-        (test) =>
-          test.title.toLowerCase().includes(search.toLowerCase()) ||
-          test.test_id.toLowerCase().includes(search.toLowerCase()),
-      )
-    : [];
 
   return (
     <Layout title="Buat Program">
@@ -279,8 +296,8 @@ export default function CreateProgramPage({
               </div>
             </div>
 
-            <div className="grid pt-12">
-              <div className="sticky left-0 top-0 z-50 grid grid-cols-[1fr_400px] gap-6 bg-white pb-4">
+            <div className="grid gap-4 pt-12">
+              <div className="sticky left-0 top-0 z-50 grid grid-cols-[1fr_400px] gap-6 bg-white">
                 <Input
                   type="text"
                   variant="flat"
@@ -332,7 +349,7 @@ export default function CreateProgramPage({
                 </TableHeader>
 
                 <TableBody
-                  items={filteredTest}
+                  items={tests?.tests}
                   emptyContent={
                     <span className="text-sm font-semibold italic text-gray">
                       Ujian tidak ditemukan!
@@ -348,6 +365,26 @@ export default function CreateProgramPage({
                   )}
                 </TableBody>
               </Table>
+
+              {tests?.tests.length ? (
+                <Pagination
+                  isCompact
+                  showControls
+                  page={tests?.page as number}
+                  total={tests?.total_pages as number}
+                  onChange={(e) => {
+                    router.push({
+                      query: {
+                        page: e,
+                      },
+                    });
+                  }}
+                  className="justify-self-center"
+                  classNames={{
+                    cursor: "bg-purple text-white",
+                  }}
+                />
+              ) : null}
             </div>
           </div>
         </section>
@@ -357,22 +394,31 @@ export default function CreateProgramPage({
 }
 
 type DataProps = {
-  tests?: TestType[];
+  tests?: TestsResponse;
   token?: string;
   error?: ErrorDataType;
 };
 
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/tests?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/tests?page=${query.page ? query.page : 1}`;
+}
+
 export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   req,
+  query,
 }) => {
   const token = req.headers["access_token"] as string;
 
   try {
     const response = (await fetcher({
-      url: "/admin/tests?page=all",
+      url: getUrl(query) as string,
       method: "GET",
       token,
-    })) as SuccessResponse<TestType[]>;
+    })) as SuccessResponse<TestsResponse>;
 
     return {
       props: {
