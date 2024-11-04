@@ -12,6 +12,7 @@ import {
   getKeyValue,
   Image,
   Input,
+  Pagination,
   Radio,
   RadioGroup,
   Selection,
@@ -29,10 +30,13 @@ import {
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useDebounce } from "use-debounce";
 
-type DetailsProgramType = {
+type DetailsProgramResponse = {
   program_id: string;
   title: string;
   type: string;
@@ -46,10 +50,18 @@ type DetailsProgramType = {
   participants: ParticipantType[];
 };
 
+type TestsResponse = {
+  tests: TestType[];
+  page: number;
+  total_tests: number;
+  total_pages: number;
+};
+
 export default function EditProgramPage({
   program,
-  allTest,
+  tests,
   token,
+  id,
   error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
@@ -62,13 +74,28 @@ export default function EditProgramPage({
     price: program?.price || 0,
     url_qr_code: program?.url_qr_code || "",
   });
+  const router = useRouter();
   const [search, setSearch] = useState<string>("");
+  const [searchValue] = useDebounce(search, 800);
   const [selectedType, setSelectedType] = useState<string>(program?.type || "");
   const [loading, setLoading] = useState(false);
   const [qrcodeFile, setQrcodeFile] = useState<File | null>();
 
   const testId = program?.tests.map((test) => test.test_id);
   const [value, setValue] = useState<Selection>(new Set(testId));
+
+  useEffect(() => {
+    if (searchValue) {
+      router.push({
+        pathname: `/programs/edit/${id}`,
+        query: {
+          q: searchValue,
+        },
+      });
+    } else {
+      router.push(`/programs/edit/${id}`);
+    }
+  }, [searchValue]);
 
   const columnsTest = [
     { name: "ID Ujian", uid: "test_id" },
@@ -129,14 +156,6 @@ export default function EditProgramPage({
       </Layout>
     );
   }
-
-  const filteredTest = allTest?.length
-    ? allTest.filter(
-        (test) =>
-          test.title.toLowerCase().includes(search.toLowerCase()) ||
-          test.test_id.toLowerCase().includes(search.toLowerCase()),
-      )
-    : [];
 
   return (
     <Layout title="Edit Program">
@@ -289,8 +308,8 @@ export default function EditProgramPage({
               </div>
             </div>
 
-            <div className="grid pt-12">
-              <div className="sticky left-0 top-0 z-50 grid grid-cols-[1fr_400px] gap-6 bg-white pb-4">
+            <div className="grid gap-4 pt-12">
+              <div className="sticky left-0 top-0 z-50 grid grid-cols-[1fr_400px] gap-6 bg-white">
                 <Input
                   type="text"
                   variant="flat"
@@ -343,7 +362,7 @@ export default function EditProgramPage({
                 </TableHeader>
 
                 <TableBody
-                  items={filteredTest}
+                  items={tests?.tests}
                   emptyContent={
                     <span className="text-sm font-semibold italic text-gray">
                       Ujian tidak ditemukan!
@@ -359,6 +378,27 @@ export default function EditProgramPage({
                   )}
                 </TableBody>
               </Table>
+
+              {tests?.tests.length ? (
+                <Pagination
+                  isCompact
+                  showControls
+                  page={tests?.page as number}
+                  total={tests?.total_pages as number}
+                  onChange={(e) => {
+                    router.push({
+                      pathname: `/programs/edit/${id}`,
+                      query: {
+                        page: e,
+                      },
+                    });
+                  }}
+                  className="justify-self-center"
+                  classNames={{
+                    cursor: "bg-purple text-white",
+                  }}
+                />
+              ) : null}
             </div>
           </div>
         </section>
@@ -368,15 +408,25 @@ export default function EditProgramPage({
 }
 
 type DataProps = {
-  program?: DetailsProgramType;
-  allTest?: TestType[];
+  program?: DetailsProgramResponse;
+  tests?: TestsResponse;
+  id?: string;
   token?: string;
   error?: ErrorDataType;
 };
 
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/tests?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/tests?page=${query.page ? query.page : 1}`;
+}
+
 export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   req,
   params,
+  query,
 }) => {
   const token = req.headers["access_token"] as string;
 
@@ -386,19 +436,20 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
         url: `/admin/programs/${encodeURIComponent(params?.id as string)}`,
         method: "GET",
         token,
-      }) as Promise<SuccessResponse<DetailsProgramType>>,
+      }) as Promise<SuccessResponse<DetailsProgramResponse>>,
 
       fetcher({
-        url: "/admin/tests?page=all",
+        url: getUrl(query) as string,
         method: "GET",
         token,
-      }) as Promise<SuccessResponse<TestType[]>>,
+      }) as Promise<SuccessResponse<TestsResponse>>,
     ]);
 
     return {
       props: {
         program: responseProgram.data,
-        allTest: responseTests.data,
+        tests: responseTests.data,
+        id: params?.id as string,
         token,
       },
     };
