@@ -34,3 +34,15 @@
   list-style: decimal;
   padding-left: 2em;
 }
+
+.ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-blurred,
+.ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-focused {
+  @apply px-8;
+}
+
+@layer base {
+  ul,
+  ol {
+    list-style: revert;
+  }
+}
