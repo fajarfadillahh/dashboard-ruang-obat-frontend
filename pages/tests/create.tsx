@@ -340,7 +340,7 @@ export default function CreateTestPage({
 
                   <div className="inline-flex gap-2">
                     <ModalInputQuestion
-                      {...{ handleAddQuestion, type: "create" }}
+                      {...{ handleAddQuestion, type: "create", token: token }}
                     />
 
                     <Button
@@ -437,6 +437,7 @@ export default function CreateTestPage({
                           handleEditQuestion,
                           index,
                           type: "create",
+                          token: token,
                         }}
                       />
 

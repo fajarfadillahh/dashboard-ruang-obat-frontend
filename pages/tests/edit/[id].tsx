@@ -325,6 +325,7 @@ export default function EditTestPage({
                   }}
                 />
               </div>
+
               <Button
                 variant="solid"
                 color="secondary"
@@ -345,7 +346,7 @@ export default function EditTestPage({
                   test?.status === "Berakhir" ? null : (
                     <div className="inline-flex gap-2">
                       <ModalInputQuestion
-                        {...{ handleAddQuestion, type: "edit" }}
+                        {...{ handleAddQuestion, type: "edit", token: token }}
                       />
                     </div>
                   )}
@@ -429,6 +430,7 @@ export default function EditTestPage({
                             handleEditQuestion,
                             index,
                             type: "edit",
+                            token: token,
                           }}
                         />
 

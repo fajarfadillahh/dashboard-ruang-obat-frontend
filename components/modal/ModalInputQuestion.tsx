@@ -1,4 +1,3 @@
-import CardSimpleInputTest from "@/components/card/CardSimpleInputTest";
 import { CreateQuestion } from "@/pages/tests/create";
 import {
   Button,
@@ -12,16 +11,22 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import { FloppyDisk, Plus } from "@phosphor-icons/react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
+const CKEditor = dynamic(() => import("@/components/editor/CKEditor"), {
+  ssr: false,
+});
 
 type CardInputTestProps = {
   handleAddQuestion: (question: CreateQuestion) => void;
   type: "create" | "edit";
+  token?: string;
 };
 
 export default function ModalInputQuestion({
   handleAddQuestion,
   type,
+  token,
 }: CardInputTestProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [text, setText] = useState("");
@@ -77,7 +82,12 @@ export default function ModalInputQuestion({
                   <div className="grid gap-2">
                     <p className="font-medium text-black">Pertanyaan</p>
 
-                    <CardSimpleInputTest value={text} onChange={setText} />
+                    <CKEditor
+                      value={text}
+                      onChange={setText}
+                      token={`${token}`}
+                    />
+                    {/* <CardSimpleInputTest value={text} onChange={setText} /> */}
                   </div>
 
                   <div className="grid gap-2">
@@ -126,10 +136,15 @@ export default function ModalInputQuestion({
                   <div className="grid gap-2">
                     <p className="font-medium text-black">Pembahasan</p>
 
-                    <CardSimpleInputTest
+                    <CKEditor
                       value={explanation}
                       onChange={setExplanation}
+                      token={`${token}`}
                     />
+                    {/* <CardSimpleInputTest
+                      value={explanation}
+                      onChange={setExplanation}
+                    /> */}
                   </div>
                 </div>
               </ModalBody>
