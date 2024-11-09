@@ -29,6 +29,7 @@ type DetailsTestType = {
   duration: number;
   questions: {
     question_id: string;
+    type: string;
     number: number;
     text: string;
     explanation: string;
@@ -203,7 +204,7 @@ export default function DetailsTestPage({
 
                     <div className="grid flex-1 gap-4">
                       <p
-                        className="preventive-list list-outside text-[16px] font-semibold leading-[170%] text-black"
+                        className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
                         dangerouslySetInnerHTML={{ __html: question.text }}
                       />
 
@@ -251,6 +252,7 @@ export default function DetailsTestPage({
                           }}
                         >
                           <div
+                            className="preventive-list preventive-table list-outside text-[16px] leading-[170%] text-black"
                             dangerouslySetInnerHTML={{
                               __html: question.explanation,
                             }}

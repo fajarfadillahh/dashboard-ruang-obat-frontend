@@ -15,6 +15,8 @@ import {
   List,
   Paragraph,
   SimpleUploadAdapter,
+  Table,
+  TableToolbar,
   Undo,
 } from "ckeditor5";
 import "ckeditor5/ckeditor5.css";
@@ -40,11 +42,15 @@ export default function CKEditor({ value, onChange, token }: CKEditorProps) {
             "italic",
             "|",
             "uploadImage",
+            "insertTable",
             "|",
             "bulletedList",
             "numberedList",
           ],
           shouldNotGroupWhenFull: true,
+        },
+        table: {
+          contentToolbar: ["tableColumn", "tableRow", "mergeTableCells"],
         },
         plugins: [
           Bold,
@@ -55,6 +61,8 @@ export default function CKEditor({ value, onChange, token }: CKEditorProps) {
           Undo,
           List,
           FontSize,
+          Table,
+          TableToolbar,
           SimpleUploadAdapter,
           ImageToolbar,
           Image,

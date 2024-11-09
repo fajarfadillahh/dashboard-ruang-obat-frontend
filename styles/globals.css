@@ -25,15 +25,14 @@
   @apply list-outside;
 }
 
-.rsw-ce ul {
+/* .rsw-ce ul {
   list-style: disc;
   padding-left: 2em;
 }
-
 .rsw-ce ol {
   list-style: decimal;
   padding-left: 2em;
-}
+} */
 
 .ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-blurred,
 .ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-focused {
@@ -50,4 +49,19 @@
 .ck.ck-content.ck-editor__editable.ck-rounded-corners.ck-editor__editable_inline.ck-focused
   ol {
   @apply pl-4;
+}
+
+.preventive-table table {
+  table-layout: auto;
+  width: 100%;
+  border-collapse: collapse;
+}
+.preventive-table table tr:first-child td {
+  font-weight: bold;
+  border: 2px solid black;
+  padding: 8px;
+}
+.preventive-table table td {
+  border: 2px solid black;
+  padding: 8px;
 }

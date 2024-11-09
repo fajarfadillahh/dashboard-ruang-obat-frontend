@@ -28,6 +28,7 @@ import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export type CreateQuestion = {
+  type?: "text" | "image" | "video";
   text: string;
   options: {
     text: string;
@@ -183,7 +184,7 @@ export default function CreateTestPage({
             return {
               ...question,
               number: index + 1,
-              type: "text",
+              type: question.type,
             };
           }),
           by: status == "authenticated" ? session.user.fullname : "",
@@ -372,7 +373,7 @@ export default function CreateTestPage({
 
                     <div className="grid flex-1 gap-4">
                       <p
-                        className="preventive-list list-outside text-[16px] font-semibold leading-[170%] text-black"
+                        className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
                         dangerouslySetInnerHTML={{ __html: question.text }}
                       />
 
@@ -422,6 +423,7 @@ export default function CreateTestPage({
                           }}
                         >
                           <div
+                            className="preventive-list preventive-table list-outside text-[16px] leading-[170%] text-black"
                             dangerouslySetInnerHTML={{
                               __html: question.explanation,
                             }}
