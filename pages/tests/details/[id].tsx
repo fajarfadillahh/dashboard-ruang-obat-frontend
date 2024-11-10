@@ -1,5 +1,6 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
+import VideoComponent from "@/components/VideoComponent";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
@@ -23,7 +24,7 @@ import {
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 
 type DetailsTestType = {
   status: string;
@@ -213,10 +214,16 @@ export default function DetailsTestPage({
                     </div>
 
                     <div className="grid flex-1 gap-4">
-                      <p
-                        className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
-                        dangerouslySetInnerHTML={{ __html: question.text }}
-                      />
+                      {question.type == "video" ? (
+                        <Suspense fallback={<p>Loading video...</p>}>
+                          <VideoComponent url={question.text} />
+                        </Suspense>
+                      ) : (
+                        <p
+                          className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
+                          dangerouslySetInnerHTML={{ __html: question.text }}
+                        />
+                      )}
 
                       <div className="grid gap-1">
                         {question.options.map((option) => (

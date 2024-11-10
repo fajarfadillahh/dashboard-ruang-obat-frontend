@@ -2,6 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
+import VideoComponent from "@/components/VideoComponent";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
@@ -29,7 +30,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { CreateQuestion } from "../create";
 
@@ -390,10 +391,16 @@ export default function EditTestPage({
                     </div>
 
                     <div className="grid flex-1 gap-4">
-                      <p
-                        className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
-                        dangerouslySetInnerHTML={{ __html: question.text }}
-                      />
+                      {question.type == "video" ? (
+                        <Suspense fallback={<p>Loading video...</p>}>
+                          <VideoComponent url={question.text} />
+                        </Suspense>
+                      ) : (
+                        <p
+                          className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
+                          dangerouslySetInnerHTML={{ __html: question.text }}
+                        />
+                      )}
 
                       <div className="grid gap-1">
                         {question.options.map((option) => (
@@ -448,8 +455,7 @@ export default function EditTestPage({
                       </Accordion>
                     </div>
 
-                    {test?.status === "Berlangsung" ||
-                    test?.status === "Berakhir" ? null : (
+                    {test?.status !== "Belum dimulai" ? null : (
                       <div className="flex gap-2">
                         <ModalEditQuestion
                           {...{
