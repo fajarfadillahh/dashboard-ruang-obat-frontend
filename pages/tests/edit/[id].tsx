@@ -1,4 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ErrorPage from "@/components/ErrorPage";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import Container from "@/components/wrapper/Container";
@@ -12,6 +13,7 @@ import {
   Button,
   DatePicker,
   Input,
+  Pagination,
   Textarea,
 } from "@nextui-org/react";
 import {
@@ -25,13 +27,14 @@ import {
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { CreateQuestion } from "../create";
 
 type DetailsTestType = {
   status: string;
-  total_questions: number;
   test_id: string;
   title: string;
   description: string;
@@ -50,12 +53,18 @@ type DetailsTestType = {
       is_correct: boolean;
     }[];
   }[];
+  page: number;
+  total_questions: number;
+  total_pages: number;
 };
 
 export default function EditTestPage({
   test,
   token,
+  id,
+  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const [client, setClient] = useState<boolean>(false);
 
@@ -164,6 +173,22 @@ export default function EditTestPage({
 
   if (!client) {
     return;
+  }
+
+  if (error) {
+    return (
+      <Layout title={`${test?.title}`}>
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
   }
 
   return (
@@ -460,6 +485,27 @@ export default function EditTestPage({
                   </div>
                 ))}
               </div>
+
+              {test?.questions.length ? (
+                <Pagination
+                  isCompact
+                  showControls
+                  page={test?.page}
+                  total={test?.total_pages}
+                  onChange={(e) => {
+                    router.push({
+                      pathname: `/tests/edit/${id}`,
+                      query: {
+                        page: e,
+                      },
+                    });
+                  }}
+                  className="justify-self-center pt-8"
+                  classNames={{
+                    cursor: "bg-purple text-white",
+                  }}
+                />
+              ) : null}
             </div>
           </div>
         </section>
@@ -471,18 +517,24 @@ export default function EditTestPage({
 type DataProps = {
   test?: DetailsTestType;
   token?: string;
+  id?: string;
   error?: ErrorDataType;
 };
+
+function getUrl(query: ParsedUrlQuery, id: string) {
+  return `/admin/tests/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
+}
 
 export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   req,
   params,
+  query,
 }) => {
   const token = req.headers["access_token"] as string;
 
   try {
     const response = (await fetcher({
-      url: `/admin/tests/${encodeURIComponent(params?.id as string)}`,
+      url: getUrl(query, params?.id as string),
       method: "GET",
       token,
     })) as SuccessResponse<DetailsTestType>;
@@ -490,6 +542,7 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
     return {
       props: {
         test: response.data,
+        id: params?.id as string,
         token,
       },
     };

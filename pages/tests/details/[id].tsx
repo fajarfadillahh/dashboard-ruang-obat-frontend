@@ -209,7 +209,7 @@ export default function DetailsTestPage({
                     className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
                   >
                     <div className="font-extrabold text-purple">
-                      {question.number}
+                      {question.number}.
                     </div>
 
                     <div className="grid flex-1 gap-4">
@@ -273,28 +273,28 @@ export default function DetailsTestPage({
                   </div>
                 ))}
               </div>
-            </div>
 
-            {test?.questions.length ? (
-              <Pagination
-                isCompact
-                showControls
-                page={test?.page}
-                total={test?.total_pages}
-                onChange={(e) => {
-                  router.push({
-                    pathname: `/tests/details/${id}`,
-                    query: {
-                      page: e,
-                    },
-                  });
-                }}
-                className="justify-self-center pt-8"
-                classNames={{
-                  cursor: "bg-purple text-white",
-                }}
-              />
-            ) : null}
+              {test?.questions.length ? (
+                <Pagination
+                  isCompact
+                  showControls
+                  page={test?.page}
+                  total={test?.total_pages}
+                  onChange={(e) => {
+                    router.push({
+                      pathname: `/tests/details/${id}`,
+                      query: {
+                        page: e,
+                      },
+                    });
+                  }}
+                  className="justify-self-center pt-8"
+                  classNames={{
+                    cursor: "bg-purple text-white",
+                  }}
+                />
+              ) : null}
+            </div>
           </div>
         </section>
       </Container>
