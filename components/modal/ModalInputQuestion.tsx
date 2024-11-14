@@ -1,4 +1,3 @@
-import CardSimpleInputTest from "@/components/card/CardSimpleInputTest";
 import { CreateQuestion } from "@/pages/tests/create";
 import {
   Button,
@@ -9,21 +8,30 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Radio,
+  RadioGroup,
   useDisclosure,
 } from "@nextui-org/react";
 import { FloppyDisk, Plus } from "@phosphor-icons/react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
+const CKEditor = dynamic(() => import("@/components/editor/CKEditor"), {
+  ssr: false,
+});
 
 type CardInputTestProps = {
   handleAddQuestion: (question: CreateQuestion) => void;
   type: "create" | "edit";
+  token?: string;
 };
 
 export default function ModalInputQuestion({
   handleAddQuestion,
   type,
+  token,
 }: CardInputTestProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [typeQuestion, setTypeQuestion] = useState("text");
   const [text, setText] = useState("");
   const [explanation, setExplanation] = useState("");
   const [options, setOptions] = useState([
@@ -74,11 +82,53 @@ export default function ModalInputQuestion({
 
               <ModalBody>
                 <div className="grid gap-6">
-                  <div className="grid gap-2">
-                    <p className="font-medium text-black">Pertanyaan</p>
+                  <RadioGroup
+                    aria-label="select program type"
+                    orientation="horizontal"
+                    label={
+                      <span className="font-medium text-black">Tipe Soal</span>
+                    }
+                    color="secondary"
+                    value={typeQuestion}
+                    onValueChange={setTypeQuestion}
+                    classNames={{
+                      base: "font-semibold text-black",
+                    }}
+                  >
+                    <Radio value="text">Text</Radio>
+                    <Radio value="image">Gambar</Radio>
+                    <Radio value="video">Video</Radio>
+                  </RadioGroup>
 
-                    <CardSimpleInputTest value={text} onChange={setText} />
-                  </div>
+                  {typeQuestion == "text" || typeQuestion == "image" ? (
+                    <div className="grid gap-2">
+                      <p className="font-medium text-black">Pertanyaan</p>
+
+                      <CKEditor
+                        value={text}
+                        onChange={setText}
+                        token={`${token}`}
+                      />
+                    </div>
+                  ) : (
+                    <Input
+                      type="text"
+                      variant="flat"
+                      label="Pertanyaan"
+                      labelPlacement="outside"
+                      placeholder="Masukan Link Soal Video"
+                      name="video"
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      classNames={{
+                        input:
+                          "font-semibold placeholder:font-normal placeholder:text-default-600",
+                        label: "font-medium text-black text-[16px]",
+                      }}
+                      className="flex-1"
+                    />
+                  )}
+                  {/* <CardSimpleInputTest value={text} onChange={setText} /> */}
 
                   <div className="grid gap-2">
                     <p className="font-medium text-black">Jawaban</p>
@@ -126,10 +176,15 @@ export default function ModalInputQuestion({
                   <div className="grid gap-2">
                     <p className="font-medium text-black">Pembahasan</p>
 
-                    <CardSimpleInputTest
+                    <CKEditor
                       value={explanation}
                       onChange={setExplanation}
+                      token={`${token}`}
                     />
+                    {/* <CardSimpleInputTest
+                      value={explanation}
+                      onChange={setExplanation}
+                    /> */}
                   </div>
                 </div>
               </ModalBody>
@@ -160,7 +215,12 @@ export default function ModalInputQuestion({
                   color="secondary"
                   startContent={<FloppyDisk weight="bold" size={18} />}
                   onClick={() => {
-                    handleAddQuestion({ text, options, explanation });
+                    handleAddQuestion({
+                      text,
+                      options,
+                      explanation,
+                      type: typeQuestion as "text" | "image" | "video",
+                    });
                     onClose();
                     setText("");
                     setExplanation("");

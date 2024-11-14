@@ -1,4 +1,3 @@
-import CardSimpleInputTest from "@/components/card/CardSimpleInputTest";
 import { CreateQuestion } from "@/pages/tests/create";
 import {
   Button,
@@ -9,16 +8,24 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Radio,
+  RadioGroup,
   useDisclosure,
 } from "@nextui-org/react";
 import { FloppyDisk, Pencil } from "@phosphor-icons/react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
+const CKEditor = dynamic(() => import("@/components/editor/CKEditor"), {
+  ssr: false,
+});
 
 type CardInputTestProps = {
   handleEditQuestion: (question: CreateQuestion, index: number) => void;
   question: CreateQuestion;
   index: number;
   type: "create" | "edit";
+  type_question?: string;
+  token?: string;
 };
 
 export default function ModalEditQuestion({
@@ -26,8 +33,13 @@ export default function ModalEditQuestion({
   question,
   index,
   type,
+  type_question,
+  token,
 }: CardInputTestProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [typeQuestion, setTypeQuestion] = useState(
+    `${type == "create" ? question.type : type_question}`,
+  );
   const [text, setText] = useState(question.text);
   const [explanation, setExplanation] = useState(question.explanation);
   const [options, setOptions] = useState(question.options);
@@ -65,11 +77,53 @@ export default function ModalEditQuestion({
 
               <ModalBody>
                 <div className="grid gap-6">
-                  <div className="grid gap-2">
-                    <p className="font-medium text-black">Pertanyaan</p>
+                  <RadioGroup
+                    aria-label="select program type"
+                    orientation="horizontal"
+                    label={
+                      <span className="font-medium text-black">Tipe Soal</span>
+                    }
+                    color="secondary"
+                    value={typeQuestion}
+                    onValueChange={setTypeQuestion}
+                    classNames={{
+                      base: "font-semibold text-black",
+                    }}
+                  >
+                    <Radio value="text">Text</Radio>
+                    <Radio value="image">Gambar</Radio>
+                    <Radio value="video">Video</Radio>
+                  </RadioGroup>
 
-                    <CardSimpleInputTest value={text} onChange={setText} />
-                  </div>
+                  {typeQuestion == "text" || typeQuestion == "image" ? (
+                    <div className="grid gap-2">
+                      <p className="font-medium text-black">Pertanyaan</p>
+
+                      <CKEditor
+                        value={text}
+                        onChange={setText}
+                        token={`${token}`}
+                      />
+                    </div>
+                  ) : (
+                    <Input
+                      type="text"
+                      variant="flat"
+                      label="Pertanyaan"
+                      labelPlacement="outside"
+                      placeholder="Masukan Link Soal Video"
+                      name="video"
+                      value={text}
+                      onChange={(e) => setText(e.target.value)}
+                      classNames={{
+                        input:
+                          "font-semibold placeholder:font-normal placeholder:text-default-600",
+                        label: "font-medium text-black text-[16px]",
+                      }}
+                      className="flex-1"
+                    />
+                  )}
+                  {/* <CardSimpleInputTest value={text} onChange={setText} /> */}
 
                   <div className="grid gap-2">
                     <p className="font-medium text-black">Jawaban</p>
@@ -117,10 +171,15 @@ export default function ModalEditQuestion({
                   <div className="grid gap-2">
                     <p className="font-medium text-black">Pembahasan</p>
 
-                    <CardSimpleInputTest
+                    <CKEditor
                       value={explanation}
                       onChange={setExplanation}
+                      token={`${token}`}
                     />
+                    {/* <CardSimpleInputTest
+                      value={explanation}
+                      onChange={setExplanation}
+                    /> */}
                   </div>
                 </div>
               </ModalBody>
@@ -150,6 +209,7 @@ export default function ModalEditQuestion({
                         text: text ? text : question.text,
                         options,
                         explanation: explanation ? explanation : question.text,
+                        type: typeQuestion as "text" | "image" | "video",
                       },
                       index,
                     );

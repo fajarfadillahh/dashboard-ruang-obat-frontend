@@ -1,6 +1,8 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ErrorPage from "@/components/ErrorPage";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
+import VideoComponent from "@/components/VideoComponent";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
@@ -12,6 +14,7 @@ import {
   Button,
   DatePicker,
   Input,
+  Pagination,
   Textarea,
 } from "@nextui-org/react";
 import {
@@ -25,13 +28,14 @@ import {
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
+import { Suspense, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { CreateQuestion } from "../create";
 
 type DetailsTestType = {
   status: string;
-  total_questions: number;
   test_id: string;
   title: string;
   description: string;
@@ -40,6 +44,7 @@ type DetailsTestType = {
   duration: number;
   questions: {
     question_id: string;
+    type: string;
     number: number;
     text: string;
     explanation: string;
@@ -49,12 +54,18 @@ type DetailsTestType = {
       is_correct: boolean;
     }[];
   }[];
+  page: number;
+  total_questions: number;
+  total_pages: number;
 };
 
 export default function EditTestPage({
   test,
   token,
+  id,
+  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const router = useRouter();
   const { data: session, status } = useSession();
   const [client, setClient] = useState<boolean>(false);
 
@@ -75,7 +86,7 @@ export default function EditTestPage({
         data: {
           test_id: test?.test_id,
           update_type: "add_question",
-          questions: [{ ...question, type: "text" }],
+          questions: [{ ...question, type: question.type }],
           by: status == "authenticated" ? session.user.fullname : "",
         },
       });
@@ -163,6 +174,22 @@ export default function EditTestPage({
 
   if (!client) {
     return;
+  }
+
+  if (error) {
+    return (
+      <Layout title={`${test?.title}`}>
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
   }
 
   return (
@@ -325,6 +352,7 @@ export default function EditTestPage({
                   }}
                 />
               </div>
+
               <Button
                 variant="solid"
                 color="secondary"
@@ -345,7 +373,7 @@ export default function EditTestPage({
                   test?.status === "Berakhir" ? null : (
                     <div className="inline-flex gap-2">
                       <ModalInputQuestion
-                        {...{ handleAddQuestion, type: "edit" }}
+                        {...{ handleAddQuestion, type: "edit", token: token }}
                       />
                     </div>
                   )}
@@ -363,10 +391,16 @@ export default function EditTestPage({
                     </div>
 
                     <div className="grid flex-1 gap-4">
-                      <p
-                        className="preventive-list list-outside text-[16px] font-semibold leading-[170%] text-black"
-                        dangerouslySetInnerHTML={{ __html: question.text }}
-                      />
+                      {question.type == "video" ? (
+                        <Suspense fallback={<p>Loading video...</p>}>
+                          <VideoComponent url={question.text} />
+                        </Suspense>
+                      ) : (
+                        <p
+                          className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
+                          dangerouslySetInnerHTML={{ __html: question.text }}
+                        />
+                      )}
 
                       <div className="grid gap-1">
                         {question.options.map((option) => (
@@ -412,6 +446,7 @@ export default function EditTestPage({
                           }}
                         >
                           <div
+                            className="preventive-list preventive-table list-outside text-[16px] leading-[170%] text-black"
                             dangerouslySetInnerHTML={{
                               __html: question.explanation,
                             }}
@@ -420,8 +455,7 @@ export default function EditTestPage({
                       </Accordion>
                     </div>
 
-                    {test?.status === "Berlangsung" ||
-                    test?.status === "Berakhir" ? null : (
+                    {test?.status !== "Belum dimulai" ? null : (
                       <div className="flex gap-2">
                         <ModalEditQuestion
                           {...{
@@ -429,6 +463,8 @@ export default function EditTestPage({
                             handleEditQuestion,
                             index,
                             type: "edit",
+                            token: token,
+                            type_question: question?.type,
                           }}
                         />
 
@@ -455,6 +491,27 @@ export default function EditTestPage({
                   </div>
                 ))}
               </div>
+
+              {test?.questions.length ? (
+                <Pagination
+                  isCompact
+                  showControls
+                  page={test?.page}
+                  total={test?.total_pages}
+                  onChange={(e) => {
+                    router.push({
+                      pathname: `/tests/edit/${id}`,
+                      query: {
+                        page: e,
+                      },
+                    });
+                  }}
+                  className="justify-self-center pt-8"
+                  classNames={{
+                    cursor: "bg-purple text-white",
+                  }}
+                />
+              ) : null}
             </div>
           </div>
         </section>
@@ -466,18 +523,24 @@ export default function EditTestPage({
 type DataProps = {
   test?: DetailsTestType;
   token?: string;
+  id?: string;
   error?: ErrorDataType;
 };
+
+function getUrl(query: ParsedUrlQuery, id: string) {
+  return `/admin/tests/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
+}
 
 export const getServerSideProps: GetServerSideProps<DataProps> = async ({
   req,
   params,
+  query,
 }) => {
   const token = req.headers["access_token"] as string;
 
   try {
     const response = (await fetcher({
-      url: `/admin/tests/${encodeURIComponent(params?.id as string)}`,
+      url: getUrl(query, params?.id as string),
       method: "GET",
       token,
     })) as SuccessResponse<DetailsTestType>;
@@ -485,6 +548,7 @@ export const getServerSideProps: GetServerSideProps<DataProps> = async ({
     return {
       props: {
         test: response.data,
+        id: params?.id as string,
         token,
       },
     };

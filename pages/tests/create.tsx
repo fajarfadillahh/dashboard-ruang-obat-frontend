@@ -1,6 +1,7 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
+import VideoComponent from "@/components/VideoComponent";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { fetcher } from "@/utils/fetcher";
@@ -24,10 +25,11 @@ import {
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export type CreateQuestion = {
+  type?: "text" | "image" | "video";
   text: string;
   options: {
     text: string;
@@ -183,7 +185,7 @@ export default function CreateTestPage({
             return {
               ...question,
               number: index + 1,
-              type: "text",
+              type: question.type,
             };
           }),
           by: status == "authenticated" ? session.user.fullname : "",
@@ -340,7 +342,7 @@ export default function CreateTestPage({
 
                   <div className="inline-flex gap-2">
                     <ModalInputQuestion
-                      {...{ handleAddQuestion, type: "create" }}
+                      {...{ handleAddQuestion, type: "create", token: token }}
                     />
 
                     <Button
@@ -371,10 +373,16 @@ export default function CreateTestPage({
                     </div>
 
                     <div className="grid flex-1 gap-4">
-                      <p
-                        className="preventive-list list-outside text-[16px] font-semibold leading-[170%] text-black"
-                        dangerouslySetInnerHTML={{ __html: question.text }}
-                      />
+                      {question.type == "video" ? (
+                        <Suspense fallback={<p>Loading video...</p>}>
+                          <VideoComponent url={question.text} />
+                        </Suspense>
+                      ) : (
+                        <p
+                          className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
+                          dangerouslySetInnerHTML={{ __html: question.text }}
+                        />
+                      )}
 
                       <div className="grid gap-1">
                         {question.options.map((option, index) => {
@@ -422,6 +430,7 @@ export default function CreateTestPage({
                           }}
                         >
                           <div
+                            className="preventive-list preventive-table list-outside text-[16px] leading-[170%] text-black"
                             dangerouslySetInnerHTML={{
                               __html: question.explanation,
                             }}
@@ -437,6 +446,7 @@ export default function CreateTestPage({
                           handleEditQuestion,
                           index,
                           type: "create",
+                          token: token,
                         }}
                       />
 
