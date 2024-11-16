@@ -68,6 +68,8 @@ export default function EditTestPage({
   const router = useRouter();
   const { data: session, status } = useSession();
   const [client, setClient] = useState<boolean>(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [input, setInput] = useState({
     title: test?.title || "",
@@ -76,6 +78,18 @@ export default function EditTestPage({
     end: test?.end || "",
     duration: test?.duration || 0,
   });
+
+  useEffect(() => {
+    const isFormValid =
+      input.title &&
+      input.description &&
+      input.start &&
+      input.end &&
+      input.duration &&
+      (test?.questions ?? []).length > 0;
+
+    setIsButtonDisabled(!isFormValid);
+  }, [input, test]);
 
   async function handleAddQuestion(question: CreateQuestion) {
     try {
@@ -119,6 +133,7 @@ export default function EditTestPage({
 
   async function handleEditTestData() {
     if (!confirm("Apakah anda yakin ingin mengubah data ujian?")) return;
+    setLoading(true);
 
     try {
       await fetcher({
@@ -136,6 +151,7 @@ export default function EditTestPage({
       toast.success("Berhasil Mengubah Data Ujian");
       window.location.reload();
     } catch (error) {
+      setLoading(false);
       console.log(error);
       toast.error("Terjadi kesalahan saat mengubah data ujian");
     }
@@ -354,9 +370,13 @@ export default function EditTestPage({
               </div>
 
               <Button
+                isLoading={loading}
+                isDisabled={isButtonDisabled || loading}
                 variant="solid"
                 color="secondary"
-                startContent={<Database weight="bold" size={18} />}
+                startContent={
+                  loading ? null : <Database weight="bold" size={18} />
+                }
                 className="w-max justify-self-end font-bold"
                 onClick={handleEditTestData}
               >
