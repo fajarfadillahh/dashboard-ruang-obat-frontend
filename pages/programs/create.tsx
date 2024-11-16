@@ -65,6 +65,7 @@ export default function CreateProgramPage({
   const [loading, setLoading] = useState(false);
   const [qrcodeFile, setQrcodeFile] = useState<File | null>();
   const [imagePreview, setImagePreview] = useState<string | null>();
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   useEffect(() => {
     if (searchValue) {
@@ -82,6 +83,20 @@ export default function CreateProgramPage({
     { name: "ID Ujian", uid: "test_id" },
     { name: "Judul Ujian", uid: "title" },
   ];
+
+  useEffect(() => {
+    const selectedTests = Array.from(value);
+
+    const isFormValid =
+      input.title &&
+      qrcodeFile &&
+      input.url_qr_code &&
+      selectedType &&
+      (selectedType !== "paid" || input.price) &&
+      selectedTests.length > 0;
+
+    setIsButtonDisabled(!isFormValid);
+  }, [input, qrcodeFile, selectedType, value]);
 
   async function handleCreateProgram() {
     setLoading(true);
@@ -320,6 +335,7 @@ export default function CreateProgramPage({
 
                 <Button
                   isLoading={loading}
+                  isDisabled={isButtonDisabled || loading}
                   variant="solid"
                   color="secondary"
                   startContent={
