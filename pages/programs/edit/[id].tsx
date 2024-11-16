@@ -83,6 +83,7 @@ export default function EditProgramPage({
 
   const testId = program?.tests.map((test) => test.test_id);
   const [value, setValue] = useState<Selection>(new Set(testId));
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   useEffect(() => {
     if (searchValue) {
@@ -101,6 +102,19 @@ export default function EditProgramPage({
     { name: "ID Ujian", uid: "test_id" },
     { name: "Judul Ujian", uid: "title" },
   ];
+
+  useEffect(() => {
+    const selectedTests = Array.from(value);
+
+    const isFormValid =
+      input.title &&
+      (selectedType !== "paid" || input.price > 0) &&
+      (qrcodeFile || input.url_qr_code) &&
+      selectedType &&
+      selectedTests.length > 0;
+
+    setIsButtonDisabled(!isFormValid);
+  }, [input, selectedType, qrcodeFile, value]);
 
   async function handleEditProgram() {
     setLoading(true);
@@ -332,6 +346,7 @@ export default function EditProgramPage({
 
                 <Button
                   isLoading={loading}
+                  isDisabled={isButtonDisabled || loading}
                   variant="solid"
                   color="secondary"
                   startContent={
