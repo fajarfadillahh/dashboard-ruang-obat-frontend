@@ -1,6 +1,6 @@
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
-import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { AdminType } from "@/types/admin.type";
@@ -18,7 +18,13 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, MagnifyingGlass, PencilLine, Plus } from "@phosphor-icons/react";
+import {
+  Eye,
+  MagnifyingGlass,
+  PencilLine,
+  Plus,
+  Trash,
+} from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -30,7 +36,6 @@ export default function AdminsPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState("");
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<AdminType[]>
@@ -89,12 +94,61 @@ export default function AdminsPage({
               <PencilLine weight="bold" size={18} />
             </Button>
 
-            <ModalConfirmDelete
-              id={admin.admin_id}
-              header="Admin"
-              title={admin.fullname}
-              loading={loading}
-              handleDelete={() => handleDeleteAdmin(admin.admin_id)}
+            <ModalConfirm
+              trigger={
+                <Button isIconOnly variant="light" color="danger" size="sm">
+                  <Trash weight="bold" size={18} className="text-danger" />
+                </Button>
+              }
+              header={<h1 className="font-bold text-black">Hapus Admin</h1>}
+              body={
+                <div className="grid gap-3 text-sm font-medium">
+                  <p className="leading-[170%] text-gray">
+                    Apakah anda ingin menghapus admin berikut secara permanen?
+                  </p>
+
+                  <div className="grid gap-1">
+                    {[
+                      ["ID Admin", `${admin.admin_id}`],
+                      ["Nama Lengkap", `${admin.fullname}`],
+                    ].map(([label, value], index) => (
+                      <div
+                        key={index}
+                        className="grid gap-4 [grid-template-columns:110px_2px_1fr;]"
+                      >
+                        <h1 className="text-gray">{label}</h1>
+                        <span>:</span>
+                        <h1 className="font-extrabold text-purple">{value}</h1>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="leading-[170%] text-gray">
+                    Tindakan ini tidak dapat dibatalkan, dan data yang sudah
+                    dihapus tidak dapat dipulihkan.
+                  </p>
+                </div>
+              }
+              footer={(onClose: any) => (
+                <>
+                  <Button
+                    color="danger"
+                    variant="light"
+                    onPress={onClose}
+                    className="font-bold"
+                  >
+                    Tutup
+                  </Button>
+
+                  <Button
+                    color="danger"
+                    onClick={() => handleDeleteAdmin(admin.admin_id)}
+                    className="font-bold"
+                  >
+                    Ya, Hapus Admin
+                  </Button>
+                </>
+              )}
             />
           </div>
         );
@@ -105,8 +159,6 @@ export default function AdminsPage({
   }
 
   async function handleDeleteAdmin(id: string) {
-    setLoading(true);
-
     try {
       await fetcher({
         url: `/admins/${id}`,
@@ -117,7 +169,6 @@ export default function AdminsPage({
       mutate();
       toast.success("Berhasil Menghapus Admin");
     } catch (error) {
-      setLoading(false);
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
