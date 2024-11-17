@@ -1,10 +1,10 @@
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import usePagination from "@/hooks/usePagination";
 import { AdminType } from "@/types/admin.type";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
@@ -24,19 +24,21 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 
 export default function AdminsPage({
-  admins,
   token,
-  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState("");
-  const { data, page, pages, setPage } = usePagination(
-    admins as AdminType[],
-    10,
-  );
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<AdminType[]>
+  >({
+    url: "/admins",
+    method: "GET",
+    token,
+  });
 
   const columnsUser = [
     { name: "ID Admin", uid: "admin_id" },
@@ -112,8 +114,8 @@ export default function AdminsPage({
         token,
       });
 
+      mutate();
       toast.success("Berhasil Menghapus Admin");
-      window.location.reload();
     } catch (error) {
       setLoading(false);
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
@@ -137,8 +139,10 @@ export default function AdminsPage({
     );
   }
 
-  const filteredAdmin = admins?.length
-    ? admins.filter(
+  if (isLoading) return <LoadingScreen />;
+
+  const filterAdmin = data?.data.length
+    ? data?.data.filter(
         (admin) =>
           admin.admin_id.toLowerCase().includes(search.toLowerCase()) ||
           admin.fullname.toLowerCase().includes(search.toLowerCase()),
@@ -214,7 +218,7 @@ export default function AdminsPage({
                 </TableHeader>
 
                 <TableBody
-                  items={filteredAdmin}
+                  items={filterAdmin}
                   emptyContent={
                     <span className="text-sm font-semibold italic text-gray">
                       Admin tidak ditemukan!
@@ -233,20 +237,6 @@ export default function AdminsPage({
                 </TableBody>
               </Table>
             </div>
-
-            {/* {filteredAdmin.length ? (
-              <Pagination
-                isCompact
-                showControls
-                page={page}
-                total={pages}
-                onChange={setPage}
-                className="justify-self-center"
-                classNames={{
-                  cursor: "bg-purple text-white",
-                }}
-              />
-            ) : null} */}
           </div>
         </section>
       </Container>
@@ -254,35 +244,12 @@ export default function AdminsPage({
   );
 }
 
-type DataProps = {
-  admins?: AdminType[];
-  token?: string;
-  error?: ErrorDataType;
-};
-
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-}) => {
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   const token = req.headers["access_token"] as string;
 
-  try {
-    const response = (await fetcher({
-      url: "/admins",
-      method: "GET",
+  return {
+    props: {
       token,
-    })) as SuccessResponse<AdminType[]>;
-
-    return {
-      props: {
-        admins: response.data,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+    },
+  };
 };
