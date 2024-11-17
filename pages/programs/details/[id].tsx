@@ -104,6 +104,7 @@ export default function DetailsProgramPage({
     { name: "Nama Lengkap", uid: "fullname" },
     { name: "Asal Kampus", uid: "university" },
     { name: "Status", uid: "status" },
+    { name: "Bergabung Pada", uid: "joined_at" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -216,13 +217,13 @@ export default function DetailsProgramPage({
       case "action":
         return (
           <div className="flex max-w-max items-center gap-2">
-            {program?.type === "free" ? (
+            {!(program?.type === "paid" || participant?.is_approved) && (
               <ModalJoiningRequirement
-                program_id={program.program_id}
+                program_id={program?.program_id as string}
                 participant={participant}
                 token={`${token}`}
               />
-            ) : null}
+            )}
 
             <ModalConfirmDelete
               id={participant.user_id}
