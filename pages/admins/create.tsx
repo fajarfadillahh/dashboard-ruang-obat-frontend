@@ -2,13 +2,15 @@ import ButtonBack from "@/components/button/ButtonBack";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { fetcher } from "@/utils/fetcher";
+import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { FloppyDisk, Lock, User, UserGear } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-type InputProps = {
+type InputType = {
   fullname: string;
   role: string;
   password: string;
@@ -18,7 +20,8 @@ type InputProps = {
 export default function CreateAdminPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const [input, setInput] = useState<InputProps>({
+  const router = useRouter();
+  const [input, setInput] = useState<InputType>({
     fullname: "",
     role: "",
     password: "",
@@ -26,6 +29,7 @@ export default function CreateAdminPage({
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<any>();
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   async function handleCreateAdmin() {
     setLoading(true);
@@ -39,13 +43,20 @@ export default function CreateAdminPage({
       });
 
       toast.success("Berhasil Membuat Admin");
-      window.location.href = "/admins";
+      router.push("/admins");
     } catch (error) {
       setLoading(false);
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
   }
+
+  useEffect(() => {
+    const isFormValid =
+      input.fullname && input.role && input.password && input.access_key;
+
+    setIsButtonDisabled(!isFormValid);
+  }, [input]);
 
   return (
     <Layout title="Buat Admin" className="scrollbar-hide">
@@ -174,6 +185,7 @@ export default function CreateAdminPage({
                     [e.target.name]: e.target.value,
                   })
                 }
+                onKeyDown={(e) => handleKeyDown(e, handleCreateAdmin)}
                 startContent={
                   <Lock weight="bold" size={18} className="text-default-600" />
                 }
@@ -186,9 +198,12 @@ export default function CreateAdminPage({
 
             <Button
               isLoading={loading}
+              isDisabled={isButtonDisabled || loading}
               variant="solid"
               color="secondary"
-              startContent={<FloppyDisk weight="bold" size={18} />}
+              startContent={
+                loading ? null : <FloppyDisk weight="bold" size={18} />
+              }
               onClick={handleCreateAdmin}
               className="w-max justify-self-end font-bold"
             >
