@@ -4,13 +4,15 @@ import Layout from "@/components/wrapper/Layout";
 import { AdminType } from "@/types/admin.type";
 import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
+import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { FloppyDisk, Lock, User, UserGear } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-type InputProps = {
+type InputType = {
   fullname: string;
   role: string;
   password: string;
@@ -21,7 +23,8 @@ export default function EditAdminPage({
   admin,
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const [input, setInput] = useState<InputProps>({
+  const router = useRouter();
+  const [input, setInput] = useState<InputType>({
     fullname: `${admin?.fullname}`,
     role: `${admin?.role}`,
     password: "",
@@ -29,6 +32,7 @@ export default function EditAdminPage({
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<any>();
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   async function handleEditAdmin() {
     setLoading(true);
@@ -44,14 +48,21 @@ export default function EditAdminPage({
         },
       });
 
-      toast.success("Berhasil Mangubah Admin");
-      window.location.href = "/admins";
+      toast.success("Berhasil Mengubah Data Admin");
+      router.push("/admins");
     } catch (error) {
       setLoading(false);
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
   }
+
+  useEffect(() => {
+    const isFormValid =
+      input.fullname && input.role && input.password && input.access_key;
+
+    setIsButtonDisabled(!isFormValid);
+  }, [input]);
 
   return (
     <Layout title="Edit Admin" className="scrollbar-hide">
@@ -181,6 +192,7 @@ export default function EditAdminPage({
                     [e.target.name]: e.target.value,
                   })
                 }
+                onKeyDown={(e) => handleKeyDown(e, handleEditAdmin)}
                 startContent={
                   <Lock weight="bold" size={18} className="text-default-600" />
                 }
@@ -193,9 +205,12 @@ export default function EditAdminPage({
 
             <Button
               isLoading={loading}
+              isDisabled={isButtonDisabled || loading}
               variant="solid"
               color="secondary"
-              startContent={<FloppyDisk weight="bold" size={18} />}
+              startContent={
+                loading ? null : <FloppyDisk weight="bold" size={18} />
+              }
               onClick={handleEditAdmin}
               className="w-max justify-self-end font-bold"
             >
