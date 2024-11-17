@@ -224,11 +224,9 @@ export default function DashboardPage({
 export const getServerSideProps: GetServerSideProps<{
   token: string;
 }> = async ({ req }) => {
-  const token = req.headers["access_token"] as string;
-
   return {
     props: {
-      token,
+      token: req.headers["access_token"] as string,
     },
   };
 };

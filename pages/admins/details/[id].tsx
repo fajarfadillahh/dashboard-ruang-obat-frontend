@@ -8,6 +8,11 @@ import { ErrorDataType, SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
+type DataResponse = {
+  admin?: AdminType;
+  error?: ErrorDataType;
+};
+
 export default function DetailsAdminPage({
   admin,
   error,
@@ -69,12 +74,7 @@ export default function DetailsAdminPage({
   );
 }
 
-type DataProps = {
-  admin?: AdminType;
-  error?: ErrorDataType;
-};
-
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+export const getServerSideProps: GetServerSideProps<DataResponse> = async ({
   req,
   params,
 }) => {

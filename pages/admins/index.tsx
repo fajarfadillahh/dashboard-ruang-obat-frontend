@@ -295,12 +295,12 @@ export default function AdminsPage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
-  const token = req.headers["access_token"] as string;
-
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+}> = async ({ req }) => {
   return {
     props: {
-      token,
+      token: req.headers["access_token"] as string,
     },
   };
 };

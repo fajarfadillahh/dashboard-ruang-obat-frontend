@@ -19,6 +19,12 @@ type InputType = {
   access_key: string;
 };
 
+type DataResponse = {
+  admin?: AdminType;
+  token?: string;
+  error?: ErrorDataType;
+};
+
 export default function EditAdminPage({
   admin,
   token,
@@ -223,13 +229,7 @@ export default function EditAdminPage({
   );
 }
 
-type DataProps = {
-  admin?: AdminType;
-  token?: string;
-  error?: ErrorDataType;
-};
-
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
+export const getServerSideProps: GetServerSideProps<DataResponse> = async ({
   req,
   params,
 }) => {
