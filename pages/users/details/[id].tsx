@@ -1,14 +1,16 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
-import { fetcher } from "@/utils/fetcher";
+import { SuccessResponse } from "@/types/global.type";
 import { formatDate } from "@/utils/formatDate";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { ParsedUrlQuery } from "querystring";
+import useSWR from "swr";
 
-type DetailsUserType = {
+type DetailsUserResponse = {
   user_id: string;
   fullname: string;
   email: string;
@@ -19,10 +21,16 @@ type DetailsUserType = {
 };
 
 export default function DetailsUserPage({
-  user,
-  error,
+  token,
+  params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  console.log(user);
+  const { data, error, isLoading } = useSWR<
+    SuccessResponse<DetailsUserResponse>
+  >({
+    url: `/admin/users/${encodeURIComponent(params?.id as string)}`,
+    method: "GET",
+    token,
+  });
 
   if (error) {
     return (
@@ -40,11 +48,13 @@ export default function DetailsUserPage({
     );
   }
 
+  if (isLoading) return <LoadingScreen />;
+
   return (
     <Layout title="Detail Pengguna" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
-          <ButtonBack />
+          <ButtonBack href="/users" />
 
           <div className="grid gap-1">
             <h1 className="text-[22px] font-bold -tracking-wide text-black">
@@ -58,16 +68,16 @@ export default function DetailsUserPage({
           <div className="grid grid-cols-2 items-center gap-16">
             <div className="grid gap-[6px] rounded-xl border-2 border-l-8 border-gray/20 p-8">
               {[
-                ["ID Pengguna", `${user?.user_id}`],
-                ["Nama Lengkap", `${user?.fullname}`],
-                ["Email", `${user?.email}`],
+                ["ID Pengguna", `${data?.data.user_id}`],
+                ["Nama Lengkap", `${data?.data.fullname}`],
+                ["Email", `${data?.data.email}`],
                 [
                   "Jenis Kelamin",
-                  `${user?.gender === "M" ? "Laki-Laki" : "Perempuan"}`,
+                  `${data?.data.gender === "M" ? "Laki-Laki" : "Perempuan"}`,
                 ],
-                ["No. Telpon", `${user?.phone_number}`],
-                ["Asal Kampus", `${user?.university}`],
-                ["Dibuat Pada", `${formatDate(user?.created_at ?? "-")}`],
+                ["No. Telpon", `${data?.data.phone_number}`],
+                ["Asal Kampus", `${data?.data.university}`],
+                ["Dibuat Pada", `${formatDate(data?.data.created_at ?? "-")}`],
               ].map(([label, value], index) => (
                 <div
                   key={index}
@@ -88,34 +98,14 @@ export default function DetailsUserPage({
   );
 }
 
-type DataProps = {
-  user?: DetailsUserType;
-  error?: ErrorDataType;
-};
-
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  params,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: `/admin/users/${encodeURIComponent(params?.id as string)}`,
-      method: "GET",
-      token,
-    })) as SuccessResponse<DetailsUserType>;
-
-    return {
-      props: {
-        user: response.data,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  params: ParsedUrlQuery;
+}> = async ({ req, params }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      params: params as ParsedUrlQuery,
+    },
+  };
 };

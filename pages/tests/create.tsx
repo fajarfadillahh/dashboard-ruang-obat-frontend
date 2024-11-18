@@ -41,6 +41,7 @@ export type CreateQuestion = {
 export default function CreateTestPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const router = useRouter();
   const [input, setInput] = useState({
     title: "",
     description: "",
@@ -49,7 +50,8 @@ export default function CreateTestPage({
     duration: 0,
   });
   const [questions, setQuestions] = useState<CreateQuestion[]>([]);
-  const router = useRouter();
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [loading, setLoading] = useState(false);
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -174,7 +176,21 @@ export default function CreateTestPage({
   //   [questions],
   // );
 
+  useEffect(() => {
+    const isFormValid =
+      input.title &&
+      input.description &&
+      input.start &&
+      input.end &&
+      input.duration &&
+      questions.length > 0;
+
+    setIsButtonDisabled(!isFormValid);
+  }, [input, questions]);
+
   async function handleSaveTest() {
+    setLoading(true);
+
     try {
       await fetcher({
         url: "/admin/tests",
@@ -199,6 +215,7 @@ export default function CreateTestPage({
       localStorage.removeItem("questions");
       router.back();
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   }
@@ -346,9 +363,13 @@ export default function CreateTestPage({
                     />
 
                     <Button
+                      isLoading={loading}
+                      isDisabled={isButtonDisabled || loading}
                       variant="solid"
                       color="secondary"
-                      startContent={<Database weight="bold" size={18} />}
+                      startContent={
+                        loading ? null : <Database weight="bold" size={18} />
+                      }
                       className="w-max justify-self-end font-bold"
                       onClick={() => {
                         if (confirm("Apakah Sudah Yakin?")) {

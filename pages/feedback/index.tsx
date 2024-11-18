@@ -1,9 +1,9 @@
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { FeedbackType } from "@/types/feedback.type";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
-import { fetcher } from "@/utils/fetcher";
+import { SuccessResponse } from "@/types/global.type";
 import { formatDate } from "@/utils/formatDate";
 import { Avatar, Input, Pagination } from "@nextui-org/react";
 import { MagnifyingGlass, Star } from "@phosphor-icons/react";
@@ -11,30 +11,26 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
-type FeedbackProps = {
+type FeedbackResponse = {
   feedback: FeedbackType[];
   page: number;
   total_feedback: number;
   total_pages: number;
 };
 
-const feedbacks: FeedbackType[] = [
-  {
-    user_id: "ROUTU461184",
-    fullname: "Test User",
-    rating: 5,
-    text: "ajib kak, tingkatkan terus kalo bisa kasih program free sesering mungkin yaa",
-    created_at: "2024-10-20T16:07:42.897Z",
-  },
-];
-
 export default function FeedbackPage({
-  feedback,
-  error,
+  token,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { data, error, isLoading } = useSWR<SuccessResponse<FeedbackResponse>>({
+    url: getUrl(query) as string,
+    method: "GET",
+    token,
+  });
   const [search, setSearch] = useState("");
   const [searchValue] = useDebounce(search, 800);
 
@@ -81,6 +77,8 @@ export default function FeedbackPage({
     );
   }
 
+  if (isLoading) return <LoadingScreen />;
+
   return (
     <Layout title="Daftar Masukan dan Saran" className="scrollbar-hide">
       <Container>
@@ -108,16 +106,17 @@ export default function FeedbackPage({
                     className="text-gray"
                   />
                 }
+                defaultValue={query.q as string}
+                onChange={(e) => setSearch(e.target.value)}
                 classNames={{
                   input:
                     "font-semibold placeholder:font-semibold placeholder:text-gray",
                 }}
-                onChange={(e) => setSearch(e.target.value)}
                 className="max-w-[500px]"
               />
             </div>
 
-            {searchValue && feedback?.feedback.length === 0 ? (
+            {searchValue && data?.data.feedback.length === 0 ? (
               <div className="flex items-center justify-center gap-2 py-16">
                 <MagnifyingGlass
                   weight="bold"
@@ -130,7 +129,7 @@ export default function FeedbackPage({
               </div>
             ) : (
               <div className="grid grid-cols-2 items-start gap-x-4 gap-y-2">
-                {feedback?.feedback.map((data, index) => (
+                {data?.data.feedback.map((data, index) => (
                   <div
                     key={index}
                     className="grid gap-4 rounded-xl border-2 border-purple/10 p-6 hover:border-purple hover:bg-purple/10"
@@ -183,12 +182,12 @@ export default function FeedbackPage({
             )}
           </div>
 
-          {feedback?.feedback.length ? (
+          {data?.data.feedback.length ? (
             <Pagination
               isCompact
               showControls
-              page={feedback?.page as number}
-              total={feedback?.total_pages as number}
+              page={data?.data.page as number}
+              total={data?.data.total_pages as number}
               onChange={(e) => {
                 router.push({
                   query: {
@@ -208,11 +207,6 @@ export default function FeedbackPage({
   );
 }
 
-type DataProps = {
-  feedback?: FeedbackProps;
-  error?: ErrorDataType;
-};
-
 function getUrl(query: ParsedUrlQuery) {
   if (query.q) {
     return `/admin/feedback?q=${query.q}&page=${query.page ? query.page : 1}`;
@@ -221,29 +215,14 @@ function getUrl(query: ParsedUrlQuery) {
   return `/admin/feedback?page=${query.page ? query.page : 1}`;
 }
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  query,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: getUrl(query) as string,
-      method: "GET",
-      token,
-    })) as SuccessResponse<FeedbackProps>;
-
-    return {
-      props: {
-        feedback: response.data,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  query: ParsedUrlQuery;
+}> = async ({ req, query }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      query,
+    },
+  };
 };

@@ -1,16 +1,22 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { AdminType } from "@/types/admin.type";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
+import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { FloppyDisk, Lock, User, UserGear } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 
-type InputProps = {
+type InputType = {
   fullname: string;
   role: string;
   password: string;
@@ -18,17 +24,24 @@ type InputProps = {
 };
 
 export default function EditAdminPage({
-  admin,
   token,
+  params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const [input, setInput] = useState<InputProps>({
-    fullname: `${admin?.fullname}`,
-    role: `${admin?.role}`,
+  const router = useRouter();
+  const { data, error, isLoading } = useSWR<SuccessResponse<AdminType>>({
+    url: `/admins/${encodeURIComponent(params?.id as string)}`,
+    method: "GET",
+    token,
+  });
+  const [input, setInput] = useState<InputType>({
+    fullname: `${data?.data.fullname}`,
+    role: `${data?.data.role}`,
     password: "",
     access_key: "",
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<any>();
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   async function handleEditAdmin() {
     setLoading(true);
@@ -39,25 +52,65 @@ export default function EditAdminPage({
         method: "PATCH",
         token,
         data: {
-          admin_id: admin?.admin_id,
+          admin_id: data?.data.admin_id,
           ...input,
         },
       });
 
-      toast.success("Berhasil Mangubah Admin");
-      window.location.href = "/admins";
-    } catch (error) {
+      toast.success("Berhasil Mengubah Data Admin");
+      router.push("/admins");
+    } catch (error: any) {
       setLoading(false);
+
+      if (error?.status_code === 400) return toast.error("Kunci Akses Salah!");
+      if (error?.status_code === 403)
+        return toast.error("Kunci Akses Ditolak! Silakan Coba Lagi");
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
   }
 
+  useEffect(() => {
+    if (!data?.data) return;
+
+    const { fullname, role } = data.data;
+    setInput((prev) => ({
+      ...prev,
+      fullname,
+      role,
+    }));
+  }, [data]);
+
+  useEffect(() => {
+    const isFormValid =
+      input.fullname && input.role && input.password && input.access_key;
+
+    setIsButtonDisabled(!isFormValid);
+  }, [input]);
+
+  if (error) {
+    return (
+      <Layout title="Edit Admin">
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
+  }
+
+  if (isLoading) return <LoadingScreen />;
+
   return (
     <Layout title="Edit Admin" className="scrollbar-hide">
       <Container>
         <section className="grid">
-          <ButtonBack />
+          <ButtonBack href="/admins" />
 
           <div className="border-gray/200 grid gap-1 border-b-2 border-dashed py-8">
             <h1 className="text-[22px] font-bold -tracking-wide text-black">
@@ -80,12 +133,12 @@ export default function EditAdminPage({
                   placeholder="Masukan Nama Lengkap"
                   name="fullname"
                   value={input.fullname}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setInput({
                       ...input,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
+                      fullname: e.target.value,
+                    });
+                  }}
                   startContent={
                     <User
                       weight="bold"
@@ -108,12 +161,12 @@ export default function EditAdminPage({
                   placeholder="Pilih Role"
                   name="role"
                   selectedKeys={[input.role]}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setInput({
                       ...input,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
+                      role: e.target.value,
+                    });
+                  }}
                   startContent={
                     <UserGear weight="bold" size={18} className="text-gray" />
                   }
@@ -181,6 +234,7 @@ export default function EditAdminPage({
                     [e.target.name]: e.target.value,
                   })
                 }
+                onKeyDown={(e) => handleKeyDown(e, handleEditAdmin)}
                 startContent={
                   <Lock weight="bold" size={18} className="text-default-600" />
                 }
@@ -193,9 +247,12 @@ export default function EditAdminPage({
 
             <Button
               isLoading={loading}
+              isDisabled={isButtonDisabled || loading}
               variant="solid"
               color="secondary"
-              startContent={<FloppyDisk weight="bold" size={18} />}
+              startContent={
+                loading ? null : <FloppyDisk weight="bold" size={18} />
+              }
               onClick={handleEditAdmin}
               className="w-max justify-self-end font-bold"
             >
@@ -208,36 +265,14 @@ export default function EditAdminPage({
   );
 }
 
-type DataProps = {
-  admin?: AdminType;
-  token?: string;
-  error?: ErrorDataType;
-};
-
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  params,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: `/admins/${encodeURIComponent(params?.id as string)}`,
-      method: "GET",
-      token,
-    })) as SuccessResponse<AdminType>;
-
-    return {
-      props: {
-        admin: response.data,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  params: ParsedUrlQuery;
+}> = async ({ req, params }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      params: params as ParsedUrlQuery,
+    },
+  };
 };

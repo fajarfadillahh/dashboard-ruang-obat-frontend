@@ -1,8 +1,8 @@
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
-import { fetcher } from "@/utils/fetcher";
+import { SuccessResponse } from "@/types/global.type";
 import { formatDayWithoutTime } from "@/utils/formatDate";
 import { Button } from "@nextui-org/react";
 import {
@@ -15,8 +15,9 @@ import {
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 
-type DashboardType = {
+type DashboardResponse = {
   total_programs: number;
   total_tests: number;
   total_online_users: number;
@@ -24,13 +25,19 @@ type DashboardType = {
 };
 
 export default function DashboardPage({
-  dashboard,
-  error,
+  token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [time, setTime] = useState(new Date());
   const [client, setClient] = useState(false);
   const formatTime = (num: number) => String(num).padStart(2, "0");
+  const { data, error, isLoading } = useSWR<SuccessResponse<DashboardResponse>>(
+    {
+      url: "/admin/dashboard",
+      method: "GET",
+      token,
+    },
+  );
 
   useEffect(() => {
     setClient(true);
@@ -60,6 +67,10 @@ export default function DashboardPage({
         </Container>
       </Layout>
     );
+  }
+
+  if (isLoading) {
+    return <LoadingScreen />;
   }
 
   return (
@@ -93,7 +104,7 @@ export default function DashboardPage({
                         Total Pengguna
                       </p>
                       <h6 className="text-[32px] font-extrabold text-black">
-                        {dashboard?.total_users}
+                        {data?.data.total_users}
                       </h6>
                     </div>
                   </div>
@@ -123,7 +134,7 @@ export default function DashboardPage({
                         Total Program
                       </p>
                       <h6 className="text-[32px] font-extrabold text-black">
-                        {dashboard?.total_programs}
+                        {data?.data.total_programs}
                       </h6>
                     </div>
                   </div>
@@ -155,7 +166,7 @@ export default function DashboardPage({
                         Pengguna Aktif
                       </p>
                       <h6 className="text-[32px] font-extrabold text-black">
-                        {dashboard?.total_online_users}
+                        {data?.data.total_online_users}
                       </h6>
                     </div>
                   </div>
@@ -185,7 +196,7 @@ export default function DashboardPage({
                         Total Ujian
                       </p>
                       <h6 className="text-[32px] font-extrabold text-black">
-                        {dashboard?.total_tests}
+                        {data?.data.total_tests}
                       </h6>
                     </div>
                   </div>
@@ -210,33 +221,12 @@ export default function DashboardPage({
   );
 }
 
-type DataProps = {
-  dashboard?: DashboardType;
-  error?: ErrorDataType;
-};
-
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: "/admin/dashboard",
-      method: "GET",
-      token,
-    })) as SuccessResponse<DashboardType>;
-
-    return {
-      props: {
-        dashboard: response.data,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+}> = async ({ req }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+    },
+  };
 };

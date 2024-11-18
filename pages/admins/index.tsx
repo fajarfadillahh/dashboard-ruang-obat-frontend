@@ -1,10 +1,10 @@
 import ErrorPage from "@/components/ErrorPage";
-import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
+import LoadingScreen from "@/components/LoadingScreen";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import usePagination from "@/hooks/usePagination";
 import { AdminType } from "@/types/admin.type";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
@@ -18,25 +18,32 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, MagnifyingGlass, PencilLine, Plus } from "@phosphor-icons/react";
+import {
+  Eye,
+  MagnifyingGlass,
+  PencilLine,
+  Plus,
+  Trash,
+} from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 
 export default function AdminsPage({
-  admins,
   token,
-  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const [loading, setLoading] = useState<boolean>(false);
   const [search, setSearch] = useState("");
-  const { data, page, pages, setPage } = usePagination(
-    admins as AdminType[],
-    10,
-  );
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<AdminType[]>
+  >({
+    url: "/admins",
+    method: "GET",
+    token,
+  });
 
   const columnsUser = [
     { name: "ID Admin", uid: "admin_id" },
@@ -87,12 +94,61 @@ export default function AdminsPage({
               <PencilLine weight="bold" size={18} />
             </Button>
 
-            <ModalConfirmDelete
-              id={admin.admin_id}
-              header="Admin"
-              title={admin.fullname}
-              loading={loading}
-              handleDelete={() => handleDeleteAdmin(admin.admin_id)}
+            <ModalConfirm
+              trigger={
+                <Button isIconOnly variant="light" color="danger" size="sm">
+                  <Trash weight="bold" size={18} className="text-danger" />
+                </Button>
+              }
+              header={<h1 className="font-bold text-black">Hapus Admin</h1>}
+              body={
+                <div className="grid gap-3 text-sm font-medium">
+                  <p className="leading-[170%] text-gray">
+                    Apakah anda ingin menghapus admin berikut secara permanen?
+                  </p>
+
+                  <div className="grid gap-1">
+                    {[
+                      ["ID Admin", `${admin.admin_id}`],
+                      ["Nama Lengkap", `${admin.fullname}`],
+                    ].map(([label, value], index) => (
+                      <div
+                        key={index}
+                        className="grid gap-4 [grid-template-columns:110px_2px_1fr;]"
+                      >
+                        <h1 className="text-gray">{label}</h1>
+                        <span>:</span>
+                        <h1 className="font-extrabold text-purple">{value}</h1>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="leading-[170%] text-gray">
+                    Tindakan ini tidak dapat dibatalkan, dan data yang sudah
+                    dihapus tidak dapat dipulihkan.
+                  </p>
+                </div>
+              }
+              footer={(onClose: any) => (
+                <>
+                  <Button
+                    color="danger"
+                    variant="light"
+                    onPress={onClose}
+                    className="font-bold"
+                  >
+                    Tutup
+                  </Button>
+
+                  <Button
+                    color="danger"
+                    onClick={() => handleDeleteAdmin(admin.admin_id)}
+                    className="font-bold"
+                  >
+                    Ya, Hapus Admin
+                  </Button>
+                </>
+              )}
             />
           </div>
         );
@@ -103,8 +159,6 @@ export default function AdminsPage({
   }
 
   async function handleDeleteAdmin(id: string) {
-    setLoading(true);
-
     try {
       await fetcher({
         url: `/admins/${id}`,
@@ -112,10 +166,9 @@ export default function AdminsPage({
         token,
       });
 
+      mutate();
       toast.success("Berhasil Menghapus Admin");
-      window.location.reload();
     } catch (error) {
-      setLoading(false);
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
@@ -137,8 +190,10 @@ export default function AdminsPage({
     );
   }
 
-  const filteredAdmin = admins?.length
-    ? admins.filter(
+  if (isLoading) return <LoadingScreen />;
+
+  const filterAdmin = data?.data.length
+    ? data?.data.filter(
         (admin) =>
           admin.admin_id.toLowerCase().includes(search.toLowerCase()) ||
           admin.fullname.toLowerCase().includes(search.toLowerCase()),
@@ -214,7 +269,7 @@ export default function AdminsPage({
                 </TableHeader>
 
                 <TableBody
-                  items={filteredAdmin}
+                  items={filterAdmin}
                   emptyContent={
                     <span className="text-sm font-semibold italic text-gray">
                       Admin tidak ditemukan!
@@ -233,20 +288,6 @@ export default function AdminsPage({
                 </TableBody>
               </Table>
             </div>
-
-            {/* {filteredAdmin.length ? (
-              <Pagination
-                isCompact
-                showControls
-                page={page}
-                total={pages}
-                onChange={setPage}
-                className="justify-self-center"
-                classNames={{
-                  cursor: "bg-purple text-white",
-                }}
-              />
-            ) : null} */}
           </div>
         </section>
       </Container>
@@ -254,35 +295,12 @@ export default function AdminsPage({
   );
 }
 
-type DataProps = {
-  admins?: AdminType[];
-  token?: string;
-  error?: ErrorDataType;
-};
-
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: "/admins",
-      method: "GET",
-      token,
-    })) as SuccessResponse<AdminType[]>;
-
-    return {
-      props: {
-        admins: response.data,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+}> = async ({ req }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+    },
+  };
 };

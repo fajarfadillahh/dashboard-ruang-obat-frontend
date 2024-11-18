@@ -1,10 +1,10 @@
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { UserType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
-import { fetcher } from "@/utils/fetcher";
 import {
   Button,
   Input,
@@ -22,9 +22,10 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
-type UsersType = {
+type UsersResponse = {
   users: UserType[];
   page: number;
   total_users: number;
@@ -32,12 +33,25 @@ type UsersType = {
 };
 
 export default function UsersPage({
-  users,
-  error,
+  token,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { data, error, isLoading } = useSWR<SuccessResponse<UsersResponse>>({
+    url: getUrl(query),
+    method: "GET",
+    token,
+  });
   const [search, setSearch] = useState("");
   const [searchValue] = useDebounce(search, 800);
+
+  useEffect(() => {
+    if (searchValue) {
+      router.push({ query: { q: searchValue } });
+    } else {
+      router.push("/users");
+    }
+  }, [searchValue]);
 
   const columnsUser = [
     { name: "ID Pengguna", uid: "user_id" },
@@ -68,49 +82,22 @@ export default function UsersPage({
         );
       case "action":
         return (
-          <div className="flex w-max items-center gap-1">
-            <Button
-              isIconOnly
-              variant="light"
-              size="sm"
-              color="secondary"
-              onClick={() =>
-                router.push(
-                  `/users/details/${encodeURIComponent(user.user_id)}`,
-                )
-              }
-            >
-              <Eye weight="bold" size={18} />
-            </Button>
-
-            {/* <ModalConfirmDelete
-              id={user.user_id}
-              header="Pengguna"
-              title={user.fullname}
-              handleDelete={() => handleDeleteUser(user.user_id)}
-            /> */}
-          </div>
+          <Button
+            isIconOnly
+            variant="light"
+            size="sm"
+            color="secondary"
+            onClick={() =>
+              router.push(`/users/details/${encodeURIComponent(user.user_id)}`)
+            }
+          >
+            <Eye weight="bold" size={18} />
+          </Button>
         );
 
       default:
         return cellValue;
     }
-  }
-
-  useEffect(() => {
-    if (searchValue) {
-      router.push({
-        query: {
-          q: searchValue,
-        },
-      });
-    } else {
-      router.push("/users");
-    }
-  }, [searchValue]);
-
-  function handleDeleteUser(id: string) {
-    console.log(`Pengguna dengan ID: ${id} berhasil terhapus!`);
   }
 
   if (error) {
@@ -128,6 +115,8 @@ export default function UsersPage({
       </Layout>
     );
   }
+
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <Layout title="Daftar Pengguna" className="scrollbar-hide">
@@ -163,12 +152,13 @@ export default function UsersPage({
                     className="text-gray"
                   />
                 }
+                defaultValue={query.q as string}
+                onChange={(e) => setSearch(e.target.value)}
                 classNames={{
                   input:
                     "font-semibold placeholder:font-semibold placeholder:text-gray",
                 }}
                 className="max-w-[500px]"
-                onChange={(e) => setSearch(e.target.value)}
               />
             </div>
 
@@ -188,7 +178,7 @@ export default function UsersPage({
                 </TableHeader>
 
                 <TableBody
-                  items={users?.users}
+                  items={data?.data.users}
                   emptyContent={
                     <span className="text-sm font-semibold italic text-gray">
                       Pengguna tidak ditemukan!
@@ -208,12 +198,12 @@ export default function UsersPage({
               </Table>
             </div>
 
-            {users?.users.length ? (
+            {data?.data.users.length ? (
               <Pagination
                 isCompact
                 showControls
-                page={users?.page as number}
-                total={users?.total_pages as number}
+                page={data?.data.page as number}
+                total={data?.data.total_pages as number}
                 onChange={(e) => {
                   router.push({
                     query: {
@@ -234,11 +224,6 @@ export default function UsersPage({
   );
 }
 
-type DataProps = {
-  users?: UsersType;
-  error?: ErrorDataType;
-};
-
 function getUrl(query: ParsedUrlQuery) {
   if (query.q) {
     return `/admin/users?q=${query.q}&page=${query.page ? query.page : 1}`;
@@ -247,29 +232,14 @@ function getUrl(query: ParsedUrlQuery) {
   return `/admin/users?page=${query.page ? query.page : 1}`;
 }
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  query,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: getUrl(query) as string,
-      method: "GET",
-      token,
-    })) as SuccessResponse<UsersType>;
-
-    return {
-      props: {
-        users: response.data,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  query: ParsedUrlQuery;
+}> = async ({ req, query }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      query,
+    },
+  };
 };
