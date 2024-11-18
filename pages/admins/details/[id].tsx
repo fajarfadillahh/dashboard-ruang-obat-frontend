@@ -1,22 +1,25 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
 import { AdminType } from "@/types/admin.type";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
-import { fetcher } from "@/utils/fetcher";
+import { SuccessResponse } from "@/types/global.type";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-
-type DataResponse = {
-  admin?: AdminType;
-  error?: ErrorDataType;
-};
+import { ParsedUrlQuery } from "querystring";
+import useSWR from "swr";
 
 export default function DetailsAdminPage({
-  admin,
-  error,
+  token,
+  params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const { data, error, isLoading } = useSWR<SuccessResponse<AdminType>>({
+    url: `/admins/${encodeURIComponent(params?.id as string)}`,
+    method: "GET",
+    token,
+  });
+
   if (error) {
     return (
       <Layout title="Detail Admin">
@@ -32,6 +35,8 @@ export default function DetailsAdminPage({
       </Layout>
     );
   }
+
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <Layout title="Detail Admin" className="scrollbar-hide">
@@ -51,9 +56,9 @@ export default function DetailsAdminPage({
           <div className="grid grid-cols-2 items-center gap-16">
             <div className="grid gap-[6px] rounded-xl border-2 border-l-8 border-gray/20 p-8">
               {[
-                ["ID Admin", `${admin?.admin_id}`],
-                ["Nama Lengkap", `${admin?.fullname}`],
-                ["Role", `${admin?.role}`],
+                ["ID Admin", `${data?.data.admin_id}`],
+                ["Nama Lengkap", `${data?.data.fullname}`],
+                ["Role", `${data?.data.role}`],
               ].map(([label, value], index) => (
                 <div
                   key={index}
@@ -74,29 +79,14 @@ export default function DetailsAdminPage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps<DataResponse> = async ({
-  req,
-  params,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: `/admins/${encodeURIComponent(params?.id as string)}`,
-      method: "GET",
-      token,
-    })) as SuccessResponse<AdminType>;
-
-    return {
-      props: {
-        admin: response.data,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  params: ParsedUrlQuery;
+}> = async ({ req, params }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      params: params as ParsedUrlQuery,
+    },
+  };
 };
