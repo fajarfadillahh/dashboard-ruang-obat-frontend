@@ -63,6 +63,8 @@ export default function EditAdminPage({
       setLoading(false);
 
       if (error?.status_code === 400) return toast.error("Kunci Akses Salah!");
+      if (error?.status_code === 403)
+        return toast.error("Kunci Akses Ditolak! Silakan Coba Lagi");
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
