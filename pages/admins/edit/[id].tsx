@@ -112,7 +112,7 @@ export default function EditAdminPage({
         <section className="grid">
           <ButtonBack href="/admins" />
 
-          <div className="border-gray/200 grid gap-1 border-b-2 border-dashed py-8">
+          <div className="grid gap-1 border-b-2 border-dashed border-gray/20 py-8">
             <h1 className="text-[22px] font-bold -tracking-wide text-black">
               Edit Admin 🧑🏽
             </h1>

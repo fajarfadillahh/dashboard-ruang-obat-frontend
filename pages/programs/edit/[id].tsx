@@ -177,7 +177,7 @@ export default function EditProgramPage({
         <section className="grid">
           <ButtonBack />
 
-          <div className="divide-gray/200 mt-8 divide-y-2 divide-dashed">
+          <div className="mt-8 divide-y-2 divide-dashed divide-gray/20">
             <div className="grid gap-1 pb-8">
               <h1 className="text-[22px] font-bold -tracking-wide text-black">
                 Edit Program ✏️
