@@ -1,5 +1,5 @@
+import { useErrorContent } from "@/components/ErrorContent";
 import { Button } from "@nextui-org/react";
-import { ArrowClockwise } from "@phosphor-icons/react";
 import Image from "next/image";
 
 type ErrorProps = {
@@ -9,18 +9,20 @@ type ErrorProps = {
 };
 
 export default function ErrorPage({ status_code, message, name }: ErrorProps) {
+  const errorContent = useErrorContent();
+
+  const { title, description, buttonText, buttonAction, buttonIcon } =
+    errorContent[status_code as keyof typeof errorContent] ||
+    errorContent.default;
+
   return (
     <section className="grid w-full grid-cols-2 items-center gap-8 pt-8">
       <div className="grid gap-6">
         <div className="grid gap-2">
           <h1 className="text-[42px] font-black capitalize leading-[120%] -tracking-wide text-black">
-            Telah terjadi kesalahan sistem atau server
+            {title}
           </h1>
-          <p className="font-medium leading-[170%] text-gray">
-            Sepertinya telah terjadi kesalahan pada sistem. Silakan{" "}
-            <strong className="font-black text-purple">muat ulang</strong>{" "}
-            halaman atau hubungi tim developer jika masalah ini terus berlanjut.
-          </p>
+          {description}
         </div>
 
         <div className="grid items-start gap-[2px]">
@@ -40,11 +42,11 @@ export default function ErrorPage({ status_code, message, name }: ErrorProps) {
         <Button
           variant="solid"
           color="secondary"
-          startContent={<ArrowClockwise weight="bold" size={18} />}
-          onClick={() => window.location.reload()}
-          className="mt-4 w-max px-4 font-bold"
+          startContent={buttonIcon}
+          onClick={buttonAction}
+          className="mt-4 w-max px-8 font-bold"
         >
-          Muat Ulang Halaman
+          {buttonText}
         </Button>
       </div>
 
