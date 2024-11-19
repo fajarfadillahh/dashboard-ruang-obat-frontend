@@ -1,8 +1,9 @@
 import CardProgram from "@/components/card/CardProgram";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { ProgramType } from "@/types/program.type";
 import { fetcher } from "@/utils/fetcher";
 import { Button, Input, Pagination } from "@nextui-org/react";
@@ -13,9 +14,10 @@ import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
-export type ProgramsType = {
+export type ProgramsResponse = {
   programs: ProgramType[];
   page: number;
   total_programs: number;
@@ -23,21 +25,23 @@ export type ProgramsType = {
 };
 
 export default function ProgramsPage({
-  programs,
-  error,
   token,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<ProgramsResponse>
+  >({
+    url: getUrl(query) as string,
+    method: "GET",
+    token,
+  });
   const [search, setSearch] = useState("");
   const [searchValue] = useDebounce(search, 800);
 
   useEffect(() => {
     if (searchValue) {
-      router.push({
-        query: {
-          q: searchValue,
-        },
-      });
+      router.push({ query: { q: searchValue } });
     } else {
       router.push("/programs");
     }
@@ -68,10 +72,6 @@ export default function ProgramsPage({
     }
   }
 
-  const filteredPrograms = programs?.programs.filter((program) =>
-    program.title.toLowerCase().includes(`${searchValue}`),
-  );
-
   if (error) {
     return (
       <Layout title="Daftar Program">
@@ -87,6 +87,8 @@ export default function ProgramsPage({
       </Layout>
     );
   }
+
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <Layout title="Daftar Program" className="scrollbar-hide">
@@ -122,12 +124,13 @@ export default function ProgramsPage({
                     className="text-gray"
                   />
                 }
+                defaultValue={query.q as string}
+                onChange={(e) => setSearch(e.target.value)}
                 classNames={{
                   input:
                     "font-semibold placeholder:font-semibold placeholder:text-gray",
                 }}
                 className="flex-1"
-                onChange={(e) => setSearch(e.target.value)}
               />
 
               <Button
@@ -141,7 +144,7 @@ export default function ProgramsPage({
               </Button>
             </div>
 
-            {searchValue && filteredPrograms?.length === 0 ? (
+            {searchValue && data?.data.programs.length === 0 ? (
               <div className="flex items-center justify-center gap-2 py-16">
                 <MagnifyingGlass
                   weight="bold"
@@ -154,7 +157,7 @@ export default function ProgramsPage({
               </div>
             ) : (
               <div className="grid gap-2">
-                {programs?.programs.map((program: ProgramType) => (
+                {data?.data.programs.map((program: ProgramType) => (
                   <CardProgram
                     key={program.program_id}
                     program={program}
@@ -166,15 +169,16 @@ export default function ProgramsPage({
               </div>
             )}
 
-            {programs?.programs.length ? (
+            {data?.data.programs.length ? (
               <Pagination
                 isCompact
                 showControls
-                page={programs?.page as number}
-                total={programs?.total_pages as number}
+                page={data.data.page as number}
+                total={data.data.total_pages as number}
                 onChange={(e) => {
                   router.push({
                     query: {
+                      ...router.query, // keep existing query params
                       page: e,
                     },
                   });
@@ -192,12 +196,6 @@ export default function ProgramsPage({
   );
 }
 
-type DataProps = {
-  programs?: ProgramsType;
-  error?: ErrorDataType;
-  token?: string;
-};
-
 function getUrl(query: ParsedUrlQuery) {
   if (query.q) {
     return `/admin/programs?q=${query.q}&page=${query.page ? query.page : 1}`;
@@ -206,30 +204,14 @@ function getUrl(query: ParsedUrlQuery) {
   return `/admin/programs?page=${query.page ? query.page : 1}`;
 }
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  query,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: getUrl(query) as string,
-      method: "GET",
-      token,
-    })) as SuccessResponse<ProgramsType>;
-
-    return {
-      props: {
-        programs: response.data,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  query: ParsedUrlQuery;
+}> = async ({ req, query }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      query,
+    },
+  };
 };
