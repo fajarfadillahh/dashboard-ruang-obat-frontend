@@ -220,7 +220,9 @@ export default function CreateAdminPage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+}> = async ({ req }) => {
   return {
     props: {
       token: req.headers["access_token"] as string,
