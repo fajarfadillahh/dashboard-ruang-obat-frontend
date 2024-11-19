@@ -16,17 +16,20 @@ import { CheckCircle, Eye } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { KeyedMutator } from "swr";
 
 type RequirementProps = {
   program_id: string;
   participant: ParticipantType;
   token: string;
+  mutate: KeyedMutator<any>;
 };
 
 export default function ModalJoiningRequirement({
   program_id,
   participant,
   token,
+  mutate,
 }: RequirementProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [images, setImages] = useState<{ url: string }[]>([]);
@@ -63,8 +66,8 @@ export default function ModalJoiningRequirement({
         },
       })) as SuccessResponse<ParticipantType>;
 
+      mutate();
       toast.success("Permintaan Berhasil Diterima");
-      window.location.reload();
     } catch (error) {
       setLoading(false);
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");

@@ -23,12 +23,14 @@ import {
 import { MagnifyingGlass, Plus } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { KeyedMutator } from "swr";
 import { useDebounce } from "use-debounce";
 
 type ModalAddParticipantProps = {
   token: string;
   by: string;
   program_id: string;
+  mutate: KeyedMutator<any>;
 };
 
 type UsersType = {
@@ -42,12 +44,13 @@ export default function ModalAddParticipant({
   token,
   by,
   program_id,
+  mutate,
 }: ModalAddParticipantProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [users, setUsers] = useState<UsersType>();
   const [page, setPage] = useState(1);
   const [value, setValue] = useState<Selection>(new Set([]));
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [searchValue] = useDebounce(search, 800);
 
@@ -93,8 +96,8 @@ export default function ModalAddParticipant({
         },
       });
 
+      mutate();
       toast.success("Berhasil Menambahkan Partisipan");
-      window.location.reload();
     } catch (error) {
       setLoading(false);
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
@@ -144,6 +147,7 @@ export default function ModalAddParticipant({
           setPage(1);
           setValue(new Set([]));
           setSearch("");
+          setLoading(false);
         }}
         size="xl"
       >
@@ -238,48 +242,6 @@ export default function ModalAddParticipant({
                       ) : null
                     ) : null}
                   </div>
-
-                  {/* <Autocomplete
-                    disableSelectorIconRotation
-                    aria-label="select user"
-                    labelPlacement="outside"
-                    placeholder="Cari ID Pengguna..."
-                    defaultItems={users}
-                    selectedKey={value}
-                    onSelectionChange={(key) => {
-                      key !== null ? setValue(key.toString()) : setValue("");
-                    }}
-                    selectorIcon={<CaretUpDown weight="bold" size={16} />}
-                    inputProps={{
-                      classNames: {
-                        input:
-                          "placeholder:font-medium placeholder:text-gray font-semibold text-black",
-                      },
-                    }}
-                    listboxProps={{
-                      emptyContent: (
-                        <span className="font-medium text-gray">
-                          ID pengguna tidak ditemukan.
-                        </span>
-                      ),
-                    }}
-                  >
-                    {(user: UserType) => (
-                      <AutocompleteItem
-                        key={user.user_id}
-                        textValue={user.user_id}
-                      >
-                        <div className="flex flex-col">
-                          <span className="text-sm font-semibold text-black">
-                            {user.fullname}
-                          </span>
-                          <span className="text-xs text-gray">
-                            {user.user_id}
-                          </span>
-                        </div>
-                      </AutocompleteItem>
-                    )}
-                  </Autocomplete> */}
                 </div>
               </ModalBody>
 
@@ -301,7 +263,12 @@ export default function ModalAddParticipant({
                 <Button
                   isLoading={loading}
                   color="secondary"
-                  onClick={handleInviteParticipant}
+                  onClick={() => {
+                    handleInviteParticipant();
+                    setTimeout(() => {
+                      onClose();
+                    }, 500);
+                  }}
                   className="font-bold"
                 >
                   Tambah Partisipan

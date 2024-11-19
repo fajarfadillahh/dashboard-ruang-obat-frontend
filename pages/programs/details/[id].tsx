@@ -1,12 +1,13 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
-import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalJoiningRequirement from "@/components/modal/ModalJoiningRequirement";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
 import { ParticipantType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
@@ -14,6 +15,7 @@ import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import {
+  Button,
   Chip,
   Image,
   Input,
@@ -35,6 +37,7 @@ import {
   MagnifyingGlass,
   Notepad,
   Tag,
+  Trash,
   Users,
   XCircle,
 } from "@phosphor-icons/react";
@@ -45,9 +48,10 @@ import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
-type DetailsProgramType = {
+type DetailsProgramResponse = {
   program_id: string;
   title: string;
   type: string;
@@ -66,13 +70,20 @@ type DetailsProgramType = {
 };
 
 export default function DetailsProgramPage({
-  program,
   token,
   id,
-  error,
+  params,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<DetailsProgramResponse>
+  >({
+    url: getUrlParticipant(query, params?.id as string),
+    method: "GET",
+    token,
+  });
   const [search, setSearch] = useState<string>("");
   const [searchValue] = useDebounce(search, 800);
 
@@ -217,24 +228,80 @@ export default function DetailsProgramPage({
       case "action":
         return (
           <div className="flex max-w-max items-center gap-2">
-            {!(program?.type === "paid" || participant?.is_approved) && (
+            {!(data?.data.type === "paid" || participant?.is_approved) && (
               <ModalJoiningRequirement
-                program_id={program?.program_id as string}
-                participant={participant}
-                token={`${token}`}
+                {...{
+                  program_id: data?.data.program_id as string,
+                  participant: participant,
+                  token: `${token}`,
+                  mutate,
+                }}
               />
             )}
 
-            <ModalConfirmDelete
-              id={participant.user_id}
-              header="Partisipan"
-              title={participant.fullname}
-              handleDelete={() =>
-                handleDeleteParticipant(
-                  program?.program_id,
-                  participant.user_id,
-                )
+            <ModalConfirm
+              trigger={
+                <Button isIconOnly variant="light" color="danger" size="sm">
+                  <Trash weight="bold" size={18} className="text-danger" />
+                </Button>
               }
+              header={
+                <h1 className="font-bold text-black">Hapus Partisipan</h1>
+              }
+              body={
+                <div className="grid gap-3 text-sm font-medium">
+                  <p className="leading-[170%] text-gray">
+                    Apakah anda ingin menghapus partisipan berikut secara
+                    permanen?
+                  </p>
+
+                  <div className="grid gap-1">
+                    {[
+                      ["ID Partisipan", `${participant?.user_id}`],
+                      ["Nama Lengkap", `${participant?.fullname}`],
+                    ].map(([label, value], index) => (
+                      <div
+                        key={index}
+                        className="grid gap-4 [grid-template-columns:110px_2px_1fr;]"
+                      >
+                        <h1 className="text-gray">{label}</h1>
+                        <span>:</span>
+                        <h1 className="font-extrabold text-purple">{value}</h1>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="leading-[170%] text-gray">
+                    Tindakan ini tidak dapat dibatalkan, dan data yang sudah
+                    dihapus tidak dapat dipulihkan.
+                  </p>
+                </div>
+              }
+              footer={(onClose: any) => (
+                <>
+                  <Button
+                    color="danger"
+                    variant="light"
+                    onPress={onClose}
+                    className="font-bold"
+                  >
+                    Tutup
+                  </Button>
+
+                  <Button
+                    color="danger"
+                    onClick={() =>
+                      handleDeleteParticipant(
+                        data?.data.program_id,
+                        participant?.user_id,
+                      )
+                    }
+                    className="font-bold"
+                  >
+                    Ya, Hapus Partisipan
+                  </Button>
+                </>
+              )}
             />
           </div>
         );
@@ -255,7 +322,8 @@ export default function DetailsProgramPage({
         token,
       });
 
-      window.location.reload();
+      mutate();
+      toast.success("Berhasil Menghapus Partisipan");
     } catch (error) {
       toast.error("Gagal Menghapus Partisipan, Silakan Coba Lagi");
       console.error(error);
@@ -264,7 +332,7 @@ export default function DetailsProgramPage({
 
   if (error) {
     return (
-      <Layout title={`${program?.title}`}>
+      <Layout title={`${data?.data.title}`}>
         <Container>
           <ErrorPage
             {...{
@@ -278,18 +346,20 @@ export default function DetailsProgramPage({
     );
   }
 
+  if (isLoading) return <LoadingScreen />;
+
   return (
-    <Layout title={`${program?.title}`}>
+    <Layout title={`${data?.data.title}`}>
       <Container>
         <section className="grid gap-8">
-          <ButtonBack />
+          <ButtonBack href="/programs" />
 
           <div className="grid divide-y-2 divide-dashed divide-gray/20">
             <div className="inline-flex items-end gap-12 pb-8">
-              {program?.qr_code ? (
+              {data?.data.qr_code ? (
                 <div className="grid gap-2">
                   <Image
-                    src={`${program?.qr_code}`}
+                    src={`${data?.data.qr_code}`}
                     alt="qrcode image"
                     width={130}
                     height={130}
@@ -300,7 +370,7 @@ export default function DetailsProgramPage({
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      window.open(program?.url_qr_code, "_blank");
+                      window.open(data.data.url_qr_code, "_blank");
                     }}
                     className="w-max justify-self-center text-sm font-bold leading-[170%] text-purple underline"
                   >
@@ -322,12 +392,12 @@ export default function DetailsProgramPage({
 
               <div className="grid w-max">
                 <h4 className="max-w-[700px] text-[28px] font-bold leading-[120%] -tracking-wide text-black">
-                  {program?.title}
+                  {data?.data.title}
                 </h4>
 
                 <div className="grid grid-rows-2 divide-y-2 divide-dashed divide-gray/10">
                   <div className="grid grid-cols-3 items-end gap-12 pb-4">
-                    {program?.type === "free" ? (
+                    {data?.data.type === "free" ? (
                       <Chip
                         variant="flat"
                         color="default"
@@ -342,25 +412,25 @@ export default function DetailsProgramPage({
                       >
                         Gratis
                       </Chip>
-                    ) : program?.price ? (
+                    ) : data?.data.price ? (
                       <h5 className="font-extrabold text-purple">
-                        {formatRupiah(program?.price)}
+                        {formatRupiah(data?.data.price)}
                       </h5>
                     ) : null}
 
                     <div className="inline-flex items-center gap-1 text-gray">
                       <Notepad weight="bold" size={18} />
                       <p className="text-sm font-bold">
-                        {program?.total_tests} Ujian
+                        {data?.data.total_tests} Ujian
                       </p>
                     </div>
 
                     <Chip
                       variant="flat"
-                      color={program?.is_active ? "success" : "danger"}
+                      color={data?.data.is_active ? "success" : "danger"}
                       size="sm"
                       startContent={
-                        program?.is_active ? (
+                        data?.data.is_active ? (
                           <CheckCircle weight="fill" size={16} />
                         ) : (
                           <XCircle weight="fill" size={16} />
@@ -371,7 +441,7 @@ export default function DetailsProgramPage({
                         content: "font-bold",
                       }}
                     >
-                      {program?.is_active
+                      {data?.data.is_active
                         ? "Program Aktif"
                         : "Program Tidak Aktif"}
                     </Chip>
@@ -386,7 +456,7 @@ export default function DetailsProgramPage({
                       <div className="inline-flex items-center gap-1 text-gray">
                         <Users weight="bold" size={18} />
                         <p className="text-sm font-bold">
-                          {program?.total_participants}
+                          {data?.data.total_users}
                         </p>
                       </div>
                     </div>
@@ -399,7 +469,7 @@ export default function DetailsProgramPage({
                       <div className="inline-flex items-center gap-1 text-gray">
                         <Users weight="bold" size={18} />
                         <p className="text-sm font-bold">
-                          {program?.total_approved_users}
+                          {data?.data.total_approved_users}
                         </p>
                       </div>
                     </div>
@@ -412,8 +482,8 @@ export default function DetailsProgramPage({
                       <div className="inline-flex items-center gap-1 text-gray">
                         <Users weight="bold" size={18} />
                         <p className="text-sm font-bold">
-                          {(program?.total_users ?? 0) -
-                            (program?.total_approved_users ?? 0)}
+                          {(data?.data.total_users ?? 0) -
+                            (data?.data.total_approved_users ?? 0)}
                         </p>
                       </div>
                     </div>
@@ -428,7 +498,7 @@ export default function DetailsProgramPage({
               </h4>
 
               <div className="grid gap-2">
-                {program?.tests.map((test: TestType) => (
+                {data?.data.tests.map((test: TestType) => (
                   <CardTest key={test.test_id} test={test} />
                 ))}
               </div>
@@ -452,21 +522,26 @@ export default function DetailsProgramPage({
                       className="text-gray"
                     />
                   }
+                  defaultValue={query.q as string}
+                  onChange={(e) => setSearch(e.target.value)}
                   classNames={{
                     input:
                       "font-semibold placeholder:font-semibold placeholder:text-gray",
                   }}
                   className={
-                    program?.type === "paid" ? "flex-1" : "max-w-[500px]"
+                    data?.data.type === "paid" ? "flex-1" : "max-w-[500px]"
                   }
-                  onChange={(e) => setSearch(e.target.value)}
                 />
 
-                {program?.type === "paid" ? (
+                {data?.data.type === "paid" ? (
                   <ModalAddParticipant
-                    by={status == "authenticated" ? session.user.fullname : ""}
-                    token={token as string}
-                    program_id={program?.program_id as string}
+                    {...{
+                      by:
+                        status == "authenticated" ? session.user.fullname : "",
+                      token: token as string,
+                      program_id: data?.data.program_id as string,
+                      mutate,
+                    }}
                   />
                 ) : null}
               </div>
@@ -482,7 +557,7 @@ export default function DetailsProgramPage({
                 >
                   <TableHeader
                     columns={
-                      program?.type === "paid"
+                      data?.data.type === "paid"
                         ? columnsParticipantPaid
                         : columnsParticipantFree
                     }
@@ -493,7 +568,7 @@ export default function DetailsProgramPage({
                   </TableHeader>
 
                   <TableBody
-                    items={program?.participants}
+                    items={data?.data.participants}
                     emptyContent={
                       <span className="text-sm font-semibold italic text-gray">
                         Partisipan tidak ditemukan!
@@ -513,16 +588,17 @@ export default function DetailsProgramPage({
                 </Table>
               </div>
 
-              {program?.participants.length ? (
+              {data?.data.participants.length ? (
                 <Pagination
                   isCompact
                   showControls
-                  page={program?.page}
-                  total={program?.total_pages}
+                  page={data?.data.page}
+                  total={data?.data.total_pages}
                   onChange={(e) => {
                     router.push({
                       pathname: `/programs/details/${id}`,
                       query: {
+                        ...router.query, // keep existing query params
                         page: e,
                       },
                     });
@@ -541,13 +617,6 @@ export default function DetailsProgramPage({
   );
 }
 
-type DataProps = {
-  program?: DetailsProgramType;
-  token?: string;
-  id?: string;
-  error?: ErrorDataType;
-};
-
 function getUrlParticipant(query: ParsedUrlQuery, id: string) {
   if (query.q) {
     return `/admin/programs/${encodeURIComponent(id)}?q=${query.q}&page=${query.page ? query.page : 1}`;
@@ -556,32 +625,20 @@ function getUrlParticipant(query: ParsedUrlQuery, id: string) {
   return `/admin/programs/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
 }
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  params,
-  query,
-}) => {
-  const token = req.headers["access_token"] as string;
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  id: string;
+  params: ParsedUrlQuery;
+  query: ParsedUrlQuery;
+}> = async ({ req, params, query }) => {
+  const id = params?.id as string;
 
-  try {
-    const response = (await fetcher({
-      url: getUrlParticipant(query, params?.id as string),
-      method: "GET",
-      token,
-    })) as SuccessResponse<DetailsProgramType>;
-
-    return {
-      props: {
-        program: response.data,
-        id: params?.id as string,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      params: params as ParsedUrlQuery,
+      query,
+      id,
+    },
+  };
 };
