@@ -1,8 +1,9 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
@@ -33,6 +34,7 @@ import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
 type TestsResponse = {
@@ -43,11 +45,15 @@ type TestsResponse = {
 };
 
 export default function CreateProgramPage({
-  tests,
   token,
-  error,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
+  const { data, error, isLoading } = useSWR<SuccessResponse<TestsResponse>>({
+    url: getUrl(query) as string,
+    method: "GET",
+    token,
+  });
   const [input, setInput] = useState<{
     title: string;
     price: number | any;
@@ -128,12 +134,25 @@ export default function CreateProgramPage({
       });
 
       setQrcodeFile(null);
-      toast.success("Berhasil Membuat Program");
-      window.location.href = "/programs";
+      toast.success("Program Berhasil Di Buat");
+      router.push("/programs");
     } catch (error) {
       setLoading(false);
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
+    }
+  }
+
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
+    if (e.target.files) {
+      const file = e.target.files[0];
+      setQrcodeFile(file);
+
+      const imageUrl = URL.createObjectURL(file);
+      setImagePreview(imageUrl);
+    } else {
+      setQrcodeFile(null);
+      setImagePreview(null);
     }
   }
 
@@ -153,18 +172,7 @@ export default function CreateProgramPage({
     );
   }
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const file = e.target.files[0];
-      setQrcodeFile(file);
-
-      const imageUrl = URL.createObjectURL(file);
-      setImagePreview(imageUrl);
-    } else {
-      setQrcodeFile(null);
-      setImagePreview(null);
-    }
-  };
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <Layout title="Buat Program">
@@ -318,7 +326,6 @@ export default function CreateProgramPage({
                   variant="flat"
                   labelPlacement="outside"
                   placeholder="Cari Ujian ID atau Nama Ujian"
-                  onChange={(e) => setSearch(e.target.value)}
                   startContent={
                     <MagnifyingGlass
                       weight="bold"
@@ -326,6 +333,8 @@ export default function CreateProgramPage({
                       className="text-gray"
                     />
                   }
+                  defaultValue={query.q as string}
+                  onChange={(e) => setSearch(e.target.value)}
                   classNames={{
                     input:
                       "font-semibold placeholder:font-semibold placeholder:text-gray",
@@ -365,7 +374,7 @@ export default function CreateProgramPage({
                 </TableHeader>
 
                 <TableBody
-                  items={tests?.tests}
+                  items={data?.data.tests}
                   emptyContent={
                     <span className="text-sm font-semibold italic text-gray">
                       Ujian tidak ditemukan!
@@ -382,15 +391,16 @@ export default function CreateProgramPage({
                 </TableBody>
               </Table>
 
-              {tests?.tests.length ? (
+              {data?.data.tests.length ? (
                 <Pagination
                   isCompact
                   showControls
-                  page={tests?.page as number}
-                  total={tests?.total_pages as number}
+                  page={data.data.page as number}
+                  total={data.data.total_pages as number}
                   onChange={(e) => {
                     router.push({
                       query: {
+                        ...router.query,
                         page: e,
                       },
                     });
@@ -409,12 +419,6 @@ export default function CreateProgramPage({
   );
 }
 
-type DataProps = {
-  tests?: TestsResponse;
-  token?: string;
-  error?: ErrorDataType;
-};
-
 function getUrl(query: ParsedUrlQuery) {
   if (query.q) {
     return `/admin/tests?q=${query.q}&page=${query.page ? query.page : 1}`;
@@ -423,30 +427,14 @@ function getUrl(query: ParsedUrlQuery) {
   return `/admin/tests?page=${query.page ? query.page : 1}`;
 }
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  query,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: getUrl(query) as string,
-      method: "GET",
-      token,
-    })) as SuccessResponse<TestsResponse>;
-
-    return {
-      props: {
-        tests: response.data,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  query: ParsedUrlQuery;
+}> = async ({ req, query }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      query,
+    },
+  };
 };
