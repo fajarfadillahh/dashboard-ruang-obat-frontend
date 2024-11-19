@@ -62,10 +62,10 @@ export default function ProgramsPage({
         },
       });
 
+      mutate();
       is_active
-        ? toast.success("Berhasil Menonaktifkan Program")
-        : toast.success("Berhasil Mengaktifkan Program");
-      window.location.reload();
+        ? toast.success("Program Berhasil Di Non-aktifkan")
+        : toast.success("Program Berhasil Di Aktifkan");
     } catch (error) {
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
