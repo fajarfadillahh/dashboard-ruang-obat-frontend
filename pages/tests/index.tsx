@@ -1,8 +1,9 @@
 import CardTest from "@/components/card/CardTest";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
 import { fetcher } from "@/utils/fetcher";
 import { Button, Input, Pagination } from "@nextui-org/react";
@@ -12,9 +13,10 @@ import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
-type TestsType = {
+type TestsResponse = {
   tests: TestType[];
   page: number;
   total_tests: number;
@@ -22,11 +24,17 @@ type TestsType = {
 };
 
 export default function TestsPage({
-  tests,
   token,
-  error,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<TestsResponse>
+  >({
+    url: getUrl(query) as string,
+    method: "GET",
+    token,
+  });
   const [search, setSearch] = useState("");
   const [searchValue] = useDebounce(search, 800);
 
@@ -57,19 +65,15 @@ export default function TestsPage({
         },
       });
 
+      mutate();
       is_active
-        ? toast.success("Berhasil Menonaktifkan Ujian")
-        : toast.success("Berhasil Mengaktifkan Ujian");
-      window.location.reload();
+        ? toast.success("Ujian Berhasil Di Non-aktifkan")
+        : toast.success("Ujian Berhasil Di Aktifkan");
     } catch (error) {
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
     }
   }
-
-  const filteredTests = tests?.tests.filter((test) =>
-    test.title.toLowerCase().includes(`${searchValue}`),
-  );
 
   if (error) {
     return (
@@ -86,6 +90,8 @@ export default function TestsPage({
       </Layout>
     );
   }
+
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <Layout title="Daftar Ujian" className="scrollbar-hide">
@@ -114,12 +120,13 @@ export default function TestsPage({
                     className="text-gray"
                   />
                 }
+                defaultValue={query.q as string}
+                onChange={(e) => setSearch(e.target.value)}
                 classNames={{
                   input:
                     "font-semibold placeholder:font-semibold placeholder:text-gray",
                 }}
                 className="flex-1"
-                onChange={(e) => setSearch(e.target.value)}
               />
 
               <Button
@@ -133,7 +140,7 @@ export default function TestsPage({
               </Button>
             </div>
 
-            {searchValue && filteredTests?.length === 0 ? (
+            {searchValue && data?.data.tests.length === 0 ? (
               <div className="flex items-center justify-center gap-2 py-16">
                 <MagnifyingGlass
                   weight="bold"
@@ -146,7 +153,7 @@ export default function TestsPage({
               </div>
             ) : (
               <div className="grid gap-2">
-                {tests?.tests.map((test: TestType) => (
+                {data?.data.tests.map((test: TestType) => (
                   <CardTest
                     key={test.test_id}
                     test={test}
@@ -158,15 +165,16 @@ export default function TestsPage({
               </div>
             )}
 
-            {tests?.tests.length ? (
+            {data?.data.tests.length ? (
               <Pagination
                 isCompact
                 showControls
-                page={tests?.page as number}
-                total={tests?.total_pages as number}
+                page={data?.data.page as number}
+                total={data?.data.total_pages as number}
                 onChange={(e) => {
                   router.push({
                     query: {
+                      ...router.query,
                       page: e,
                     },
                   });
@@ -184,12 +192,6 @@ export default function TestsPage({
   );
 }
 
-type DataProps = {
-  tests?: TestsType;
-  token?: string;
-  error?: ErrorDataType;
-};
-
 function getUrl(query: ParsedUrlQuery) {
   if (query.q) {
     return `/admin/tests?q=${query.q}&page=${query.page ? query.page : 1}`;
@@ -198,30 +200,14 @@ function getUrl(query: ParsedUrlQuery) {
   return `/admin/tests?page=${query.page ? query.page : 1}`;
 }
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  query,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: getUrl(query) as string,
-      method: "GET",
-      token,
-    })) as SuccessResponse<TestsType>;
-
-    return {
-      props: {
-        tests: response.data,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  query: ParsedUrlQuery;
+}> = async ({ req, query }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      query,
+    },
+  };
 };
