@@ -1,4 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import VideoComponent from "@/components/VideoComponent";
@@ -42,6 +43,7 @@ export default function CreateTestPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [input, setInput] = useState({
     title: "",
     description: "",
@@ -52,7 +54,6 @@ export default function CreateTestPage({
   const [questions, setQuestions] = useState<CreateQuestion[]>([]);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
-  const { data: session, status } = useSession();
 
   useEffect(() => {
     const input = localStorage.getItem("input");
@@ -104,78 +105,6 @@ export default function CreateTestPage({
     [questions],
   );
 
-  // function handleEditorChange({
-  //   index,
-  //   text,
-  //   field,
-  // }: {
-  //   index: number;
-  //   text: string;
-  //   field: "explanation" | "text";
-  // }) {
-  //   if (field == "text") {
-  //     const mapping = [...questions];
-  //     mapping[index] = {
-  //       ...mapping[index],
-  //       text,
-  //     };
-
-  //     setQuestions(mapping);
-  //   }
-
-  //   if (field == "explanation") {
-  //     const mapping = [...questions];
-  //     mapping[index] = {
-  //       ...mapping[index],
-  //       explanation: text,
-  //     };
-
-  //     setQuestions(mapping);
-  //   }
-  // }
-
-  // const handleOptionChange = useCallback(
-  //   (
-  //     qIndex: number,
-  //     oIndex: number,
-  //     option: {
-  //       text: string;
-  //       is_correct: boolean;
-  //     },
-  //   ) => {
-  //     const mapping = [...questions];
-  //     mapping[qIndex].options[oIndex] = option;
-
-  //     mapping[qIndex] = {
-  //       ...mapping[qIndex],
-  //     };
-
-  //     setQuestions(mapping);
-  //   },
-  //   [questions],
-  // );
-
-  // const handleCheckboxChange = useCallback(
-  //   (
-  //     qIndex: number,
-  //     oIndex: number,
-  //     option: {
-  //       text: string;
-  //       is_correct: boolean;
-  //     },
-  //   ) => {
-  //     const mapping = [...questions];
-  //     mapping[qIndex].options[oIndex] = option;
-
-  //     mapping[qIndex] = {
-  //       ...mapping[qIndex],
-  //     };
-
-  //     setQuestions(mapping);
-  //   },
-  //   [questions],
-  // );
-
   useEffect(() => {
     const isFormValid =
       input.title &&
@@ -209,13 +138,13 @@ export default function CreateTestPage({
         token,
       });
 
-      toast.success("Berhasil membuat test");
-
+      toast.success("Ujian Berhasil Di Buat");
       localStorage.removeItem("input");
       localStorage.removeItem("questions");
       router.back();
     } catch (error) {
       setLoading(false);
+      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.log(error);
     }
   }
@@ -362,7 +291,57 @@ export default function CreateTestPage({
                       {...{ handleAddQuestion, type: "create", token: token }}
                     />
 
-                    <Button
+                    <ModalConfirm
+                      trigger={
+                        <Button
+                          isLoading={loading}
+                          isDisabled={isButtonDisabled || loading}
+                          variant="solid"
+                          color="secondary"
+                          startContent={
+                            loading ? null : (
+                              <Database weight="bold" size={18} />
+                            )
+                          }
+                          className="w-max justify-self-end font-bold"
+                        >
+                          Simpan Database
+                        </Button>
+                      }
+                      header={
+                        <h1 className="font-bold text-black">Perhatian!</h1>
+                      }
+                      body={
+                        <p className="leading-[170%] text-gray">
+                          Apakah anda ingin menyimpan ujian ini ke dalam
+                          database?
+                        </p>
+                      }
+                      footer={(onClose: any) => (
+                        <>
+                          <Button
+                            color="danger"
+                            variant="light"
+                            onPress={onClose}
+                            className="font-bold"
+                          >
+                            Tutup
+                          </Button>
+
+                          <Button
+                            isLoading={loading}
+                            isDisabled={loading}
+                            color="secondary"
+                            onClick={handleSaveTest}
+                            className="font-bold"
+                          >
+                            Ya, Simpan
+                          </Button>
+                        </>
+                      )}
+                    />
+
+                    {/* <Button
                       isLoading={loading}
                       isDisabled={isButtonDisabled || loading}
                       variant="solid"
@@ -378,7 +357,7 @@ export default function CreateTestPage({
                       }}
                     >
                       Simpan Database
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               </div>
@@ -490,34 +469,6 @@ export default function CreateTestPage({
                     </div>
                   </div>
                 ))}
-
-                {/* <div className="grid gap-2">
-                  {questions.map((question, index) => {
-                    return (
-                      <CardInputTest
-                        key={index}
-                        {...{
-                          question,
-                          index,
-                          handleRemoveQuestion,
-                          handleEditorChange,
-                          handleOptionChange,
-                          handleCheckboxChange,
-                        }}
-                      />
-                    );
-                  })}
-                </div> */}
-
-                {/* <Button
-                  variant="bordered"
-                  color="default"
-                  startContent={<Plus weight="bold" size={18} />}
-                  className="font-bold"
-                  onClick={handleAddQuestion}
-                >
-                  Tambah Soal
-                </Button> */}
               </div>
             </div>
           </div>
@@ -530,11 +481,9 @@ export default function CreateTestPage({
 export const getServerSideProps: GetServerSideProps<{
   token: string;
 }> = async ({ req }) => {
-  const token = req.headers["access_token"] as string;
-
   return {
     props: {
-      token,
+      token: req.headers["access_token"] as string,
     },
   };
 };
