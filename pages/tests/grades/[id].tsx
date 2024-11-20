@@ -1,5 +1,6 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
@@ -24,15 +25,41 @@ import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
+type ResultResponse = {
+  test_id: string;
+  title: string;
+  results: Result[];
+  page: number;
+  total_results: number;
+  total_pages: number;
+  total_participants: number;
+};
+
+type Result = {
+  result_id: string;
+  user_id: string;
+  fullname: string;
+  university: string;
+  score: number;
+};
+
 export default function GradeUsersPage({
-  result,
-  error,
-  id,
   token,
+  params,
+  query,
+  id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<ResultResponse>
+  >({
+    url: getUrl(query, params?.id as string),
+    method: "GET",
+    token,
+  });
   const [search, setSearch] = useState<string>("");
   const [searchValue] = useDebounce(search, 800);
 
@@ -130,8 +157,8 @@ export default function GradeUsersPage({
         token,
       });
 
-      toast.success("Berhasil Menghapus Nilai");
-      window.location.reload();
+      mutate();
+      toast.success("Nilai Berhasil Di Hapus");
     } catch (error) {
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
@@ -140,7 +167,7 @@ export default function GradeUsersPage({
 
   if (error) {
     return (
-      <Layout title={`Daftar Nilai ${result?.title}`}>
+      <Layout title={`Daftar Nilai ${data?.data.title}`}>
         <Container>
           <ErrorPage
             {...{
@@ -154,8 +181,13 @@ export default function GradeUsersPage({
     );
   }
 
+  if (isLoading) return <LoadingScreen />;
+
   return (
-    <Layout title={`Daftar Nilai ${result?.title}`} className="scrollbar-hide">
+    <Layout
+      title={`Daftar Nilai ${data?.data.title}`}
+      className="scrollbar-hide"
+    >
       <Container>
         <section className="grid gap-8">
           <ButtonBack />
@@ -163,7 +195,7 @@ export default function GradeUsersPage({
           <div className="grid gap-8">
             <div className="grid gap-1">
               <h1 className="max-w-[550px] text-[24px] font-bold leading-[120%] -tracking-wide text-black">
-                Daftar Nilai {result?.title} 🎯
+                Daftar Nilai {data?.data.title} 🎯
               </h1>
               <p className="font-medium text-gray">
                 Lihat semua nilai dari para mahasiswa/i
@@ -184,20 +216,21 @@ export default function GradeUsersPage({
                       className="text-gray"
                     />
                   }
+                  defaultValue={query.q as string}
+                  onChange={(e) => setSearch(e.target.value)}
                   classNames={{
                     input:
                       "font-semibold placeholder:font-semibold placeholder:text-gray",
                   }}
                   className="max-w-[500px]"
-                  onChange={(e) => setSearch(e.target.value)}
                 />
 
                 <p className="text-sm font-medium text-gray">
                   Total Jawaban{" "}
                   <strong className="font-black text-purple">
-                    {result?.total_results ? result.total_results : "-"}/
-                    {result?.total_participants
-                      ? result.total_participants
+                    {data?.data.total_results ? data.data.total_results : "-"}/
+                    {data?.data.total_participants
+                      ? data.data.total_participants
                       : "-"}
                   </strong>
                 </p>
@@ -219,7 +252,7 @@ export default function GradeUsersPage({
                   </TableHeader>
 
                   <TableBody
-                    items={result?.results}
+                    items={data?.data.results}
                     emptyContent={
                       <span className="text-sm font-semibold italic text-gray">
                         Nilai pengguna tidak ditemukan!
@@ -240,16 +273,17 @@ export default function GradeUsersPage({
               </div>
             </div>
 
-            {result?.results.length ? (
+            {data?.data.results.length ? (
               <Pagination
                 isCompact
                 showControls
-                page={result.page}
-                total={result.total_pages}
+                page={data.data.page as number}
+                total={data.data.total_pages as number}
                 onChange={(e) => {
                   router.push({
                     pathname: `/tests/grades/${id}`,
                     query: {
+                      ...router.query,
                       page: e,
                     },
                   });
@@ -267,24 +301,6 @@ export default function GradeUsersPage({
   );
 }
 
-type ResultResponse = {
-  test_id: string;
-  title: string;
-  results: Result[];
-  page: number;
-  total_results: number;
-  total_pages: number;
-  total_participants: number;
-};
-
-type Result = {
-  result_id: string;
-  user_id: string;
-  fullname: string;
-  university: string;
-  score: number;
-};
-
 function getUrl(query: ParsedUrlQuery, id: string) {
   if (query.q) {
     return `/admin/tests/results/${encodeURIComponent(id)}?q=${query.q}&page=${query.page ? query.page : 1}`;
@@ -294,32 +310,19 @@ function getUrl(query: ParsedUrlQuery, id: string) {
 }
 
 export const getServerSideProps: GetServerSideProps<{
-  result?: ResultResponse;
-  error?: any;
-  id?: string;
-  token?: string;
+  token: string;
+  id: string;
+  params: ParsedUrlQuery;
+  query: ParsedUrlQuery;
 }> = async ({ req, params, query }) => {
-  const token = req.headers["access_token"] as string;
+  const id = params?.id as string;
 
-  try {
-    const response: SuccessResponse<ResultResponse> = await fetcher({
-      url: getUrl(query, params?.id as string),
-      method: "GET",
-      token,
-    });
-
-    return {
-      props: {
-        result: response.data,
-        id: params?.id as string,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      params: params as ParsedUrlQuery,
+      query,
+      id,
+    },
+  };
 };
