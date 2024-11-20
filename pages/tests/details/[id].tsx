@@ -1,10 +1,10 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import VideoComponent from "@/components/VideoComponent";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
-import { fetcher } from "@/utils/fetcher";
+import { SuccessResponse } from "@/types/global.type";
 import { formatDateWithoutTime } from "@/utils/formatDate";
 import {
   Accordion,
@@ -25,8 +25,9 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { Suspense, useEffect, useState } from "react";
+import useSWR from "swr";
 
-type DetailsTestType = {
+type DetailsTestResponse = {
   status: string;
   test_id: string;
   title: string;
@@ -52,16 +53,32 @@ type DetailsTestType = {
 };
 
 export default function DetailsTestPage({
-  test,
-  error,
+  token,
+  params,
+  query,
   id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { data, error, isLoading } = useSWR<
+    SuccessResponse<DetailsTestResponse>
+  >({
+    url: getUrl(query, params?.id as string),
+    method: "GET",
+    token,
+  });
   const [client, setClient] = useState<boolean>(false);
+
+  useEffect(() => {
+    setClient(true);
+  }, []);
+
+  if (!client) {
+    return;
+  }
 
   if (error) {
     return (
-      <Layout title={`${test?.title}`}>
+      <Layout title={`${data?.data.title}`}>
         <Container>
           <ErrorPage
             {...{
@@ -75,29 +92,23 @@ export default function DetailsTestPage({
     );
   }
 
-  useEffect(() => {
-    setClient(true);
-  }, []);
-
-  if (!client) {
-    return;
-  }
+  if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title={`${test?.title}`}>
+    <Layout title={`${data?.data.title}`}>
       <Container>
         <section className="grid gap-8">
-          <ButtonBack />
+          <ButtonBack href="/tests" />
 
           <div className="grid divide-y-2 divide-dashed divide-gray/20">
             <div className="grid grid-cols-[1fr_max-content] items-start gap-16">
               <div className="grid gap-6 pb-8">
                 <div>
                   <h4 className="mb-2 text-[28px] font-bold capitalize leading-[120%] -tracking-wide text-black">
-                    {test?.title}
+                    {data?.data.title}
                   </h4>
                   <p className="max-w-[700px] font-medium leading-[170%] text-gray">
-                    {test?.description}
+                    {data?.data.description}
                   </p>
                 </div>
 
@@ -107,7 +118,7 @@ export default function DetailsTestPage({
                       Tanggal Mulai:
                     </span>
                     <h1 className="font-semibold text-black">
-                      {formatDateWithoutTime(`${test?.start}`)}
+                      {formatDateWithoutTime(`${data?.data.start}`)}
                     </h1>
                   </div>
 
@@ -116,7 +127,7 @@ export default function DetailsTestPage({
                       Tanggal Selesai:
                     </span>
                     <h1 className="font-semibold text-black">
-                      {formatDateWithoutTime(`${test?.end}`)}
+                      {formatDateWithoutTime(`${data?.data.end}`)}
                     </h1>
                   </div>
 
@@ -125,7 +136,7 @@ export default function DetailsTestPage({
                       Durasi Pengerjaan:
                     </span>
                     <h1 className="font-semibold text-black">
-                      {test?.duration} Menit
+                      {data?.data.duration} Menit
                     </h1>
                   </div>
 
@@ -134,7 +145,7 @@ export default function DetailsTestPage({
                       Jumlah Soal:
                     </span>
                     <h1 className="font-semibold text-black">
-                      {test?.total_questions} Butir
+                      {data?.data.total_questions} Butir
                     </h1>
                   </div>
 
@@ -146,17 +157,17 @@ export default function DetailsTestPage({
                     <Chip
                       variant="flat"
                       color={
-                        test?.status === "Belum dimulai"
+                        data?.data.status === "Belum dimulai"
                           ? "danger"
-                          : test?.status === "Berlangsung"
+                          : data?.data.status === "Berlangsung"
                             ? "warning"
                             : "success"
                       }
                       size="sm"
                       startContent={
-                        test?.status === "Belum dimulai" ? (
+                        data?.data.status === "Belum dimulai" ? (
                           <ClockCountdown weight="bold" size={16} />
-                        ) : test?.status === "Berlangsung" ? (
+                        ) : data?.data.status === "Berlangsung" ? (
                           <HourglassLow weight="fill" size={16} />
                         ) : (
                           <CheckCircle weight="fill" size={16} />
@@ -167,19 +178,21 @@ export default function DetailsTestPage({
                         content: "font-semibold capitalize",
                       }}
                     >
-                      {test?.status}
+                      {data?.data.status}
                     </Chip>
                   </div>
                 </div>
               </div>
 
               <div className="grid gap-2">
-                {test?.status === "Berakhir" ? null : (
+                {data?.data.status === "Berakhir" ? null : (
                   <Button
                     variant="light"
                     color="secondary"
                     startContent={<PencilLine weight="bold" size={18} />}
-                    onClick={() => router.push(`/tests/edit/${test?.test_id}`)}
+                    onClick={() =>
+                      router.push(`/tests/edit/${data?.data.test_id}`)
+                    }
                     className="px-6 font-bold"
                   >
                     Edit Ujian
@@ -190,7 +203,9 @@ export default function DetailsTestPage({
                   variant="solid"
                   color="secondary"
                   startContent={<ClipboardText weight="bold" size={18} />}
-                  onClick={() => router.push(`/tests/grades/${test?.test_id}`)}
+                  onClick={() =>
+                    router.push(`/tests/grades/${data?.data.test_id}`)
+                  }
                   className="px-6 font-bold"
                 >
                   Lihat Nilai
@@ -204,7 +219,7 @@ export default function DetailsTestPage({
               </div>
 
               <div className="grid gap-2 overflow-y-scroll scrollbar-hide">
-                {test?.questions.map((question) => (
+                {data?.data.questions.map((question) => (
                   <div
                     key={question.question_id}
                     className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
@@ -281,12 +296,12 @@ export default function DetailsTestPage({
                 ))}
               </div>
 
-              {test?.questions.length ? (
+              {data?.data.questions.length ? (
                 <Pagination
                   isCompact
                   showControls
-                  page={test?.page}
-                  total={test?.total_pages}
+                  page={data?.data.page as number}
+                  total={data?.data.total_pages as number}
                   onChange={(e) => {
                     router.push({
                       pathname: `/tests/details/${id}`,
@@ -309,41 +324,24 @@ export default function DetailsTestPage({
   );
 }
 
-type DataProps = {
-  test?: DetailsTestType;
-  id?: string;
-  error?: ErrorDataType;
-};
-
 function getUrl(query: ParsedUrlQuery, id: string) {
   return `/admin/tests/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
 }
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  params,
-  query,
-}) => {
-  const token = req.headers["access_token"] as string;
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  id: string;
+  params: ParsedUrlQuery;
+  query: ParsedUrlQuery;
+}> = async ({ req, params, query }) => {
+  const id = params?.id as string;
 
-  try {
-    const response = (await fetcher({
-      url: getUrl(query, params?.id as string),
-      method: "GET",
-      token,
-    })) as SuccessResponse<DetailsTestType>;
-
-    return {
-      props: {
-        test: response.data,
-        id: params?.id as string,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      params: params as ParsedUrlQuery,
+      query,
+      id,
+    },
+  };
 };
