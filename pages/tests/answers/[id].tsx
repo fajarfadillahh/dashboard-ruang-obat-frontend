@@ -1,15 +1,18 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { Question } from "@/types/question.type";
-import { fetcher } from "@/utils/fetcher";
 import { Accordion, AccordionItem, Radio, RadioGroup } from "@nextui-org/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
+import { ParsedUrlQuery } from "querystring";
 import { useState } from "react";
+import useSWR from "swr";
 
-type AnswersType = {
+type AnswersResponse = {
   result_id: string;
   score: number;
   user_id: string;
@@ -21,14 +24,37 @@ type AnswersType = {
 };
 
 export default function AnswersPage({
-  answer,
-  error,
+  token,
+  params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const { data, error, isLoading } = useSWR<SuccessResponse<AnswersResponse>>({
+    url: `/admin/results/${params?.id as string}`,
+    method: "GET",
+    token,
+  });
   const [number, setNumber] = useState(1);
 
-  const question = answer?.questions.find(
+  const question = data?.data.questions.find(
     (question) => question.number == number,
   );
+
+  if (error) {
+    return (
+      <Layout title="Daftar Semua Jawaban">
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
+  }
+
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <Layout title="Daftar Semua Jawaban" className="scrollbar-hide">
@@ -40,9 +66,9 @@ export default function AnswersPage({
             <div className="flex items-end justify-between gap-8">
               <div className="grid gap-1">
                 <h1 className="max-w-[550px] text-[24px] font-bold leading-[120%] -tracking-wide text-black">
-                  {answer?.fullname}
+                  {data?.data.fullname}
                 </h1>
-                <p className="font-medium text-gray">{answer?.university}</p>
+                <p className="font-medium text-gray">{data?.data.university}</p>
               </div>
 
               <div className="inline-flex items-center gap-12">
@@ -51,7 +77,7 @@ export default function AnswersPage({
                     Nilai Pengguna
                   </p>
                   <h4 className="text-[24px] font-extrabold text-black">
-                    🏆 {answer?.score}
+                    🏆 {data?.data.score}
                   </h4>
                 </div>
 
@@ -60,7 +86,7 @@ export default function AnswersPage({
                     Jawaban Benar
                   </p>
                   <h4 className="text-[24px] font-extrabold text-black">
-                    ✅ {answer?.total_correct}
+                    ✅ {data?.data.total_correct}
                   </h4>
                 </div>
 
@@ -69,7 +95,7 @@ export default function AnswersPage({
                     Jawaban Salah
                   </p>
                   <h4 className="text-[24px] font-extrabold text-black">
-                    ❌ {answer?.total_incorrect}
+                    ❌ {data?.data.total_incorrect}
                   </h4>
                 </div>
               </div>
@@ -157,7 +183,7 @@ export default function AnswersPage({
                   </h4>
 
                   <div className="grid h-full max-h-[400px] grid-cols-5 justify-items-center gap-2 overflow-y-scroll scrollbar-hide">
-                    {answer?.questions.map((question) => {
+                    {data?.data.questions.map((question) => {
                       let answerClass = "";
 
                       if (question.is_correct) {
@@ -199,34 +225,14 @@ export default function AnswersPage({
   );
 }
 
-type DataProps = {
-  answer?: AnswersType;
-  error?: ErrorDataType;
-};
-
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  params,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: `/admin/results/${params?.id as string}`,
-      method: "GET",
-      token,
-    })) as SuccessResponse<AnswersType>;
-
-    return {
-      props: {
-        answer: response.data,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  params: ParsedUrlQuery;
+}> = async ({ req, params }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      params: params as ParsedUrlQuery,
+    },
+  };
 };

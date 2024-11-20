@@ -1,7 +1,7 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
-import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, MagnifyingGlass, XCircle } from "@phosphor-icons/react";
+import { Eye, MagnifyingGlass, Trash, XCircle } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
@@ -135,11 +135,61 @@ export default function GradeUsersPage({
               Lihat Jawaban
             </Button>
 
-            <ModalConfirmDelete
-              header="Nilai"
-              id={user.result_id}
-              title="Nilai Pengguna"
-              handleDelete={() => handleDeleteAnswer(user.result_id)}
+            <ModalConfirm
+              trigger={
+                <Button isIconOnly variant="light" color="danger" size="sm">
+                  <Trash weight="bold" size={18} className="text-danger" />
+                </Button>
+              }
+              header={<h1 className="font-bold text-black">Hapus Nilai</h1>}
+              body={
+                <div className="grid gap-3 text-sm font-medium">
+                  <p className="leading-[170%] text-gray">
+                    Apakah anda ingin menghapus nilai berikut secara permanen?
+                  </p>
+
+                  <div className="grid gap-1">
+                    {[
+                      ["ID Pengguna", `${user.user_id}`],
+                      ["Nama Lengkap", `${user.fullname}`],
+                    ].map(([label, value], index) => (
+                      <div
+                        key={index}
+                        className="grid gap-4 [grid-template-columns:110px_2px_1fr;]"
+                      >
+                        <h1 className="text-gray">{label}</h1>
+                        <span>:</span>
+                        <h1 className="font-extrabold text-purple">{value}</h1>
+                      </div>
+                    ))}
+                  </div>
+
+                  <p className="leading-[170%] text-gray">
+                    Tindakan ini tidak dapat dibatalkan, dan data yang sudah
+                    dihapus tidak dapat dipulihkan.
+                  </p>
+                </div>
+              }
+              footer={(onClose: any) => (
+                <>
+                  <Button
+                    color="danger"
+                    variant="light"
+                    onPress={onClose}
+                    className="font-bold"
+                  >
+                    Tutup
+                  </Button>
+
+                  <Button
+                    color="danger"
+                    onClick={() => handleDeleteAnswer(user.user_id)}
+                    className="font-bold"
+                  >
+                    Ya, Hapus Nilai
+                  </Button>
+                </>
+              )}
             />
           </div>
         );
@@ -190,7 +240,7 @@ export default function GradeUsersPage({
     >
       <Container>
         <section className="grid gap-8">
-          <ButtonBack />
+          <ButtonBack href={`/tests/details/${params?.id}`} />
 
           <div className="grid gap-8">
             <div className="grid gap-1">
