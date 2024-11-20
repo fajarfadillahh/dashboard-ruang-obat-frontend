@@ -1,11 +1,13 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import VideoComponent from "@/components/VideoComponent";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
 import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import {
@@ -32,9 +34,10 @@ import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { Suspense, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 import { CreateQuestion } from "../create";
 
-type DetailsTestType = {
+type DetailsTestResponse = {
   status: string;
   test_id: string;
   title: string;
@@ -60,36 +63,59 @@ type DetailsTestType = {
 };
 
 export default function EditTestPage({
-  test,
   token,
+  params,
+  query,
   id,
-  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<DetailsTestResponse>
+  >({
+    url: getUrl(query, params?.id as string),
+    method: "GET",
+    token,
+  });
   const { data: session, status } = useSession();
   const [client, setClient] = useState<boolean>(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
-
+  const [isInputReady, setIsInputReady] = useState(false);
   const [input, setInput] = useState({
-    title: test?.title || "",
-    description: test?.description || "",
-    start: test?.start || "",
-    end: test?.end || "",
-    duration: test?.duration || 0,
+    title: "",
+    description: "",
+    start: "",
+    end: "",
+    duration: 0,
   });
 
   useEffect(() => {
+    if (data?.data) {
+      const { title, description, start, end, duration } = data.data;
+
+      setInput({
+        title,
+        description,
+        start,
+        end,
+        duration: duration ?? 0,
+      });
+
+      setIsInputReady(true);
+    }
+  }, [data]);
+
+  useEffect(() => {
     const isFormValid =
-      input.title &&
-      input.description &&
-      input.start &&
-      input.end &&
-      input.duration &&
-      (test?.questions ?? []).length > 0;
+      input?.title?.trim() !== "" &&
+      input?.description?.trim() !== "" &&
+      input?.start?.trim() !== "" &&
+      input?.end?.trim() !== "" &&
+      input?.duration > 0 &&
+      (data?.data.questions ?? []).length > 0;
 
     setIsButtonDisabled(!isFormValid);
-  }, [input, test]);
+  }, [input, data]);
 
   async function handleAddQuestion(question: CreateQuestion) {
     try {
@@ -98,24 +124,22 @@ export default function EditTestPage({
         method: "PATCH",
         token,
         data: {
-          test_id: test?.test_id,
+          test_id: data?.data.test_id,
           update_type: "add_question",
           questions: [{ ...question, type: question.type }],
           by: status == "authenticated" ? session.user.fullname : "",
         },
       });
 
-      toast.success("Berhasil Menambahkan soal");
-      window.location.reload();
+      mutate();
+      toast.success("Soal Berhasil Di Tambahkan");
     } catch (error) {
       console.log(error);
-      toast.error("Terjadi kesalahan saat menambahkan soal");
+      toast.error("Terjadi Kesalahan Saat Menambahkan soal");
     }
   }
 
   async function handleDeleteQuestion(test_id: string, question_id: string) {
-    if (!confirm("Apakah anda yakin ingin menghapus soal?")) return;
-
     try {
       await fetcher({
         url: `/admin/tests/${test_id}/questions/${question_id}`,
@@ -123,16 +147,40 @@ export default function EditTestPage({
         token,
       });
 
-      toast.success("Berhasil Menghapus soal");
-      window.location.reload();
+      mutate();
+      toast.success("Soal Berhasil Di Hapus");
     } catch (error) {
       console.log(error);
-      toast.error("Terjadi kesalahan saat menghapus soal");
+      toast.error("Terjadi Kesalahan Saat Menghapus Soal");
+    }
+  }
+
+  async function handleEditQuestion(question: CreateQuestion, index: number) {
+    try {
+      console.log(question);
+      const mappingQuestion = data?.data.questions[index];
+
+      await fetcher({
+        url: "/admin/tests",
+        method: "PATCH",
+        token,
+        data: {
+          test_id: data?.data.test_id,
+          update_type: "update_question",
+          questions: [{ ...mappingQuestion, ...question }],
+          by: status == "authenticated" ? session.user.fullname : "",
+        },
+      });
+
+      mutate();
+      toast.success("Soal Berhasil Di Ubah");
+    } catch (error) {
+      console.log(error);
+      toast.error("Terjadi Kesalahan Saat Mengubah Soal");
     }
   }
 
   async function handleEditTestData() {
-    if (!confirm("Apakah anda yakin ingin mengubah data ujian?")) return;
     setLoading(true);
 
     try {
@@ -141,46 +189,19 @@ export default function EditTestPage({
         method: "PATCH",
         token,
         data: {
-          test_id: test?.test_id,
+          test_id: data?.data.test_id,
           update_type: "update_test",
           ...input,
           by: status == "authenticated" ? session.user.fullname : "",
         },
       });
 
-      toast.success("Berhasil Mengubah Data Ujian");
-      window.location.reload();
+      mutate();
+      toast.success("Data Ujian Berhasil Di Ubah");
     } catch (error) {
       setLoading(false);
       console.log(error);
-      toast.error("Terjadi kesalahan saat mengubah data ujian");
-    }
-  }
-
-  async function handleEditQuestion(question: CreateQuestion, index: number) {
-    if (!confirm("Apakah anda yakin ingin mengubah soal?")) return;
-
-    try {
-      console.log(question);
-      const mappingQuestion = test?.questions[index];
-
-      await fetcher({
-        url: "/admin/tests",
-        method: "PATCH",
-        token,
-        data: {
-          test_id: test?.test_id,
-          update_type: "update_question",
-          questions: [{ ...mappingQuestion, ...question }],
-          by: status == "authenticated" ? session.user.fullname : "",
-        },
-      });
-
-      toast.success("Berhasil Mengubah Soal");
-      window.location.reload();
-    } catch (error) {
-      console.log(error);
-      toast.error("Terjadi kesalahan saat mengubah soal");
+      toast.error("Terjadi Kesalahan Saat Mengubah Data Ujian");
     }
   }
 
@@ -194,7 +215,7 @@ export default function EditTestPage({
 
   if (error) {
     return (
-      <Layout title={`${test?.title}`}>
+      <Layout title="Edit Ujian">
         <Container>
           <ErrorPage
             {...{
@@ -208,13 +229,15 @@ export default function EditTestPage({
     );
   }
 
+  if (isLoading) return <LoadingScreen />;
+
   return (
     <Layout title="Edit Ujian">
       <Container>
         <section className="grid">
           <ButtonBack />
 
-          {test?.status === "Berlangsung" ? (
+          {data?.data.status === "Berlangsung" ? (
             <div className="mt-8 grid rounded-xl border-2 border-warning bg-warning/5 p-6">
               <h4 className="mb-2 inline-flex items-center text-[20px] font-bold text-warning">
                 <WarningCircle
@@ -246,151 +269,196 @@ export default function EditTestPage({
               <p className="font-medium text-gray">Sesuaikan ujian sekarang.</p>
             </div>
 
-            <div className="grid gap-4 py-10">
-              <h5 className="font-bold text-black">Data Ujian</h5>
-
-              <Input
-                isRequired
-                type="text"
-                variant="flat"
-                label="Judul Ujian"
-                labelPlacement="outside"
-                placeholder="Contoh: Tryout Internal Ruangobat"
-                value={input.title}
-                onChange={(e) => {
-                  setInput({
-                    ...input,
-                    title: e.target.value,
-                  });
-                }}
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-normal placeholder:text-default-600",
-                }}
-                className="flex-1"
-              />
-
-              <Textarea
-                isRequired
-                variant="flat"
-                label="Deskripsi Ujian"
-                labelPlacement="outside"
-                placeholder="Ketikan Deskripsi Ujian..."
-                value={input.description}
-                onChange={(e) => {
-                  setInput({
-                    ...input,
-                    description: e.target.value,
-                  });
-                }}
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-normal placeholder:text-default-600",
-                }}
-              />
-
-              <div className="grid grid-cols-3 gap-4">
-                <DatePicker
-                  isRequired
-                  isDisabled={
-                    test?.status === "Berlangsung" ||
-                    test?.status === "Berakhir"
-                      ? true
-                      : false
-                  }
-                  hideTimeZone
-                  showMonthAndYearPickers
-                  variant="flat"
-                  label="Tanggal Mulai"
-                  labelPlacement="outside"
-                  endContent={<Calendar weight="bold" size={18} />}
-                  hourCycle={24}
-                  defaultValue={parseDate(input.start.substring(0, 10)).add({
-                    days: 1,
-                  })}
-                  onChange={(e) => {
-                    const value = e.toString();
-                    const date = new Date(value);
-                    date.setHours(0, 0, 0, 0);
-                    setInput({
-                      ...input,
-                      start: date.toISOString(),
-                    });
-                  }}
-                />
-
-                <DatePicker
-                  isRequired
-                  hideTimeZone
-                  showMonthAndYearPickers
-                  variant="flat"
-                  label="Tanggal Selesai"
-                  labelPlacement="outside"
-                  endContent={<Calendar weight="bold" size={18} />}
-                  hourCycle={24}
-                  minValue={today(getLocalTimeZone())}
-                  defaultValue={parseDate(input.end.substring(0, 10))}
-                  onChange={(e) => {
-                    const value = e.toString();
-                    const date = new Date(value);
-                    date.setHours(23, 59, 59, 999);
-                    setInput({
-                      ...input,
-                      end: date.toISOString(),
-                    });
-                  }}
-                />
+            {isInputReady && (
+              <div className="grid gap-4 py-10">
+                <h5 className="font-bold text-black">Data Ujian</h5>
 
                 <Input
                   isRequired
-                  type="number"
+                  type="text"
                   variant="flat"
-                  label="Durasi Pengerjaan"
+                  label="Judul Ujian"
                   labelPlacement="outside"
-                  placeholder="Satuan Menit..."
-                  value={`${input.duration}`}
+                  placeholder="Contoh: Tryout Internal Ruangobat"
+                  value={input.title}
                   onChange={(e) => {
                     setInput({
                       ...input,
-                      duration: parseInt(e.target.value),
+                      title: e.target.value,
                     });
                   }}
-                  endContent={
-                    <ClockCountdown
-                      weight="bold"
-                      size={18}
-                      className="text-default-600"
-                    />
-                  }
+                  classNames={{
+                    input:
+                      "font-semibold placeholder:font-normal placeholder:text-default-600",
+                  }}
+                  className="flex-1"
+                />
+
+                <Textarea
+                  isRequired
+                  variant="flat"
+                  label="Deskripsi Ujian"
+                  labelPlacement="outside"
+                  placeholder="Ketikan Deskripsi Ujian..."
+                  value={input.description}
+                  onChange={(e) => {
+                    setInput({
+                      ...input,
+                      description: e.target.value,
+                    });
+                  }}
                   classNames={{
                     input:
                       "font-semibold placeholder:font-normal placeholder:text-default-600",
                   }}
                 />
-              </div>
 
-              <Button
-                isLoading={loading}
-                isDisabled={isButtonDisabled || loading}
-                variant="solid"
-                color="secondary"
-                startContent={
-                  loading ? null : <Database weight="bold" size={18} />
-                }
-                className="w-max justify-self-end font-bold"
-                onClick={handleEditTestData}
-              >
-                Simpan Data Ujian
-              </Button>
-            </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <DatePicker
+                    isRequired
+                    isDisabled={
+                      data?.data.status === "Berlangsung" ||
+                      data?.data.status === "Berakhir"
+                        ? true
+                        : false
+                    }
+                    hideTimeZone
+                    showMonthAndYearPickers
+                    variant="flat"
+                    label="Tanggal Mulai"
+                    labelPlacement="outside"
+                    endContent={<Calendar weight="bold" size={18} />}
+                    hourCycle={24}
+                    defaultValue={
+                      input.start
+                        ? parseDate(input.start.substring(0, 10)).add({
+                            days: 1,
+                          })
+                        : undefined
+                    }
+                    onChange={(e) => {
+                      const value = e.toString();
+                      const date = new Date(value);
+                      date.setHours(0, 0, 0, 0);
+                      setInput({
+                        ...input,
+                        start: date.toISOString(),
+                      });
+                    }}
+                  />
+
+                  <DatePicker
+                    isRequired
+                    hideTimeZone
+                    showMonthAndYearPickers
+                    variant="flat"
+                    label="Tanggal Selesai"
+                    labelPlacement="outside"
+                    endContent={<Calendar weight="bold" size={18} />}
+                    hourCycle={24}
+                    minValue={today(getLocalTimeZone())}
+                    defaultValue={
+                      input.end
+                        ? parseDate(input.end.substring(0, 10))
+                        : undefined
+                    }
+                    onChange={(e) => {
+                      const value = e.toString();
+                      const date = new Date(value);
+                      date.setHours(23, 59, 59, 999);
+                      setInput({
+                        ...input,
+                        end: date.toISOString(),
+                      });
+                    }}
+                  />
+
+                  <Input
+                    isRequired
+                    type="number"
+                    variant="flat"
+                    label="Durasi Pengerjaan"
+                    labelPlacement="outside"
+                    placeholder="Satuan Menit..."
+                    value={input.duration.toString()}
+                    onChange={(e) => {
+                      setInput({
+                        ...input,
+                        duration: parseInt(e.target.value),
+                      });
+                    }}
+                    endContent={
+                      <ClockCountdown
+                        weight="bold"
+                        size={18}
+                        className="text-default-600"
+                      />
+                    }
+                    classNames={{
+                      input:
+                        "font-semibold placeholder:font-normal placeholder:text-default-600",
+                    }}
+                  />
+                </div>
+
+                <ModalConfirm
+                  trigger={
+                    <Button
+                      isDisabled={isButtonDisabled}
+                      variant="solid"
+                      color="secondary"
+                      startContent={<Database weight="bold" size={18} />}
+                      className="w-max justify-self-end font-bold"
+                    >
+                      Simpan Data Ujian
+                    </Button>
+                  }
+                  header={<h1 className="font-bold text-black">Perhatian!</h1>}
+                  body={
+                    <p className="leading-[170%] text-gray">
+                      Apakah anda ingin menyimpan data ujian ini ke dalam
+                      database?
+                    </p>
+                  }
+                  footer={(onClose: any) => (
+                    <>
+                      <Button
+                        color="danger"
+                        variant="light"
+                        onPress={onClose}
+                        className="font-bold"
+                      >
+                        Tutup
+                      </Button>
+
+                      <Button
+                        isLoading={loading}
+                        isDisabled={loading}
+                        color="secondary"
+                        onClick={() => {
+                          handleEditTestData(),
+                            setTimeout(() => {
+                              onClose();
+                              setLoading(false);
+                            }, 500);
+                        }}
+                        className="font-bold"
+                      >
+                        Ya, Simpan
+                      </Button>
+                    </>
+                  )}
+                />
+              </div>
+            )}
 
             <div className="grid pt-10">
               <div className="sticky left-0 top-0 z-50 grid gap-4 bg-white pb-4">
                 <div className="flex items-end justify-between gap-4">
                   <h5 className="font-bold text-black">Daftar Soal</h5>
 
-                  {test?.status === "Berlangsung" ||
-                  test?.status === "Berakhir" ? null : (
+                  {data?.data.status === "Berlangsung" ||
+                  data?.data.status === "Berakhir" ? null : (
                     <div className="inline-flex gap-2">
                       <ModalInputQuestion
                         {...{ handleAddQuestion, type: "edit", token: token }}
@@ -401,7 +469,7 @@ export default function EditTestPage({
               </div>
 
               <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
-                {test?.questions.map((question, index) => (
+                {data?.data.questions.map((question, index) => (
                   <div
                     key={question.question_id}
                     className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
@@ -475,7 +543,7 @@ export default function EditTestPage({
                       </Accordion>
                     </div>
 
-                    {test?.status !== "Belum dimulai" ? null : (
+                    {data?.data.status !== "Belum dimulai" ? null : (
                       <div className="flex gap-2">
                         <ModalEditQuestion
                           {...{
@@ -488,36 +556,68 @@ export default function EditTestPage({
                           }}
                         />
 
-                        <Button
-                          isIconOnly
-                          variant="flat"
-                          color="danger"
-                          size="sm"
-                          onClick={() =>
-                            handleDeleteQuestion(
-                              test.test_id,
-                              question.question_id,
-                            )
+                        <ModalConfirm
+                          trigger={
+                            <Button
+                              isIconOnly
+                              variant="flat"
+                              color="danger"
+                              size="sm"
+                            >
+                              <Trash
+                                weight="bold"
+                                size={18}
+                                className="text-danger"
+                              />
+                            </Button>
                           }
-                        >
-                          <Trash
-                            weight="bold"
-                            size={18}
-                            className="text-danger"
-                          />
-                        </Button>
+                          header={
+                            <h1 className="font-bold text-black">Perhatian!</h1>
+                          }
+                          body={
+                            <p className="leading-[170%] text-gray">
+                              Apakah anda ingin menghapus soal ini?
+                            </p>
+                          }
+                          footer={(onClose: any) => (
+                            <>
+                              <Button
+                                color="danger"
+                                variant="light"
+                                onPress={onClose}
+                                className="font-bold"
+                              >
+                                Tutup
+                              </Button>
+
+                              <Button
+                                color="secondary"
+                                onClick={() => {
+                                  handleDeleteQuestion(
+                                    data?.data.test_id,
+                                    question.question_id,
+                                  ),
+                                    onClose();
+                                }}
+                                className="font-bold"
+                              >
+                                Ya, Hapus Soal
+                              </Button>
+                            </>
+                          )}
+                        />
                       </div>
                     )}
                   </div>
                 ))}
               </div>
 
-              {test?.questions.length ? (
+              {data?.data.questions.length ? (
                 <Pagination
                   isCompact
                   showControls
-                  page={test?.page}
-                  total={test?.total_pages}
+                  page={data?.data.page as number}
+                  total={data?.data.total_pages as number}
                   onChange={(e) => {
                     router.push({
                       pathname: `/tests/edit/${id}`,
@@ -540,43 +640,24 @@ export default function EditTestPage({
   );
 }
 
-type DataProps = {
-  test?: DetailsTestType;
-  token?: string;
-  id?: string;
-  error?: ErrorDataType;
-};
-
 function getUrl(query: ParsedUrlQuery, id: string) {
   return `/admin/tests/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
 }
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  params,
-  query,
-}) => {
-  const token = req.headers["access_token"] as string;
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  id: string;
+  params: ParsedUrlQuery;
+  query: ParsedUrlQuery;
+}> = async ({ req, params, query }) => {
+  const id = params?.id as string;
 
-  try {
-    const response = (await fetcher({
-      url: getUrl(query, params?.id as string),
-      method: "GET",
-      token,
-    })) as SuccessResponse<DetailsTestType>;
-
-    return {
-      props: {
-        test: response.data,
-        id: params?.id as string,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      params: params as ParsedUrlQuery,
+      query,
+      id,
+    },
+  };
 };

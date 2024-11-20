@@ -191,6 +191,7 @@ export default function FeedbackPage({
               onChange={(e) => {
                 router.push({
                   query: {
+                    ...router.query,
                     page: e,
                   },
                 });

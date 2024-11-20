@@ -340,24 +340,6 @@ export default function CreateTestPage({
                         </>
                       )}
                     />
-
-                    {/* <Button
-                      isLoading={loading}
-                      isDisabled={isButtonDisabled || loading}
-                      variant="solid"
-                      color="secondary"
-                      startContent={
-                        loading ? null : <Database weight="bold" size={18} />
-                      }
-                      className="w-max justify-self-end font-bold"
-                      onClick={() => {
-                        if (confirm("Apakah Sudah Yakin?")) {
-                          handleSaveTest();
-                        }
-                      }}
-                    >
-                      Simpan Database
-                    </Button> */}
                   </div>
                 </div>
               </div>

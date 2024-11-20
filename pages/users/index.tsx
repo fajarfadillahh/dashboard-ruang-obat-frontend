@@ -207,6 +207,7 @@ export default function UsersPage({
                 onChange={(e) => {
                   router.push({
                     query: {
+                      ...router.query,
                       page: e,
                     },
                   });
