@@ -1,12 +1,15 @@
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import SearchInput from "@/components/SearchInput";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { FeedbackType } from "@/types/feedback.type";
 import { SuccessResponse } from "@/types/global.type";
 import { formatDate } from "@/utils/formatDate";
-import { Avatar, Input, Pagination } from "@nextui-org/react";
-import { MagnifyingGlass, Star } from "@phosphor-icons/react";
+import { Avatar, Pagination } from "@nextui-org/react";
+import { Star } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
@@ -20,6 +23,14 @@ type FeedbackResponse = {
   total_feedback: number;
   total_pages: number;
 };
+
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/feedback?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/feedback?page=${query.page ? query.page : 1}`;
+}
 
 export default function FeedbackPage({
   token,
@@ -80,53 +91,26 @@ export default function FeedbackPage({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Daftar Masukan dan Saran" className="scrollbar-hide">
+    <Layout title="Feedback" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
-          <div className="grid gap-1">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Masukan dan Saran ⭐
-            </h1>
-            <p className="font-medium text-gray">
-              Semua masukan dan saran akan tampil disini
-            </p>
-          </div>
+          <TitleText
+            title="Masukan dan Saran ⭐"
+            text="Semua masukan dan saran akan tampil disini"
+          />
 
           <div className="grid gap-4">
             <div className="sticky left-0 top-0 z-50 bg-white">
-              <Input
-                type="text"
-                variant="flat"
-                labelPlacement="outside"
+              <SearchInput
                 placeholder="Cari User ID atau Nama User"
-                startContent={
-                  <MagnifyingGlass
-                    weight="bold"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
                 defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-semibold placeholder:text-gray",
-                }}
-                className="max-w-[500px]"
+                onClear={() => setSearch("")}
               />
             </div>
 
             {searchValue && data?.data.feedback.length === 0 ? (
-              <div className="flex items-center justify-center gap-2 py-16">
-                <MagnifyingGlass
-                  weight="bold"
-                  size={20}
-                  className="text-gray"
-                />
-                <p className="font-semibold capitalize text-gray">
-                  Feedback tidak ditemukan!
-                </p>
-              </div>
+              <EmptyData text="Feedback tidak ditemukan!" />
             ) : (
               <div className="grid grid-cols-2 items-start gap-x-4 gap-y-2">
                 {data?.data.feedback.map((data, index) => (
@@ -206,14 +190,6 @@ export default function FeedbackPage({
       </Container>
     </Layout>
   );
-}
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/feedback?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/feedback?page=${query.page ? query.page : 1}`;
 }
 
 export const getServerSideProps: GetServerSideProps<{
