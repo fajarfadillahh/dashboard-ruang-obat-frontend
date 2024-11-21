@@ -99,8 +99,8 @@ export default function FeedbackPage({
             text="Semua masukan dan saran akan tampil disini"
           />
 
-          <div className="grid gap-4">
-            <div className="sticky left-0 top-0 z-50 bg-white">
+          <div className="grid">
+            <div className="sticky left-0 top-0 z-50 bg-white pb-4">
               <SearchInput
                 placeholder="Cari User ID atau Nama User"
                 defaultValue={query.q as string}
