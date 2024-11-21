@@ -1,11 +1,14 @@
+import { twMerge } from "tailwind-merge";
+
 type TitleTextProps = {
   title: string;
   text: string;
+  className?: string;
 };
 
-export default function TitleText({ title, text }: TitleTextProps) {
+export default function TitleText({ title, text, className }: TitleTextProps) {
   return (
-    <div className="grid gap-1">
+    <div className={twMerge(`grid gap-1`, className)}>
       <h1 className="text-[22px] font-bold -tracking-wide text-black">
         {title}
       </h1>
