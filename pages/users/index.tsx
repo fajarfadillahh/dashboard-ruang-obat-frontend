@@ -1,5 +1,8 @@
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import SearchInput from "@/components/SearchInput";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
@@ -7,7 +10,6 @@ import { UserType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import {
   Button,
-  Input,
   Pagination,
   Table,
   TableBody,
@@ -16,9 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, MagnifyingGlass } from "@phosphor-icons/react";
+import { Eye } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
@@ -31,6 +32,14 @@ type UsersResponse = {
   total_users: number;
   total_pages: number;
 };
+
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/users?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/users?page=${query.page ? query.page : 1}`;
+}
 
 export default function UsersPage({
   token,
@@ -122,43 +131,18 @@ export default function UsersPage({
     <Layout title="Daftar Pengguna" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
-          <div className="grid gap-1">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Daftar Pengguna 🧑🏽‍💻
-            </h1>
-            <p className="font-medium text-gray">
-              Tabel pengguna yang sudah terdaftar di{" "}
-              <Link
-                href="https://ruangobat.id"
-                target="_blank"
-                className="font-bold text-purple"
-              >
-                ruangobat.id
-              </Link>
-            </p>
-          </div>
+          <TitleText
+            title="Daftar Pengguna 🧑🏽‍💻"
+            text="Tabel pengguna yang sudah terdaftar di ruangobat.id"
+          />
 
-          <div className="grid gap-4">
-            <div className="sticky left-0 top-0 z-50 bg-white">
-              <Input
-                type="text"
-                variant="flat"
-                labelPlacement="outside"
+          <div className="grid">
+            <div className="sticky left-0 top-0 z-50 bg-white pb-4">
+              <SearchInput
                 placeholder="Cari User ID atau Nama User"
-                startContent={
-                  <MagnifyingGlass
-                    weight="bold"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
                 defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-semibold placeholder:text-gray",
-                }}
-                className="max-w-[500px]"
+                onClear={() => setSearch("")}
               />
             </div>
 
@@ -179,11 +163,7 @@ export default function UsersPage({
 
                 <TableBody
                   items={data?.data.users}
-                  emptyContent={
-                    <span className="text-sm font-semibold italic text-gray">
-                      Pengguna tidak ditemukan!
-                    </span>
-                  }
+                  emptyContent={<EmptyData text="Pengguna tidak ditemukan!" />}
                 >
                   {(item: UserType) => (
                     <TableRow key={item.user_id}>
@@ -197,40 +177,32 @@ export default function UsersPage({
                 </TableBody>
               </Table>
             </div>
-
-            {data?.data.users.length ? (
-              <Pagination
-                isCompact
-                showControls
-                page={data?.data.page as number}
-                total={data?.data.total_pages as number}
-                onChange={(e) => {
-                  router.push({
-                    query: {
-                      ...router.query,
-                      page: e,
-                    },
-                  });
-                }}
-                className="justify-self-center"
-                classNames={{
-                  cursor: "bg-purple text-white",
-                }}
-              />
-            ) : null}
           </div>
+
+          {data?.data.users.length ? (
+            <Pagination
+              isCompact
+              showControls
+              page={data?.data.page as number}
+              total={data?.data.total_pages as number}
+              onChange={(e) => {
+                router.push({
+                  query: {
+                    ...router.query,
+                    page: e,
+                  },
+                });
+              }}
+              className="justify-self-center"
+              classNames={{
+                cursor: "bg-purple text-white",
+              }}
+            />
+          ) : null}
         </section>
       </Container>
     </Layout>
   );
-}
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/users?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/users?page=${query.page ? query.page : 1}`;
 }
 
 export const getServerSideProps: GetServerSideProps<{
