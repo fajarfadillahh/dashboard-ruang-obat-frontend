@@ -68,7 +68,7 @@ export default function CreateAdminPage({
         <section className="grid">
           <ButtonBack />
 
-          <div className="border-gray/200 grid gap-1 border-b-2 border-dashed py-8">
+          <div className="grid gap-1 border-b-2 border-dashed border-gray/20 py-8">
             <h1 className="text-[22px] font-bold -tracking-wide text-black">
               Buat Admin 🧑🏽
             </h1>
@@ -220,7 +220,9 @@ export default function CreateAdminPage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+}> = async ({ req }) => {
   return {
     props: {
       token: req.headers["access_token"] as string,

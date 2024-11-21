@@ -1,8 +1,9 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { ErrorDataType, SuccessResponse } from "@/types/global.type";
+import { SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
 import { ParticipantType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
@@ -34,7 +35,14 @@ import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 import { useDebounce } from "use-debounce";
+
+type InputType = {
+  title: string;
+  price: number;
+  url_qr_code?: string;
+};
 
 type DetailsProgramResponse = {
   program_id: string;
@@ -58,31 +66,40 @@ type TestsResponse = {
 };
 
 export default function EditProgramPage({
-  program,
-  tests,
   token,
+  params,
+  query,
   id,
-  error,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const session = useSession();
-  const [input, setInput] = useState<{
-    title: string;
-    price: number;
-    url_qr_code?: string;
-  }>({
-    title: program?.title || "",
-    price: program?.price || 0,
-    url_qr_code: program?.url_qr_code || "",
-  });
   const router = useRouter();
+  const session = useSession();
+  const {
+    data: program,
+    error,
+    isLoading,
+  } = useSWR<SuccessResponse<DetailsProgramResponse>>({
+    url: `/admin/programs/${encodeURIComponent(params.id as string)}`,
+    method: "GET",
+    token,
+  });
+  const { data: test } = useSWR<SuccessResponse<TestsResponse>>({
+    url: getUrl(query) as string,
+    method: "GET",
+    token,
+  });
+
   const [search, setSearch] = useState<string>("");
   const [searchValue] = useDebounce(search, 800);
-  const [selectedType, setSelectedType] = useState<string>(program?.type || "");
-  const [loading, setLoading] = useState(false);
+  const [input, setInput] = useState<InputType>({
+    title: "",
+    price: 0,
+    url_qr_code: "",
+  });
+  const [selectedType, setSelectedType] = useState<string>("");
   const [qrcodeFile, setQrcodeFile] = useState<File | null>();
+  const [value, setValue] = useState<Selection>(new Set());
 
-  const testId = program?.tests.map((test) => test.test_id);
-  const [value, setValue] = useState<Selection>(new Set(testId));
+  const [loading, setLoading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   useEffect(() => {
@@ -98,23 +115,39 @@ export default function EditProgramPage({
     }
   }, [searchValue]);
 
-  const columnsTest = [
-    { name: "ID Ujian", uid: "test_id" },
-    { name: "Judul Ujian", uid: "title" },
-  ];
+  useEffect(() => {
+    if (program?.data) {
+      const { type, title, price, url_qr_code, tests } = program.data;
+
+      setSelectedType(type);
+      setInput({
+        title,
+        price: price ?? 0,
+        url_qr_code,
+      });
+
+      const testIds = tests.map((test) => test.test_id);
+      setValue(new Set(testIds));
+    }
+  }, [program]);
 
   useEffect(() => {
     const selectedTests = Array.from(value);
 
     const isFormValid =
-      input.title &&
+      input?.title?.trim() !== "" &&
       (selectedType !== "paid" || input.price > 0) &&
-      (qrcodeFile || input.url_qr_code) &&
-      selectedType &&
+      (qrcodeFile || input?.url_qr_code?.trim() !== "") &&
+      selectedType?.trim() !== "" &&
       selectedTests.length > 0;
 
     setIsButtonDisabled(!isFormValid);
   }, [input, selectedType, qrcodeFile, value]);
+
+  const columnsTest = [
+    { name: "ID Ujian", uid: "test_id" },
+    { name: "Judul Ujian", uid: "title" },
+  ];
 
   async function handleEditProgram() {
     setLoading(true);
@@ -125,7 +158,7 @@ export default function EditProgramPage({
       const formData = new FormData();
       formData.append("title", input.title);
       formData.append("type", selectedType);
-      formData.append("program_id", program?.program_id as string);
+      formData.append("program_id", program?.data.program_id as string);
 
       if (selectedType == "paid") {
         formData.append("price", `${input.price}`);
@@ -146,8 +179,8 @@ export default function EditProgramPage({
         file: true,
       });
 
-      toast.success("Berhasil Memperbarui Program");
-      window.location.href = "/programs";
+      toast.success("Program Berhasil Di Perbarui");
+      router.push("/programs");
     } catch (error) {
       setLoading(false);
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
@@ -171,13 +204,15 @@ export default function EditProgramPage({
     );
   }
 
+  if (isLoading) return <LoadingScreen />;
+
   return (
     <Layout title="Edit Program">
       <Container>
         <section className="grid">
           <ButtonBack />
 
-          <div className="divide-gray/200 mt-8 divide-y-2 divide-dashed">
+          <div className="mt-8 divide-y-2 divide-dashed divide-gray/20">
             <div className="grid gap-1 pb-8">
               <h1 className="text-[22px] font-bold -tracking-wide text-black">
                 Edit Program ✏️
@@ -194,9 +229,9 @@ export default function EditProgramPage({
                   <span className="text-danger">*</span>
                 </p>
 
-                {program?.qr_code ? (
+                {program?.data.qr_code ? (
                   <Image
-                    src={`${program?.qr_code}`}
+                    src={`${program?.data.qr_code}`}
                     alt="qrcode image"
                     width={180}
                     height={180}
@@ -302,10 +337,12 @@ export default function EditProgramPage({
                     label="Harga Program"
                     labelPlacement="outside"
                     placeholder="Contoh: 500.000"
-                    name="price"
                     value={input.price.toString()}
                     onChange={(e) =>
-                      setInput({ ...input, price: Number(e.target.value) })
+                      setInput((prev) => ({
+                        ...prev,
+                        price: Number(e.target.value),
+                      }))
                     }
                     startContent={
                       <span className="text-sm font-semibold text-default-600">
@@ -329,6 +366,7 @@ export default function EditProgramPage({
                   variant="flat"
                   labelPlacement="outside"
                   placeholder="Cari Ujian ID atau Nama Ujian"
+                  defaultValue={query.q as string}
                   onChange={(e) => setSearch(e.target.value)}
                   startContent={
                     <MagnifyingGlass
@@ -366,7 +404,6 @@ export default function EditProgramPage({
                 selectionMode="multiple"
                 selectedKeys={value}
                 onSelectionChange={setValue}
-                defaultSelectedKeys={value}
                 classNames={customStyleTable}
                 className="scrollbar-hide"
               >
@@ -377,7 +414,7 @@ export default function EditProgramPage({
                 </TableHeader>
 
                 <TableBody
-                  items={tests?.tests}
+                  items={test?.data.tests || []}
                   emptyContent={
                     <span className="text-sm font-semibold italic text-gray">
                       Ujian tidak ditemukan!
@@ -394,16 +431,17 @@ export default function EditProgramPage({
                 </TableBody>
               </Table>
 
-              {tests?.tests.length ? (
+              {test?.data.tests.length ? (
                 <Pagination
                   isCompact
                   showControls
-                  page={tests?.page as number}
-                  total={tests?.total_pages as number}
+                  page={test?.data.page as number}
+                  total={test?.data.total_pages as number}
                   onChange={(e) => {
                     router.push({
                       pathname: `/programs/edit/${id}`,
                       query: {
+                        ...router.query,
                         page: e,
                       },
                     });
@@ -422,14 +460,6 @@ export default function EditProgramPage({
   );
 }
 
-type DataProps = {
-  program?: DetailsProgramResponse;
-  tests?: TestsResponse;
-  id?: string;
-  token?: string;
-  error?: ErrorDataType;
-};
-
 function getUrl(query: ParsedUrlQuery) {
   if (query.q) {
     return `/admin/tests?q=${query.q}&page=${query.page ? query.page : 1}`;
@@ -438,41 +468,20 @@ function getUrl(query: ParsedUrlQuery) {
   return `/admin/tests?page=${query.page ? query.page : 1}`;
 }
 
-export const getServerSideProps: GetServerSideProps<DataProps> = async ({
-  req,
-  params,
-  query,
-}) => {
-  const token = req.headers["access_token"] as string;
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  id: string;
+  params: ParsedUrlQuery;
+  query: ParsedUrlQuery;
+}> = async ({ req, params, query }) => {
+  const id = params?.id as string;
 
-  try {
-    const [responseProgram, responseTests] = await Promise.all([
-      fetcher({
-        url: `/admin/programs/${encodeURIComponent(params?.id as string)}`,
-        method: "GET",
-        token,
-      }) as Promise<SuccessResponse<DetailsProgramResponse>>,
-
-      fetcher({
-        url: getUrl(query) as string,
-        method: "GET",
-        token,
-      }) as Promise<SuccessResponse<TestsResponse>>,
-    ]);
-
-    return {
-      props: {
-        program: responseProgram.data,
-        tests: responseTests.data,
-        id: params?.id as string,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      params: params as ParsedUrlQuery,
+      query,
+      id,
+    },
+  };
 };
