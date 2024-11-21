@@ -1,5 +1,9 @@
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingScreen from "@/components/LoadingScreen";
 import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
+import SearchInput from "@/components/SearchInput";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
@@ -8,7 +12,6 @@ import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import {
-  Input,
   Pagination,
   Table,
   TableBody,
@@ -17,21 +20,41 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { MagnifyingGlass } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
+type SessionResponse = {
+  sessions: SessionType[];
+  page: number;
+  total_sessions: number;
+  total_pages: number;
+};
+
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/sessions?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/sessions?page=${query.page ? query.page : 1}`;
+}
+
 export default function SessionPage({
-  sessions,
   token,
-  error,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<SessionResponse>
+  >({
+    url: getUrl(query) as string,
+    method: "GET",
+    token,
+  });
   const [search, setSearch] = useState("");
   const [searchValue] = useDebounce(search, 800);
 
@@ -118,8 +141,8 @@ export default function SessionPage({
         token,
       });
 
-      toast.success("Session Berhasil Dihapus");
-      window.location.reload();
+      mutate();
+      toast.success("Session Berhasil Di Hapus");
     } catch (error) {
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
@@ -128,7 +151,7 @@ export default function SessionPage({
 
   if (error) {
     return (
-      <Layout title="Daftar Aktifitas Login Pengguna">
+      <Layout title="Session">
         <Container>
           <ErrorPage
             {...{
@@ -142,46 +165,24 @@ export default function SessionPage({
     );
   }
 
+  if (isLoading) return <LoadingScreen />;
+
   return (
-    <Layout title="Daftar Aktifitas Login Pengguna" className="scrollbar-hide">
+    <Layout title="Session" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
-          <div className="grid gap-1">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Aktifitas Login 🕚
-            </h1>
-            <p className="font-medium text-gray">
-              Pantau aktifitas login pengguna{" "}
-              <Link
-                href="https://ruangobat.id"
-                target="_blank"
-                className="font-bold text-purple"
-              >
-                ruangobat.id
-              </Link>
-            </p>
-          </div>
+          <TitleText
+            title="Aktifitas Login 🕚"
+            text="Pantau aktifitas login pengguna ruangobat.id"
+          />
 
-          <div className="grid gap-4">
-            <div className="sticky left-0 top-0 z-50 bg-white">
-              <Input
-                type="text"
-                variant="flat"
-                labelPlacement="outside"
+          <div className="grid">
+            <div className="sticky left-0 top-0 z-50 bg-white pb-4">
+              <SearchInput
                 placeholder="Cari User ID atau Nama Pengguna"
-                startContent={
-                  <MagnifyingGlass
-                    weight="bold"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-semibold placeholder:text-gray",
-                }}
-                className="max-w-[500px] flex-1"
+                defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
+                onClear={() => setSearch("")}
               />
             </div>
 
@@ -201,37 +202,35 @@ export default function SessionPage({
                 </TableHeader>
 
                 <TableBody
+                  items={data?.data.sessions}
                   emptyContent={
-                    <span className="text-sm font-semibold italic text-gray">
-                      Aktifitas pengguna tidak ditemukan!
-                    </span>
+                    <EmptyData text="Aktifitas pengguna tidak ditemukan!" />
                   }
                 >
-                  {sessions.sessions.map((item: SessionType) => {
-                    return (
-                      <TableRow key={item.user_id}>
-                        {(columnKey) => (
-                          <TableCell>
-                            {renderCellSessions(item, columnKey)}
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    );
-                  })}
+                  {(item: SessionType) => (
+                    <TableRow key={item.user_id}>
+                      {(columnKey) => (
+                        <TableCell>
+                          {renderCellSessions(item, columnKey)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </div>
           </div>
 
-          {sessions?.sessions.length ? (
+          {data?.data.sessions.length ? (
             <Pagination
               isCompact
               showControls
-              page={sessions.page as number}
-              total={sessions.total_pages as number}
+              page={data?.data.page as number}
+              total={data?.data.total_pages as number}
               onChange={(e) => {
                 router.push({
                   query: {
+                    ...router.query,
                     page: e,
                   },
                 });
@@ -248,45 +247,14 @@ export default function SessionPage({
   );
 }
 
-type SessionResponse = {
-  sessions: SessionType[];
-  page: number;
-  total_sessions: number;
-  total_pages: number;
-};
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/sessions?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/sessions?page=${query.page ? query.page : 1}`;
-}
-
-export const getServerSideProps: GetServerSideProps = async ({
-  req,
-  query,
-}) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response: SuccessResponse<SessionResponse> = await fetcher({
-      url: getUrl(query) as string,
-      method: "GET",
-      token,
-    });
-
-    return {
-      props: {
-        sessions: response.data,
-        token,
-      },
-    };
-  } catch (error: any) {
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  query: ParsedUrlQuery;
+}> = async ({ req, query }) => {
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      query,
+    },
+  };
 };
