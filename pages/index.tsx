@@ -1,6 +1,6 @@
 import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input } from "@nextui-org/react";
-import { Lock, User } from "@phosphor-icons/react";
+import { Eye, EyeSlash, Lock, User } from "@phosphor-icons/react";
 import { signIn } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -13,12 +13,13 @@ type InputType = {
 };
 
 export default function LoginPage() {
+  const router = useRouter();
   const [input, setInput] = useState<InputType>({
     admin_id: "",
     password: "",
   });
+  const [type, setType] = useState("password");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleLogin() {
     setLoading(true);
@@ -91,12 +92,33 @@ export default function LoginPage() {
             />
 
             <Input
-              type="password"
+              type={type}
               variant="flat"
               color="default"
               labelPlacement="outside"
               placeholder="Kata Sandi"
               name="password"
+              endContent={
+                <button
+                  onClick={() =>
+                    type == "password" ? setType("text") : setType("password")
+                  }
+                >
+                  {type == "password" ? (
+                    <Eye
+                      weight="bold"
+                      size={18}
+                      className="cursor-pointer text-gray-600"
+                    />
+                  ) : (
+                    <EyeSlash
+                      weight="bold"
+                      size={18}
+                      className="cursor-pointer text-gray-600"
+                    />
+                  )}
+                </button>
+              }
               onChange={(e) =>
                 setInput({
                   ...input,
