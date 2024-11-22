@@ -125,28 +125,27 @@ export default function EditProgramPage({
   useEffect(() => {
     if (program?.data) {
       const { type, title, price, url_qr_code, tests } = program.data;
+      const testIds = tests.map((test) => test.test_id);
 
+      setValue(new Set(testIds));
       setSelectedType(type);
       setInput({
         title,
         price: price ?? 0,
         url_qr_code,
       });
-
-      const testIds = tests.map((test) => test.test_id);
-      setValue(new Set(testIds));
     }
   }, [program]);
 
   useEffect(() => {
     const selectedTests = Array.from(value);
-
-    const isFormValid =
-      input?.title?.trim() !== "" &&
-      (selectedType !== "paid" || input.price > 0) &&
-      (qrcodeFile || input?.url_qr_code?.trim() !== "") &&
-      selectedType?.trim() !== "" &&
-      selectedTests.length > 0;
+    const isFormValid = [
+      input?.title?.trim(),
+      selectedType !== "paid" || input?.price > 0,
+      qrcodeFile || input?.url_qr_code?.trim(),
+      selectedType.trim(),
+      selectedTests.length,
+    ].every(Boolean);
 
     setIsButtonDisabled(!isFormValid);
   }, [input, selectedType, qrcodeFile, value]);

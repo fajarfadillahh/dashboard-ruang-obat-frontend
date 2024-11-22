@@ -36,6 +36,12 @@ import toast from "react-hot-toast";
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
+type InputType = {
+  title: string;
+  price: number;
+  url_qr_code?: string;
+};
+
 type TestsResponse = {
   tests: TestType[];
   page: number;
@@ -61,11 +67,7 @@ export default function CreateProgramPage({
     method: "GET",
     token,
   });
-  const [input, setInput] = useState<{
-    title: string;
-    price: number | any;
-    url_qr_code?: string;
-  }>({
+  const [input, setInput] = useState<InputType>({
     title: "",
     price: 0,
     url_qr_code: "",
@@ -94,14 +96,14 @@ export default function CreateProgramPage({
 
   useEffect(() => {
     const selectedTests = Array.from(value);
-
-    const isFormValid =
-      input.title &&
-      qrcodeFile &&
-      input.url_qr_code &&
-      selectedType &&
-      (selectedType !== "paid" || input.price) &&
-      selectedTests.length > 0;
+    const isFormValid = [
+      input.title,
+      qrcodeFile,
+      input.url_qr_code,
+      selectedType,
+      selectedType !== "paid" || input.price,
+      selectedTests.length > 0,
+    ].every(Boolean);
 
     setIsButtonDisabled(!isFormValid);
   }, [input, qrcodeFile, selectedType, value]);
