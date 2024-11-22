@@ -2,6 +2,8 @@ import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
+import SearchInput from "@/components/SearchInput";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
@@ -10,7 +12,6 @@ import { fetcher } from "@/utils/fetcher";
 import {
   Button,
   Chip,
-  Input,
   Pagination,
   Table,
   TableBody,
@@ -19,7 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, MagnifyingGlass, Trash, XCircle } from "@phosphor-icons/react";
+import { Eye, Trash, XCircle } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
@@ -45,6 +46,14 @@ type Result = {
   university: string;
   score: number;
 };
+
+function getUrl(query: ParsedUrlQuery, id: string) {
+  if (query.q) {
+    return `/admin/tests/results/${encodeURIComponent(id)}?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/tests/results/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
+}
 
 export default function GradeUsersPage({
   token,
@@ -243,36 +252,18 @@ export default function GradeUsersPage({
           <ButtonBack href={`/tests/details/${params?.id}`} />
 
           <div className="grid gap-8">
-            <div className="grid gap-1">
-              <h1 className="max-w-[550px] text-[24px] font-bold leading-[120%] -tracking-wide text-black">
-                Daftar Nilai {data?.data.title} 🎯
-              </h1>
-              <p className="font-medium text-gray">
-                Lihat semua nilai dari para mahasiswa/i
-              </p>
-            </div>
+            <TitleText
+              title={`Daftar Nilai ${data?.data.title} 🎯`}
+              text="Lihat semua nilai dari para mahasiswa/i"
+            />
 
-            <div className="grid gap-4">
-              <div className="flex items-end justify-between gap-4">
-                <Input
-                  type="text"
-                  variant="flat"
-                  labelPlacement="outside"
+            <div className="grid">
+              <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+                <SearchInput
                   placeholder="Cari User ID atau Nama User"
-                  startContent={
-                    <MagnifyingGlass
-                      weight="bold"
-                      size={18}
-                      className="text-gray"
-                    />
-                  }
                   defaultValue={query.q as string}
                   onChange={(e) => setSearch(e.target.value)}
-                  classNames={{
-                    input:
-                      "font-semibold placeholder:font-semibold placeholder:text-gray",
-                  }}
-                  className="max-w-[500px]"
+                  onClear={() => setSearch("")}
                 />
 
                 <p className="text-sm font-medium text-gray">
@@ -349,14 +340,6 @@ export default function GradeUsersPage({
       </Container>
     </Layout>
   );
-}
-
-function getUrl(query: ParsedUrlQuery, id: string) {
-  if (query.q) {
-    return `/admin/tests/results/${encodeURIComponent(id)}?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/tests/results/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
 }
 
 export const getServerSideProps: GetServerSideProps<{

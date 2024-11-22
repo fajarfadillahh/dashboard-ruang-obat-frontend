@@ -1,18 +1,17 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
-import VideoComponent from "@/components/VideoComponent";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
 import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import {
-  Accordion,
-  AccordionItem,
   Button,
   DatePicker,
   Input,
@@ -21,18 +20,16 @@ import {
 } from "@nextui-org/react";
 import {
   Calendar,
-  CheckCircle,
   ClockCountdown,
   Database,
   Trash,
   WarningCircle,
-  XCircle,
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 import { CreateQuestion } from "../create";
@@ -47,8 +44,8 @@ type DetailsTestResponse = {
   duration: number;
   questions: {
     question_id: string;
-    type: string;
     number: number;
+    type: "text" | "image" | "video";
     text: string;
     explanation: string;
     options: {
@@ -107,12 +104,15 @@ export default function EditTestPage({
 
   useEffect(() => {
     const isFormValid =
-      input?.title?.trim() !== "" &&
-      input?.description?.trim() !== "" &&
-      input?.start?.trim() !== "" &&
-      input?.end?.trim() !== "" &&
-      input?.duration > 0 &&
-      (data?.data.questions ?? []).length > 0;
+      Object.values(input).every((value) => {
+        if (typeof value === "string") {
+          return value.trim() !== "";
+        }
+        if (typeof value === "number") {
+          return value > 0;
+        }
+        return true;
+      }) && (data?.data.questions ?? []).length > 0;
 
     setIsButtonDisabled(!isFormValid);
   }, [input, data]);
@@ -173,7 +173,7 @@ export default function EditTestPage({
       });
 
       mutate();
-      toast.success("Soal Berhasil Di Ubah");
+      toast.success("Soal Berhasil Di Edit");
     } catch (error) {
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Mengubah Soal");
@@ -197,7 +197,7 @@ export default function EditTestPage({
       });
 
       mutate();
-      toast.success("Data Ujian Berhasil Di Ubah");
+      toast.success("Data Ujian Berhasil Di Edit");
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -235,7 +235,7 @@ export default function EditTestPage({
     <Layout title="Edit Ujian">
       <Container>
         <section className="grid">
-          <ButtonBack />
+          <ButtonBack href="/tests" />
 
           {data?.data.status === "Berlangsung" ? (
             <div className="mt-8 grid rounded-xl border-2 border-warning bg-warning/5 p-6">
@@ -262,12 +262,11 @@ export default function EditTestPage({
           ) : null}
 
           <div className="divide-y-2 divide-dashed divide-gray/20 py-8">
-            <div className="grid gap-1 pb-10">
-              <h1 className="text-[22px] font-bold -tracking-wide text-black">
-                Edit Ujian ✏️
-              </h1>
-              <p className="font-medium text-gray">Sesuaikan ujian sekarang.</p>
-            </div>
+            <TitleText
+              title="Edit Ujian ✏️"
+              text="Sesuaikan ujian sekarang"
+              className="pb-10"
+            />
 
             {isInputReady && (
               <div className="grid gap-4 py-10">
@@ -316,12 +315,7 @@ export default function EditTestPage({
                 <div className="grid grid-cols-3 gap-4">
                   <DatePicker
                     isRequired
-                    isDisabled={
-                      data?.data.status === "Berlangsung" ||
-                      data?.data.status === "Berakhir"
-                        ? true
-                        : false
-                    }
+                    isDisabled={data?.data.status !== "Belum dimulai"}
                     hideTimeZone
                     showMonthAndYearPickers
                     variant="flat"
@@ -329,6 +323,11 @@ export default function EditTestPage({
                     labelPlacement="outside"
                     endContent={<Calendar weight="bold" size={18} />}
                     hourCycle={24}
+                    minValue={
+                      data?.data.status === "Belum dimulai"
+                        ? today(getLocalTimeZone())
+                        : undefined
+                    }
                     defaultValue={
                       input.start
                         ? parseDate(input.start.substring(0, 10)).add({
@@ -457,158 +456,93 @@ export default function EditTestPage({
                 <div className="flex items-end justify-between gap-4">
                   <h5 className="font-bold text-black">Daftar Soal</h5>
 
-                  {data?.data.status === "Berlangsung" ||
-                  data?.data.status === "Berakhir" ? null : (
+                  {data?.data.status === "Belum dimulai" ? (
                     <div className="inline-flex gap-2">
                       <ModalInputQuestion
                         {...{ handleAddQuestion, type: "edit", token: token }}
                       />
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
 
               <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
                 {data?.data.questions.map((question, index) => (
-                  <div
+                  <CardQuestionPreview
                     key={question.question_id}
-                    className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
-                  >
-                    <div className="font-extrabold text-purple">
-                      {question.number}.
-                    </div>
-
-                    <div className="grid flex-1 gap-4">
-                      {question.type == "video" ? (
-                        <Suspense fallback={<p>Loading video...</p>}>
-                          <VideoComponent url={question.text} />
-                        </Suspense>
-                      ) : (
-                        <p
-                          className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
-                          dangerouslySetInnerHTML={{ __html: question.text }}
-                        />
-                      )}
-
-                      <div className="grid gap-1">
-                        {question.options.map((option) => (
-                          <div
-                            key={option.option_id}
-                            className="inline-flex items-center gap-2"
-                          >
-                            {option.is_correct ? (
-                              <CheckCircle
-                                weight="bold"
-                                size={18}
-                                className="text-success"
-                              />
-                            ) : (
-                              <XCircle
-                                weight="bold"
-                                size={18}
-                                className="text-danger"
-                              />
-                            )}
-                            <p
-                              className={`flex-1 font-semibold ${
-                                option.is_correct
-                                  ? "text-success"
-                                  : "text-gray/80"
-                              }`}
-                            >
-                              {option.text}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <Accordion isCompact variant="bordered">
-                        <AccordionItem
-                          aria-label="accordion answer"
-                          key="answer"
-                          title="Penjelasan:"
-                          classNames={{
-                            title: "font-semibold text-black",
-                            content:
-                              "font-medium text-gray leading-[170%] pb-4",
-                          }}
-                        >
-                          <div
-                            className="preventive-list preventive-table list-outside text-[16px] leading-[170%] text-black"
-                            dangerouslySetInnerHTML={{
-                              __html: question.explanation,
+                    index={index}
+                    question={question}
+                    type="edit"
+                    buttonAction={
+                      data.data.status === "Belum dimulai" ? (
+                        <div className="flex gap-2">
+                          <ModalEditQuestion
+                            {...{
+                              question,
+                              handleEditQuestion,
+                              index,
+                              type: "edit",
+                              token: token,
+                              type_question: question?.type,
                             }}
-                          ></div>
-                        </AccordionItem>
-                      </Accordion>
-                    </div>
+                          />
 
-                    {data?.data.status !== "Belum dimulai" ? null : (
-                      <div className="flex gap-2">
-                        <ModalEditQuestion
-                          {...{
-                            question,
-                            handleEditQuestion,
-                            index,
-                            type: "edit",
-                            token: token,
-                            type_question: question?.type,
-                          }}
-                        />
-
-                        <ModalConfirm
-                          trigger={
-                            <Button
-                              isIconOnly
-                              variant="flat"
-                              color="danger"
-                              size="sm"
-                            >
-                              <Trash
-                                weight="bold"
-                                size={18}
-                                className="text-danger"
-                              />
-                            </Button>
-                          }
-                          header={
-                            <h1 className="font-bold text-black">Perhatian!</h1>
-                          }
-                          body={
-                            <p className="leading-[170%] text-gray">
-                              Apakah anda ingin menghapus soal ini?
-                            </p>
-                          }
-                          footer={(onClose: any) => (
-                            <>
+                          <ModalConfirm
+                            trigger={
                               <Button
+                                isIconOnly
+                                variant="flat"
                                 color="danger"
-                                variant="light"
-                                onPress={onClose}
-                                className="font-bold"
+                                size="sm"
                               >
-                                Tutup
+                                <Trash
+                                  weight="bold"
+                                  size={18}
+                                  className="text-danger"
+                                />
                               </Button>
+                            }
+                            header={
+                              <h1 className="font-bold text-black">
+                                Perhatian!
+                              </h1>
+                            }
+                            body={
+                              <p className="leading-[170%] text-gray">
+                                Apakah anda ingin menghapus soal ini?
+                              </p>
+                            }
+                            footer={(onClose: any) => (
+                              <>
+                                <Button
+                                  color="danger"
+                                  variant="light"
+                                  onPress={onClose}
+                                  className="font-bold"
+                                >
+                                  Tutup
+                                </Button>
 
-                              <Button
-                                color="secondary"
-                                onClick={() => {
-                                  handleDeleteQuestion(
-                                    data?.data.test_id,
-                                    question.question_id,
-                                  ),
-                                    onClose();
-                                }}
-                                className="font-bold"
-                              >
-                                Ya, Hapus Soal
-                              </Button>
-                            </>
-                          )}
-                        />
-                      </div>
-                    )}
-                  </div>
+                                <Button
+                                  color="secondary"
+                                  onClick={() => {
+                                    handleDeleteQuestion(
+                                      data?.data.test_id,
+                                      question.question_id,
+                                    ),
+                                      onClose();
+                                  }}
+                                  className="font-bold"
+                                >
+                                  Ya, Hapus Soal
+                                </Button>
+                              </>
+                            )}
+                          />
+                        </div>
+                      ) : null
+                    }
+                  />
                 ))}
               </div>
 
