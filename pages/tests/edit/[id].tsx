@@ -59,6 +59,10 @@ type DetailsTestResponse = {
   total_pages: number;
 };
 
+function getUrl(query: ParsedUrlQuery, id: string) {
+  return `/admin/tests/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
+}
+
 export default function EditTestPage({
   token,
   params,
@@ -572,10 +576,6 @@ export default function EditTestPage({
       </Container>
     </Layout>
   );
-}
-
-function getUrl(query: ParsedUrlQuery, id: string) {
-  return `/admin/tests/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
 }
 
 export const getServerSideProps: GetServerSideProps<{

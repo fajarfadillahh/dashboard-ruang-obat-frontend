@@ -1,4 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
@@ -295,9 +296,7 @@ export default function GradeUsersPage({
                   <TableBody
                     items={data?.data.results}
                     emptyContent={
-                      <span className="text-sm font-semibold italic text-gray">
-                        Nilai pengguna tidak ditemukan!
-                      </span>
+                      <EmptyData text="Nilai pengguna tidak ditemukan!" />
                     }
                   >
                     {(item: Result) => (
