@@ -1,5 +1,6 @@
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
@@ -28,9 +29,6 @@ export default function DashboardPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const [time, setTime] = useState(new Date());
-  const [client, setClient] = useState(false);
-  const formatTime = (num: number) => String(num).padStart(2, "0");
   const { data, error, isLoading } = useSWR<SuccessResponse<DashboardResponse>>(
     {
       url: "/admin/dashboard",
@@ -38,6 +36,9 @@ export default function DashboardPage({
       token,
     },
   );
+  const [time, setTime] = useState(new Date());
+  const [client, setClient] = useState(false);
+  const formatTime = (num: number) => String(num).padStart(2, "0");
 
   useEffect(() => {
     setClient(true);
@@ -69,25 +70,22 @@ export default function DashboardPage({
     );
   }
 
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
+  if (isLoading) return <LoadingScreen />;
 
   return (
     <Layout title="Dashboard" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
-          <div className="grid gap-1">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Selamat Datang, Admin 👋
-            </h1>
-            <p className="font-medium text-gray">
-              Berikut rangkuman aplikasi ruangobat.id |{" "}
-              <span className="font-bold text-black">
-                {formatDayWithoutTime(new Date())}{" "}
-                {`${formatTime(time.getHours())}:${formatTime(time.getMinutes())}`}
-              </span>
-            </p>
+          <div className="flex items-end justify-between gap-4">
+            <TitleText
+              title="Selamat Datang, Admin 👋"
+              text="Berikut rangkuman aplikasi ruangobat.id"
+            />
+
+            <span className="text-sm font-bold text-black">
+              ⏰ {formatDayWithoutTime(new Date())}{" "}
+              {`${formatTime(time.getHours())}:${formatTime(time.getMinutes())}`}
+            </span>
           </div>
 
           <div className="grid gap-6 rounded-xl border-[2px] border-gray/20 px-16 py-8">

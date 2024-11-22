@@ -1,15 +1,17 @@
 import CardProgram from "@/components/card/CardProgram";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import SearchInput from "@/components/SearchInput";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
 import { ProgramType } from "@/types/program.type";
 import { fetcher } from "@/utils/fetcher";
-import { Button, Input, Pagination } from "@nextui-org/react";
-import { MagnifyingGlass, Plus } from "@phosphor-icons/react";
+import { Button, Pagination } from "@nextui-org/react";
+import { Plus } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
@@ -23,6 +25,14 @@ export type ProgramsResponse = {
   total_programs: number;
   total_pages: number;
 };
+
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/programs?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/programs?page=${query.page ? query.page : 1}`;
+}
 
 export default function ProgramsPage({
   token,
@@ -94,43 +104,18 @@ export default function ProgramsPage({
     <Layout title="Daftar Program" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
-          <div className="grid gap-1">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Daftar Program 📋
-            </h1>
-            <p className="font-medium text-gray">
-              Program yang sudah dibuat oleh{" "}
-              <Link
-                href="https://ruangobat.id"
-                target="_blank"
-                className="font-bold text-purple"
-              >
-                ruangobat.id
-              </Link>
-            </p>
-          </div>
+          <TitleText
+            title="Daftar Program 📋"
+            text="Program yang sudah dibuat oleh ruangobat.id"
+          />
 
-          <div className="grid gap-4">
-            <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white">
-              <Input
-                type="text"
-                variant="flat"
-                labelPlacement="outside"
+          <div className="grid">
+            <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+              <SearchInput
                 placeholder="Cari Program ID atau Nama Program"
-                startContent={
-                  <MagnifyingGlass
-                    weight="bold"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
                 defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-semibold placeholder:text-gray",
-                }}
-                className="flex-1"
+                onClear={() => setSearch("")}
               />
 
               <Button
@@ -145,16 +130,7 @@ export default function ProgramsPage({
             </div>
 
             {searchValue && data?.data.programs.length === 0 ? (
-              <div className="flex items-center justify-center gap-2 py-16">
-                <MagnifyingGlass
-                  weight="bold"
-                  size={20}
-                  className="text-gray"
-                />
-                <p className="font-semibold capitalize text-gray">
-                  Program tidak ditemukan!
-                </p>
-              </div>
+              <EmptyData text="Program tidak ditemukan!" />
             ) : (
               <div className="grid gap-2">
                 {data?.data.programs.map((program: ProgramType) => (
@@ -168,40 +144,32 @@ export default function ProgramsPage({
                 ))}
               </div>
             )}
-
-            {data?.data.programs.length ? (
-              <Pagination
-                isCompact
-                showControls
-                page={data.data.page as number}
-                total={data.data.total_pages as number}
-                onChange={(e) => {
-                  router.push({
-                    query: {
-                      ...router.query, // keep existing query params
-                      page: e,
-                    },
-                  });
-                }}
-                className="justify-self-center"
-                classNames={{
-                  cursor: "bg-purple text-white",
-                }}
-              />
-            ) : null}
           </div>
+
+          {data?.data.programs.length ? (
+            <Pagination
+              isCompact
+              showControls
+              page={data.data.page as number}
+              total={data.data.total_pages as number}
+              onChange={(e) => {
+                router.push({
+                  query: {
+                    ...router.query,
+                    page: e,
+                  },
+                });
+              }}
+              className="justify-self-center"
+              classNames={{
+                cursor: "bg-purple text-white",
+              }}
+            />
+          ) : null}
         </section>
       </Container>
     </Layout>
   );
-}
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/programs?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/programs?page=${query.page ? query.page : 1}`;
 }
 
 export const getServerSideProps: GetServerSideProps<{

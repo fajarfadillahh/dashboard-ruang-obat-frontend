@@ -1,10 +1,12 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalJoiningRequirement from "@/components/modal/ModalJoiningRequirement";
+import SearchInput from "@/components/SearchInput";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
@@ -18,7 +20,6 @@ import {
   Button,
   Chip,
   Image,
-  Input,
   Pagination,
   Snippet,
   Table,
@@ -34,7 +35,6 @@ import {
   ClockCountdown,
   Copy,
   ImageBroken,
-  MagnifyingGlass,
   Notepad,
   Tag,
   Trash,
@@ -68,6 +68,14 @@ type DetailsProgramResponse = {
   tests: TestType[];
   participants: ParticipantType[];
 };
+
+function getUrlParticipant(query: ParsedUrlQuery, id: string) {
+  if (query.q) {
+    return `/admin/programs/${encodeURIComponent(id)}?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/programs/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
+}
 
 export default function DetailsProgramPage({
   token,
@@ -504,33 +512,17 @@ export default function DetailsProgramPage({
               </div>
             </div>
 
-            <div className="grid gap-4 pt-8">
+            <div className="grid pt-8">
               <h4 className="text-[20px] font-bold -tracking-wide text-black">
                 Daftar Partisipan 🧑🏻‍🤝‍🧑🏻
               </h4>
 
-              <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white">
-                <Input
-                  type="text"
-                  variant="flat"
-                  labelPlacement="outside"
-                  placeholder="Cari User ID atau Nama User"
-                  startContent={
-                    <MagnifyingGlass
-                      weight="bold"
-                      size={18}
-                      className="text-gray"
-                    />
-                  }
+              <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white py-4">
+                <SearchInput
+                  placeholder="Cari Partisipan ID atau Nama Partisipan"
                   defaultValue={query.q as string}
                   onChange={(e) => setSearch(e.target.value)}
-                  classNames={{
-                    input:
-                      "font-semibold placeholder:font-semibold placeholder:text-gray",
-                  }}
-                  className={
-                    data?.data.type === "paid" ? "flex-1" : "max-w-[500px]"
-                  }
+                  onClear={() => setSearch("")}
                 />
 
                 {data?.data.type === "paid" ? (
@@ -546,47 +538,43 @@ export default function DetailsProgramPage({
                 ) : null}
               </div>
 
-              <div className="overflow-x-scroll scrollbar-hide">
-                <Table
-                  isHeaderSticky
-                  aria-label="users table"
-                  color="secondary"
-                  selectionMode="none"
-                  classNames={customStyleTable}
-                  className="scrollbar-hide"
+              <Table
+                isHeaderSticky
+                aria-label="users table"
+                color="secondary"
+                selectionMode="none"
+                classNames={customStyleTable}
+                className="scrollbar-hide"
+              >
+                <TableHeader
+                  columns={
+                    data?.data.type === "paid"
+                      ? columnsParticipantPaid
+                      : columnsParticipantFree
+                  }
                 >
-                  <TableHeader
-                    columns={
-                      data?.data.type === "paid"
-                        ? columnsParticipantPaid
-                        : columnsParticipantFree
-                    }
-                  >
-                    {(column) => (
-                      <TableColumn key={column.uid}>{column.name}</TableColumn>
-                    )}
-                  </TableHeader>
+                  {(column) => (
+                    <TableColumn key={column.uid}>{column.name}</TableColumn>
+                  )}
+                </TableHeader>
 
-                  <TableBody
-                    items={data?.data.participants}
-                    emptyContent={
-                      <span className="text-sm font-semibold italic text-gray">
-                        Partisipan tidak ditemukan!
-                      </span>
-                    }
-                  >
-                    {(item: ParticipantType) => (
-                      <TableRow key={item.user_id}>
-                        {(columnKey) => (
-                          <TableCell>
-                            {renderCellParticipants(item, columnKey)}
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                <TableBody
+                  items={data?.data.participants}
+                  emptyContent={
+                    <EmptyData text="Partisipan tidak ditemukan!" />
+                  }
+                >
+                  {(item: ParticipantType) => (
+                    <TableRow key={item.user_id}>
+                      {(columnKey) => (
+                        <TableCell>
+                          {renderCellParticipants(item, columnKey)}
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
 
               {data?.data.participants.length ? (
                 <Pagination
@@ -598,12 +586,12 @@ export default function DetailsProgramPage({
                     router.push({
                       pathname: `/programs/details/${id}`,
                       query: {
-                        ...router.query, // keep existing query params
+                        ...router.query,
                         page: e,
                       },
                     });
                   }}
-                  className="justify-self-center"
+                  className="mt-4 justify-self-center"
                   classNames={{
                     cursor: "bg-purple text-white",
                   }}
@@ -615,14 +603,6 @@ export default function DetailsProgramPage({
       </Container>
     </Layout>
   );
-}
-
-function getUrlParticipant(query: ParsedUrlQuery, id: string) {
-  if (query.q) {
-    return `/admin/programs/${encodeURIComponent(id)}?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/programs/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
 }
 
 export const getServerSideProps: GetServerSideProps<{

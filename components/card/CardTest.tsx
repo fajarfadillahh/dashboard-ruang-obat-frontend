@@ -1,5 +1,6 @@
 import { TestType } from "@/types/test.type";
 import { formatDateWithoutTime } from "@/utils/formatDate";
+import { getStatusColor, getStatusIcon } from "@/utils/getStatus";
 import {
   Button,
   Chip,
@@ -10,10 +11,7 @@ import {
   DropdownTrigger,
 } from "@nextui-org/react";
 import {
-  CheckCircle,
   ClipboardText,
-  ClockCountdown,
-  HourglassLow,
   PencilLine,
   Power,
   Prohibit,
@@ -89,23 +87,9 @@ export default function CardTest({ test, onStatusChange }: TestProps) {
               <div className="inline-flex items-center gap-2">
                 <Chip
                   variant="flat"
-                  color={
-                    test.status === "Belum dimulai"
-                      ? "danger"
-                      : test.status === "Berlangsung"
-                        ? "warning"
-                        : "success"
-                  }
                   size="sm"
-                  startContent={
-                    test.status === "Belum dimulai" ? (
-                      <ClockCountdown weight="bold" size={16} />
-                    ) : test.status === "Berlangsung" ? (
-                      <HourglassLow weight="fill" size={16} />
-                    ) : (
-                      <CheckCircle weight="fill" size={16} />
-                    )
-                  }
+                  color={getStatusColor(test.status)}
+                  startContent={getStatusIcon(test.status)}
                   classNames={{
                     base: "px-2 gap-1",
                     content: "font-semibold capitalize",
@@ -137,7 +121,7 @@ export default function CardTest({ test, onStatusChange }: TestProps) {
       <div className="inline-flex items-center gap-2">
         {router.pathname === "/tests" ? (
           <>
-            {test.status === "Berakhir" ? null : (
+            {test.status !== "Berakhir" && (
               <Button
                 isIconOnly
                 variant="light"
@@ -170,17 +154,17 @@ export default function CardTest({ test, onStatusChange }: TestProps) {
               </DropdownMenu>
             </Dropdown>
           </>
-        ) : null}
-
-        <Button
-          variant="solid"
-          size="sm"
-          color="secondary"
-          onClick={() => router.push(`/tests/grades/${test.test_id}`)}
-          className="px-6 font-bold"
-        >
-          Lihat Nilai
-        </Button>
+        ) : (
+          <Button
+            variant="solid"
+            size="sm"
+            color="secondary"
+            onClick={() => router.push(`/tests/grades/${test.test_id}`)}
+            className="px-6 font-bold"
+          >
+            Lihat Nilai
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { AdminType } from "@/types/admin.type";
@@ -112,14 +113,11 @@ export default function EditAdminPage({
         <section className="grid">
           <ButtonBack href="/admins" />
 
-          <div className="grid gap-1 border-b-2 border-dashed border-gray/20 py-8">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Edit Admin 🧑🏽
-            </h1>
-            <p className="font-medium text-gray">
-              Sesuaikan kembali data admin yang sudah dibuat.
-            </p>
-          </div>
+          <TitleText
+            title="Edit Admin 🧑🏽"
+            text="Sesuaikan kembali data admin yang sudah dibuat"
+            className="border-b-2 border-dashed border-gray/20 py-8"
+          />
 
           <div className="grid max-w-[700px] gap-8 pt-8">
             <div className="grid gap-6">

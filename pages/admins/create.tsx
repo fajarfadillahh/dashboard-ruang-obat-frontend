@@ -1,4 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { fetcher } from "@/utils/fetcher";
@@ -68,14 +69,11 @@ export default function CreateAdminPage({
         <section className="grid">
           <ButtonBack />
 
-          <div className="grid gap-1 border-b-2 border-dashed border-gray/20 py-8">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Buat Admin 🧑🏽
-            </h1>
-            <p className="font-medium text-gray">
-              Tambahkan admin untuk dapat membantu yang lain.
-            </p>
-          </div>
+          <TitleText
+            title="Buat Admin 🧑🏽"
+            text="Tambahkan admin untuk dapat membantu yang lain"
+            className="border-b-2 border-dashed border-gray/20 py-8"
+          />
 
           <div className="grid max-w-[700px] gap-8 pt-8">
             <div className="grid gap-6">

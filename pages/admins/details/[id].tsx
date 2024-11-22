@@ -1,6 +1,7 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
@@ -44,14 +45,10 @@ export default function DetailsAdminPage({
         <section className="grid gap-8">
           <ButtonBack />
 
-          <div className="grid gap-1">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Detail Admin 🧑🏽
-            </h1>
-            <p className="font-medium text-gray">
-              Anda bisa melihat detail admin disini.
-            </p>
-          </div>
+          <TitleText
+            title="Detail Admin 🧑🏽"
+            text="Anda bisa melihat detail admin disini"
+          />
 
           <div className="grid grid-cols-2 items-center gap-16">
             <div className="grid gap-[6px] rounded-xl border-2 border-l-8 border-gray/20 p-8">

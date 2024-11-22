@@ -1,11 +1,13 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { CreateQuestion } from "@/pages/tests/create";
 import { SuccessResponse } from "@/types/global.type";
 import { Question } from "@/types/question.type";
-import { Accordion, AccordionItem, Radio, RadioGroup } from "@nextui-org/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { ParsedUrlQuery } from "querystring";
@@ -64,12 +66,10 @@ export default function AnswersPage({
 
           <div className="grid gap-4">
             <div className="flex items-end justify-between gap-8">
-              <div className="grid gap-1">
-                <h1 className="max-w-[550px] text-[24px] font-bold leading-[120%] -tracking-wide text-black">
-                  {data?.data.fullname}
-                </h1>
-                <p className="font-medium text-gray">{data?.data.university}</p>
-              </div>
+              <TitleText
+                title={data?.data.fullname as string}
+                text={data?.data.university as string}
+              />
 
               <div className="inline-flex items-center gap-12">
                 <div className="grid gap-1 text-center">
@@ -101,82 +101,14 @@ export default function AnswersPage({
               </div>
             </div>
 
-            <div className="grid grid-cols-[1fr_260px] items-start gap-4">
-              <div className="h-[500px] overflow-y-scroll rounded-xl border-2 border-gray/20 scrollbar-hide">
-                <div className="sticky left-0 top-0 z-40 bg-white p-6 text-[18px] font-extrabold text-purple">
-                  No. {question?.number}
-                </div>
+            <div className="grid grid-cols-[1fr_260px] gap-4">
+              <CardQuestionPreview
+                index={question?.number as number}
+                question={question as CreateQuestion}
+                className="h-auto"
+              />
 
-                <div className="grid gap-6 overflow-hidden p-[0_1.5rem_1.5rem]">
-                  <p
-                    className="preventive-list list-outside text-[16px] font-semibold leading-[170%] text-black"
-                    dangerouslySetInnerHTML={{
-                      __html: question?.text as string,
-                    }}
-                  />
-
-                  <RadioGroup
-                    aria-label="select the answer"
-                    defaultValue="fase-s"
-                    classNames={{
-                      base: "font-semibold text-black",
-                    }}
-                    value={question?.user_answer}
-                  >
-                    {question?.options.map((option) => {
-                      return (
-                        <Radio
-                          key={option.option_id}
-                          isDisabled={false}
-                          value={option.option_id}
-                          color={
-                            question.is_correct &&
-                            question.user_answer == option.option_id
-                              ? "success"
-                              : question.correct_option == option.option_id
-                                ? "success"
-                                : "danger"
-                          }
-                          classNames={{
-                            label: `${
-                              question.is_correct &&
-                              question.user_answer == option.option_id
-                                ? "text-success"
-                                : question.correct_option == option.option_id
-                                  ? "text-success"
-                                  : question.user_answer == option.option_id
-                                    ? "text-danger"
-                                    : "text-default"
-                            } font-extrabold`,
-                          }}
-                        >
-                          {option.text}
-                        </Radio>
-                      );
-                    })}
-                  </RadioGroup>
-
-                  <Accordion isCompact variant="bordered">
-                    <AccordionItem
-                      aria-label="accordion answer"
-                      key="answer"
-                      title="Penjelasan:"
-                      classNames={{
-                        title: "font-semibold text-black",
-                        content: "font-medium text-black leading-[170%] pb-4",
-                      }}
-                    >
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: question?.explanation as string,
-                        }}
-                      />
-                    </AccordionItem>
-                  </Accordion>
-                </div>
-              </div>
-
-              <div className="h-[500px] rounded-xl border-2 border-gray/20 p-6">
+              <div className="sticky right-0 top-0 h-max rounded-xl border-2 border-gray/20 p-6">
                 <div className="grid gap-4 overflow-hidden">
                   <h4 className="text-sm font-semibold text-black">
                     Daftar Pertanyaan:

@@ -1,42 +1,37 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
-import VideoComponent from "@/components/VideoComponent";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { fetcher } from "@/utils/fetcher";
 import { getLocalTimeZone, today } from "@internationalized/date";
-import {
-  Accordion,
-  AccordionItem,
-  Button,
-  DatePicker,
-  Input,
-  Textarea,
-} from "@nextui-org/react";
+import { Button, DatePicker, Input, Textarea } from "@nextui-org/react";
 import {
   Calendar,
-  CheckCircle,
   ClockCountdown,
   Database,
   Trash,
-  XCircle,
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export type CreateQuestion = {
+  question_id: string;
+  number: number;
   type?: "text" | "image" | "video";
-  text: string;
+  text?: string;
+  explanation: string;
   options: {
     text: string;
+    option_id: string;
     is_correct: boolean;
   }[];
-  explanation: string;
 };
 
 export default function CreateTestPage({
@@ -76,13 +71,22 @@ export default function CreateTestPage({
     }
   }, []);
 
+  useEffect(() => {
+    const isFormValid =
+      Object.values(input).every((value) => value !== "") &&
+      questions.length > 0 &&
+      input.duration > 0;
+
+    setIsButtonDisabled(!isFormValid);
+  }, [input, questions]);
+
   function handleAddQuestion(question: CreateQuestion) {
     setQuestions((prev) => prev.concat(question));
     localStorage.setItem(
       "questions",
       JSON.stringify(questions.concat(question)),
     );
-    toast.success("Berhasil Menambahkan Ke draft");
+    toast.success("Berhasil Menambahkan Ke Draft");
   }
 
   function handleEditQuestion(question: CreateQuestion, index: number) {
@@ -92,7 +96,7 @@ export default function CreateTestPage({
 
     setQuestions(mapping);
     localStorage.setItem("questions", JSON.stringify(mapping));
-    toast.success("Berhasil Mengedit Soal");
+    toast.success("Soal Berhasil Di Edit");
   }
 
   const handleRemoveQuestion = useCallback(
@@ -101,21 +105,10 @@ export default function CreateTestPage({
 
       setQuestions(filters);
       localStorage.setItem("questions", JSON.stringify(filters));
+      toast.success("Soal Berhasil Di Hapus");
     },
     [questions],
   );
-
-  useEffect(() => {
-    const isFormValid =
-      input.title &&
-      input.description &&
-      input.start &&
-      input.end &&
-      input.duration &&
-      questions.length > 0;
-
-    setIsButtonDisabled(!isFormValid);
-  }, [input, questions]);
 
   async function handleSaveTest() {
     setLoading(true);
@@ -156,14 +149,11 @@ export default function CreateTestPage({
           <ButtonBack />
 
           <div className="divide-y-2 divide-dashed divide-gray/20 py-8">
-            <div className="grid gap-1 pb-10">
-              <h1 className="text-[22px] font-bold -tracking-wide text-black">
-                Buat Ujian ✏️
-              </h1>
-              <p className="font-medium text-gray">
-                Saatnya buat ujian sekarang.
-              </p>
-            </div>
+            <TitleText
+              title="Buat Ujian ✏️"
+              text="Saatnya buat ujian sekarang"
+              className="pb-10"
+            />
 
             <div className="grid gap-4 py-10">
               <h5 className="font-bold text-black">Data Ujian</h5>
@@ -219,7 +209,6 @@ export default function CreateTestPage({
                   endContent={<Calendar weight="bold" size={18} />}
                   hourCycle={24}
                   minValue={today(getLocalTimeZone())}
-                  defaultValue={today(getLocalTimeZone())}
                   onChange={(e) => {
                     const value = e.toString();
                     const date = new Date(value);
@@ -240,7 +229,6 @@ export default function CreateTestPage({
                   labelPlacement="outside"
                   endContent={<Calendar weight="bold" size={18} />}
                   minValue={today(getLocalTimeZone()).add({ days: 1 })}
-                  defaultValue={today(getLocalTimeZone()).add({ days: 1 })}
                   onChange={(e) => {
                     const value = e.toString();
                     const date = new Date(value);
@@ -294,8 +282,7 @@ export default function CreateTestPage({
                     <ModalConfirm
                       trigger={
                         <Button
-                          isLoading={loading}
-                          isDisabled={isButtonDisabled || loading}
+                          isDisabled={isButtonDisabled}
                           variant="solid"
                           color="secondary"
                           startContent={
@@ -346,110 +333,42 @@ export default function CreateTestPage({
 
               <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
                 {questions.map((question, index) => (
-                  <div
+                  <CardQuestionPreview
                     key={index}
-                    className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
-                  >
-                    <div className="font-extrabold text-purple">
-                      {index + 1}.
-                    </div>
-
-                    <div className="grid flex-1 gap-4">
-                      {question.type == "video" ? (
-                        <Suspense fallback={<p>Loading video...</p>}>
-                          <VideoComponent url={question.text} />
-                        </Suspense>
-                      ) : (
-                        <p
-                          className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
-                          dangerouslySetInnerHTML={{ __html: question.text }}
+                    index={index}
+                    question={question}
+                    type="create"
+                    buttonAction={
+                      <div className="flex gap-2">
+                        <ModalEditQuestion
+                          {...{
+                            question,
+                            handleEditQuestion,
+                            index,
+                            type: "create",
+                            token: token,
+                          }}
                         />
-                      )}
 
-                      <div className="grid gap-1">
-                        {question.options.map((option, index) => {
-                          return (
-                            <div
-                              className="inline-flex items-center gap-2"
-                              key={index}
-                            >
-                              {option.is_correct ? (
-                                <CheckCircle
-                                  weight="bold"
-                                  size={18}
-                                  className="text-success"
-                                />
-                              ) : (
-                                <XCircle
-                                  weight="bold"
-                                  size={18}
-                                  className="text-danger"
-                                />
-                              )}
-                              <p
-                                className={`flex-1 font-semibold ${
-                                  option.is_correct
-                                    ? "text-success"
-                                    : "text-gray/80"
-                                }`}
-                              >
-                                {option.text}
-                              </p>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-                      <Accordion isCompact variant="bordered">
-                        <AccordionItem
-                          aria-label="accordion answer"
-                          key="answer"
-                          title="Penjelasan:"
-                          classNames={{
-                            title: "font-semibold text-black",
-                            content:
-                              "font-medium text-gray leading-[170%] pb-4",
+                        <Button
+                          isIconOnly
+                          variant="flat"
+                          color="danger"
+                          size="sm"
+                          onClick={() => {
+                            handleRemoveQuestion(index);
+                            toast.success("Soal Berhasil Di Hapus");
                           }}
                         >
-                          <div
-                            className="preventive-list preventive-table list-outside text-[16px] leading-[170%] text-black"
-                            dangerouslySetInnerHTML={{
-                              __html: question.explanation,
-                            }}
-                          ></div>
-                        </AccordionItem>
-                      </Accordion>
-                    </div>
-
-                    <div className="flex gap-2">
-                      <ModalEditQuestion
-                        {...{
-                          question,
-                          handleEditQuestion,
-                          index,
-                          type: "create",
-                          token: token,
-                        }}
-                      />
-
-                      <Button
-                        isIconOnly
-                        variant="flat"
-                        color="danger"
-                        size="sm"
-                        onClick={() => {
-                          handleRemoveQuestion(index);
-                          toast.success("Berhasil Menghapus Soal");
-                        }}
-                      >
-                        <Trash
-                          weight="bold"
-                          size={18}
-                          className="text-danger"
-                        />
-                      </Button>
-                    </div>
-                  </div>
+                          <Trash
+                            weight="bold"
+                            size={18}
+                            className="text-danger"
+                          />
+                        </Button>
+                      </div>
+                    }
+                  />
                 ))}
               </div>
             </div>

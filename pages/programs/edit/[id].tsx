@@ -1,6 +1,9 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import SearchInput from "@/components/SearchInput";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
@@ -24,11 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import {
-  FloppyDisk,
-  ImageBroken,
-  MagnifyingGlass,
-} from "@phosphor-icons/react";
+import { FloppyDisk, ImageBroken } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -64,6 +63,14 @@ type TestsResponse = {
   total_tests: number;
   total_pages: number;
 };
+
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/tests?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/tests?page=${query.page ? query.page : 1}`;
+}
 
 export default function EditProgramPage({
   token,
@@ -118,28 +125,27 @@ export default function EditProgramPage({
   useEffect(() => {
     if (program?.data) {
       const { type, title, price, url_qr_code, tests } = program.data;
+      const testIds = tests.map((test) => test.test_id);
 
+      setValue(new Set(testIds));
       setSelectedType(type);
       setInput({
         title,
         price: price ?? 0,
         url_qr_code,
       });
-
-      const testIds = tests.map((test) => test.test_id);
-      setValue(new Set(testIds));
     }
   }, [program]);
 
   useEffect(() => {
     const selectedTests = Array.from(value);
-
-    const isFormValid =
-      input?.title?.trim() !== "" &&
-      (selectedType !== "paid" || input.price > 0) &&
-      (qrcodeFile || input?.url_qr_code?.trim() !== "") &&
-      selectedType?.trim() !== "" &&
-      selectedTests.length > 0;
+    const isFormValid = [
+      input?.title?.trim(),
+      selectedType !== "paid" || input?.price > 0,
+      qrcodeFile || input?.url_qr_code?.trim(),
+      selectedType.trim(),
+      selectedTests.length,
+    ].every(Boolean);
 
     setIsButtonDisabled(!isFormValid);
   }, [input, selectedType, qrcodeFile, value]);
@@ -210,17 +216,14 @@ export default function EditProgramPage({
     <Layout title="Edit Program">
       <Container>
         <section className="grid">
-          <ButtonBack />
+          <ButtonBack href="/programs" />
 
           <div className="mt-8 divide-y-2 divide-dashed divide-gray/20">
-            <div className="grid gap-1 pb-8">
-              <h1 className="text-[22px] font-bold -tracking-wide text-black">
-                Edit Program ✏️
-              </h1>
-              <p className="font-medium text-gray">
-                Anda bebas menyesuaikan program agar lebih menarik
-              </p>
-            </div>
+            <TitleText
+              title="Edit Program ✏️"
+              text="Anda bebas menyesuaikan program agar lebih menarik"
+              className="pb-8"
+            />
 
             <div className="grid gap-6 py-8">
               <div className="flex flex-col items-center gap-2">
@@ -359,27 +362,13 @@ export default function EditProgramPage({
               </div>
             </div>
 
-            <div className="grid gap-4 pt-12">
-              <div className="sticky left-0 top-0 z-50 grid grid-cols-[1fr_400px] gap-6 bg-white">
-                <Input
-                  type="text"
-                  variant="flat"
-                  labelPlacement="outside"
+            <div className="grid pt-12">
+              <div className="sticky left-0 top-0 z-50 grid grid-cols-[1fr_400px] gap-6 bg-white pb-4">
+                <SearchInput
                   placeholder="Cari Ujian ID atau Nama Ujian"
                   defaultValue={query.q as string}
                   onChange={(e) => setSearch(e.target.value)}
-                  startContent={
-                    <MagnifyingGlass
-                      weight="bold"
-                      size={18}
-                      className="text-gray"
-                    />
-                  }
-                  classNames={{
-                    input:
-                      "font-semibold placeholder:font-semibold placeholder:text-gray",
-                  }}
-                  className="max-w-[500px]"
+                  onClear={() => setSearch("")}
                 />
 
                 <Button
@@ -415,11 +404,7 @@ export default function EditProgramPage({
 
                 <TableBody
                   items={test?.data.tests || []}
-                  emptyContent={
-                    <span className="text-sm font-semibold italic text-gray">
-                      Ujian tidak ditemukan!
-                    </span>
-                  }
+                  emptyContent={<EmptyData text="Ujian tidak ditemukan!" />}
                 >
                   {(item: TestType) => (
                     <TableRow key={item.test_id}>
@@ -446,7 +431,7 @@ export default function EditProgramPage({
                       },
                     });
                   }}
-                  className="justify-self-center"
+                  className="mt-4 justify-self-center"
                   classNames={{
                     cursor: "bg-purple text-white",
                   }}
@@ -458,14 +443,6 @@ export default function EditProgramPage({
       </Container>
     </Layout>
   );
-}
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/tests?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/tests?page=${query.page ? query.page : 1}`;
 }
 
 export const getServerSideProps: GetServerSideProps<{

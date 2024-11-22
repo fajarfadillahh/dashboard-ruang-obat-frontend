@@ -1,13 +1,16 @@
 import CardTest from "@/components/card/CardTest";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import SearchInput from "@/components/SearchInput";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
 import { fetcher } from "@/utils/fetcher";
-import { Button, Input, Pagination } from "@nextui-org/react";
-import { MagnifyingGlass, Plus } from "@phosphor-icons/react";
+import { Button, Pagination } from "@nextui-org/react";
+import { Plus } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
@@ -22,6 +25,14 @@ type TestsResponse = {
   total_tests: number;
   total_pages: number;
 };
+
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/tests?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/tests?page=${query.page ? query.page : 1}`;
+}
 
 export default function TestsPage({
   token,
@@ -97,36 +108,18 @@ export default function TestsPage({
     <Layout title="Daftar Ujian" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
-          <div className="grid gap-1">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Daftar Ujian ✏️
-            </h1>
-            <p className="font-medium text-gray">
-              Ujian yang disesuaikan dengan kebutuhan
-            </p>
-          </div>
+          <TitleText
+            title="Daftar Ujian ✏️"
+            text="Ujian yang disesuaikan dengan kebutuhan"
+          />
 
-          <div className="grid gap-4">
-            <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white">
-              <Input
-                type="text"
-                variant="flat"
-                labelPlacement="outside"
+          <div className="grid">
+            <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+              <SearchInput
                 placeholder="Cari Ujian ID atau Nama Ujian"
-                startContent={
-                  <MagnifyingGlass
-                    weight="bold"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
                 defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-semibold placeholder:text-gray",
-                }}
-                className="flex-1"
+                onClear={() => setSearch("")}
               />
 
               <Button
@@ -141,16 +134,7 @@ export default function TestsPage({
             </div>
 
             {searchValue && data?.data.tests.length === 0 ? (
-              <div className="flex items-center justify-center gap-2 py-16">
-                <MagnifyingGlass
-                  weight="bold"
-                  size={20}
-                  className="text-gray"
-                />
-                <p className="font-semibold capitalize text-gray">
-                  Ujian tidak ditemukan!
-                </p>
-              </div>
+              <EmptyData text="Ujian tidak ditemukan!" />
             ) : (
               <div className="grid gap-2">
                 {data?.data.tests.map((test: TestType) => (
@@ -164,40 +148,32 @@ export default function TestsPage({
                 ))}
               </div>
             )}
-
-            {data?.data.tests.length ? (
-              <Pagination
-                isCompact
-                showControls
-                page={data?.data.page as number}
-                total={data?.data.total_pages as number}
-                onChange={(e) => {
-                  router.push({
-                    query: {
-                      ...router.query,
-                      page: e,
-                    },
-                  });
-                }}
-                className="justify-self-center"
-                classNames={{
-                  cursor: "bg-purple text-white",
-                }}
-              />
-            ) : null}
           </div>
+
+          {data?.data.tests.length ? (
+            <Pagination
+              isCompact
+              showControls
+              page={data?.data.page as number}
+              total={data?.data.total_pages as number}
+              onChange={(e) => {
+                router.push({
+                  query: {
+                    ...router.query,
+                    page: e,
+                  },
+                });
+              }}
+              className="justify-self-center"
+              classNames={{
+                cursor: "bg-purple text-white",
+              }}
+            />
+          ) : null}
         </section>
       </Container>
     </Layout>
   );
-}
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/tests?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/tests?page=${query.page ? query.page : 1}`;
 }
 
 export const getServerSideProps: GetServerSideProps<{

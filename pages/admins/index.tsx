@@ -1,6 +1,9 @@
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
+import SearchInput from "@/components/SearchInput";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { AdminType } from "@/types/admin.type";
@@ -10,7 +13,6 @@ import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import {
   Button,
-  Input,
   Table,
   TableBody,
   TableCell,
@@ -18,15 +20,8 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import {
-  Eye,
-  MagnifyingGlass,
-  PencilLine,
-  Plus,
-  Trash,
-} from "@phosphor-icons/react";
+import { Eye, PencilLine, Plus, Trash } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -192,54 +187,27 @@ export default function AdminsPage({
 
   if (isLoading) return <LoadingScreen />;
 
-  const filterAdmin = data?.data.length
-    ? data?.data.filter(
-        (admin) =>
-          admin.admin_id.toLowerCase().includes(search.toLowerCase()) ||
-          admin.fullname.toLowerCase().includes(search.toLowerCase()),
-      )
-    : [];
+  const filterAdmin = data?.data.filter((admin) =>
+    [admin.admin_id, admin.fullname].some((value) =>
+      value.toLowerCase().includes(search.toLowerCase()),
+    ),
+  );
 
   return (
     <Layout title="Daftar Admin" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
-          <div className="grid gap-1">
-            <h1 className="text-[22px] font-bold -tracking-wide text-black">
-              Daftar Admin 🧑🏽
-            </h1>
-            <p className="font-medium text-gray">
-              Tabel admin yang terdaftar di{" "}
-              <Link
-                href="https://ruangobat.id"
-                target="_blank"
-                className="font-bold text-purple"
-              >
-                ruangobat.id
-              </Link>
-            </p>
-          </div>
+          <TitleText
+            title="Daftar Admin 🧑🏽"
+            text="Tabel admin yang terdaftar di ruangobat.id"
+          />
 
-          <div className="grid gap-4">
-            <div className="sticky left-0 top-0 z-50 flex items-center gap-4 bg-white">
-              <Input
-                type="text"
-                variant="flat"
-                labelPlacement="outside"
+          <div className="grid">
+            <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+              <SearchInput
                 placeholder="Cari Admin ID atau Nama Admin"
                 onChange={(e) => setSearch(e.target.value)}
-                startContent={
-                  <MagnifyingGlass
-                    weight="bold"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-semibold placeholder:text-gray",
-                }}
-                className="flex-1"
+                onClear={() => setSearch("")}
               />
 
               <Button
@@ -270,11 +238,7 @@ export default function AdminsPage({
 
                 <TableBody
                   items={filterAdmin}
-                  emptyContent={
-                    <span className="text-sm font-semibold italic text-gray">
-                      Admin tidak ditemukan!
-                    </span>
-                  }
+                  emptyContent={<EmptyData text="Admin tidak ditemukan!" />}
                 >
                   {(item) => (
                     <TableRow key={item.admin_id}>
