@@ -9,6 +9,7 @@ import {
 import { cloneElement } from "react";
 
 type ModalConfirmProps = {
+  hideCloseButton?: boolean;
   isDismissable?: boolean;
   trigger: any;
   header: any;
@@ -17,6 +18,7 @@ type ModalConfirmProps = {
 };
 
 export default function ModalConfirm({
+  hideCloseButton,
   isDismissable,
   trigger,
   header,
@@ -30,6 +32,7 @@ export default function ModalConfirm({
       {cloneElement(trigger, { onClick: onOpen })}
 
       <Modal
+        hideCloseButton={hideCloseButton}
         isDismissable={isDismissable}
         isOpen={isOpen}
         onOpenChange={onOpenChange}

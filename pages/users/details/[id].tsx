@@ -7,15 +7,13 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
 import { SuccessResponse } from "@/types/global.type";
+import { getErrorMessage } from "@/utils/ errorHandler";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { Button, Checkbox, Input } from "@nextui-org/react";
 import {
   ArrowClockwise,
   EnvelopeSimple,
-  Eye,
-  EyeSlash,
-  Lock,
   PencilLine,
   Phone,
 } from "@phosphor-icons/react";
@@ -28,7 +26,6 @@ import useSWR from "swr";
 type InputType = {
   email: string;
   phone_number: string;
-  password: string;
 };
 
 type DetailsUserResponse = {
@@ -55,9 +52,7 @@ export default function DetailsUserPage({
   const [input, setInput] = useState<InputType>({
     email: "",
     phone_number: "",
-    password: "",
   });
-  const [type, setType] = useState("password");
   const [errors, setErrors] = useState<any>();
   const [isSelected, setIsSelected] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -78,14 +73,20 @@ export default function DetailsUserPage({
       });
 
       mutate();
-      toast.success("Data User Berhasil Di Perbarui");
+      toast.success("Data User Berhasil DiPerbarui");
     } catch (error: any) {
-      if (error?.status_code === 400)
-        return toast.error("Email atau Nomor Telpon Sudah Digunakan");
-
-      toast.error("Telah Terjadi Kesalahan, Silakan Coba Lagi");
       setLoading(false);
       console.error(error);
+
+      if (error?.status_code) {
+        const customMessages = {
+          400: "Email atau Nomor Telpon Sudah Digunakan",
+        };
+
+        toast.error(getErrorMessage(error?.status_code, customMessages), {
+          duration: 6000,
+        });
+      }
     }
   }
 
@@ -104,11 +105,16 @@ export default function DetailsUserPage({
       });
 
       mutate();
-      toast.success("Password User Berhasil Di Reset");
-    } catch (error) {
-      toast.error("Telah Terjadi Kesalahan, Silakan Coba Lagi");
+      toast.success("Password User Berhasil Di Reset", {
+        duration: 6000,
+      });
+    } catch (error: any) {
       setLoading(false);
       console.error(error);
+
+      if (error?.status_code) {
+        return toast.error(getErrorMessage(error?.status_code));
+      }
     }
   }
 
@@ -177,7 +183,7 @@ export default function DetailsUserPage({
                   </div>
 
                   <ModalConfirm
-                    isDismissable={false}
+                    hideCloseButton={true}
                     trigger={
                       <Button
                         variant="solid"
@@ -210,37 +216,23 @@ export default function DetailsUserPage({
                             value={input.email}
                             onChange={(e) => {
                               const email = e.target.value;
-                              if (!email) {
-                                setErrors({
-                                  ...errors,
-                                  email: null,
-                                });
+                              const emailRegex =
+                                /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                              const isValidEmail = emailRegex.test(
+                                email.toLowerCase(),
+                              );
 
-                                setInput({
-                                  ...input,
-                                  email: email.toLowerCase(),
-                                });
-                              } else {
-                                setInput({
-                                  ...input,
-                                  [e.target.name]: email.toLowerCase(),
-                                });
+                              setInput({
+                                ...input,
+                                [e.target.name]: email.toLowerCase(),
+                              });
 
-                                const emailRegex =
-                                  /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-                                if (emailRegex.test(email.toLowerCase())) {
-                                  setErrors({
-                                    ...errors,
-                                    email: null,
-                                  });
-                                } else {
-                                  setErrors({
-                                    ...errors,
-                                    email: "Email tidak valid",
-                                  });
-                                }
-                              }
+                              setErrors({
+                                ...errors,
+                                email: isValidEmail
+                                  ? null
+                                  : "Email Tidak Valid",
+                              });
                             }}
                             startContent={
                               <EnvelopeSimple
@@ -253,16 +245,8 @@ export default function DetailsUserPage({
                               input:
                                 "font-semibold placeholder:font-semibold placeholder:text-gray",
                             }}
-                            isInvalid={
-                              errors ? (errors.email ? true : false) : undefined
-                            }
-                            errorMessage={
-                              errors
-                                ? errors.email
-                                  ? errors.email
-                                  : null
-                                : null
-                            }
+                            isInvalid={!!errors?.email}
+                            errorMessage={errors?.email}
                           />
 
                           <Input
@@ -275,35 +259,20 @@ export default function DetailsUserPage({
                             name="phone_number"
                             value={input.phone_number}
                             onChange={(e) => {
-                              if (!e.target.value) {
-                                setInput({
-                                  ...input,
-                                  [e.target.name]: e.target.value,
-                                });
+                              const { value, name } = e.target;
+                              setInput({ ...input, [name]: value });
 
-                                setErrors({
-                                  ...errors,
-                                  phone_number: null,
-                                });
-                              } else {
-                                setInput({
-                                  ...input,
-                                  [e.target.name]: e.target.value,
-                                });
-
+                              if (name === "phone_number") {
                                 const phoneNumberRegex =
                                   /^(?:\+62|62|0)8[1-9][0-9]{7,11}$/;
-                                if (phoneNumberRegex.test(e.target.value)) {
-                                  setErrors({
-                                    ...errors,
-                                    phone_number: null,
-                                  });
-                                } else {
-                                  setErrors({
-                                    ...errors,
-                                    phone_number: "Nomor telepon tidak valid",
-                                  });
-                                }
+                                setErrors({
+                                  ...errors,
+                                  phone_number: value
+                                    ? phoneNumberRegex.test(value)
+                                      ? null
+                                      : "Nomor Telpon Tidak Valid"
+                                    : null,
+                                });
                               }
                             }}
                             startContent={
@@ -317,96 +286,8 @@ export default function DetailsUserPage({
                               input:
                                 "font-semibold placeholder:font-semibold placeholder:text-gray",
                             }}
-                            isInvalid={
-                              errors
-                                ? errors.phone_number
-                                  ? true
-                                  : false
-                                : undefined
-                            }
-                            errorMessage={
-                              errors
-                                ? errors.phone_number
-                                  ? errors.phone_number
-                                  : null
-                                : null
-                            }
-                          />
-
-                          <Input
-                            autoComplete="off"
-                            type={type}
-                            variant="flat"
-                            labelPlacement="outside"
-                            placeholder="Kata Sandi"
-                            name="password"
-                            value={input.password}
-                            onChange={(e) => {
-                              setInput({
-                                ...input,
-                                [e.target.name]: e.target.value,
-                              });
-
-                              if (e.target.value.length < 8) {
-                                setErrors({
-                                  ...errors,
-                                  password: "Minimal 8 karakter",
-                                });
-                              } else {
-                                setErrors({
-                                  ...errors,
-                                  password: null,
-                                });
-                              }
-                            }}
-                            startContent={
-                              <Lock
-                                weight="bold"
-                                size={18}
-                                className="text-gray"
-                              />
-                            }
-                            endContent={
-                              <button
-                                onClick={() =>
-                                  type == "password"
-                                    ? setType("text")
-                                    : setType("password")
-                                }
-                              >
-                                {type == "password" ? (
-                                  <Eye
-                                    weight="bold"
-                                    size={18}
-                                    className="cursor-pointer text-gray-600"
-                                  />
-                                ) : (
-                                  <EyeSlash
-                                    weight="bold"
-                                    size={18}
-                                    className="cursor-pointer text-gray-600"
-                                  />
-                                )}
-                              </button>
-                            }
-                            classNames={{
-                              input:
-                                "font-semibold placeholder:font-semibold placeholder:text-gray",
-                            }}
-                            isInvalid={
-                              errors
-                                ? errors.password
-                                  ? true
-                                  : false
-                                : undefined
-                            }
-                            errorMessage={
-                              errors
-                                ? errors.password
-                                  ? errors.password
-                                  : null
-                                : null
-                            }
+                            isInvalid={!!errors?.phone_number}
+                            errorMessage={errors?.phone_number}
                           />
                         </div>
                       </div>
@@ -416,12 +297,12 @@ export default function DetailsUserPage({
                         <Button
                           color="danger"
                           variant="light"
-                          onPress={() => {
-                            onClose(), setErrors(null), setType("password");
+                          onClick={() => {
+                            onClose();
+                            setLoading(false);
                             setInput({
                               email: "",
                               phone_number: "",
-                              password: "",
                             });
                           }}
                           className="font-bold"
@@ -438,19 +319,15 @@ export default function DetailsUserPage({
                             handleEditDataUser(data?.data.user_id as string, {
                               email: input.email,
                               phone_number: input.phone_number,
-                              password: input.password,
-                            }),
-                              setTimeout(() => {
-                                onClose();
-                                setLoading(false);
-                                setErrors(null);
-                                setType("password");
-                                setInput({
-                                  email: "",
-                                  phone_number: "",
-                                  password: "",
-                                });
-                              }, 1000);
+                            });
+                            setTimeout(() => {
+                              onClose();
+                              setLoading(false);
+                              setInput({
+                                email: "",
+                                phone_number: "",
+                              });
+                            }, 1000);
                           }}
                         >
                           Simpan Data Terbaru
@@ -465,16 +342,18 @@ export default function DetailsUserPage({
             </div>
 
             <div className="pt-8">
-              <div className="flex items-center justify-between rounded-xl border-2 border-warning bg-warning/20 p-6">
-                <h4 className="text-[18px] font-bold leading-[120%] text-black">
-                  Reset Password Pengguna
+              <div className="flex items-center justify-between gap-20 rounded-xl border-2 border-warning bg-warning/20 [padding:1rem_2rem]">
+                <h4 className="font-bold leading-[120%] text-black">
+                  Reset Password Pengguna?
                 </h4>
 
                 <ModalConfirm
+                  hideCloseButton={true}
                   trigger={
                     <Button
                       variant="solid"
                       color="warning"
+                      size="sm"
                       startContent={<ArrowClockwise weight="bold" size={18} />}
                       className="font-bold"
                     >
