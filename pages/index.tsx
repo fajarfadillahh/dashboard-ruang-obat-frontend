@@ -1,3 +1,4 @@
+import { getErrorMessage } from "@/utils/ errorHandler";
 import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input } from "@nextui-org/react";
 import { Eye, EyeSlash, Lock, User } from "@phosphor-icons/react";
@@ -41,9 +42,12 @@ export default function LoginPage() {
         toast.success("Yeay, Anda Berhasil Login!");
         return router.push("/dashboard");
       }
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      toast.error("Terjadi kesalahan, coba lagi nanti!");
+
+      if (error?.status_code) {
+        return toast.error(getErrorMessage(error?.status_code));
+      }
     }
   }
 
@@ -57,8 +61,8 @@ export default function LoginPage() {
         <title>Login | Ruangobat.id</title>
       </Head>
 
-      <main className="mx-auto flex h-screen max-w-[1200px] items-center justify-center py-20">
-        <div className="grid w-[480px] gap-8 justify-self-center">
+      <main className="flex h-screen w-full items-center justify-center py-20">
+        <div className="grid w-max gap-8 justify-self-center">
           <div className="text-center">
             <h1 className="text-[42px] font-bold -tracking-wide text-black">
               Hi, Admin Ruangobat 👋
@@ -82,6 +86,7 @@ export default function LoginPage() {
                   [e.target.name]: e.target.value,
                 })
               }
+              onKeyDown={(e) => handleKeyDown(e, handleLogin)}
               startContent={
                 <User weight="bold" size={18} className="text-gray" />
               }
