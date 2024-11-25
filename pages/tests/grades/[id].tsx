@@ -193,7 +193,7 @@ export default function GradeUsersPage({
 
                   <Button
                     color="danger"
-                    onClick={() => handleDeleteAnswer(user.user_id)}
+                    onClick={() => handleDeleteAnswer(user.result_id)}
                     className="font-bold"
                   >
                     Ya, Hapus Nilai
