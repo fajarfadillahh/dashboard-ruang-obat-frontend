@@ -13,7 +13,7 @@ export default function Sidebar() {
   const route = SidebarMenu(adminId);
 
   return (
-    <div className="static left-0 top-0 z-50 grid h-screen min-w-[250px] grid-rows-[24px_1fr] gap-[30px] border-r border-gray/10 bg-gray/5 px-[20px] py-[30px] shadow-[0_4px_10px_rgba(0,0,0,0.1)]">
+    <div className="static left-0 top-0 z-50 grid h-screen min-w-[250px] grid-rows-[24px_1fr] gap-[30px] border-r border-gray/15 bg-gray/5 px-[20px] py-[30px]">
       <Link
         href="/"
         className="inline-flex items-center gap-2 justify-self-center"
