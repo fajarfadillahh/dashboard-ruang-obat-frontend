@@ -64,7 +64,7 @@ export default function LoginPage() {
       <main className="flex h-screen w-full items-center justify-center py-20">
         <div className="grid w-max gap-8 justify-self-center">
           <div className="text-center">
-            <h1 className="text-[42px] font-bold -tracking-wide text-black">
+            <h1 className="text-[36px] font-bold -tracking-wide text-black">
               Hi, Admin Ruangobat 👋
             </h1>
             <p className="font-medium text-gray">
