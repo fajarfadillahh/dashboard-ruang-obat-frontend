@@ -1,27 +1,19 @@
+import ModalLogout from "@/components/modal/ModalLogout";
 import {
   Avatar,
-  Button,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownSection,
   DropdownTrigger,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
 import { CaretUpDown, SignOut } from "@phosphor-icons/react";
-import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
-import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 export default function Navbar() {
   const session = useSession();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [loading, setLoading] = useState<boolean>(false);
 
   const formatName = (name: string): string => {
     const parts: string[] = name.split(" ");
@@ -37,15 +29,6 @@ export default function Navbar() {
 
     return result;
   };
-
-  function handleSignOut() {
-    setLoading(true);
-    toast.success("Berhasil Logout");
-
-    setTimeout(() => {
-      signOut();
-    }, 800);
-  }
 
   return (
     <nav className="bg-white px-6">
@@ -106,67 +89,8 @@ export default function Navbar() {
           </DropdownMenu>
         </Dropdown>
 
-        <ModalLogout
-          loading={loading}
-          isOpen={isOpen}
-          onClose={onClose}
-          handleAction={handleSignOut}
-        />
+        <ModalLogout isOpen={isOpen} onClose={onClose} />
       </div>
     </nav>
-  );
-}
-
-interface ModalLogoutProps {
-  loading?: boolean;
-  isOpen: boolean;
-  onClose: () => void;
-  handleAction?(): void;
-}
-
-function ModalLogout({
-  loading,
-  isOpen,
-  onClose,
-  handleAction,
-}: ModalLogoutProps) {
-  return (
-    <Modal hideCloseButton isOpen={isOpen} onClose={onClose} size="sm">
-      <ModalContent>
-        {(onClose) => (
-          <>
-            <ModalHeader className="flex flex-col gap-1 font-bold text-black">
-              Peringatan!
-            </ModalHeader>
-
-            <ModalBody>
-              <p className="text-sm font-medium leading-[170%] text-gray">
-                Apakah anda yakin ingin logout?
-              </p>
-            </ModalBody>
-
-            <ModalFooter>
-              <Button
-                color="danger"
-                variant="light"
-                onPress={onClose}
-                className="font-bold"
-              >
-                Tutup
-              </Button>
-
-              <Button
-                isLoading={loading}
-                color="danger"
-                onClick={handleAction}
-                className="font-bold"
-              >
-                Ya, Logout
-              </Button>
-            </ModalFooter>
-          </>
-        )}
-      </ModalContent>
-    </Modal>
   );
 }
