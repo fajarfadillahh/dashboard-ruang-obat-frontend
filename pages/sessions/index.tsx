@@ -1,7 +1,7 @@
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
-import ModalConfirmDelete from "@/components/modal/ModalConfirmDelete";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -12,6 +12,7 @@ import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import {
+  Button,
   Pagination,
   Table,
   TableBody,
@@ -20,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
+import { Trash } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
@@ -120,11 +122,61 @@ export default function SessionPage({
         );
       case "action":
         return (
-          <ModalConfirmDelete
-            id={session.user_id}
-            header="Session"
-            title={`Session: ${session.fullname}`}
-            handleDelete={() => handleDeleteSession(session.user_id)}
+          <ModalConfirm
+            trigger={
+              <Button isIconOnly variant="light" color="danger" size="sm">
+                <Trash weight="bold" size={18} className="text-danger" />
+              </Button>
+            }
+            header={<h1 className="font-bold text-black">Hapus Session</h1>}
+            body={
+              <div className="grid gap-3 text-sm font-medium">
+                <p className="leading-[170%] text-gray">
+                  Apakah anda ingin menghapus session berikut secara permanen?
+                </p>
+
+                <div className="grid gap-1">
+                  {[
+                    ["ID Pengguna", `${session.user_id}`],
+                    ["Nama Lengkap", `${session.fullname}`],
+                  ].map(([label, value], index) => (
+                    <div
+                      key={index}
+                      className="grid gap-4 [grid-template-columns:110px_2px_1fr;]"
+                    >
+                      <h1 className="text-gray">{label}</h1>
+                      <span>:</span>
+                      <h1 className="font-extrabold text-purple">{value}</h1>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="leading-[170%] text-gray">
+                  Tindakan ini tidak dapat dibatalkan, dan data yang sudah
+                  dihapus tidak dapat dipulihkan.
+                </p>
+              </div>
+            }
+            footer={(onClose: any) => (
+              <>
+                <Button
+                  color="danger"
+                  variant="light"
+                  onPress={onClose}
+                  className="font-bold"
+                >
+                  Tutup
+                </Button>
+
+                <Button
+                  color="danger"
+                  onClick={() => handleDeleteSession(session.user_id)}
+                  className="font-bold"
+                >
+                  Ya, Hapus Admin
+                </Button>
+              </>
+            )}
           />
         );
 
