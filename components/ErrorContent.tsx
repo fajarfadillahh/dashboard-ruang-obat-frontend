@@ -26,13 +26,11 @@ export function useErrorContent(): ErrorContentType {
 
   const errorContent: ErrorContentType = {
     401: {
-      title: "Uppsss.. Session login anda telah berakhir 🚫",
+      title: "Uhh ohh! Session login anda telah berakhir 🚫",
       description: (
         <>
           <p className="font-medium leading-[170%] text-gray">
-            Silakan{" "}
-            <strong className="font-black text-purple">login kembali</strong>{" "}
-            untuk bisa mengakses halaman admin Ruang Obat.
+            Silakan login kembali untuk bisa mengakses halaman admin Ruang Obat.
           </p>
 
           <ModalLogout isOpen={isOpen} onClose={onClose} />
@@ -41,7 +39,7 @@ export function useErrorContent(): ErrorContentType {
       buttonText: "Logout",
       buttonIcon: <SignOut weight="bold" size={18} />,
       buttonAction: () => {
-        onOpen;
+        onOpen();
       },
     },
     403: {

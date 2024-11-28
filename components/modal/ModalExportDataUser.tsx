@@ -13,6 +13,8 @@ import {
 } from "@nextui-org/react";
 import { Export } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import * as XLSX from "xlsx";
 
 type ColumnsDataType = {
   field: string;
@@ -44,12 +46,40 @@ export default function ModalExportDataUser({ token }: { token: string }) {
   }
 
   async function handleExport() {
-    const payload = { data: selected };
-
     try {
-      console.log("Export successful:", payload);
+      const response: SuccessResponse<any[]> = await fetcher({
+        url: "/admin/exports/users",
+        method: "GET",
+        token,
+      });
+
+      const filteredData = response.data.map((item) => {
+        const filteredItem: any = {};
+        selected.forEach((field) => {
+          filteredItem[field] = item[field];
+        });
+
+        return filteredItem;
+      });
+
+      const headers = selected.map((field) => {
+        const column = columns.find((col) => col.field === field);
+        return column ? column.translate : field;
+      });
+
+      const worksheetData = [
+        headers,
+        ...filteredData.map((row) => Object.values(row)),
+      ];
+      const woorksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      const woorkbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(woorkbook, woorksheet, "Data Pengguna");
+
+      XLSX.writeFile(woorkbook, "data_pengguna.xlsx");
+      toast.success("Data Pengguna Berhasil Di Export 🎉");
     } catch (error) {
       console.error(error);
+      toast.error("Uh oh! Terjadi Kesalahan, Silakan Ulangi 😵");
     }
   }
 
@@ -72,7 +102,6 @@ export default function ModalExportDataUser({ token }: { token: string }) {
       </Button>
 
       <Modal
-        isDismissable={false}
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         scrollBehavior="inside"
