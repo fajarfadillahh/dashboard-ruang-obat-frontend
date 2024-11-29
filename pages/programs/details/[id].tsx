@@ -357,7 +357,8 @@ export default function DetailsProgramPage({
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Data Partisipan");
 
-      const fileName = `Data Kode Akses Program ${data?.data.title}.xlsx`;
+      const dateExport = new Date();
+      const fileName = `Data Kode Akses Program ${data?.data.title} - ${formatDate(dateExport.toLocaleString())}.xlsx`;
       XLSX.writeFile(workbook, fileName);
       toast.success("Data Partisipan Berhasil Di Export 🎉");
     } catch (error) {
