@@ -554,8 +554,8 @@ export default function DetailsProgramPage({
                   onClear={() => setSearch("")}
                 />
 
-                <div className="inline-flex items-center gap-2">
-                  {data?.data.type === "paid" && (
+                {data?.data.type === "paid" && (
+                  <div className="inline-flex items-center gap-2">
                     <ModalAddParticipant
                       {...{
                         by:
@@ -567,24 +567,24 @@ export default function DetailsProgramPage({
                         mutate,
                       }}
                     />
-                  )}
 
-                  <Tooltip
-                    content="Export Data Partisipan"
-                    classNames={{
-                      content: "max-w-[350px] font-semibold text-black",
-                    }}
-                  >
-                    <Button
-                      isIconOnly
-                      variant="ghost"
-                      color="secondary"
-                      onClick={handleExport}
+                    <Tooltip
+                      content="Export Data Partisipan"
+                      classNames={{
+                        content: "max-w-[350px] font-semibold text-black",
+                      }}
                     >
-                      <Export weight="bold" size={18} />
-                    </Button>
-                  </Tooltip>
-                </div>
+                      <Button
+                        isIconOnly
+                        variant="ghost"
+                        color="secondary"
+                        onClick={handleExport}
+                      >
+                        <Export weight="bold" size={18} />
+                      </Button>
+                    </Tooltip>
+                  </div>
+                )}
               </div>
 
               <Table
