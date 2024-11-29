@@ -112,7 +112,7 @@ export default function UsersPage({
 
   if (error) {
     return (
-      <Layout title="Daftar Pengguna">
+      <Layout title="Pengguna">
         <Container>
           <ErrorPage
             {...{
@@ -129,7 +129,7 @@ export default function UsersPage({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Daftar Pengguna" className="scrollbar-hide">
+    <Layout title="Pengguna" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <TitleText

@@ -171,7 +171,7 @@ export default function AdminsPage({
 
   if (error) {
     return (
-      <Layout title="Daftar Admin">
+      <Layout title="Admin">
         <Container>
           <ErrorPage
             {...{
@@ -194,7 +194,7 @@ export default function AdminsPage({
   );
 
   return (
-    <Layout title="Daftar Admin" className="scrollbar-hide">
+    <Layout title="Admin" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <TitleText
