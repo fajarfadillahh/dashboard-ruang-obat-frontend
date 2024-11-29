@@ -88,7 +88,7 @@ export default function TestsPage({
 
   if (error) {
     return (
-      <Layout title="Daftar Ujian">
+      <Layout title="Ujian">
         <Container>
           <ErrorPage
             {...{
@@ -105,7 +105,7 @@ export default function TestsPage({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Daftar Ujian" className="scrollbar-hide">
+    <Layout title="Ujian" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <TitleText

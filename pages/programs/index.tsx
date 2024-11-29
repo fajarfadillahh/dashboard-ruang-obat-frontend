@@ -84,7 +84,7 @@ export default function ProgramsPage({
 
   if (error) {
     return (
-      <Layout title="Daftar Program">
+      <Layout title="Program">
         <Container>
           <ErrorPage
             {...{
@@ -101,7 +101,7 @@ export default function ProgramsPage({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Daftar Program" className="scrollbar-hide">
+    <Layout title="Program" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <TitleText

@@ -1,6 +1,7 @@
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
+import ModalExportDataUser from "@/components/modal/ModalExportDataUser";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -111,7 +112,7 @@ export default function UsersPage({
 
   if (error) {
     return (
-      <Layout title="Daftar Pengguna">
+      <Layout title="Pengguna">
         <Container>
           <ErrorPage
             {...{
@@ -128,7 +129,7 @@ export default function UsersPage({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Daftar Pengguna" className="scrollbar-hide">
+    <Layout title="Pengguna" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <TitleText
@@ -137,13 +138,15 @@ export default function UsersPage({
           />
 
           <div className="grid">
-            <div className="sticky left-0 top-0 z-50 bg-white pb-4">
+            <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
               <SearchInput
                 placeholder="Cari User ID atau Nama User"
                 defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
                 onClear={() => setSearch("")}
               />
+
+              <ModalExportDataUser {...{ token }} />
             </div>
 
             <div className="overflow-x-scroll scrollbar-hide">

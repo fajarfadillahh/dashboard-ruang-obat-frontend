@@ -128,7 +128,6 @@ export default function ModalInputQuestion({
                       className="flex-1"
                     />
                   )}
-                  {/* <CardSimpleInputTest value={text} onChange={setText} /> */}
 
                   <div className="grid gap-2">
                     <p className="font-medium text-black">Jawaban</p>
@@ -181,10 +180,6 @@ export default function ModalInputQuestion({
                       onChange={setExplanation}
                       token={`${token}`}
                     />
-                    {/* <CardSimpleInputTest
-                      value={explanation}
-                      onChange={setExplanation}
-                    /> */}
                   </div>
                 </div>
               </ModalBody>

@@ -1,12 +1,12 @@
 import {
   CheckCircle,
-  ClockCountdown,
+  Clock,
   HourglassLow,
   XCircle,
 } from "@phosphor-icons/react";
 
 export const getStatusColor = (status: string) => {
-  const statusColors = {
+  const statusColors: any = {
     "Belum dimulai": "danger",
     "Tidak aktif": "danger",
     Berlangsung: "warning",
@@ -17,8 +17,8 @@ export const getStatusColor = (status: string) => {
 };
 
 export const getStatusIcon = (status: string) => {
-  const statusIcons = {
-    "Belum dimulai": <ClockCountdown weight="fill" size={16} />,
+  const statusIcons: any = {
+    "Belum dimulai": <Clock weight="fill" size={16} />,
     Berlangsung: <HourglassLow weight="fill" size={16} />,
     "Tidak aktif": <XCircle weight="fill" size={16} />,
     Aktif: <CheckCircle weight="fill" size={16} />,

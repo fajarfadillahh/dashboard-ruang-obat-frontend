@@ -1,6 +1,6 @@
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 import Head from "next/head";
 import { ReactNode } from "react";
 
@@ -24,7 +24,7 @@ export default function Layout({ title, className, children }: LayoutProps) {
           <Navbar />
 
           <div className={`overflow-y-scroll ${className}`}>
-            <div className="mx-auto w-full max-w-[1200px] p-[1.5rem_1.5rem_6rem]">
+            <div className="mx-auto w-full max-w-[1200px] p-[0_1.5rem_6rem]">
               {children}
             </div>
 

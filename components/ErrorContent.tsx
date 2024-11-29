@@ -1,6 +1,7 @@
-import { ArrowClockwise, SignOut } from "@phosphor-icons/react";
-import { signOut } from "next-auth/react";
+import { useDisclosure } from "@nextui-org/react";
+import { ArrowClockwise, ArrowLeft, SignOut } from "@phosphor-icons/react";
 import { useRouter } from "next/router";
+import ModalLogout from "./modal/ModalLogout";
 
 type ErrorContentType = {
   [key: number]: {
@@ -19,26 +20,34 @@ type ErrorContentType = {
   };
 };
 
-export const useErrorContent = (): ErrorContentType => {
+export function useErrorContent(): ErrorContentType {
   const router = useRouter();
+  const { isOpen, onClose, onOpen } = useDisclosure();
 
-  return {
+  const errorContent: ErrorContentType = {
     401: {
-      title: "Uppsss.. Session login anda telah berakhir 🚫",
+      title: "Uhh ohh! Session login anda telah berakhir 🚫",
       description: (
-        <p className="font-medium leading-[170%] text-gray">
-          Silakan{" "}
-          <strong className="font-black text-purple">login kembali</strong>{" "}
-          untuk bisa mengakses halaman admin Ruang Obat.
-        </p>
+        <>
+          <p className="font-medium leading-[170%] text-gray">
+            Silakan login kembali untuk bisa mengakses halaman admin Ruang Obat.
+          </p>
+
+          <ModalLogout isOpen={isOpen} onClose={onClose} />
+        </>
       ),
       buttonText: "Logout",
-      buttonAction: () => {
-        if (confirm("Apakah anda yakin?")) {
-          signOut();
-        }
-      },
       buttonIcon: <SignOut weight="bold" size={18} />,
+      buttonAction: () => {
+        onOpen();
+      },
+    },
+    403: {
+      title: "Larangan Akses Untuk Anda 🚫",
+      description: "Anda tidak memiliki izin untuk mengakses halaman ini.",
+      buttonText: "Kembali ke Beranda",
+      buttonIcon: <ArrowLeft weight="bold" size={18} />,
+      buttonAction: () => router.push("/dashboard"),
     },
     default: {
       title: "Telah terjadi kesalahan sistem atau server",
@@ -50,8 +59,10 @@ export const useErrorContent = (): ErrorContentType => {
         </p>
       ),
       buttonText: "Muat Ulang Halaman",
-      buttonAction: () => window.location.reload(),
       buttonIcon: <ArrowClockwise weight="bold" size={18} />,
+      buttonAction: () => window.location.reload(),
     },
   };
-};
+
+  return errorContent;
+}
