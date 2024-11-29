@@ -28,12 +28,14 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  Tooltip,
 } from "@nextui-org/react";
 import {
   Check,
   CheckCircle,
   ClockCountdown,
   Copy,
+  Export,
   ImageBroken,
   Notepad,
   Tag,
@@ -50,6 +52,7 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
+import * as XLSX from "xlsx";
 
 type DetailsProgramResponse = {
   program_id: string;
@@ -338,6 +341,31 @@ export default function DetailsProgramPage({
     }
   }
 
+  async function handleExport() {
+    try {
+      const response: SuccessResponse<any[]> = await fetcher({
+        url: `/admin/exports/codes/${data?.data.program_id}`,
+        method: "GET",
+        token,
+      });
+
+      const { data: item } = response;
+      const headers = Object.keys(item[0]);
+
+      const worksheetData = [headers, ...item.map((row) => Object.values(row))];
+      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Data Partisipan");
+
+      const fileName = `Data Kode Akses Program ${data?.data.title}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+      toast.success("Data Partisipan Berhasil Di Export 🎉");
+    } catch (error) {
+      console.error(error);
+      toast.error("Uh oh! Terjadi Kesalahan, Silakan Ulangi 😵");
+    }
+  }
+
   if (error) {
     return (
       <Layout title={`${data?.data.title}`}>
@@ -525,17 +553,37 @@ export default function DetailsProgramPage({
                   onClear={() => setSearch("")}
                 />
 
-                {data?.data.type === "paid" ? (
-                  <ModalAddParticipant
-                    {...{
-                      by:
-                        status == "authenticated" ? session.user.fullname : "",
-                      token: token as string,
-                      program_id: data?.data.program_id as string,
-                      mutate,
+                <div className="inline-flex items-center gap-2">
+                  {data?.data.type === "paid" && (
+                    <ModalAddParticipant
+                      {...{
+                        by:
+                          status === "authenticated"
+                            ? session.user.fullname
+                            : "",
+                        token: token as string,
+                        program_id: data?.data.program_id as string,
+                        mutate,
+                      }}
+                    />
+                  )}
+
+                  <Tooltip
+                    content="Export Data Partisipan"
+                    classNames={{
+                      content: "max-w-[350px] font-semibold text-black",
                     }}
-                  />
-                ) : null}
+                  >
+                    <Button
+                      isIconOnly
+                      variant="ghost"
+                      color="secondary"
+                      onClick={handleExport}
+                    >
+                      <Export weight="bold" size={18} />
+                    </Button>
+                  </Tooltip>
+                </div>
               </div>
 
               <Table

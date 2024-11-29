@@ -71,11 +71,11 @@ export default function ModalExportDataUser({ token }: { token: string }) {
         headers,
         ...filteredData.map((row) => Object.values(row)),
       ];
-      const woorksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-      const woorkbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(woorkbook, woorksheet, "Data Pengguna");
+      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Data Pengguna");
 
-      XLSX.writeFile(woorkbook, "data_pengguna.xlsx");
+      XLSX.writeFile(workbook, "Data Pengguna.xlsx");
       toast.success("Data Pengguna Berhasil Di Export 🎉");
     } catch (error) {
       console.error(error);
