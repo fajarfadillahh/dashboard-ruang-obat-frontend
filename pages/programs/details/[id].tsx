@@ -38,6 +38,7 @@ import {
   Export,
   ImageBroken,
   Notepad,
+  PencilLine,
   Tag,
   Trash,
   Users,
@@ -392,141 +393,159 @@ export default function DetailsProgramPage({
           <ButtonBack href="/programs" />
 
           <div className="grid divide-y-2 divide-dashed divide-gray/20">
-            <div className="inline-flex items-end gap-12 pb-8">
-              {data?.data.qr_code ? (
-                <div className="grid gap-2">
-                  <Image
-                    src={`${data?.data.qr_code}`}
-                    alt="qrcode image"
-                    width={130}
-                    height={130}
-                    className="aspect-square rounded-xl object-cover object-center"
-                  />
+            <div className="flex items-center justify-between gap-12">
+              <div className="inline-flex flex-1 items-end gap-12 pb-8">
+                {data?.data.qr_code ? (
+                  <div className="grid gap-2">
+                    <Image
+                      src={`${data?.data.qr_code}`}
+                      alt="qrcode image"
+                      width={130}
+                      height={130}
+                      className="aspect-square rounded-xl object-cover object-center"
+                    />
 
-                  <Link
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      window.open(data.data.url_qr_code, "_blank");
-                    }}
-                    className="w-max justify-self-center text-sm font-bold leading-[170%] text-purple underline"
-                  >
-                    Link Join Grup!
-                  </Link>
-                </div>
-              ) : (
-                <div className="flex aspect-square size-[130px] flex-col items-center justify-center gap-2 rounded-xl bg-gray/10">
-                  <ImageBroken
-                    weight="bold"
-                    size={28}
-                    className="text-gray/50"
-                  />
-                  <p className="text-[12px] font-bold text-gray/50">
-                    Belum ada QR!
-                  </p>
-                </div>
-              )}
+                    <Link
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.open(data.data.url_qr_code, "_blank");
+                      }}
+                      className="w-max justify-self-center text-sm font-bold leading-[170%] text-purple underline"
+                    >
+                      Link Join Grup!
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="flex aspect-square size-[130px] flex-col items-center justify-center gap-2 rounded-xl bg-gray/10">
+                    <ImageBroken
+                      weight="bold"
+                      size={28}
+                      className="text-gray/50"
+                    />
+                    <p className="text-[12px] font-bold text-gray/50">
+                      Belum ada QR!
+                    </p>
+                  </div>
+                )}
 
-              <div className="grid w-max">
-                <h4 className="max-w-[700px] text-[28px] font-bold leading-[120%] -tracking-wide text-black">
-                  {data?.data.title}
-                </h4>
+                <div className="grid w-max">
+                  <h4 className="max-w-[700px] text-[24px] font-bold leading-[120%] -tracking-wide text-black">
+                    {data?.data.title}
+                  </h4>
 
-                <div className="grid grid-rows-2 divide-y-2 divide-dashed divide-gray/10">
-                  <div className="grid grid-cols-3 items-end gap-12 pb-4">
-                    {data?.data.type === "free" ? (
+                  <div className="grid grid-rows-2 divide-y-2 divide-dashed divide-gray/10">
+                    <div className="grid grid-cols-3 items-end gap-12 pb-4">
+                      {data?.data.type === "free" ? (
+                        <Chip
+                          variant="flat"
+                          color="default"
+                          size="sm"
+                          startContent={
+                            <Tag
+                              weight="bold"
+                              size={16}
+                              className="text-black"
+                            />
+                          }
+                          classNames={{
+                            base: "px-2 gap-1",
+                            content: "font-bold text-black",
+                          }}
+                        >
+                          Gratis
+                        </Chip>
+                      ) : data?.data.price ? (
+                        <h5 className="font-extrabold text-purple">
+                          {formatRupiah(data?.data.price)}
+                        </h5>
+                      ) : null}
+
+                      <div className="inline-flex items-center gap-1 text-gray">
+                        <Notepad weight="bold" size={18} />
+                        <p className="text-sm font-bold">
+                          {data?.data.total_tests} Ujian
+                        </p>
+                      </div>
+
                       <Chip
                         variant="flat"
-                        color="default"
+                        color={data?.data.is_active ? "success" : "danger"}
                         size="sm"
                         startContent={
-                          <Tag weight="bold" size={16} className="text-black" />
+                          data?.data.is_active ? (
+                            <CheckCircle weight="fill" size={16} />
+                          ) : (
+                            <XCircle weight="fill" size={16} />
+                          )
                         }
                         classNames={{
                           base: "px-2 gap-1",
-                          content: "font-bold text-black",
+                          content: "font-bold",
                         }}
                       >
-                        Gratis
+                        {data?.data.is_active
+                          ? "Program Aktif"
+                          : "Program Tidak Aktif"}
                       </Chip>
-                    ) : data?.data.price ? (
-                      <h5 className="font-extrabold text-purple">
-                        {formatRupiah(data?.data.price)}
-                      </h5>
-                    ) : null}
-
-                    <div className="inline-flex items-center gap-1 text-gray">
-                      <Notepad weight="bold" size={18} />
-                      <p className="text-sm font-bold">
-                        {data?.data.total_tests} Ujian
-                      </p>
                     </div>
 
-                    <Chip
-                      variant="flat"
-                      color={data?.data.is_active ? "success" : "danger"}
-                      size="sm"
-                      startContent={
-                        data?.data.is_active ? (
-                          <CheckCircle weight="fill" size={16} />
-                        ) : (
-                          <XCircle weight="fill" size={16} />
-                        )
-                      }
-                      classNames={{
-                        base: "px-2 gap-1",
-                        content: "font-bold",
-                      }}
-                    >
-                      {data?.data.is_active
-                        ? "Program Aktif"
-                        : "Program Tidak Aktif"}
-                    </Chip>
-                  </div>
-
-                  <div className="grid grid-cols-3 items-end gap-12 pt-2">
-                    <div>
-                      <p className="text-[12px] font-medium text-gray">
-                        Total Partisipan:
-                      </p>
-
-                      <div className="inline-flex items-center gap-1 text-gray">
-                        <Users weight="bold" size={18} />
-                        <p className="text-sm font-bold">
-                          {data?.data.total_users}
+                    <div className="grid grid-cols-3 items-end gap-12 pt-2">
+                      <div>
+                        <p className="text-[12px] font-medium text-gray">
+                          Total Partisipan:
                         </p>
+
+                        <div className="inline-flex items-center gap-1 text-gray">
+                          <Users weight="bold" size={18} />
+                          <p className="text-sm font-bold">
+                            {data?.data.total_users}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <p className="text-[12px] font-medium text-gray">
-                        Approved Partisipan:
-                      </p>
-
-                      <div className="inline-flex items-center gap-1 text-gray">
-                        <Users weight="bold" size={18} />
-                        <p className="text-sm font-bold">
-                          {data?.data.total_approved_users}
+                      <div>
+                        <p className="text-[12px] font-medium text-gray">
+                          Approved Partisipan:
                         </p>
+
+                        <div className="inline-flex items-center gap-1 text-gray">
+                          <Users weight="bold" size={18} />
+                          <p className="text-sm font-bold">
+                            {data?.data.total_approved_users}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <p className="text-[12px] font-medium text-gray">
-                        Pending Partisipan:
-                      </p>
-
-                      <div className="inline-flex items-center gap-1 text-gray">
-                        <Users weight="bold" size={18} />
-                        <p className="text-sm font-bold">
-                          {(data?.data.total_users ?? 0) -
-                            (data?.data.total_approved_users ?? 0)}
+                      <div>
+                        <p className="text-[12px] font-medium text-gray">
+                          Pending Partisipan:
                         </p>
+
+                        <div className="inline-flex items-center gap-1 text-gray">
+                          <Users weight="bold" size={18} />
+                          <p className="text-sm font-bold">
+                            {(data?.data.total_users ?? 0) -
+                              (data?.data.total_approved_users ?? 0)}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <Button
+                variant="solid"
+                color="secondary"
+                startContent={<PencilLine weight="bold" size={18} />}
+                onClick={() =>
+                  router.push(`/programs/edit/${data?.data.program_id}`)
+                }
+                className="font-bold"
+              >
+                Edit Program
+              </Button>
             </div>
 
             <div className="grid gap-4 py-8">
