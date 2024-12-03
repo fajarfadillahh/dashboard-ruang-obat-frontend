@@ -9,6 +9,7 @@ import ModalJoiningRequirement from "@/components/modal/ModalJoiningRequirement"
 import SearchInput from "@/components/SearchInput";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import { TestType } from "@/types/test.type";
 import { ParticipantType } from "@/types/user.type";
@@ -49,10 +50,9 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { useDebounce } from "use-debounce";
 import * as XLSX from "xlsx";
 
 type DetailsProgramResponse = {
@@ -87,8 +87,9 @@ export default function DetailsProgramPage({
   params,
   query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { data: session, status } = useSession();
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<DetailsProgramResponse>
   >({
@@ -96,8 +97,6 @@ export default function DetailsProgramPage({
     method: "GET",
     token,
   });
-  const [search, setSearch] = useState<string>("");
-  const [searchValue] = useDebounce(search, 800);
 
   useEffect(() => {
     if (searchValue) {
