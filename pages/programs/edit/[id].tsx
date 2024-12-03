@@ -6,9 +6,10 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
+import { DetailsProgramResponse } from "@/types/program.type";
 import { TestType } from "@/types/test.type";
-import { ParticipantType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import {
@@ -35,26 +36,11 @@ import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { useDebounce } from "use-debounce";
 
 type InputType = {
   title: string;
   price: number;
   url_qr_code?: string;
-};
-
-type DetailsProgramResponse = {
-  program_id: string;
-  title: string;
-  type: string;
-  price: number;
-  is_active: boolean;
-  qr_code: string;
-  url_qr_code: string;
-  total_tests: number;
-  total_users: number;
-  tests: TestType[];
-  participants: ParticipantType[];
 };
 
 type TestsResponse = {
@@ -80,6 +66,7 @@ export default function EditProgramPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const session = useSession();
+  const { setSearch, searchValue } = useSearch(800);
   const {
     data: program,
     error,
@@ -95,8 +82,6 @@ export default function EditProgramPage({
     token,
   });
 
-  const [search, setSearch] = useState<string>("");
-  const [searchValue] = useDebounce(search, 800);
   const [input, setInput] = useState<InputType>({
     title: "",
     price: 0,
@@ -105,7 +90,6 @@ export default function EditProgramPage({
   const [selectedType, setSelectedType] = useState<string>("");
   const [qrcodeFile, setQrcodeFile] = useState<File | null>();
   const [value, setValue] = useState<Selection>(new Set());
-
   const [loading, setLoading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 

@@ -11,6 +11,7 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
+import { DetailsProgramResponse } from "@/types/program.type";
 import { TestType } from "@/types/test.type";
 import { ParticipantType } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
@@ -54,24 +55,6 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 import * as XLSX from "xlsx";
-
-type DetailsProgramResponse = {
-  program_id: string;
-  title: string;
-  type: string;
-  price: number;
-  is_active: boolean;
-  qr_code: string;
-  url_qr_code: string;
-  total_tests: number;
-  total_users: number;
-  page: number;
-  total_participants: number;
-  total_approved_users: number;
-  total_pages: number;
-  tests: TestType[];
-  participants: ParticipantType[];
-};
 
 function getUrlParticipant(query: ParsedUrlQuery, id: string) {
   if (query.q) {
