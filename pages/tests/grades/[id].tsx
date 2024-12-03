@@ -91,6 +91,7 @@ export default function GradeUsersPage({
     { name: "Nama Lengkap", uid: "fullname" },
     { name: "Asal Kampus", uid: "university" },
     { name: "Nilai", uid: "score" },
+    { name: "Kategori", uid: "category" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -129,6 +130,12 @@ export default function GradeUsersPage({
             ) : (
               user.score
             )}
+          </div>
+        );
+      case "category":
+        return (
+          <div className="w-max font-medium text-black">
+            {handleCategoryScore(user.score)}
           </div>
         );
       case "action":
@@ -209,6 +216,15 @@ export default function GradeUsersPage({
     }
   }
 
+  function handleCategoryScore(score: number): string {
+    if (score < 0 || score > 100) return "Nilai tidak sesuai";
+    if (score >= 81) return "A";
+    if (score >= 61) return "B";
+    if (score >= 41) return "C";
+    if (score >= 21) return "D";
+    return "E";
+  }
+
   async function handleDeleteAnswer(id: string) {
     try {
       await fetcher({
@@ -250,7 +266,7 @@ export default function GradeUsersPage({
     >
       <Container>
         <section className="grid gap-8">
-          <ButtonBack href={`/tests/details/${params?.id}`} />
+          <ButtonBack />
 
           <div className="grid gap-8">
             <TitleText
