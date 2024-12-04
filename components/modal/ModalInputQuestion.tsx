@@ -1,4 +1,4 @@
-import { CreateQuestion } from "@/pages/tests/create";
+import { CreateQuestion } from "@/types/question.type";
 import {
   Button,
   Checkbox,
