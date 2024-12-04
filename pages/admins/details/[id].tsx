@@ -5,7 +5,7 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
-import { AdminType } from "@/types/admin.type";
+import { Admin } from "@/types/admin.type";
 import { SuccessResponse } from "@/types/global.type";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { ParsedUrlQuery } from "querystring";
@@ -15,7 +15,7 @@ export default function DetailsAdminPage({
   token,
   params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { data, error, isLoading } = useSWR<SuccessResponse<AdminType>>({
+  const { data, error, isLoading } = useSWR<SuccessResponse<Admin>>({
     url: `/admins/${encodeURIComponent(params?.id as string)}`,
     method: "GET",
     token,

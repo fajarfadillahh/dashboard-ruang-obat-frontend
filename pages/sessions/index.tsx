@@ -6,8 +6,9 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
-import { SessionType } from "@/types/session.type";
+import { Session, SessionResponse } from "@/types/session.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
@@ -25,17 +26,9 @@ import { Trash } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { useDebounce } from "use-debounce";
-
-type SessionResponse = {
-  sessions: SessionType[];
-  page: number;
-  total_sessions: number;
-  total_pages: number;
-};
 
 function getUrl(query: ParsedUrlQuery) {
   if (query.q) {
@@ -50,6 +43,7 @@ export default function SessionPage({
   query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<SessionResponse>
   >({
@@ -57,8 +51,6 @@ export default function SessionPage({
     method: "GET",
     token,
   });
-  const [search, setSearch] = useState("");
-  const [searchValue] = useDebounce(search, 800);
 
   useEffect(() => {
     if (searchValue) {
@@ -82,8 +74,8 @@ export default function SessionPage({
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellSessions(session: SessionType, columnKey: React.Key) {
-    const cellValue = session[columnKey as keyof SessionType];
+  function renderCellSessions(session: Session, columnKey: React.Key) {
+    const cellValue = session[columnKey as keyof Session];
 
     switch (columnKey) {
       case "user_id":
@@ -259,11 +251,11 @@ export default function SessionPage({
                     <EmptyData text="Aktifitas pengguna tidak ditemukan!" />
                   }
                 >
-                  {(item: SessionType) => (
-                    <TableRow key={item.user_id}>
+                  {(session: Session) => (
+                    <TableRow key={session.user_id}>
                       {(columnKey) => (
                         <TableCell>
-                          {renderCellSessions(item, columnKey)}
+                          {renderCellSessions(session, columnKey)}
                         </TableCell>
                       )}
                     </TableRow>

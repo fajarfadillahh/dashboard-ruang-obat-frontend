@@ -9,7 +9,7 @@ import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import { DetailsProgramResponse } from "@/types/program.type";
-import { TestType } from "@/types/test.type";
+import { Test, TestsResponse } from "@/types/test.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import {
@@ -41,13 +41,6 @@ type InputType = {
   title: string;
   price: number;
   url_qr_code?: string;
-};
-
-type TestsResponse = {
-  tests: TestType[];
-  page: number;
-  total_tests: number;
-  total_pages: number;
 };
 
 function getUrl(query: ParsedUrlQuery) {
@@ -390,7 +383,7 @@ export default function EditProgramPage({
                   items={test?.data.tests || []}
                   emptyContent={<EmptyData text="Ujian tidak ditemukan!" />}
                 >
-                  {(item: TestType) => (
+                  {(item: Test) => (
                     <TableRow key={item.test_id}>
                       {(columnKey) => (
                         <TableCell>{getKeyValue(item, columnKey)}</TableCell>

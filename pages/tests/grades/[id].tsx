@@ -7,7 +7,9 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
+import { GradeTest, GradeTestResponse } from "@/types/test.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import {
@@ -25,28 +27,9 @@ import { Eye, Trash, XCircle } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { useDebounce } from "use-debounce";
-
-type ResultResponse = {
-  test_id: string;
-  title: string;
-  results: Result[];
-  page: number;
-  total_results: number;
-  total_pages: number;
-  total_participants: number;
-};
-
-type Result = {
-  result_id: string;
-  user_id: string;
-  fullname: string;
-  university: string;
-  score: number;
-};
 
 function getUrl(query: ParsedUrlQuery, id: string) {
   if (query.q) {
@@ -63,15 +46,14 @@ export default function GradeUsersPage({
   id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading, mutate } = useSWR<
-    SuccessResponse<ResultResponse>
+    SuccessResponse<GradeTestResponse>
   >({
     url: getUrl(query, params?.id as string),
     method: "GET",
     token,
   });
-  const [search, setSearch] = useState<string>("");
-  const [searchValue] = useDebounce(search, 800);
 
   useEffect(() => {
     if (searchValue) {
@@ -95,8 +77,8 @@ export default function GradeUsersPage({
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellUsers(user: Result, columnKey: React.Key) {
-    const cellValue = user[columnKey as keyof Result];
+  function renderCellUsers(user: GradeTest, columnKey: React.Key) {
+    const cellValue = user[columnKey as keyof GradeTest];
 
     switch (columnKey) {
       case "user_id":
@@ -315,7 +297,7 @@ export default function GradeUsersPage({
                       <EmptyData text="Nilai pengguna tidak ditemukan!" />
                     }
                   >
-                    {(item: Result) => (
+                    {(item: GradeTest) => (
                       <TableRow key={item.result_id}>
                         {(columnKey) => (
                           <TableCell>

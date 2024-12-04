@@ -6,8 +6,9 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
-import { UserType } from "@/types/user.type";
+import { User, UsersResponse } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import {
   Button,
@@ -23,16 +24,8 @@ import { Eye } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import useSWR from "swr";
-import { useDebounce } from "use-debounce";
-
-type UsersResponse = {
-  users: UserType[];
-  page: number;
-  total_users: number;
-  total_pages: number;
-};
 
 function getUrl(query: ParsedUrlQuery) {
   if (query.q) {
@@ -47,13 +40,12 @@ export default function UsersPage({
   query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading } = useSWR<SuccessResponse<UsersResponse>>({
     url: getUrl(query),
     method: "GET",
     token,
   });
-  const [search, setSearch] = useState("");
-  const [searchValue] = useDebounce(search, 800);
 
   useEffect(() => {
     if (searchValue) {
@@ -72,8 +64,8 @@ export default function UsersPage({
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellUsers(user: UserType, columnKey: React.Key) {
-    const cellValue = user[columnKey as keyof UserType];
+  function renderCellUsers(user: User, columnKey: React.Key) {
+    const cellValue = user[columnKey as keyof User];
 
     switch (columnKey) {
       case "user_id":
@@ -168,11 +160,11 @@ export default function UsersPage({
                   items={data?.data.users}
                   emptyContent={<EmptyData text="Pengguna tidak ditemukan!" />}
                 >
-                  {(item: UserType) => (
-                    <TableRow key={item.user_id}>
+                  {(user: User) => (
+                    <TableRow key={user.user_id}>
                       {(columnKey) => (
                         <TableCell>
-                          {renderCellUsers(item, columnKey)}
+                          {renderCellUsers(user, columnKey)}
                         </TableCell>
                       )}
                     </TableRow>

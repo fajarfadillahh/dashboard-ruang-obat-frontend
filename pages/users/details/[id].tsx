@@ -7,6 +7,7 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
 import { SuccessResponse } from "@/types/global.type";
+import { DetailsUserResponse } from "@/types/user.type";
 import { getErrorMessage } from "@/utils/ errorHandler";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
@@ -26,16 +27,6 @@ import useSWR from "swr";
 type InputType = {
   email: string;
   phone_number: string;
-};
-
-type DetailsUserResponse = {
-  user_id: string;
-  fullname: string;
-  email: string;
-  phone_number: string;
-  gender: string;
-  university: string;
-  created_at: string;
 };
 
 export default function DetailsUserPage({

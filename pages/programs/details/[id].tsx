@@ -12,8 +12,8 @@ import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import { DetailsProgramResponse } from "@/types/program.type";
-import { TestType } from "@/types/test.type";
-import { ParticipantType } from "@/types/user.type";
+import { Test } from "@/types/test.type";
+import { Participant } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
@@ -114,10 +114,10 @@ export default function DetailsProgramPage({
   ];
 
   function renderCellParticipants(
-    participant: ParticipantType,
+    participant: Participant,
     columnKey: React.Key,
   ) {
-    const cellValue = participant[columnKey as keyof ParticipantType];
+    const cellValue = participant[columnKey as keyof Participant];
 
     switch (columnKey) {
       case "user_id":
@@ -536,7 +536,7 @@ export default function DetailsProgramPage({
               </h4>
 
               <div className="grid gap-2">
-                {data?.data.tests.map((test: TestType) => (
+                {data?.data.tests.map((test: Test) => (
                   <CardTest key={test.test_id} test={test} />
                 ))}
               </div>
@@ -614,11 +614,11 @@ export default function DetailsProgramPage({
                     <EmptyData text="Partisipan tidak ditemukan!" />
                   }
                 >
-                  {(item: ParticipantType) => (
-                    <TableRow key={item.user_id}>
+                  {(participant: Participant) => (
+                    <TableRow key={participant.user_id}>
                       {(columnKey) => (
                         <TableCell>
-                          {renderCellParticipants(item, columnKey)}
+                          {renderCellParticipants(participant, columnKey)}
                         </TableCell>
                       )}
                     </TableRow>

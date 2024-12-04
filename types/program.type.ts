@@ -1,5 +1,5 @@
-import { TestType } from "@/types/test.type";
-import { ParticipantType } from "@/types/user.type";
+import { Test } from "@/types/test.type";
+import { Participant } from "@/types/user.type";
 
 export type Program = {
   program_id: string;
@@ -32,6 +32,6 @@ export type DetailsProgramResponse = {
   total_participants: number;
   total_approved_users: number;
   total_pages: number;
-  tests: TestType[];
-  participants: ParticipantType[];
+  tests: Test[];
+  participants: Participant[];
 };

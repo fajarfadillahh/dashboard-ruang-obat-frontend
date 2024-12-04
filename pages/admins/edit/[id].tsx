@@ -4,7 +4,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { AdminType } from "@/types/admin.type";
+import { Admin } from "@/types/admin.type";
 import { SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
 import { handleKeyDown } from "@/utils/handleKeyDown";
@@ -29,7 +29,7 @@ export default function EditAdminPage({
   params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { data, error, isLoading } = useSWR<SuccessResponse<AdminType>>({
+  const { data, error, isLoading } = useSWR<SuccessResponse<Admin>>({
     url: `/admins/${encodeURIComponent(params?.id as string)}`,
     method: "GET",
     token,

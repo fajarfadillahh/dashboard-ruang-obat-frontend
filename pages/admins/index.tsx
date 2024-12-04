@@ -6,7 +6,7 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { AdminType } from "@/types/admin.type";
+import { Admin } from "@/types/admin.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
@@ -32,9 +32,7 @@ export default function AdminsPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const { data, error, isLoading, mutate } = useSWR<
-    SuccessResponse<AdminType[]>
-  >({
+  const { data, error, isLoading, mutate } = useSWR<SuccessResponse<Admin[]>>({
     url: "/admins",
     method: "GET",
     token,
@@ -48,8 +46,8 @@ export default function AdminsPage({
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellUsers(admin: AdminType, columnKey: React.Key) {
-    const cellValue = admin[columnKey as keyof AdminType];
+  function renderCellUsers(admin: Admin, columnKey: React.Key) {
+    const cellValue = admin[columnKey as keyof Admin];
 
     switch (columnKey) {
       case "admin_id":
@@ -240,11 +238,11 @@ export default function AdminsPage({
                   items={filterAdmin}
                   emptyContent={<EmptyData text="Admin tidak ditemukan!" />}
                 >
-                  {(item) => (
-                    <TableRow key={item.admin_id}>
+                  {(admin) => (
+                    <TableRow key={admin.admin_id}>
                       {(columnKey) => (
                         <TableCell>
-                          {renderCellUsers(item, columnKey)}
+                          {renderCellUsers(admin, columnKey)}
                         </TableCell>
                       )}
                     </TableRow>

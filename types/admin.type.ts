@@ -1,4 +1,4 @@
-export type AdminType = {
+export type Admin = {
   admin_id: string;
   fullname: string;
   role: string;

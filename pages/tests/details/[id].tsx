@@ -5,6 +5,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
+import { DetailsTestResponse } from "@/types/test.type";
 import { formatDateWithoutTime } from "@/utils/formatDate";
 import { getStatusColor, getStatusIcon } from "@/utils/getStatus";
 import { Button, Chip, Pagination } from "@nextui-org/react";
@@ -14,31 +15,6 @@ import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
-
-type DetailsTestResponse = {
-  status: string;
-  test_id: string;
-  title: string;
-  description: string;
-  start: string;
-  end: string;
-  duration: number;
-  questions: {
-    question_id: string;
-    type: "text" | "image" | "video";
-    number: number;
-    text: string;
-    explanation: string;
-    options: {
-      text: string;
-      option_id: string;
-      is_correct: boolean;
-    }[];
-  }[];
-  page: number;
-  total_questions: number;
-  total_pages: number;
-};
 
 function getUrl(query: ParsedUrlQuery, id: string) {
   return `/admin/tests/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
