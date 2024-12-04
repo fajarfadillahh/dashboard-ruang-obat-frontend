@@ -9,6 +9,8 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
+import { CreateQuestion } from "@/types/question.type";
+import { DetailsTestResponse } from "@/types/test.type";
 import { fetcher } from "@/utils/fetcher";
 import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import {
@@ -32,32 +34,6 @@ import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { CreateQuestion } from "../create";
-
-type DetailsTestResponse = {
-  status: string;
-  test_id: string;
-  title: string;
-  description: string;
-  start: string;
-  end: string;
-  duration: number;
-  questions: {
-    question_id: string;
-    number: number;
-    type: "text" | "image" | "video";
-    text: string;
-    explanation: string;
-    options: {
-      text: string;
-      option_id: string;
-      is_correct: boolean;
-    }[];
-  }[];
-  page: number;
-  total_questions: number;
-  total_pages: number;
-};
 
 function getUrl(query: ParsedUrlQuery, id: string) {
   return `/admin/tests/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
@@ -70,6 +46,21 @@ export default function EditTestPage({
   id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const initialState = {
+    title: "",
+    description: "",
+    start: "",
+    end: "",
+    duration: 0,
+  };
+
+  const [client, setClient] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isInputReady, setIsInputReady] = useState(false);
+  const [input, setInput] = useState(initialState);
+
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<DetailsTestResponse>
   >({
@@ -77,23 +68,10 @@ export default function EditTestPage({
     method: "GET",
     token,
   });
-  const { data: session, status } = useSession();
-  const [client, setClient] = useState<boolean>(false);
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [isInputReady, setIsInputReady] = useState(false);
-  const [input, setInput] = useState({
-    title: "",
-    description: "",
-    start: "",
-    end: "",
-    duration: 0,
-  });
 
   useEffect(() => {
     if (data?.data) {
       const { title, description, start, end, duration } = data.data;
-
       setInput({
         title,
         description,
@@ -101,7 +79,6 @@ export default function EditTestPage({
         end,
         duration: duration ?? 0,
       });
-
       setIsInputReady(true);
     }
   }, [data]);
@@ -109,19 +86,14 @@ export default function EditTestPage({
   useEffect(() => {
     const isFormValid =
       Object.values(input).every((value) => {
-        if (typeof value === "string") {
-          return value.trim() !== "";
-        }
-        if (typeof value === "number") {
-          return value > 0;
-        }
+        if (typeof value === "string") return value.trim() !== "";
+        if (typeof value === "number") return value > 0;
         return true;
       }) && (data?.data.questions ?? []).length > 0;
-
     setIsButtonDisabled(!isFormValid);
   }, [input, data]);
 
-  async function handleAddQuestion(question: CreateQuestion) {
+  const handleAddQuestion = async (question: CreateQuestion) => {
     try {
       await fetcher({
         url: "/admin/tests",
@@ -134,36 +106,35 @@ export default function EditTestPage({
           by: status == "authenticated" ? session.user.fullname : "",
         },
       });
-
       mutate();
       toast.success("Soal Berhasil Di Tambahkan");
     } catch (error) {
       console.log(error);
-      toast.error("Terjadi Kesalahan Saat Menambahkan soal");
+      toast.error("Terjadi Kesalahan Saat Menambahkan Soal");
     }
-  }
+  };
 
-  async function handleDeleteQuestion(test_id: string, question_id: string) {
+  const handleDeleteQuestion = async (test_id: string, question_id: string) => {
     try {
       await fetcher({
         url: `/admin/tests/${test_id}/questions/${question_id}`,
         method: "DELETE",
         token,
       });
-
       mutate();
       toast.success("Soal Berhasil Di Hapus");
     } catch (error) {
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Menghapus Soal");
     }
-  }
+  };
 
-  async function handleEditQuestion(question: CreateQuestion, index: number) {
+  const handleEditQuestion = async (
+    question: CreateQuestion,
+    index: number,
+  ) => {
     try {
-      console.log(question);
       const mappingQuestion = data?.data.questions[index];
-
       await fetcher({
         url: "/admin/tests",
         method: "PATCH",
@@ -175,16 +146,15 @@ export default function EditTestPage({
           by: status == "authenticated" ? session.user.fullname : "",
         },
       });
-
       mutate();
       toast.success("Soal Berhasil Di Edit");
     } catch (error) {
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Mengubah Soal");
     }
-  }
+  };
 
-  async function handleEditTestData() {
+  const handleEditTestData = async () => {
     setLoading(true);
 
     try {
@@ -199,7 +169,6 @@ export default function EditTestPage({
           by: status == "authenticated" ? session.user.fullname : "",
         },
       });
-
       mutate();
       toast.success("Data Ujian Berhasil Di Edit");
     } catch (error) {
@@ -207,7 +176,7 @@ export default function EditTestPage({
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Mengubah Data Ujian");
     }
-  }
+  };
 
   useEffect(() => {
     setClient(true);
@@ -463,7 +432,7 @@ export default function EditTestPage({
                   {data?.data.status === "Belum dimulai" ? (
                     <div className="inline-flex gap-2">
                       <ModalInputQuestion
-                        {...{ handleAddQuestion, type: "edit", token: token }}
+                        {...{ handleAddQuestion, page: "edit", token: token }}
                       />
                     </div>
                   ) : null}
@@ -485,7 +454,7 @@ export default function EditTestPage({
                               question,
                               handleEditQuestion,
                               index,
-                              type: "edit",
+                              page: "edit",
                               token: token,
                               type_question: question?.type,
                             }}
