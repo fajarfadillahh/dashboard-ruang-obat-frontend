@@ -19,7 +19,8 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ["Mulish", "sans-serif"],
+        sans: ["var(--font-sans)"],
+        mono: ["var(--font-mono)"],
       },
       colors: {
         black: "#171717",

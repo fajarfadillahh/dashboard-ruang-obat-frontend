@@ -1,4 +1,5 @@
 import SessionWatcher from "@/components/SessionWatcher";
+import { fontMono, fontSans } from "@/config/fonts";
 import "@/styles/globals.css";
 import { fetcher } from "@/utils/fetcher";
 import { NextUIProvider } from "@nextui-org/react";
@@ -38,3 +39,8 @@ export default function App({
     </NextUIProvider>
   );
 }
+
+export const fonts = {
+  sans: fontSans.style.fontFamily,
+  mono: fontMono.style.fontFamily,
+};
