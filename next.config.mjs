@@ -28,7 +28,12 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    optimizePackageImports: ["@nextui-org/react", "@phosphor-icons/react"],
+    optimizePackageImports: [
+      "@nextui-org/react",
+      "@phosphor-icons/react",
+      "@ckeditor/ckeditor5-react",
+      "framer-motion",
+    ],
   },
 };
 
