@@ -146,7 +146,7 @@ export default function DetailsTestPage({
                   onClick={() =>
                     router.push(`/tests/edit/${data?.data.test_id}`)
                   }
-                  className="px-6 font-bold"
+                  className="font-bold"
                 >
                   Edit Ujian
                 </Button>

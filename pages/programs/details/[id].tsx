@@ -21,7 +21,6 @@ import { formatRupiah } from "@/utils/formatRupiah";
 import {
   Button,
   Chip,
-  Image,
   Pagination,
   Snippet,
   Table,
@@ -48,6 +47,7 @@ import {
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
@@ -378,13 +378,14 @@ export default function DetailsProgramPage({
             <div className="flex items-center justify-between gap-12">
               <div className="inline-flex flex-1 items-end gap-12 pb-8">
                 {data?.data.qr_code ? (
-                  <div className="grid gap-2">
+                  <div className="group relative overflow-hidden rounded-xl">
                     <Image
                       src={`${data?.data.qr_code}`}
                       alt="qrcode image"
-                      width={130}
-                      height={130}
-                      className="aspect-square rounded-xl object-cover object-center"
+                      width={160}
+                      height={160}
+                      loading="lazy"
+                      className="aspect-square object-cover object-center"
                     />
 
                     <Link
@@ -393,13 +394,13 @@ export default function DetailsProgramPage({
                         e.preventDefault();
                         window.open(data.data.url_qr_code, "_blank");
                       }}
-                      className="w-max justify-self-center text-sm font-bold leading-[170%] text-purple underline"
+                      className="absolute left-0 top-0 hidden h-full w-full items-center justify-center bg-purple text-sm font-semibold text-white backdrop-blur-sm group-hover:flex"
                     >
-                      Link Join Grup!
+                      Klik Link Grup!
                     </Link>
                   </div>
                 ) : (
-                  <div className="flex aspect-square size-[130px] flex-col items-center justify-center gap-2 rounded-xl bg-gray/10">
+                  <div className="flex aspect-square size-[160px] flex-col items-center justify-center gap-2 rounded-xl bg-gray/10">
                     <ImageBroken
                       weight="bold"
                       size={28}
