@@ -208,7 +208,7 @@ export default function EditTestPage({
     <Layout title="Edit Ujian">
       <Container>
         <section className="grid">
-          <ButtonBack href="/tests" />
+          <ButtonBack />
 
           {data?.data.status === "Berlangsung" ? (
             <div className="mt-8 grid rounded-xl border-2 border-warning bg-warning/5 p-6">

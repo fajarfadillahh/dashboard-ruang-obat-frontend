@@ -193,7 +193,7 @@ export default function EditProgramPage({
     <Layout title="Edit Program">
       <Container>
         <section className="grid">
-          <ButtonBack href="/programs" />
+          <ButtonBack />
 
           <div className="mt-8 divide-y-2 divide-dashed divide-gray/20">
             <TitleText
