@@ -18,7 +18,7 @@ export default function App({
       <Toaster
         toastOptions={{
           style: {
-            fontFamily: "Mulish, sans-serif",
+            fontFamily: "var(--font-sans)",
             fontWeight: 600,
             color: "#171717",
           },

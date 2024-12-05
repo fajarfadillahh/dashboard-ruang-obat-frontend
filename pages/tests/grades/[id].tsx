@@ -117,7 +117,7 @@ export default function GradeUsersPage({
       case "category":
         return (
           <div className="w-max font-medium text-black">
-            {handleCategoryScore(user.score)}
+            {user.score_category}
           </div>
         );
       case "action":
@@ -196,15 +196,6 @@ export default function GradeUsersPage({
       default:
         return cellValue;
     }
-  }
-
-  function handleCategoryScore(score: number): string {
-    if (score < 0 || score > 100) return "Nilai tidak sesuai";
-    if (score >= 81) return "A";
-    if (score >= 61) return "B";
-    if (score >= 41) return "C";
-    if (score >= 21) return "D";
-    return "E";
   }
 
   async function handleDeleteAnswer(id: string) {

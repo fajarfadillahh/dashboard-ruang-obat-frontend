@@ -16,6 +16,7 @@ export type GradeTest = {
   fullname: string;
   university: string;
   score: number;
+  score_category: string;
 };
 
 export type TestsResponse = {
