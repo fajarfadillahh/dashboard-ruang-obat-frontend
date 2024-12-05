@@ -1,6 +1,7 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingData from "@/components/loading/LoadingData";
 import LoadingScreen from "@/components/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
@@ -241,305 +242,315 @@ export default function EditTestPage({
               className="pb-10"
             />
 
-            {isInputReady && (
-              <div className="grid gap-4 py-10">
-                <h5 className="font-bold text-black">Data Ujian</h5>
-
-                <Input
-                  isRequired
-                  type="text"
-                  variant="flat"
-                  label="Judul Ujian"
-                  labelPlacement="outside"
-                  placeholder="Contoh: Tryout Internal Ruangobat"
-                  value={input.title}
-                  onChange={(e) => {
-                    setInput({
-                      ...input,
-                      title: e.target.value,
-                    });
-                  }}
-                  classNames={{
-                    input:
-                      "font-semibold placeholder:font-normal placeholder:text-default-600",
-                  }}
-                  className="flex-1"
-                />
-
-                <Textarea
-                  isRequired
-                  variant="flat"
-                  label="Deskripsi Ujian"
-                  labelPlacement="outside"
-                  placeholder="Ketikan Deskripsi Ujian..."
-                  value={input.description}
-                  onChange={(e) => {
-                    setInput({
-                      ...input,
-                      description: e.target.value,
-                    });
-                  }}
-                  classNames={{
-                    input:
-                      "font-semibold placeholder:font-normal placeholder:text-default-600",
-                  }}
-                />
-
-                <div className="grid grid-cols-3 gap-4">
-                  <DatePicker
-                    isRequired
-                    isDisabled={data?.data.status !== "Belum dimulai"}
-                    hideTimeZone
-                    showMonthAndYearPickers
-                    variant="flat"
-                    label="Tanggal Mulai"
-                    labelPlacement="outside"
-                    endContent={<Calendar weight="bold" size={18} />}
-                    hourCycle={24}
-                    minValue={
-                      data?.data.status === "Belum dimulai"
-                        ? today(getLocalTimeZone())
-                        : undefined
-                    }
-                    defaultValue={
-                      input.start
-                        ? parseDate(input.start.substring(0, 10)).add({
-                            days: 1,
-                          })
-                        : undefined
-                    }
-                    onChange={(e) => {
-                      const value = e.toString();
-                      const date = new Date(value);
-                      date.setHours(0, 0, 0, 0);
-                      setInput({
-                        ...input,
-                        start: date.toISOString(),
-                      });
-                    }}
-                  />
-
-                  <DatePicker
-                    isRequired
-                    hideTimeZone
-                    showMonthAndYearPickers
-                    variant="flat"
-                    label="Tanggal Selesai"
-                    labelPlacement="outside"
-                    endContent={<Calendar weight="bold" size={18} />}
-                    hourCycle={24}
-                    minValue={today(getLocalTimeZone())}
-                    defaultValue={
-                      input.end
-                        ? parseDate(input.end.substring(0, 10))
-                        : undefined
-                    }
-                    onChange={(e) => {
-                      const value = e.toString();
-                      const date = new Date(value);
-                      date.setHours(23, 59, 59, 999);
-                      setInput({
-                        ...input,
-                        end: date.toISOString(),
-                      });
-                    }}
-                  />
+            {!isInputReady ? (
+              <LoadingData />
+            ) : (
+              <>
+                <div className="grid gap-4 py-10">
+                  <h5 className="font-bold text-black">Data Ujian</h5>
 
                   <Input
                     isRequired
-                    type="number"
+                    type="text"
                     variant="flat"
-                    label="Durasi Pengerjaan"
+                    label="Judul Ujian"
                     labelPlacement="outside"
-                    placeholder="Satuan Menit..."
-                    value={input.duration.toString()}
+                    placeholder="Contoh: Tryout Internal Ruangobat"
+                    value={input.title}
                     onChange={(e) => {
                       setInput({
                         ...input,
-                        duration: parseInt(e.target.value),
+                        title: e.target.value,
                       });
                     }}
-                    endContent={
-                      <ClockCountdown
-                        weight="bold"
-                        size={18}
-                        className="text-default-600"
-                      />
-                    }
+                    classNames={{
+                      input:
+                        "font-semibold placeholder:font-normal placeholder:text-default-600",
+                    }}
+                    className="flex-1"
+                  />
+
+                  <Textarea
+                    isRequired
+                    variant="flat"
+                    label="Deskripsi Ujian"
+                    labelPlacement="outside"
+                    placeholder="Ketikan Deskripsi Ujian..."
+                    value={input.description}
+                    onChange={(e) => {
+                      setInput({
+                        ...input,
+                        description: e.target.value,
+                      });
+                    }}
                     classNames={{
                       input:
                         "font-semibold placeholder:font-normal placeholder:text-default-600",
                     }}
                   />
-                </div>
 
-                <ModalConfirm
-                  trigger={
-                    <Button
-                      isDisabled={isButtonDisabled}
-                      variant="solid"
-                      color="secondary"
-                      startContent={<Database weight="bold" size={18} />}
-                      className="w-max justify-self-end font-bold"
-                    >
-                      Simpan Data Ujian
-                    </Button>
-                  }
-                  header={<h1 className="font-bold text-black">Perhatian!</h1>}
-                  body={
-                    <p className="leading-[170%] text-gray">
-                      Apakah anda ingin menyimpan data ujian ini ke dalam
-                      database?
-                    </p>
-                  }
-                  footer={(onClose: any) => (
-                    <>
-                      <Button
-                        color="danger"
-                        variant="light"
-                        onPress={onClose}
-                        className="font-bold"
-                      >
-                        Tutup
-                      </Button>
+                  <div className="grid grid-cols-3 gap-4">
+                    <DatePicker
+                      isRequired
+                      isDisabled={data?.data.status !== "Belum dimulai"}
+                      hideTimeZone
+                      showMonthAndYearPickers
+                      variant="flat"
+                      label="Tanggal Mulai"
+                      labelPlacement="outside"
+                      endContent={<Calendar weight="bold" size={18} />}
+                      hourCycle={24}
+                      minValue={
+                        data?.data.status === "Belum dimulai"
+                          ? today(getLocalTimeZone())
+                          : undefined
+                      }
+                      defaultValue={
+                        input.start
+                          ? parseDate(input.start.substring(0, 10)).add({
+                              days: 1,
+                            })
+                          : undefined
+                      }
+                      onChange={(e) => {
+                        const value = e.toString();
+                        const date = new Date(value);
+                        date.setHours(0, 0, 0, 0);
+                        setInput({
+                          ...input,
+                          start: date.toISOString(),
+                        });
+                      }}
+                    />
 
+                    <DatePicker
+                      isRequired
+                      hideTimeZone
+                      showMonthAndYearPickers
+                      variant="flat"
+                      label="Tanggal Selesai"
+                      labelPlacement="outside"
+                      endContent={<Calendar weight="bold" size={18} />}
+                      hourCycle={24}
+                      minValue={today(getLocalTimeZone())}
+                      defaultValue={
+                        input.end
+                          ? parseDate(input.end.substring(0, 10))
+                          : undefined
+                      }
+                      onChange={(e) => {
+                        const value = e.toString();
+                        const date = new Date(value);
+                        date.setHours(23, 59, 59, 999);
+                        setInput({
+                          ...input,
+                          end: date.toISOString(),
+                        });
+                      }}
+                    />
+
+                    <Input
+                      isRequired
+                      type="number"
+                      variant="flat"
+                      label="Durasi Pengerjaan"
+                      labelPlacement="outside"
+                      placeholder="Satuan Menit..."
+                      value={input.duration.toString()}
+                      onChange={(e) => {
+                        setInput({
+                          ...input,
+                          duration: parseInt(e.target.value),
+                        });
+                      }}
+                      endContent={
+                        <ClockCountdown
+                          weight="bold"
+                          size={18}
+                          className="text-default-600"
+                        />
+                      }
+                      classNames={{
+                        input:
+                          "font-semibold placeholder:font-normal placeholder:text-default-600",
+                      }}
+                    />
+                  </div>
+
+                  <ModalConfirm
+                    trigger={
                       <Button
-                        isLoading={loading}
-                        isDisabled={loading}
+                        isDisabled={isButtonDisabled}
+                        variant="solid"
                         color="secondary"
-                        onClick={() => {
-                          handleEditTestData(),
-                            setTimeout(() => {
-                              onClose();
-                              setLoading(false);
-                            }, 500);
-                        }}
-                        className="font-bold"
+                        startContent={<Database weight="bold" size={18} />}
+                        className="w-max justify-self-end font-bold"
                       >
-                        Ya, Simpan
+                        Simpan Data Ujian
                       </Button>
-                    </>
-                  )}
-                />
-              </div>
-            )}
+                    }
+                    header={
+                      <h1 className="font-bold text-black">Perhatian!</h1>
+                    }
+                    body={
+                      <p className="leading-[170%] text-gray">
+                        Apakah anda ingin menyimpan data ujian ini ke dalam
+                        database?
+                      </p>
+                    }
+                    footer={(onClose: any) => (
+                      <>
+                        <Button
+                          color="danger"
+                          variant="light"
+                          onPress={onClose}
+                          className="font-bold"
+                        >
+                          Tutup
+                        </Button>
 
-            <div className="grid pt-10">
-              <div className="sticky left-0 top-0 z-50 grid gap-4 bg-white pb-4">
-                <div className="flex items-end justify-between gap-4">
-                  <h5 className="font-bold text-black">Daftar Soal</h5>
-
-                  {data?.data.status === "Belum dimulai" ? (
-                    <div className="inline-flex gap-2">
-                      <ModalInputQuestion
-                        {...{ handleAddQuestion, page: "edit", token: token }}
-                      />
-                    </div>
-                  ) : null}
+                        <Button
+                          isLoading={loading}
+                          isDisabled={loading}
+                          color="secondary"
+                          onClick={() => {
+                            handleEditTestData(),
+                              setTimeout(() => {
+                                onClose();
+                                setLoading(false);
+                              }, 500);
+                          }}
+                          className="font-bold"
+                        >
+                          Ya, Simpan
+                        </Button>
+                      </>
+                    )}
+                  />
                 </div>
-              </div>
 
-              <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
-                {data?.data.questions.map((question, index) => (
-                  <CardQuestionPreview
-                    key={question.question_id}
-                    index={index}
-                    question={question}
-                    type="edit"
-                    buttonAction={
-                      data.data.status === "Belum dimulai" ? (
-                        <div className="flex gap-2">
-                          <ModalEditQuestion
+                <div className="grid pt-10">
+                  <div className="sticky left-0 top-0 z-50 grid gap-4 bg-white pb-4">
+                    <div className="flex items-end justify-between gap-4">
+                      <h5 className="font-bold text-black">Daftar Soal</h5>
+
+                      {data?.data.status === "Belum dimulai" ? (
+                        <div className="inline-flex gap-2">
+                          <ModalInputQuestion
                             {...{
-                              question,
-                              handleEditQuestion,
-                              index,
+                              handleAddQuestion,
                               page: "edit",
                               token: token,
-                              type_question: question?.type,
                             }}
                           />
-
-                          <ModalConfirm
-                            trigger={
-                              <Button
-                                isIconOnly
-                                variant="flat"
-                                color="danger"
-                                size="sm"
-                              >
-                                <Trash
-                                  weight="bold"
-                                  size={18}
-                                  className="text-danger"
-                                />
-                              </Button>
-                            }
-                            header={
-                              <h1 className="font-bold text-black">
-                                Perhatian!
-                              </h1>
-                            }
-                            body={
-                              <p className="leading-[170%] text-gray">
-                                Apakah anda ingin menghapus soal ini?
-                              </p>
-                            }
-                            footer={(onClose: any) => (
-                              <>
-                                <Button
-                                  color="danger"
-                                  variant="light"
-                                  onPress={onClose}
-                                  className="font-bold"
-                                >
-                                  Tutup
-                                </Button>
-
-                                <Button
-                                  color="secondary"
-                                  onClick={() => {
-                                    handleDeleteQuestion(
-                                      data?.data.test_id,
-                                      question.question_id,
-                                    ),
-                                      onClose();
-                                  }}
-                                  className="font-bold"
-                                >
-                                  Ya, Hapus Soal
-                                </Button>
-                              </>
-                            )}
-                          />
                         </div>
-                      ) : null
-                    }
-                  />
-                ))}
-              </div>
+                      ) : null}
+                    </div>
+                  </div>
 
-              {data?.data.questions.length ? (
-                <Pagination
-                  isCompact
-                  showControls
-                  page={data?.data.page as number}
-                  total={data?.data.total_pages as number}
-                  onChange={(e) => {
-                    router.push({
-                      pathname: `/tests/edit/${id}`,
-                      query: {
-                        page: e,
-                      },
-                    });
-                  }}
-                  className="justify-self-center pt-8"
-                  classNames={{
-                    cursor: "bg-purple text-white",
-                  }}
-                />
-              ) : null}
-            </div>
+                  <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
+                    {data?.data.questions.map((question, index) => (
+                      <CardQuestionPreview
+                        key={question.question_id}
+                        index={index}
+                        question={question}
+                        type="edit"
+                        buttonAction={
+                          data.data.status === "Belum dimulai" ? (
+                            <div className="flex gap-2">
+                              <ModalEditQuestion
+                                {...{
+                                  question,
+                                  handleEditQuestion,
+                                  index,
+                                  page: "edit",
+                                  token: token,
+                                  type_question: question?.type,
+                                }}
+                              />
+
+                              <ModalConfirm
+                                trigger={
+                                  <Button
+                                    isIconOnly
+                                    variant="flat"
+                                    color="danger"
+                                    size="sm"
+                                  >
+                                    <Trash
+                                      weight="bold"
+                                      size={18}
+                                      className="text-danger"
+                                    />
+                                  </Button>
+                                }
+                                header={
+                                  <h1 className="font-bold text-black">
+                                    Perhatian!
+                                  </h1>
+                                }
+                                body={
+                                  <p className="leading-[170%] text-gray">
+                                    Apakah anda ingin menghapus soal ini?
+                                  </p>
+                                }
+                                footer={(onClose: any) => (
+                                  <>
+                                    <Button
+                                      color="danger"
+                                      variant="light"
+                                      onPress={onClose}
+                                      className="font-bold"
+                                    >
+                                      Tutup
+                                    </Button>
+
+                                    <Button
+                                      color="secondary"
+                                      onClick={() => {
+                                        handleDeleteQuestion(
+                                          data?.data.test_id,
+                                          question.question_id,
+                                        ),
+                                          onClose();
+                                      }}
+                                      className="font-bold"
+                                    >
+                                      Ya, Hapus Soal
+                                    </Button>
+                                  </>
+                                )}
+                              />
+                            </div>
+                          ) : null
+                        }
+                      />
+                    ))}
+                  </div>
+
+                  {data?.data.questions.length ? (
+                    <Pagination
+                      isCompact
+                      showControls
+                      page={data?.data.page as number}
+                      total={data?.data.total_pages as number}
+                      onChange={(e) => {
+                        router.push({
+                          pathname: `/tests/edit/${id}`,
+                          query: {
+                            page: e,
+                          },
+                        });
+                      }}
+                      className="justify-self-center pt-8"
+                      classNames={{
+                        cursor: "bg-purple text-white",
+                      }}
+                    />
+                  ) : null}
+                </div>
+              </>
+            )}
           </div>
         </section>
       </Container>
