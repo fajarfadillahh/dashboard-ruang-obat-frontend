@@ -538,7 +538,12 @@ export default function DetailsProgramPage({
 
               <div className="grid gap-2">
                 {data?.data.tests.map((test: Test) => (
-                  <CardTest key={test.test_id} test={test} />
+                  <CardTest
+                    key={test.test_id}
+                    test={test}
+                    token={token as string}
+                    mutate={mutate}
+                  />
                 ))}
               </div>
             </div>

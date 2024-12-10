@@ -9,14 +9,12 @@ import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import { Test, TestsResponse } from "@/types/test.type";
-import { fetcher } from "@/utils/fetcher";
 import { Button, Pagination } from "@nextui-org/react";
 import { Plus } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
-import toast from "react-hot-toast";
 import useSWR from "swr";
 
 function getUrl(query: ParsedUrlQuery) {
@@ -52,31 +50,6 @@ export default function TestsPage({
       router.push("/tests");
     }
   }, [searchValue]);
-
-  async function handleUpdateStatus(
-    test_id: string,
-    is_active: boolean = true,
-  ) {
-    try {
-      await fetcher({
-        url: "/admin/tests/status",
-        method: "PATCH",
-        token,
-        data: {
-          test_id: test_id,
-          is_active: !is_active,
-        },
-      });
-
-      mutate();
-      is_active
-        ? toast.success("Ujian Berhasil Di Non-aktifkan")
-        : toast.success("Ujian Berhasil Di Aktifkan");
-    } catch (error) {
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
-      console.error(error);
-    }
-  }
 
   if (error) {
     return (
@@ -133,9 +106,8 @@ export default function TestsPage({
                   <CardTest
                     key={test.test_id}
                     test={test}
-                    onStatusChange={() =>
-                      handleUpdateStatus(test.test_id, test.is_active)
-                    }
+                    token={token as string}
+                    mutate={mutate}
                   />
                 ))}
               </div>

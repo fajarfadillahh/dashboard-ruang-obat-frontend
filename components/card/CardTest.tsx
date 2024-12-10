@@ -1,4 +1,7 @@
-import { TestType } from "@/types/test.type";
+import { SuccessResponse } from "@/types/global.type";
+import { DetailsProgramResponse } from "@/types/program.type";
+import { Test, TestsResponse } from "@/types/test.type";
+import { fetcher } from "@/utils/fetcher";
 import { formatDateWithoutTime } from "@/utils/formatDate";
 import { getStatusColor, getStatusIcon } from "@/utils/getStatus";
 import {
@@ -19,14 +22,44 @@ import {
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import toast from "react-hot-toast";
+import { KeyedMutator } from "swr";
 
 interface TestProps {
-  test: TestType;
-  onStatusChange?: () => void;
+  test: Test;
+  token: string;
+  mutate:
+    | KeyedMutator<SuccessResponse<TestsResponse>>
+    | KeyedMutator<SuccessResponse<DetailsProgramResponse>>;
 }
 
-export default function CardTest({ test, onStatusChange }: TestProps) {
+export default function CardTest({ test, token, mutate }: TestProps) {
   const router = useRouter();
+
+  async function handleUpdateStatus(
+    test_id: string,
+    is_active: boolean = true,
+  ) {
+    try {
+      await fetcher({
+        url: "/admin/tests/status",
+        method: "PATCH",
+        token,
+        data: {
+          test_id: test_id,
+          is_active: !is_active,
+        },
+      });
+
+      mutate();
+      is_active
+        ? toast.success("Ujian Berhasil Di Non-aktifkan")
+        : toast.success("Ujian Berhasil Di Aktifkan");
+    } catch (error) {
+      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
+      console.error(error);
+    }
+  }
 
   return (
     <div
@@ -119,44 +152,41 @@ export default function CardTest({ test, onStatusChange }: TestProps) {
       </div>
 
       <div className="inline-flex items-center gap-2">
-        {router.pathname === "/tests" ? (
-          <>
-            {test.status !== "Berakhir" && (
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                color="secondary"
-                onClick={() => router.push(`/tests/edit/${test.test_id}`)}
-              >
-                <PencilLine weight="bold" size={18} />
-              </Button>
-            )}
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          color="secondary"
+          onClick={() => router.push(`/tests/edit/${test.test_id}`)}
+        >
+          <PencilLine weight="bold" size={18} />
+        </Button>
 
-            <Dropdown>
-              <DropdownTrigger>
-                <Button isIconOnly variant="light" size="sm">
-                  <Power weight="bold" size={18} className="text-danger" />
-                </Button>
-              </DropdownTrigger>
+        <Dropdown>
+          <DropdownTrigger>
+            <Button isIconOnly variant="light" size="sm">
+              <Power weight="bold" size={18} className="text-danger" />
+            </Button>
+          </DropdownTrigger>
 
-              <DropdownMenu
-                aria-label="actions"
-                itemClasses={{
-                  title: "font-semibold text-black",
-                }}
+          <DropdownMenu
+            aria-label="actions"
+            itemClasses={{
+              title: "font-semibold text-black",
+            }}
+          >
+            <DropdownSection aria-label="action zone" title="Anda Yakin?">
+              <DropdownItem
+                onClick={() => handleUpdateStatus(test.test_id, test.is_active)}
               >
-                <DropdownSection aria-label="action zone" title="Anda Yakin?">
-                  <DropdownItem onClick={onStatusChange}>
-                    {test.is_active ? "Non-aktifkan Ujian" : "Aktifkan Ujian"}
-                  </DropdownItem>
-                </DropdownSection>
-              </DropdownMenu>
-            </Dropdown>
-          </>
-        ) : (
+                {test.is_active ? "Non-aktifkan Ujian" : "Aktifkan Ujian"}
+              </DropdownItem>
+            </DropdownSection>
+          </DropdownMenu>
+        </Dropdown>
+
+        {router.pathname !== "/tests" && (
           <Button
-            variant="solid"
             size="sm"
             color="secondary"
             onClick={() => router.push(`/tests/grades/${test.test_id}`)}

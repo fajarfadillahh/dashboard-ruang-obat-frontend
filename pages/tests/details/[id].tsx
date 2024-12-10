@@ -1,5 +1,6 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/LoadingScreen";
 import Container from "@/components/wrapper/Container";
@@ -66,7 +67,7 @@ export default function DetailsTestPage({
     <Layout title={`${data?.data.title}`}>
       <Container>
         <section className="grid gap-8">
-          <ButtonBack href="/tests" />
+          <ButtonBack />
 
           <div className="grid divide-y-2 divide-dashed divide-gray/20">
             <div className="grid grid-cols-[1fr_max-content] items-start gap-16">
@@ -138,19 +139,14 @@ export default function DetailsTestPage({
                 </div>
               </div>
 
-              {data?.data.status !== "Berakhir" && (
-                <Button
-                  variant="solid"
-                  color="secondary"
-                  startContent={<PencilLine weight="bold" size={18} />}
-                  onClick={() =>
-                    router.push(`/tests/edit/${data?.data.test_id}`)
-                  }
-                  className="font-bold"
-                >
-                  Edit Ujian
-                </Button>
-              )}
+              <Button
+                color="secondary"
+                startContent={<PencilLine weight="bold" size={18} />}
+                onClick={() => router.push(`/tests/edit/${data?.data.test_id}`)}
+                className="font-bold"
+              >
+                Edit Ujian
+              </Button>
             </div>
 
             <div className="grid pt-8">
@@ -159,13 +155,17 @@ export default function DetailsTestPage({
               </div>
 
               <div className="grid gap-2 overflow-y-scroll scrollbar-hide">
-                {data?.data.questions.map((question) => (
-                  <CardQuestionPreview
-                    key={question.question_id}
-                    index={question.number}
-                    question={question}
-                  />
-                ))}
+                {data?.data.questions.length === 0 ? (
+                  <EmptyData text="Belum Ada Soal Di Ujian Ini" />
+                ) : (
+                  data?.data.questions.map((question) => (
+                    <CardQuestionPreview
+                      key={question.question_id}
+                      index={question.number}
+                      question={question}
+                    />
+                  ))
+                )}
               </div>
 
               {data?.data.questions.length ? (
