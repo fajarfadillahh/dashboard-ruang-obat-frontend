@@ -95,7 +95,7 @@ export default function EditTestPage({
     setIsButtonDisabled(!isFormValid);
   }, [input, data]);
 
-  const handleAddQuestion = async (question: CreateQuestion) => {
+  async function handleAddQuestion(question: CreateQuestion) {
     try {
       await fetcher({
         url: "/admin/tests",
@@ -114,9 +114,9 @@ export default function EditTestPage({
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Menambahkan Soal");
     }
-  };
+  }
 
-  const handleDeleteQuestion = async (test_id: string, question_id: string) => {
+  async function handleDeleteQuestion(test_id: string, question_id: string) {
     try {
       await fetcher({
         url: `/admin/tests/${test_id}/questions/${question_id}`,
@@ -129,12 +129,9 @@ export default function EditTestPage({
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Menghapus Soal");
     }
-  };
+  }
 
-  const handleEditQuestion = async (
-    question: CreateQuestion,
-    index: number,
-  ) => {
+  async function handleEditQuestion(question: CreateQuestion, index: number) {
     try {
       const mappingQuestion = data?.data.questions[index];
       await fetcher({
@@ -154,9 +151,9 @@ export default function EditTestPage({
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Mengubah Soal");
     }
-  };
+  }
 
-  const handleEditTestData = async () => {
+  async function handleEditTestData() {
     setLoading(true);
 
     try {
@@ -178,7 +175,7 @@ export default function EditTestPage({
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Mengubah Data Ujian");
     }
-  };
+  }
 
   useEffect(() => {
     setClient(true);

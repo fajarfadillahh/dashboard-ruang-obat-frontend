@@ -19,7 +19,7 @@ import {
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CreateTestPage({
@@ -58,29 +58,26 @@ export default function CreateTestPage({
     setIsButtonDisabled(!isFormValid);
   }, [input, questions]);
 
-  const handleAddQuestion = (question: CreateQuestion) => {
+  function handleAddQuestion(question: CreateQuestion) {
     setQuestions((prev) => [...prev, question]);
     localStorage.setItem("questions", JSON.stringify([...questions, question]));
     toast.success("Berhasil Menambahkan Ke Draft");
-  };
+  }
 
-  const handleEditQuestion = (question: CreateQuestion, index: number) => {
+  function handleEditQuestion(question: CreateQuestion, index: number) {
     const updatedQuestions = [...questions];
     updatedQuestions[index] = question;
     setQuestions(updatedQuestions);
     localStorage.setItem("questions", JSON.stringify(updatedQuestions));
     toast.success("Soal Berhasil Di Edit");
-  };
+  }
 
-  const handleRemoveQuestion = useCallback(
-    (index: number) => {
-      const updatedQuestions = questions.filter((_, i) => i !== index);
-      setQuestions(updatedQuestions);
-      localStorage.setItem("questions", JSON.stringify(updatedQuestions));
-      toast.success("Soal Berhasil Di Hapus");
-    },
-    [questions],
-  );
+  function handleRemoveQuestion(index: number) {
+    const updatedQuestions = questions.filter((_, i) => i !== index);
+    setQuestions(updatedQuestions);
+    localStorage.setItem("questions", JSON.stringify(updatedQuestions));
+    toast.success("Soal Berhasil Di Hapus");
+  }
 
   async function handleSaveTest() {
     setLoading(true);
