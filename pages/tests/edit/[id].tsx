@@ -1,5 +1,6 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingData from "@/components/loading/LoadingData";
 import LoadingScreen from "@/components/LoadingScreen";
@@ -211,30 +212,6 @@ export default function EditTestPage({
         <section className="grid">
           <ButtonBack />
 
-          {data?.data.status === "Berlangsung" ? (
-            <div className="mt-8 grid rounded-xl border-2 border-warning bg-warning/5 p-6">
-              <h4 className="mb-2 inline-flex items-center text-[20px] font-bold text-warning">
-                <WarningCircle
-                  weight="bold"
-                  size={20}
-                  className="mr-2 inline-flex text-warning"
-                />
-                Perhatian!
-              </h4>
-              <p className="ml-8 font-medium leading-[180%] text-warning">
-                Ketika ujian sedang <strong>Berlangsung</strong>, anda tidak
-                dapat mengubah <strong>Tanggal Mulai</strong> ujian dan{" "}
-                <strong>Menambah/Mengedit</strong> soal-soal ujian.
-                <br />
-                Hal ini bertujuan untuk menjaga <strong>
-                  konsistensi
-                </strong>{" "}
-                soal-soal ujian dan menghindari <strong>berubahnya</strong>{" "}
-                soal-soal ketika user sedang mengerjakan ujian.
-              </p>
-            </div>
-          ) : null}
-
           <div className="divide-y-2 divide-dashed divide-gray/20 py-8">
             <TitleText
               title="Edit Ujian ✏️"
@@ -247,6 +224,23 @@ export default function EditTestPage({
             ) : (
               <>
                 <div className="grid gap-4 py-10">
+                  {data?.data.status === "Berlangsung" ? (
+                    <div className="flex items-start gap-2 rounded-xl bg-warning p-4 text-black">
+                      <WarningCircle weight="bold" size={24} />
+
+                      <div className="flex-1">
+                        <h4 className="mb-2 text-[18px] font-extrabold">
+                          Perhatian!
+                        </h4>
+                        <p className="font-medium leading-[170%]">
+                          Status ujian saat ini sedang{" "}
+                          <strong>"Berlangsung"</strong>, pastikan kembali jika
+                          anda ingin benar-benar mengubah data ujian ini.
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+
                   <h5 className="font-bold text-black">Data Ujian</h5>
 
                   <Input
@@ -292,7 +286,6 @@ export default function EditTestPage({
                   <div className="grid grid-cols-3 gap-4">
                     <DatePicker
                       isRequired
-                      isDisabled={data?.data.status !== "Belum dimulai"}
                       hideTimeZone
                       showMonthAndYearPickers
                       variant="flat"
@@ -431,32 +424,50 @@ export default function EditTestPage({
 
                 <div className="grid pt-10">
                   <div className="sticky left-0 top-0 z-50 grid gap-4 bg-white pb-4">
+                    {data?.data.status === "Berlangsung" ? (
+                      <div className="flex items-start gap-2 rounded-xl bg-warning p-4 text-black">
+                        <WarningCircle weight="bold" size={24} />
+
+                        <div className="flex-1">
+                          <h4 className="mb-2 text-[18px] font-extrabold">
+                            Perhatian!
+                          </h4>
+                          <p className="font-medium leading-[170%]">
+                            Untuk menjaga konsistensi soal-soal ujian, kami
+                            menyarankan untuk tidak{" "}
+                            <strong>Menambah/Menghapus</strong> soal-soal ujian
+                            ketika sedang <strong>"Berlangsung"</strong>. Hal
+                            ini bertujuan juga untuk menghindari kesalahan dalam
+                            proses pengumpulan jawaban peserta.
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+
                     <div className="flex items-end justify-between gap-4">
                       <h5 className="font-bold text-black">Daftar Soal</h5>
 
-                      {data?.data.status === "Belum dimulai" ? (
-                        <div className="inline-flex gap-2">
-                          <ModalInputQuestion
-                            {...{
-                              handleAddQuestion,
-                              page: "edit",
-                              token: token,
-                            }}
-                          />
-                        </div>
-                      ) : null}
+                      <ModalInputQuestion
+                        {...{
+                          handleAddQuestion,
+                          page: "edit",
+                          token: token,
+                        }}
+                      />
                     </div>
                   </div>
 
                   <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
-                    {data?.data.questions.map((question, index) => (
-                      <CardQuestionPreview
-                        key={question.question_id}
-                        index={index}
-                        question={question}
-                        type="edit"
-                        buttonAction={
-                          data.data.status === "Belum dimulai" ? (
+                    {data?.data.questions.length === 0 ? (
+                      <EmptyData text="Belum Ada Soal Di Ujian Ini" />
+                    ) : (
+                      data?.data.questions.map((question, index) => (
+                        <CardQuestionPreview
+                          key={question.question_id}
+                          index={index}
+                          question={question}
+                          type="edit"
+                          buttonAction={
                             <div className="flex gap-2">
                               <ModalEditQuestion
                                 {...{
@@ -522,10 +533,10 @@ export default function EditTestPage({
                                 )}
                               />
                             </div>
-                          ) : null
-                        }
-                      />
-                    ))}
+                          }
+                        />
+                      ))
+                    )}
                   </div>
 
                   {data?.data.questions.length ? (
