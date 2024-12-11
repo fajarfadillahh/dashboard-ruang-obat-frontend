@@ -8,6 +8,7 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { CreateQuestion } from "@/types/question.type";
 import { fetcher } from "@/utils/fetcher";
+import { getError } from "@/utils/getError";
 import { getLocalTimeZone, today } from "@internationalized/date";
 import { Button, DatePicker, Input, Textarea } from "@nextui-org/react";
 import {
@@ -69,14 +70,14 @@ export default function CreateTestPage({
     updatedQuestions[index] = question;
     setQuestions(updatedQuestions);
     localStorage.setItem("questions", JSON.stringify(updatedQuestions));
-    toast.success("Soal Berhasil Di Edit");
+    toast.success("Soal Berhasil Diedit");
   }
 
   function handleRemoveQuestion(index: number) {
     const updatedQuestions = questions.filter((_, i) => i !== index);
     setQuestions(updatedQuestions);
     localStorage.setItem("questions", JSON.stringify(updatedQuestions));
-    toast.success("Soal Berhasil Di Hapus");
+    toast.success("Soal Berhasil Dihapus");
   }
 
   async function handleSaveTest() {
@@ -100,14 +101,15 @@ export default function CreateTestPage({
         token,
       });
 
-      toast.success("Ujian Berhasil Di Buat");
+      toast.success("Ujian Berhasil Dibuat");
       localStorage.removeItem("input");
       localStorage.removeItem("questions");
       router.push("/tests");
     } catch (error) {
       setLoading(false);
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.log(error);
+
+      toast.error(getError(error));
     }
   }
 
@@ -326,7 +328,7 @@ export default function CreateTestPage({
                           size="sm"
                           onClick={() => {
                             handleRemoveQuestion(index);
-                            toast.success("Soal Berhasil Di Hapus");
+                            toast.success("Soal Berhasil Dihapus");
                           }}
                         >
                           <Trash
