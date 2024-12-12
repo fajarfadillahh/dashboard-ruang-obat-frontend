@@ -96,7 +96,7 @@ export default function DetailsUserPage({
       });
 
       mutate();
-      toast.success("Password User Berhasil Di Reset", {
+      toast.success("Password User Berhasil Direset", {
         duration: 6000,
       });
     } catch (error: any) {

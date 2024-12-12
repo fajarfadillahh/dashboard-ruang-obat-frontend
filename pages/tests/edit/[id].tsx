@@ -109,7 +109,7 @@ export default function EditTestPage({
         },
       });
       mutate();
-      toast.success("Soal Berhasil Di Tambahkan");
+      toast.success("Soal Berhasil Ditambahkan");
     } catch (error) {
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Menambahkan Soal");
@@ -124,7 +124,7 @@ export default function EditTestPage({
         token,
       });
       mutate();
-      toast.success("Soal Berhasil Di Hapus");
+      toast.success("Soal Berhasil Dihapus");
     } catch (error) {
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Menghapus Soal");
@@ -146,7 +146,7 @@ export default function EditTestPage({
         },
       });
       mutate();
-      toast.success("Soal Berhasil Di Edit");
+      toast.success("Soal Berhasil Diedit");
     } catch (error) {
       console.log(error);
       toast.error("Terjadi Kesalahan Saat Mengubah Soal");
@@ -169,7 +169,7 @@ export default function EditTestPage({
         },
       });
       mutate();
-      toast.success("Data Ujian Berhasil Di Edit");
+      toast.success("Data Ujian Berhasil Diedit");
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -231,7 +231,7 @@ export default function EditTestPage({
                         </h4>
                         <p className="font-medium leading-[170%]">
                           Status ujian saat ini sedang{" "}
-                          <strong>"Berlangsung"</strong>, pastikan kembali jika
+                          <strong>Berlangsung</strong>, pastikan kembali jika
                           anda ingin benar-benar mengubah data ujian ini.
                         </p>
                       </div>
@@ -433,8 +433,8 @@ export default function EditTestPage({
                             Untuk menjaga konsistensi soal-soal ujian, kami
                             menyarankan untuk tidak{" "}
                             <strong>Menambah/Menghapus</strong> soal-soal ujian
-                            ketika sedang <strong>"Berlangsung"</strong>. Hal
-                            ini bertujuan juga untuk menghindari kesalahan dalam
+                            ketika sedang <strong>Berlangsung</strong>. Hal ini
+                            bertujuan juga untuk menghindari kesalahan dalam
                             proses pengumpulan jawaban peserta.
                           </p>
                         </div>

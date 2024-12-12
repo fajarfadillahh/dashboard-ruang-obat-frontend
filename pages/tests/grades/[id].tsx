@@ -207,7 +207,7 @@ export default function GradeUsersPage({
       });
 
       mutate();
-      toast.success("Nilai Berhasil Di Hapus");
+      toast.success("Nilai Berhasil Dihapus");
     } catch (error) {
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);

@@ -135,7 +135,7 @@ export default function CreateProgramPage({
       });
 
       setQrcodeFile(null);
-      toast.success("Program Berhasil Di Buat");
+      toast.success("Program Berhasil Dibuat");
       router.push("/programs");
     } catch (error) {
       setLoading(false);

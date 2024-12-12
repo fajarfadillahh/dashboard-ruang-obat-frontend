@@ -53,8 +53,8 @@ export default function CardTest({ test, token, mutate }: TestProps) {
 
       mutate();
       is_active
-        ? toast.success("Ujian Berhasil Di Non-aktifkan")
-        : toast.success("Ujian Berhasil Di Aktifkan");
+        ? toast.success("Ujian Berhasil Dinonaktifkan")
+        : toast.success("Ujian Berhasil Diaktifkan");
     } catch (error) {
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);

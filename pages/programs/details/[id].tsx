@@ -343,7 +343,7 @@ export default function DetailsProgramPage({
       const dateExport = new Date();
       const fileName = `Data Kode Akses Program ${data?.data.title} - ${formatDate(dateExport.toLocaleString())}.xlsx`;
       XLSX.writeFile(workbook, fileName);
-      toast.success("Data Partisipan Berhasil Di Export 🎉");
+      toast.success("Data Partisipan Berhasil Diexport 🎉");
     } catch (error) {
       console.error(error);
       toast.error("Uh oh! Terjadi Kesalahan, Silakan Ulangi 😵");

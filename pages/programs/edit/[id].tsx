@@ -165,7 +165,7 @@ export default function EditProgramPage({
         file: true,
       });
 
-      toast.success("Program Berhasil Di Perbarui");
+      toast.success("Program Berhasil Diperbarui");
       router.push("/programs");
     } catch (error) {
       setLoading(false);

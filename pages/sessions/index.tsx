@@ -186,7 +186,7 @@ export default function SessionPage({
       });
 
       mutate();
-      toast.success("Session Berhasil Di Hapus");
+      toast.success("Session Berhasil Dihapus");
     } catch (error) {
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
