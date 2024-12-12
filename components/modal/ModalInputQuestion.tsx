@@ -1,4 +1,4 @@
-import { CreateQuestion } from "@/pages/tests/create";
+import { CreateQuestion } from "@/types/question.type";
 import {
   Button,
   Checkbox,
@@ -19,17 +19,17 @@ const CKEditor = dynamic(() => import("@/components/editor/CKEditor"), {
   ssr: false,
 });
 
-type CardInputTestProps = {
+type ModalInputQuestionProps = {
   handleAddQuestion: (question: CreateQuestion) => void;
-  type: "create" | "edit";
+  page: "create" | "edit";
   token?: string;
 };
 
 export default function ModalInputQuestion({
   handleAddQuestion,
-  type,
+  page,
   token,
-}: CardInputTestProps) {
+}: ModalInputQuestionProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [typeQuestion, setTypeQuestion] = useState("text");
   const [text, setText] = useState("");
@@ -229,7 +229,7 @@ export default function ModalInputQuestion({
                   }}
                   className="w-max justify-self-end font-bold"
                 >
-                  {type == "create" ? "Simpan Draft" : "Simpan Soal"}
+                  {page == "create" ? "Simpan Draft" : "Simpan Soal"}
                 </Button>
               </ModalFooter>
             </>

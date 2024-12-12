@@ -6,25 +6,18 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
-import { ProgramType } from "@/types/program.type";
+import { Program, ProgramsResponse } from "@/types/program.type";
 import { fetcher } from "@/utils/fetcher";
 import { Button, Pagination } from "@nextui-org/react";
 import { Plus } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { useDebounce } from "use-debounce";
-
-export type ProgramsResponse = {
-  programs: ProgramType[];
-  page: number;
-  total_programs: number;
-  total_pages: number;
-};
 
 function getUrl(query: ParsedUrlQuery) {
   if (query.q) {
@@ -39,6 +32,7 @@ export default function ProgramsPage({
   query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<ProgramsResponse>
   >({
@@ -46,8 +40,6 @@ export default function ProgramsPage({
     method: "GET",
     token,
   });
-  const [search, setSearch] = useState("");
-  const [searchValue] = useDebounce(search, 800);
 
   useEffect(() => {
     if (searchValue) {
@@ -74,8 +66,8 @@ export default function ProgramsPage({
 
       mutate();
       is_active
-        ? toast.success("Program Berhasil Di Non-aktifkan")
-        : toast.success("Program Berhasil Di Aktifkan");
+        ? toast.success("Program Berhasil Dinonaktifkan")
+        : toast.success("Program Berhasil Diaktifkan");
     } catch (error) {
       toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
@@ -133,7 +125,7 @@ export default function ProgramsPage({
               <EmptyData text="Program tidak ditemukan!" />
             ) : (
               <div className="grid gap-2">
-                {data?.data.programs.map((program: ProgramType) => (
+                {data?.data.programs.map((program: Program) => (
                   <CardProgram
                     key={program.program_id}
                     program={program}

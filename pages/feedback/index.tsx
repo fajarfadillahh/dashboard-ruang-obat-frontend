@@ -5,7 +5,8 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { FeedbackType } from "@/types/feedback.type";
+import useSearch from "@/hooks/useSearch";
+import { FeedbackResponse } from "@/types/feedback.type";
 import { SuccessResponse } from "@/types/global.type";
 import { formatDate } from "@/utils/formatDate";
 import { Avatar, Pagination } from "@nextui-org/react";
@@ -13,16 +14,8 @@ import { Star } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import useSWR from "swr";
-import { useDebounce } from "use-debounce";
-
-type FeedbackResponse = {
-  feedback: FeedbackType[];
-  page: number;
-  total_feedback: number;
-  total_pages: number;
-};
 
 function getUrl(query: ParsedUrlQuery) {
   if (query.q) {
@@ -37,13 +30,12 @@ export default function FeedbackPage({
   query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
+  const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading } = useSWR<SuccessResponse<FeedbackResponse>>({
     url: getUrl(query) as string,
     method: "GET",
     token,
   });
-  const [search, setSearch] = useState("");
-  const [searchValue] = useDebounce(search, 800);
 
   useEffect(() => {
     if (searchValue) {

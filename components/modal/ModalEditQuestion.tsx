@@ -1,4 +1,4 @@
-import { CreateQuestion } from "@/pages/tests/create";
+import { CreateQuestion } from "@/types/question.type";
 import {
   Button,
   Checkbox,
@@ -19,11 +19,11 @@ const CKEditor = dynamic(() => import("@/components/editor/CKEditor"), {
   ssr: false,
 });
 
-type CardInputTestProps = {
+type ModalEditQuestionProps = {
   handleEditQuestion: (question: CreateQuestion, index: number) => void;
   question: CreateQuestion;
   index: number;
-  type: "create" | "edit";
+  page: "create" | "edit";
   type_question?: string;
   token?: string;
 };
@@ -32,13 +32,13 @@ export default function ModalEditQuestion({
   handleEditQuestion,
   question,
   index,
-  type,
+  page,
   type_question,
   token,
-}: CardInputTestProps) {
+}: ModalEditQuestionProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [typeQuestion, setTypeQuestion] = useState(
-    `${type == "create" ? question.type : type_question}`,
+    `${page == "create" ? question.type : type_question}`,
   );
   const [text, setText] = useState(question.text);
   const [explanation, setExplanation] = useState(question.explanation);
@@ -100,7 +100,7 @@ export default function ModalEditQuestion({
                       <p className="font-medium text-black">Pertanyaan</p>
 
                       <CKEditor
-                        value={text}
+                        value={text as string}
                         onChange={setText}
                         token={`${token}`}
                       />
@@ -215,7 +215,7 @@ export default function ModalEditQuestion({
                   }}
                   className="w-max justify-self-end font-bold"
                 >
-                  {type == "create" ? "Simpan Draft" : "Simpan Soal"}
+                  {page == "create" ? "Simpan Draft" : "Simpan Soal"}
                 </Button>
               </ModalFooter>
             </>

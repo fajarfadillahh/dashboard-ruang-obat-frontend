@@ -9,9 +9,11 @@ import ModalJoiningRequirement from "@/components/modal/ModalJoiningRequirement"
 import SearchInput from "@/components/SearchInput";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
-import { TestType } from "@/types/test.type";
-import { ParticipantType } from "@/types/user.type";
+import { DetailsProgramResponse } from "@/types/program.type";
+import { Test } from "@/types/test.type";
+import { Participant } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
@@ -19,7 +21,6 @@ import { formatRupiah } from "@/utils/formatRupiah";
 import {
   Button,
   Chip,
-  Image,
   Pagination,
   Snippet,
   Table,
@@ -38,6 +39,7 @@ import {
   Export,
   ImageBroken,
   Notepad,
+  PencilLine,
   Tag,
   Trash,
   Users,
@@ -45,32 +47,14 @@ import {
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
-import React, { useEffect, useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { useDebounce } from "use-debounce";
 import * as XLSX from "xlsx";
-
-type DetailsProgramResponse = {
-  program_id: string;
-  title: string;
-  type: string;
-  price: number;
-  is_active: boolean;
-  qr_code: string;
-  url_qr_code: string;
-  total_tests: number;
-  total_users: number;
-  page: number;
-  total_participants: number;
-  total_approved_users: number;
-  total_pages: number;
-  tests: TestType[];
-  participants: ParticipantType[];
-};
 
 function getUrlParticipant(query: ParsedUrlQuery, id: string) {
   if (query.q) {
@@ -86,8 +70,9 @@ export default function DetailsProgramPage({
   params,
   query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { data: session, status } = useSession();
   const router = useRouter();
+  const { data: session, status } = useSession();
+  const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<DetailsProgramResponse>
   >({
@@ -95,8 +80,6 @@ export default function DetailsProgramPage({
     method: "GET",
     token,
   });
-  const [search, setSearch] = useState<string>("");
-  const [searchValue] = useDebounce(search, 800);
 
   useEffect(() => {
     if (searchValue) {
@@ -131,10 +114,10 @@ export default function DetailsProgramPage({
   ];
 
   function renderCellParticipants(
-    participant: ParticipantType,
+    participant: Participant,
     columnKey: React.Key,
   ) {
-    const cellValue = participant[columnKey as keyof ParticipantType];
+    const cellValue = participant[columnKey as keyof Participant];
 
     switch (columnKey) {
       case "user_id":
@@ -360,7 +343,7 @@ export default function DetailsProgramPage({
       const dateExport = new Date();
       const fileName = `Data Kode Akses Program ${data?.data.title} - ${formatDate(dateExport.toLocaleString())}.xlsx`;
       XLSX.writeFile(workbook, fileName);
-      toast.success("Data Partisipan Berhasil Di Export 🎉");
+      toast.success("Data Partisipan Berhasil Diexport 🎉");
     } catch (error) {
       console.error(error);
       toast.error("Uh oh! Terjadi Kesalahan, Silakan Ulangi 😵");
@@ -392,141 +375,160 @@ export default function DetailsProgramPage({
           <ButtonBack href="/programs" />
 
           <div className="grid divide-y-2 divide-dashed divide-gray/20">
-            <div className="inline-flex items-end gap-12 pb-8">
-              {data?.data.qr_code ? (
-                <div className="grid gap-2">
-                  <Image
-                    src={`${data?.data.qr_code}`}
-                    alt="qrcode image"
-                    width={130}
-                    height={130}
-                    className="aspect-square rounded-xl object-cover object-center"
-                  />
+            <div className="flex items-center justify-between gap-12">
+              <div className="inline-flex flex-1 items-end gap-12 pb-8">
+                {data?.data.qr_code ? (
+                  <div className="group relative overflow-hidden rounded-xl">
+                    <Image
+                      src={`${data?.data.qr_code}`}
+                      alt="qrcode image"
+                      width={160}
+                      height={160}
+                      loading="lazy"
+                      className="aspect-square object-cover object-center"
+                    />
 
-                  <Link
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      window.open(data.data.url_qr_code, "_blank");
-                    }}
-                    className="w-max justify-self-center text-sm font-bold leading-[170%] text-purple underline"
-                  >
-                    Link Join Grup!
-                  </Link>
-                </div>
-              ) : (
-                <div className="flex aspect-square size-[130px] flex-col items-center justify-center gap-2 rounded-xl bg-gray/10">
-                  <ImageBroken
-                    weight="bold"
-                    size={28}
-                    className="text-gray/50"
-                  />
-                  <p className="text-[12px] font-bold text-gray/50">
-                    Belum ada QR!
-                  </p>
-                </div>
-              )}
+                    <Link
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.open(data.data.url_qr_code, "_blank");
+                      }}
+                      className="absolute left-0 top-0 hidden h-full w-full items-center justify-center bg-purple text-sm font-semibold text-white backdrop-blur-sm group-hover:flex"
+                    >
+                      Klik Link Grup!
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="flex aspect-square size-[160px] flex-col items-center justify-center gap-2 rounded-xl bg-gray/10">
+                    <ImageBroken
+                      weight="bold"
+                      size={28}
+                      className="text-gray/50"
+                    />
+                    <p className="text-[12px] font-bold text-gray/50">
+                      Belum ada QR!
+                    </p>
+                  </div>
+                )}
 
-              <div className="grid w-max">
-                <h4 className="max-w-[700px] text-[28px] font-bold leading-[120%] -tracking-wide text-black">
-                  {data?.data.title}
-                </h4>
+                <div className="grid w-max">
+                  <h4 className="max-w-[700px] text-[24px] font-bold leading-[120%] -tracking-wide text-black">
+                    {data?.data.title}
+                  </h4>
 
-                <div className="grid grid-rows-2 divide-y-2 divide-dashed divide-gray/10">
-                  <div className="grid grid-cols-3 items-end gap-12 pb-4">
-                    {data?.data.type === "free" ? (
+                  <div className="grid grid-rows-2 divide-y-2 divide-dashed divide-gray/10">
+                    <div className="grid grid-cols-3 items-end gap-12 pb-4">
+                      {data?.data.type === "free" ? (
+                        <Chip
+                          variant="flat"
+                          color="default"
+                          size="sm"
+                          startContent={
+                            <Tag
+                              weight="bold"
+                              size={16}
+                              className="text-black"
+                            />
+                          }
+                          classNames={{
+                            base: "px-2 gap-1",
+                            content: "font-bold text-black",
+                          }}
+                        >
+                          Gratis
+                        </Chip>
+                      ) : data?.data.price ? (
+                        <h5 className="font-extrabold text-purple">
+                          {formatRupiah(data?.data.price)}
+                        </h5>
+                      ) : null}
+
+                      <div className="inline-flex items-center gap-1 text-gray">
+                        <Notepad weight="bold" size={18} />
+                        <p className="text-sm font-bold">
+                          {data?.data.total_tests} Ujian
+                        </p>
+                      </div>
+
                       <Chip
                         variant="flat"
-                        color="default"
+                        color={data?.data.is_active ? "success" : "danger"}
                         size="sm"
                         startContent={
-                          <Tag weight="bold" size={16} className="text-black" />
+                          data?.data.is_active ? (
+                            <CheckCircle weight="fill" size={16} />
+                          ) : (
+                            <XCircle weight="fill" size={16} />
+                          )
                         }
                         classNames={{
                           base: "px-2 gap-1",
-                          content: "font-bold text-black",
+                          content: "font-bold",
                         }}
                       >
-                        Gratis
+                        {data?.data.is_active
+                          ? "Program Aktif"
+                          : "Program Tidak Aktif"}
                       </Chip>
-                    ) : data?.data.price ? (
-                      <h5 className="font-extrabold text-purple">
-                        {formatRupiah(data?.data.price)}
-                      </h5>
-                    ) : null}
-
-                    <div className="inline-flex items-center gap-1 text-gray">
-                      <Notepad weight="bold" size={18} />
-                      <p className="text-sm font-bold">
-                        {data?.data.total_tests} Ujian
-                      </p>
                     </div>
 
-                    <Chip
-                      variant="flat"
-                      color={data?.data.is_active ? "success" : "danger"}
-                      size="sm"
-                      startContent={
-                        data?.data.is_active ? (
-                          <CheckCircle weight="fill" size={16} />
-                        ) : (
-                          <XCircle weight="fill" size={16} />
-                        )
-                      }
-                      classNames={{
-                        base: "px-2 gap-1",
-                        content: "font-bold",
-                      }}
-                    >
-                      {data?.data.is_active
-                        ? "Program Aktif"
-                        : "Program Tidak Aktif"}
-                    </Chip>
-                  </div>
-
-                  <div className="grid grid-cols-3 items-end gap-12 pt-2">
-                    <div>
-                      <p className="text-[12px] font-medium text-gray">
-                        Total Partisipan:
-                      </p>
-
-                      <div className="inline-flex items-center gap-1 text-gray">
-                        <Users weight="bold" size={18} />
-                        <p className="text-sm font-bold">
-                          {data?.data.total_users}
+                    <div className="grid grid-cols-3 items-end gap-12 pt-2">
+                      <div>
+                        <p className="text-[12px] font-medium text-gray">
+                          Total Partisipan:
                         </p>
+
+                        <div className="inline-flex items-center gap-1 text-gray">
+                          <Users weight="bold" size={18} />
+                          <p className="text-sm font-bold">
+                            {data?.data.total_users}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <p className="text-[12px] font-medium text-gray">
-                        Approved Partisipan:
-                      </p>
-
-                      <div className="inline-flex items-center gap-1 text-gray">
-                        <Users weight="bold" size={18} />
-                        <p className="text-sm font-bold">
-                          {data?.data.total_approved_users}
+                      <div>
+                        <p className="text-[12px] font-medium text-gray">
+                          Approved Partisipan:
                         </p>
+
+                        <div className="inline-flex items-center gap-1 text-gray">
+                          <Users weight="bold" size={18} />
+                          <p className="text-sm font-bold">
+                            {data?.data.total_approved_users}
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <p className="text-[12px] font-medium text-gray">
-                        Pending Partisipan:
-                      </p>
-
-                      <div className="inline-flex items-center gap-1 text-gray">
-                        <Users weight="bold" size={18} />
-                        <p className="text-sm font-bold">
-                          {(data?.data.total_users ?? 0) -
-                            (data?.data.total_approved_users ?? 0)}
+                      <div>
+                        <p className="text-[12px] font-medium text-gray">
+                          Pending Partisipan:
                         </p>
+
+                        <div className="inline-flex items-center gap-1 text-gray">
+                          <Users weight="bold" size={18} />
+                          <p className="text-sm font-bold">
+                            {(data?.data.total_users ?? 0) -
+                              (data?.data.total_approved_users ?? 0)}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              <Button
+                variant="solid"
+                color="secondary"
+                startContent={<PencilLine weight="bold" size={18} />}
+                onClick={() =>
+                  router.push(`/programs/edit/${data?.data.program_id}`)
+                }
+                className="font-bold"
+              >
+                Edit Program
+              </Button>
             </div>
 
             <div className="grid gap-4 py-8">
@@ -535,8 +537,13 @@ export default function DetailsProgramPage({
               </h4>
 
               <div className="grid gap-2">
-                {data?.data.tests.map((test: TestType) => (
-                  <CardTest key={test.test_id} test={test} />
+                {data?.data.tests.map((test: Test) => (
+                  <CardTest
+                    key={test.test_id}
+                    test={test}
+                    token={token as string}
+                    mutate={mutate}
+                  />
                 ))}
               </div>
             </div>
@@ -613,11 +620,11 @@ export default function DetailsProgramPage({
                     <EmptyData text="Partisipan tidak ditemukan!" />
                   }
                 >
-                  {(item: ParticipantType) => (
-                    <TableRow key={item.user_id}>
+                  {(participant: Participant) => (
+                    <TableRow key={participant.user_id}>
                       {(columnKey) => (
                         <TableCell>
-                          {renderCellParticipants(item, columnKey)}
+                          {renderCellParticipants(participant, columnKey)}
                         </TableCell>
                       )}
                     </TableRow>

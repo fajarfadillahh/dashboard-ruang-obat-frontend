@@ -6,7 +6,9 @@ import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { CreateQuestion } from "@/types/question.type";
 import { fetcher } from "@/utils/fetcher";
+import { getError } from "@/utils/getError";
 import { getLocalTimeZone, today } from "@internationalized/date";
 import { Button, DatePicker, Input, Textarea } from "@nextui-org/react";
 import {
@@ -18,57 +20,35 @@ import {
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-
-export type CreateQuestion = {
-  question_id: string;
-  number: number;
-  type?: "text" | "image" | "video";
-  text?: string;
-  explanation: string;
-  options: {
-    text: string;
-    option_id: string;
-    is_correct: boolean;
-  }[];
-};
 
 export default function CreateTestPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [input, setInput] = useState({
+  const initialState = {
     title: "",
     description: "",
     start: "",
     end: "",
     duration: 0,
-  });
-  const [questions, setQuestions] = useState<CreateQuestion[]>([]);
+  };
+
+  const initialQuestions: CreateQuestion[] = [];
+
+  const [input, setInput] = useState(initialState);
+  const [questions, setQuestions] = useState(initialQuestions);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const input = localStorage.getItem("input");
-    const questions = localStorage.getItem("questions");
+    const storedInput = localStorage.getItem("input");
+    const storedQuestions = localStorage.getItem("questions");
 
-    if (questions) {
-      setQuestions(JSON.parse(questions) as CreateQuestion[]);
-    }
-
-    if (input) {
-      setInput(
-        JSON.parse(input) as {
-          title: string;
-          description: string;
-          start: string;
-          end: string;
-          duration: number;
-        },
-      );
-    }
+    if (storedInput) setInput(JSON.parse(storedInput));
+    if (storedQuestions) setQuestions(JSON.parse(storedQuestions));
   }, []);
 
   useEffect(() => {
@@ -76,69 +56,60 @@ export default function CreateTestPage({
       Object.values(input).every((value) => value !== "") &&
       questions.length > 0 &&
       input.duration > 0;
-
     setIsButtonDisabled(!isFormValid);
   }, [input, questions]);
 
   function handleAddQuestion(question: CreateQuestion) {
-    setQuestions((prev) => prev.concat(question));
-    localStorage.setItem(
-      "questions",
-      JSON.stringify(questions.concat(question)),
-    );
+    setQuestions((prev) => [...prev, question]);
+    localStorage.setItem("questions", JSON.stringify([...questions, question]));
     toast.success("Berhasil Menambahkan Ke Draft");
   }
 
   function handleEditQuestion(question: CreateQuestion, index: number) {
-    const mapping = [...questions];
-
-    mapping[index] = question;
-
-    setQuestions(mapping);
-    localStorage.setItem("questions", JSON.stringify(mapping));
-    toast.success("Soal Berhasil Di Edit");
+    const updatedQuestions = [...questions];
+    updatedQuestions[index] = question;
+    setQuestions(updatedQuestions);
+    localStorage.setItem("questions", JSON.stringify(updatedQuestions));
+    toast.success("Soal Berhasil Diedit");
   }
 
-  const handleRemoveQuestion = useCallback(
-    (index: number) => {
-      const filters = questions.filter((_, findex) => findex != index);
-
-      setQuestions(filters);
-      localStorage.setItem("questions", JSON.stringify(filters));
-      toast.success("Soal Berhasil Di Hapus");
-    },
-    [questions],
-  );
+  function handleRemoveQuestion(index: number) {
+    const updatedQuestions = questions.filter((_, i) => i !== index);
+    setQuestions(updatedQuestions);
+    localStorage.setItem("questions", JSON.stringify(updatedQuestions));
+    toast.success("Soal Berhasil Dihapus");
+  }
 
   async function handleSaveTest() {
     setLoading(true);
 
     try {
+      const payload = {
+        ...input,
+        questions: questions.map((question, index) => ({
+          ...question,
+          number: index + 1,
+          type: question.type,
+        })),
+        by: status === "authenticated" ? session.user.fullname : "",
+      };
+
       await fetcher({
         url: "/admin/tests",
         method: "POST",
-        data: {
-          ...input,
-          questions: questions.map((question, index) => {
-            return {
-              ...question,
-              number: index + 1,
-              type: question.type,
-            };
-          }),
-          by: status == "authenticated" ? session.user.fullname : "",
-        },
+        data: payload,
         token,
       });
 
-      toast.success("Ujian Berhasil Di Buat");
+      toast.success("Ujian Berhasil Dibuat");
       localStorage.removeItem("input");
       localStorage.removeItem("questions");
-      router.back();
+      router.push("/tests");
     } catch (error) {
       setLoading(false);
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.log(error);
+
+      toast.error(getError(error));
     }
   }
 
@@ -276,7 +247,7 @@ export default function CreateTestPage({
 
                   <div className="inline-flex gap-2">
                     <ModalInputQuestion
-                      {...{ handleAddQuestion, type: "create", token: token }}
+                      {...{ handleAddQuestion, page: "create", token: token }}
                     />
 
                     <ModalConfirm
@@ -345,7 +316,7 @@ export default function CreateTestPage({
                             question,
                             handleEditQuestion,
                             index,
-                            type: "create",
+                            page: "create",
                             token: token,
                           }}
                         />
@@ -357,7 +328,7 @@ export default function CreateTestPage({
                           size="sm"
                           onClick={() => {
                             handleRemoveQuestion(index);
-                            toast.success("Soal Berhasil Di Hapus");
+                            toast.success("Soal Berhasil Dihapus");
                           }}
                         >
                           <Trash

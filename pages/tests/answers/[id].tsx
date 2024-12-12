@@ -7,29 +7,20 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { CreateQuestion } from "@/pages/tests/create";
 import { SuccessResponse } from "@/types/global.type";
-import { Question } from "@/types/question.type";
+import { TestAnswerResponse } from "@/types/test.type";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { ParsedUrlQuery } from "querystring";
 import { useState } from "react";
 import useSWR from "swr";
 
-type AnswersResponse = {
-  result_id: string;
-  score: number;
-  user_id: string;
-  fullname: string;
-  university: string;
-  total_correct: number;
-  total_incorrect: number;
-  questions: Question[];
-};
-
 export default function AnswersPage({
   token,
   params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { data, error, isLoading } = useSWR<SuccessResponse<AnswersResponse>>({
+  const { data, error, isLoading } = useSWR<
+    SuccessResponse<TestAnswerResponse>
+  >({
     url: `/admin/results/${params?.id as string}`,
     method: "GET",
     token,

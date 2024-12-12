@@ -11,6 +11,15 @@ export type Question = {
   is_correct: boolean;
 };
 
+export type CreateQuestion = {
+  question_id: string;
+  number: number;
+  type?: "text" | "image" | "video";
+  text?: string;
+  explanation: string;
+  options: Option[];
+};
+
 export type Option = {
   option_id: string;
   text: string;

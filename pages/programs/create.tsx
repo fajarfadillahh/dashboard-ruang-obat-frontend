@@ -6,8 +6,9 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
-import { TestType } from "@/types/test.type";
+import { Test, TestsResponse } from "@/types/test.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import {
@@ -34,19 +35,11 @@ import { ParsedUrlQuery } from "querystring";
 import { ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { useDebounce } from "use-debounce";
 
 type InputType = {
   title: string;
   price: number;
   url_qr_code?: string;
-};
-
-type TestsResponse = {
-  tests: TestType[];
-  page: number;
-  total_tests: number;
-  total_pages: number;
 };
 
 function getUrl(query: ParsedUrlQuery) {
@@ -62,6 +55,8 @@ export default function CreateProgramPage({
   query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
+  const router = useRouter();
+  const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading } = useSWR<SuccessResponse<TestsResponse>>({
     url: getUrl(query) as string,
     method: "GET",
@@ -72,9 +67,6 @@ export default function CreateProgramPage({
     price: 0,
     url_qr_code: "",
   });
-  const router = useRouter();
-  const [search, setSearch] = useState<string>("");
-  const [searchValue] = useDebounce(search, 800);
   const [selectedType, setSelectedType] = useState<string>("");
   const [value, setValue] = useState<Selection>(new Set([]));
   const [loading, setLoading] = useState(false);
@@ -143,7 +135,7 @@ export default function CreateProgramPage({
       });
 
       setQrcodeFile(null);
-      toast.success("Program Berhasil Di Buat");
+      toast.success("Program Berhasil Dibuat");
       router.push("/programs");
     } catch (error) {
       setLoading(false);
@@ -369,7 +361,7 @@ export default function CreateProgramPage({
                   items={data?.data.tests}
                   emptyContent={<EmptyData text="Ujian tidak ditemukan!" />}
                 >
-                  {(item: TestType) => (
+                  {(item: Test) => (
                     <TableRow key={item.test_id}>
                       {(columnKey) => (
                         <TableCell>{getKeyValue(item, columnKey)}</TableCell>

@@ -3,6 +3,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { DashboardResponse } from "@/types/dashboard.type";
 import { SuccessResponse } from "@/types/global.type";
 import { formatDayWithoutTime } from "@/utils/formatDate";
 import { Button } from "@nextui-org/react";
@@ -17,13 +18,6 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
-
-type DashboardResponse = {
-  total_programs: number;
-  total_tests: number;
-  total_online_users: number;
-  total_users: number;
-};
 
 export default function DashboardPage({
   token,
