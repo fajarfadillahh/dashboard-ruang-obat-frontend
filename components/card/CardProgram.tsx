@@ -14,8 +14,8 @@ import {
   DropdownTrigger,
 } from "@nextui-org/react";
 import {
+  BookBookmark,
   CheckCircle,
-  ClipboardText,
   PencilLine,
   Power,
   Prohibit,
@@ -74,7 +74,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
     >
       <div className="flex items-start gap-6">
         {program.is_active ? (
-          <ClipboardText weight="bold" size={28} className="text-purple" />
+          <BookBookmark weight="bold" size={28} className="text-purple" />
         ) : (
           <Prohibit weight="bold" size={28} className="text-danger" />
         )}
@@ -82,42 +82,41 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
         <div className="grid gap-4">
           <Link
             href={`/programs/details/${encodeURIComponent(program.program_id)}`}
-            className={`line-clamp-1 text-[20px] font-bold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
+            className={`line-clamp-1 text-xl font-bold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
           >
             {program.title}
           </Link>
 
           <div className="grid grid-cols-[repeat(3,120px),max-content] items-start gap-2">
             <div className="grid gap-1">
-              <span className="text-[12px] font-medium text-gray">
+              <span className="text-xs font-medium text-gray">
                 Harga Program:
               </span>
               {program.type == "free" ? (
                 <Chip
                   variant="flat"
-                  color="default"
                   size="sm"
                   startContent={
-                    <Tag weight="bold" size={16} className="text-black" />
+                    <Tag weight="fill" size={16} className="text-black" />
                   }
                   classNames={{
                     base: "px-2 gap-1",
-                    content: "font-semibold text-black",
+                    content: "font-bold text-black",
                   }}
                 >
                   Gratis
                 </Chip>
-              ) : program.price ? (
+              ) : (
                 <h5
                   className={`text-sm font-extrabold ${program.is_active ? "text-purple" : "text-danger"}`}
                 >
-                  {formatRupiah(program.price)}
+                  {formatRupiah(program.price as number)}
                 </h5>
-              ) : null}
+              )}
             </div>
 
             <div className="grid gap-1">
-              <span className="text-[12px] font-medium text-gray">
+              <span className="text-xs font-medium text-gray">
                 Jumlah Ujian:
               </span>
               <h5 className="text-sm font-semibold text-black">
@@ -126,7 +125,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
             </div>
 
             <div className="grid gap-1">
-              <span className="text-[12px] font-medium text-gray">
+              <span className="text-xs font-medium text-gray">
                 Status Program:
               </span>
               <Chip
@@ -142,7 +141,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
                 }
                 classNames={{
                   base: "px-2 gap-1",
-                  content: "font-semibold",
+                  content: "font-bold",
                 }}
               >
                 {program.is_active ? "Aktif" : "Tidak Aktif"}
@@ -150,7 +149,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
             </div>
 
             <div className="grid gap-1">
-              <span className="text-[12px] font-medium text-gray">
+              <span className="text-xs font-medium text-gray">
                 Dibuat Pada:
               </span>
               <h5 className="text-sm font-semibold text-black">

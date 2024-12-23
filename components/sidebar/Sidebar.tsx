@@ -13,13 +13,13 @@ export default function Sidebar() {
   const route = SidebarMenu(adminId);
 
   return (
-    <div className="static left-0 top-0 z-50 grid h-screen min-w-[250px] grid-rows-[24px_1fr] gap-[30px] border-r border-gray/15 bg-gray/5 px-[20px] py-[30px]">
+    <div className="static left-0 top-0 z-50 grid h-screen min-w-[250px] grid-rows-[24px_1fr] gap-8 border-r border-gray/15 bg-gray/5 [padding:2rem_1rem]">
       <Link
         href="/"
         className="inline-flex items-center gap-2 justify-self-center"
       >
         <LogoRuangobat className="h-auto w-[32px] text-gray/20" />
-        <h1 className="text-[20px] font-extrabold -tracking-wide text-black">
+        <h1 className="text-xl font-extrabold -tracking-wide text-black">
           RuangObat<span className="text-purple">.</span>
         </h1>
       </Link>
@@ -36,7 +36,7 @@ export default function Sidebar() {
               <Link
                 key={index}
                 href={item.path}
-                className={`flex h-10 items-center justify-between rounded-xl px-3 py-2 ${
+                className={`flex h-10 items-center justify-between rounded-xl [padding:0.5rem_1rem] ${
                   router.asPath.includes(item.path)
                     ? "bg-purple text-white hover:bg-purple/90"
                     : "bg-transparent text-gray hover:bg-gray/10"

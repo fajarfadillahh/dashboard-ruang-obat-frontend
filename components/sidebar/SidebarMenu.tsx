@@ -1,10 +1,10 @@
 import {
+  BookBookmark,
   ChatCircleText,
   ClipboardText,
   Clock,
   House,
   Icon,
-  ListChecks,
   User,
   Users,
 } from "@phosphor-icons/react";
@@ -27,7 +27,7 @@ export default function SidebarMenu(adminId: string): SidebarMenuType[] {
     {
       label: "Program",
       path: "/programs",
-      icon: ListChecks,
+      icon: BookBookmark,
     },
     {
       label: "Ujian",
