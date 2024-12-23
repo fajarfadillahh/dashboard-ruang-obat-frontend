@@ -1,5 +1,5 @@
-import { getErrorMessage } from "@/utils/ errorHandler";
 import { customStyleInput } from "@/utils/customStyleInput";
+import { getError } from "@/utils/getError";
 import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input } from "@nextui-org/react";
 import { Eye, EyeSlash, IconContext, Lock, User } from "@phosphor-icons/react";
@@ -45,10 +45,9 @@ export default function LoginPage() {
       }
     } catch (error: any) {
       setLoading(false);
+      console.error(error);
 
-      if (error?.status_code) {
-        return toast.error(getErrorMessage(error?.status_code));
-      }
+      toast.error(getError(error));
     }
   }
 

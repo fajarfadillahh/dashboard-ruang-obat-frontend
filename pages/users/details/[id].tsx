@@ -8,9 +8,9 @@ import Layout from "@/components/wrapper/Layout";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
 import { SuccessResponse } from "@/types/global.type";
 import { DetailsUserResponse } from "@/types/user.type";
-import { getErrorMessage } from "@/utils/ errorHandler";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import { Button, Checkbox, Input } from "@nextui-org/react";
 import {
   ArrowClockwise,
@@ -69,15 +69,7 @@ export default function DetailsUserPage({
       setLoading(false);
       console.error(error);
 
-      if (error?.status_code) {
-        const customMessages = {
-          400: "Email atau Nomor Telpon Sudah Digunakan",
-        };
-
-        toast.error(getErrorMessage(error?.status_code, customMessages), {
-          duration: 6000,
-        });
-      }
+      toast.error(getError(error), { duration: 5000 });
     }
   }
 
@@ -103,9 +95,7 @@ export default function DetailsUserPage({
       setLoading(false);
       console.error(error);
 
-      if (error?.status_code) {
-        return toast.error(getErrorMessage(error?.status_code));
-      }
+      toast.error(getError(error));
     }
   }
 
