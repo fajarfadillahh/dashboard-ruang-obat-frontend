@@ -1,6 +1,9 @@
-import { ProgramType } from "@/types/program.type";
+import { SuccessResponse } from "@/types/global.type";
+import { Program, ProgramsResponse } from "@/types/program.type";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
@@ -21,14 +24,45 @@ import {
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import toast from "react-hot-toast";
+import { KeyedMutator } from "swr";
 
 interface ProgramProps {
-  program: ProgramType;
-  onStatusChange: () => void;
+  program: Program;
+  token: string;
+  mutate: KeyedMutator<SuccessResponse<ProgramsResponse>>;
 }
 
-export default function CardProgram({ program, onStatusChange }: ProgramProps) {
+export default function CardProgram({ program, token, mutate }: ProgramProps) {
   const router = useRouter();
+
+  async function handleUpdateStatus(
+    program_id: string,
+    is_active: boolean = true,
+  ) {
+    try {
+      const paylod = {
+        program_id: program_id,
+        is_active: !is_active,
+      };
+
+      await fetcher({
+        url: "/admin/programs/status",
+        method: "PATCH",
+        data: paylod,
+        token,
+      });
+
+      mutate();
+      is_active
+        ? toast.success("Program berhasil dinonaktifkan")
+        : toast.success("Program berhasil diaktifkan");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error(getError(error));
+    }
+  }
 
   return (
     <div
@@ -152,10 +186,12 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
             }}
           >
             <DropdownSection aria-label="action zone" title="Anda Yakin?">
-              <DropdownItem onClick={onStatusChange}>
-                {program.is_active
-                  ? "Non-aktifkan Program"
-                  : "Aktifkan Program"}
+              <DropdownItem
+                onClick={() =>
+                  handleUpdateStatus(program.program_id, program.is_active)
+                }
+              >
+                {program.is_active ? "Nonaktifkan program" : "Aktifkan program"}
               </DropdownItem>
             </DropdownSection>
           </DropdownMenu>
