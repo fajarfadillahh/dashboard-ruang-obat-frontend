@@ -40,7 +40,7 @@ export default function LoginPage() {
       }
 
       if (response?.ok) {
-        toast.success("Yeay, Anda Berhasil Login!");
+        toast.success("Yeay, anda berhasil login!");
         return router.push("/dashboard");
       }
     } catch (error: any) {
