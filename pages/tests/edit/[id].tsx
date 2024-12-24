@@ -3,7 +3,7 @@ import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingData from "@/components/loading/LoadingData";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";

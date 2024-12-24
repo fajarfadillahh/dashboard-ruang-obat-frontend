@@ -1,6 +1,6 @@
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalExportDataUser from "@/components/modal/ModalExportDataUser";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";

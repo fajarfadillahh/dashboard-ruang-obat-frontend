@@ -2,7 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalJoiningRequirement from "@/components/modal/ModalJoiningRequirement";

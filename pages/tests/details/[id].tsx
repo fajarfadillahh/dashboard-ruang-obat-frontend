@@ -2,7 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
