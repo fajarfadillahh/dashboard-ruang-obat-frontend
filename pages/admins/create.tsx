@@ -2,35 +2,56 @@ import ButtonBack from "@/components/button/ButtonBack";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
+import { validateFullname, validatePassword } from "@/utils/formValidator";
+import { getError } from "@/utils/getError";
 import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { FloppyDisk, Lock, User, UserGear } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-type InputType = {
+type InputState = {
   fullname: string;
   role: string;
   password: string;
   access_key: string;
 };
 
+type ErrorState = {
+  fullname?: string;
+  password?: string;
+};
+
 export default function CreateAdminPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const [input, setInput] = useState<InputType>({
+  const [input, setInput] = useState<InputState>({
     fullname: "",
     role: "",
     password: "",
     access_key: "",
   });
   const [loading, setLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<any>();
+  const [errors, setErrors] = useState<ErrorState>({});
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+
+  function handleInputChange(
+    e: ChangeEvent<HTMLInputElement>,
+    customValidator?: (value: string) => string | null,
+  ) {
+    const { name, value } = e.target;
+    setInput((prev) => ({ ...prev, [name]: value }));
+
+    if (customValidator) {
+      const error = customValidator(value);
+      setErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  }
 
   async function handleCreateAdmin() {
     setLoading(true);
@@ -43,16 +64,16 @@ export default function CreateAdminPage({
         data: input,
       });
 
-      toast.success("Berhasil Membuat Admin");
+      toast.success("Admin berhasil dibuat");
       router.push("/admins");
     } catch (error: any) {
       setLoading(false);
-
-      if (error?.status_code === 400) return toast.error("Kunci Akses Salah!");
-      if (error?.status_code === 403)
-        return toast.error("Kunci Akses Ditolak! Silakan Coba Lagi");
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
+
+      if (error?.status_code === 400) return toast.error("Kunci akses salah!");
+      if (error?.status_code === 403)
+        return toast.error("Kunci akses ditolak! silakan coba lagi");
+      toast.error(getError(error));
     }
   }
 
@@ -86,12 +107,7 @@ export default function CreateAdminPage({
                   labelPlacement="outside"
                   placeholder="Masukan Nama Lengkap"
                   name="fullname"
-                  onChange={(e) =>
-                    setInput({
-                      ...input,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
+                  onChange={(e) => handleInputChange(e, validateFullname)}
                   startContent={
                     <User
                       weight="bold"
@@ -99,10 +115,9 @@ export default function CreateAdminPage({
                       className="text-default-600"
                     />
                   }
-                  classNames={{
-                    input:
-                      "font-semibold placeholder:font-normal placeholder:text-default-600",
-                  }}
+                  classNames={customStyleInput}
+                  isInvalid={!!errors.fullname}
+                  errorMessage={errors.fullname}
                 />
 
                 <Select
@@ -140,37 +155,13 @@ export default function CreateAdminPage({
                 labelPlacement="outside"
                 placeholder="Masukan Kata Sandi"
                 name="password"
-                onChange={(e) => {
-                  setInput({
-                    ...input,
-                    [e.target.name]: e.target.value,
-                  });
-
-                  if (e.target.value.length < 8) {
-                    setErrors({
-                      ...errors,
-                      password: "Minimal 8 karakter",
-                    });
-                  } else {
-                    setErrors({
-                      ...errors,
-                      password: null,
-                    });
-                  }
-                }}
-                isInvalid={
-                  errors ? (errors.password ? true : false) : undefined
-                }
-                errorMessage={
-                  errors ? (errors.password ? errors.password : null) : null
-                }
+                onChange={(e) => handleInputChange(e, validatePassword)}
                 startContent={
                   <Lock weight="bold" size={18} className="text-default-600" />
                 }
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-normal placeholder:text-default-600",
-                }}
+                classNames={customStyleInput}
+                isInvalid={!!errors.password}
+                errorMessage={errors.password}
               />
 
               <Input
@@ -191,17 +182,13 @@ export default function CreateAdminPage({
                 startContent={
                   <Lock weight="bold" size={18} className="text-default-600" />
                 }
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-normal placeholder:text-default-600",
-                }}
+                classNames={customStyleInput}
               />
             </div>
 
             <Button
               isLoading={loading}
               isDisabled={isButtonDisabled || loading}
-              variant="solid"
               color="secondary"
               startContent={
                 loading ? null : <FloppyDisk weight="bold" size={18} />

@@ -11,6 +11,7 @@ import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Table,
@@ -160,10 +161,11 @@ export default function AdminsPage({
       });
 
       mutate();
-      toast.success("Berhasil Menghapus Admin");
-    } catch (error) {
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
+      toast.success("Admin berhasil dihapus");
+    } catch (error: any) {
       console.error(error);
+
+      toast.error(getError(error));
     }
   }
 
@@ -209,7 +211,6 @@ export default function AdminsPage({
               />
 
               <Button
-                variant="solid"
                 color="secondary"
                 startContent={<Plus weight="bold" size={16} />}
                 onClick={() => router.push("/admins/create")}

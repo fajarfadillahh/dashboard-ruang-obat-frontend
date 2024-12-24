@@ -3,6 +3,17 @@ export function validateEmail(value: string): string | null {
   return value && !emailRegex.test(value) ? "Email tidak valid" : null;
 }
 
+export function validatePassword(value: string): string | null {
+  return value && value.length < 8 ? "Minimal 8 karakter" : null;
+}
+
+export function validateFullname(value: string): string | null {
+  const regexOnlyWordAndSpacing = /^[A-Za-z\s]+$/;
+  return value && !regexOnlyWordAndSpacing.test(value)
+    ? "Harus tanpa angka dan simbol"
+    : null;
+}
+
 export function validatePhoneNumber(value: string): string | null {
   const phoneNumberRegex = /^(?:\+62|62|0)8[1-9][0-9]{7,11}$/;
   return value && !phoneNumberRegex.test(value)
