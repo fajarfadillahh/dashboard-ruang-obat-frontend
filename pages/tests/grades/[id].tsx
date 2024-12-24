@@ -12,6 +12,7 @@ import { SuccessResponse } from "@/types/global.type";
 import { GradeTest, GradeTestResponse } from "@/types/test.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
@@ -104,7 +105,7 @@ export default function GradeUsersPage({
                 startContent={<XCircle weight="fill" size={16} />}
                 classNames={{
                   base: "px-2 gap-1",
-                  content: "font-semibold capitalize",
+                  content: "font-bold capitalize",
                 }}
               >
                 Belum ada nilai
@@ -207,10 +208,11 @@ export default function GradeUsersPage({
       });
 
       mutate();
-      toast.success("Nilai Berhasil Dihapus");
-    } catch (error) {
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
+      toast.success("Nilai berhasil dihapus");
+    } catch (error: any) {
       console.error(error);
+
+      toast.error(getError(error));
     }
   }
 

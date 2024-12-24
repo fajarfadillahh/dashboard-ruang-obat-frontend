@@ -7,6 +7,7 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { CreateQuestion } from "@/types/question.type";
+import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
 import { getLocalTimeZone, today } from "@internationalized/date";
@@ -62,7 +63,7 @@ export default function CreateTestPage({
   function handleAddQuestion(question: CreateQuestion) {
     setQuestions((prev) => [...prev, question]);
     localStorage.setItem("questions", JSON.stringify([...questions, question]));
-    toast.success("Berhasil Menambahkan Ke Draft");
+    toast.success("Soal berhasil ditambahkan ke draft");
   }
 
   function handleEditQuestion(question: CreateQuestion, index: number) {
@@ -70,14 +71,14 @@ export default function CreateTestPage({
     updatedQuestions[index] = question;
     setQuestions(updatedQuestions);
     localStorage.setItem("questions", JSON.stringify(updatedQuestions));
-    toast.success("Soal Berhasil Diedit");
+    toast.success("Soal berhasil diedit");
   }
 
   function handleRemoveQuestion(index: number) {
     const updatedQuestions = questions.filter((_, i) => i !== index);
     setQuestions(updatedQuestions);
     localStorage.setItem("questions", JSON.stringify(updatedQuestions));
-    toast.success("Soal Berhasil Dihapus");
+    toast.success("Soal berhasil dihapus");
   }
 
   async function handleSaveTest() {
@@ -101,13 +102,13 @@ export default function CreateTestPage({
         token,
       });
 
-      toast.success("Ujian Berhasil Dibuat");
+      toast.success("Ujian berhasil dibuat");
       localStorage.removeItem("input");
       localStorage.removeItem("questions");
       router.push("/tests");
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      console.log(error);
+      console.error(error);
 
       toast.error(getError(error));
     }
@@ -137,10 +138,7 @@ export default function CreateTestPage({
                 label="Judul Ujian"
                 labelPlacement="outside"
                 placeholder="Contoh: Tryout Internal Ruangobat"
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-normal placeholder:text-default-600",
-                }}
+                classNames={customStyleInput}
                 className="flex-1"
                 onChange={(e) => {
                   setInput({
@@ -157,10 +155,7 @@ export default function CreateTestPage({
                 label="Deskripsi Ujian"
                 labelPlacement="outside"
                 placeholder="Ketikan Deskripsi Ujian..."
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-normal placeholder:text-default-600",
-                }}
+                classNames={customStyleInput}
                 onChange={(e) => {
                   setInput({
                     ...input,
@@ -212,7 +207,7 @@ export default function CreateTestPage({
                 />
 
                 <Input
-                  value={`${input.duration}`}
+                  value={input.duration.toString()}
                   isRequired
                   type="number"
                   variant="flat"
@@ -226,10 +221,7 @@ export default function CreateTestPage({
                       className="text-default-600"
                     />
                   }
-                  classNames={{
-                    input:
-                      "font-semibold placeholder:font-normal placeholder:text-default-600",
-                  }}
+                  classNames={customStyleInput}
                   onChange={(e) => {
                     setInput({
                       ...input,
@@ -254,7 +246,6 @@ export default function CreateTestPage({
                       trigger={
                         <Button
                           isDisabled={isButtonDisabled}
-                          variant="solid"
                           color="secondary"
                           startContent={
                             loading ? null : (
@@ -328,7 +319,7 @@ export default function CreateTestPage({
                           size="sm"
                           onClick={() => {
                             handleRemoveQuestion(index);
-                            toast.success("Soal Berhasil Dihapus");
+                            toast.success("Soal berhasil dihapus");
                           }}
                         >
                           <Trash

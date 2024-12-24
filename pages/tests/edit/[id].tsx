@@ -13,7 +13,9 @@ import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
 import { CreateQuestion } from "@/types/question.type";
 import { DetailsTestResponse } from "@/types/test.type";
+import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
+import { getError } from "@/utils/getError";
 import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
 import {
   Button,
@@ -95,24 +97,56 @@ export default function EditTestPage({
     setIsButtonDisabled(!isFormValid);
   }, [input, data]);
 
-  async function handleAddQuestion(question: CreateQuestion) {
+  async function handleEditTestData() {
+    setLoading(true);
+
     try {
+      const payload = {
+        ...input,
+        test_id: data?.data.test_id,
+        update_type: "update_test",
+        by: status == "authenticated" ? session.user.fullname : "",
+      };
+
       await fetcher({
         url: "/admin/tests",
         method: "PATCH",
         token,
-        data: {
-          test_id: data?.data.test_id,
-          update_type: "add_question",
-          questions: [{ ...question, type: question.type }],
-          by: status == "authenticated" ? session.user.fullname : "",
-        },
+        data: payload,
       });
+
       mutate();
-      toast.success("Soal Berhasil Ditambahkan");
-    } catch (error) {
+      toast.success("Data ujian berhasil diedit");
+    } catch (error: any) {
+      setLoading(false);
+      console.error(error);
+
+      toast.error(getError(error));
+    }
+  }
+
+  async function handleAddQuestion(question: CreateQuestion) {
+    try {
+      const payload = {
+        test_id: data?.data.test_id,
+        update_type: "add_question",
+        questions: [{ ...question, type: question.type }],
+        by: status == "authenticated" ? session.user.fullname : "",
+      };
+
+      await fetcher({
+        url: "/admin/tests",
+        method: "PATCH",
+        token,
+        data: payload,
+      });
+
+      mutate();
+      toast.success("Soal berhasil ditambahkan");
+    } catch (error: any) {
       console.log(error);
-      toast.error("Terjadi Kesalahan Saat Menambahkan Soal");
+
+      toast.error(getError(error));
     }
   }
 
@@ -123,57 +157,39 @@ export default function EditTestPage({
         method: "DELETE",
         token,
       });
+
       mutate();
       toast.success("Soal Berhasil Dihapus");
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
-      toast.error("Terjadi Kesalahan Saat Menghapus Soal");
+
+      toast.error(getError(error));
     }
   }
 
   async function handleEditQuestion(question: CreateQuestion, index: number) {
     try {
       const mappingQuestion = data?.data.questions[index];
+      const payload = {
+        test_id: data?.data.test_id,
+        update_type: "update_question",
+        questions: [{ ...mappingQuestion, ...question }],
+        by: status == "authenticated" ? session.user.fullname : "",
+      };
+
       await fetcher({
         url: "/admin/tests",
         method: "PATCH",
         token,
-        data: {
-          test_id: data?.data.test_id,
-          update_type: "update_question",
-          questions: [{ ...mappingQuestion, ...question }],
-          by: status == "authenticated" ? session.user.fullname : "",
-        },
+        data: payload,
       });
-      mutate();
-      toast.success("Soal Berhasil Diedit");
-    } catch (error) {
-      console.log(error);
-      toast.error("Terjadi Kesalahan Saat Mengubah Soal");
-    }
-  }
 
-  async function handleEditTestData() {
-    setLoading(true);
-
-    try {
-      await fetcher({
-        url: "/admin/tests",
-        method: "PATCH",
-        token,
-        data: {
-          test_id: data?.data.test_id,
-          update_type: "update_test",
-          ...input,
-          by: status == "authenticated" ? session.user.fullname : "",
-        },
-      });
       mutate();
-      toast.success("Data Ujian Berhasil Diedit");
-    } catch (error) {
-      setLoading(false);
+      toast.success("Soal berhasil diedit");
+    } catch (error: any) {
       console.log(error);
-      toast.error("Terjadi Kesalahan Saat Mengubah Data Ujian");
+
+      toast.error(getError(error));
     }
   }
 
@@ -254,10 +270,7 @@ export default function EditTestPage({
                         title: e.target.value,
                       });
                     }}
-                    classNames={{
-                      input:
-                        "font-semibold placeholder:font-normal placeholder:text-default-600",
-                    }}
+                    classNames={customStyleInput}
                     className="flex-1"
                   />
 
@@ -274,10 +287,7 @@ export default function EditTestPage({
                         description: e.target.value,
                       });
                     }}
-                    classNames={{
-                      input:
-                        "font-semibold placeholder:font-normal placeholder:text-default-600",
-                    }}
+                    classNames={customStyleInput}
                   />
 
                   <div className="grid grid-cols-3 gap-4">
@@ -360,10 +370,7 @@ export default function EditTestPage({
                           className="text-default-600"
                         />
                       }
-                      classNames={{
-                        input:
-                          "font-semibold placeholder:font-normal placeholder:text-default-600",
-                      }}
+                      classNames={customStyleInput}
                     />
                   </div>
 
@@ -371,7 +378,6 @@ export default function EditTestPage({
                     trigger={
                       <Button
                         isDisabled={isButtonDisabled}
-                        variant="solid"
                         color="secondary"
                         startContent={<Database weight="bold" size={18} />}
                         className="w-max justify-self-end font-bold"
@@ -456,7 +462,7 @@ export default function EditTestPage({
 
                   <div className="grid gap-4 overflow-y-scroll scrollbar-hide">
                     {data?.data.questions.length === 0 ? (
-                      <EmptyData text="Belum Ada Soal Di Ujian Ini" />
+                      <EmptyData text="Belum ada soal diujian ini" />
                     ) : (
                       data?.data.questions.map((question, index) => (
                         <CardQuestionPreview
@@ -514,7 +520,7 @@ export default function EditTestPage({
                                     </Button>
 
                                     <Button
-                                      color="secondary"
+                                      color="danger"
                                       onClick={() => {
                                         handleDeleteQuestion(
                                           data?.data.test_id,

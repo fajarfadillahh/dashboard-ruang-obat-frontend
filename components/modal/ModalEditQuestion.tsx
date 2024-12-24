@@ -171,7 +171,7 @@ export default function ModalEditQuestion({
                     <p className="font-medium text-black">Pembahasan</p>
 
                     <CKEditor
-                      value={explanation}
+                      value={explanation as string}
                       onChange={setExplanation}
                       token={`${token}`}
                     />
@@ -195,7 +195,6 @@ export default function ModalEditQuestion({
                 </Button>
 
                 <Button
-                  variant="solid"
                   color="secondary"
                   startContent={<FloppyDisk weight="bold" size={18} />}
                   onClick={() => {
@@ -203,8 +202,12 @@ export default function ModalEditQuestion({
                       {
                         text: text ? text : question.text,
                         options,
-                        explanation: explanation ? explanation : question.text,
+                        explanation: explanation
+                          ? explanation
+                          : question.explanation,
                         type: typeQuestion as "text" | "image" | "video",
+                        question_id: question.question_id,
+                        number: question.number,
                       },
                       index,
                     );

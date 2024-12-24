@@ -1,5 +1,5 @@
 import VideoComponent from "@/components/VideoComponent";
-import { CreateQuestion } from "@/pages/tests/create";
+import { CreateQuestion } from "@/types/question.type";
 import { Accordion, AccordionItem } from "@nextui-org/react";
 import { CheckCircle, XCircle } from "@phosphor-icons/react";
 import { Suspense } from "react";
@@ -81,7 +81,7 @@ export default function CardQuestionPreview({
             <div
               className="preventive-list preventive-table list-outside text-[16px] leading-[170%] text-black"
               dangerouslySetInnerHTML={{
-                __html: question.explanation,
+                __html: question.explanation as string,
               }}
             ></div>
           </AccordionItem>

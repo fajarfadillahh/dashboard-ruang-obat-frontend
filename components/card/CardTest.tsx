@@ -3,6 +3,7 @@ import { DetailsProgramResponse } from "@/types/program.type";
 import { Test, TestsResponse } from "@/types/test.type";
 import { fetcher } from "@/utils/fetcher";
 import { formatDateWithoutTime } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import { getStatusColor, getStatusIcon } from "@/utils/getStatus";
 import {
   Button,
@@ -41,23 +42,26 @@ export default function CardTest({ test, token, mutate }: TestProps) {
     is_active: boolean = true,
   ) {
     try {
+      const payload = {
+        test_id: test_id,
+        is_active: !is_active,
+      };
+
       await fetcher({
         url: "/admin/tests/status",
         method: "PATCH",
         token,
-        data: {
-          test_id: test_id,
-          is_active: !is_active,
-        },
+        data: payload,
       });
 
       mutate();
       is_active
-        ? toast.success("Ujian Berhasil Dinonaktifkan")
-        : toast.success("Ujian Berhasil Diaktifkan");
-    } catch (error) {
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
+        ? toast.success("Ujian berhasil dinonaktifkan")
+        : toast.success("Ujian berhasil diaktifkan");
+    } catch (error: any) {
       console.error(error);
+
+      toast.error(getError(error));
     }
   }
 
@@ -79,14 +83,14 @@ export default function CardTest({ test, token, mutate }: TestProps) {
         <div className="grid gap-6">
           <Link
             href={`/tests/details/${test.test_id}`}
-            className={`line-clamp-1 text-[20px] font-bold leading-[120%] text-black ${test.is_active ? "hover:text-purple" : "hover:text-danger"}`}
+            className={`line-clamp-1 text-xl font-bold leading-[120%] text-black ${test.is_active ? "hover:text-purple" : "hover:text-danger"}`}
           >
             {test.title}
           </Link>
 
           <div className="inline-flex items-start gap-6">
-            <div className="grid gap-[2px]">
-              <span className="text-[12px] font-medium text-gray">
+            <div className="grid gap-1">
+              <span className="text-xs font-medium text-gray">
                 Tanggal Mulai:
               </span>
               <h1 className="text-sm font-semibold text-black">
@@ -94,8 +98,8 @@ export default function CardTest({ test, token, mutate }: TestProps) {
               </h1>
             </div>
 
-            <div className="grid gap-[2px]">
-              <span className="text-[12px] font-medium text-gray">
+            <div className="grid gap-1">
+              <span className="text-xs font-medium text-gray">
                 Tanggal Selesai:
               </span>
               <h1 className="text-sm font-semibold text-black">
@@ -103,8 +107,8 @@ export default function CardTest({ test, token, mutate }: TestProps) {
               </h1>
             </div>
 
-            <div className="grid gap-[2px]">
-              <span className="text-[12px] font-medium text-gray">
+            <div className="grid gap-1">
+              <span className="text-xs font-medium text-gray">
                 Durasi Pengerjaan:
               </span>
               <h1 className="text-sm font-semibold text-black">
@@ -112,8 +116,8 @@ export default function CardTest({ test, token, mutate }: TestProps) {
               </h1>
             </div>
 
-            <div className="grid gap-[2px]">
-              <span className="text-[12px] font-medium text-gray">
+            <div className="grid gap-1">
+              <span className="text-xs font-medium text-gray">
                 Status Ujian:
               </span>
 
@@ -125,7 +129,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
                   startContent={getStatusIcon(test.status)}
                   classNames={{
                     base: "px-2 gap-1",
-                    content: "font-semibold capitalize",
+                    content: "font-bold capitalize",
                   }}
                 >
                   {test.status}
@@ -139,7 +143,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
                     startContent={<XCircle weight="fill" size={16} />}
                     classNames={{
                       base: "px-2 gap-1",
-                      content: "font-semibold capitalize",
+                      content: "font-bold capitalize",
                     }}
                   >
                     Tidak Aktif
@@ -179,7 +183,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
               <DropdownItem
                 onClick={() => handleUpdateStatus(test.test_id, test.is_active)}
               >
-                {test.is_active ? "Non-aktifkan Ujian" : "Aktifkan Ujian"}
+                {test.is_active ? "Nonaktifkan ujian" : "Aktifkan ujian"}
               </DropdownItem>
             </DropdownSection>
           </DropdownMenu>
