@@ -1,5 +1,7 @@
+import LoadingData from "@/components/loading/LoadingData";
 import { SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Checkbox,
@@ -38,14 +40,16 @@ export default function ModalExportDataUser({ token }: { token: string }) {
       });
 
       setColumns(response.data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching columns:", error);
+
+      toast.error(getError(error));
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleExport() {
+  async function handleExportDataUser() {
     try {
       const response: SuccessResponse<any[]> = await fetcher({
         url: "/admin/exports/users",
@@ -76,10 +80,10 @@ export default function ModalExportDataUser({ token }: { token: string }) {
       XLSX.utils.book_append_sheet(workbook, worksheet, "Data Pengguna");
 
       XLSX.writeFile(workbook, "Data Pengguna.xlsx");
-      toast.success("Data Pengguna Berhasil Di Export 🎉");
+      toast.success("Data pengguna berhasil diexport 🎉");
     } catch (error) {
       console.error(error);
-      toast.error("Uh oh! Terjadi Kesalahan, Silakan Ulangi 😵");
+      toast.error("Uh oh! Terjadi kesalahan, silakan ulangi 😵");
     }
   }
 
@@ -93,7 +97,6 @@ export default function ModalExportDataUser({ token }: { token: string }) {
     <>
       <Button
         color="secondary"
-        variant="solid"
         startContent={<Export weight="bold" size={18} />}
         onClick={onOpen}
         className="font-bold"
@@ -119,9 +122,7 @@ export default function ModalExportDataUser({ token }: { token: string }) {
 
               <ModalBody className="scrollbar-hide">
                 {loading ? (
-                  <div className="flex justify-center py-2 text-sm font-medium leading-[170%] text-black">
-                    Tunggu Sebentar...
-                  </div>
+                  <LoadingData />
                 ) : (
                   <div className="grid gap-6">
                     <p className="text-sm font-medium leading-[170%] text-gray">
@@ -161,8 +162,7 @@ export default function ModalExportDataUser({ token }: { token: string }) {
                 <Button
                   isDisabled={selected.length === 0}
                   color="secondary"
-                  variant="solid"
-                  onClick={handleExport}
+                  onClick={handleExportDataUser}
                   className="font-bold"
                 >
                   Export
