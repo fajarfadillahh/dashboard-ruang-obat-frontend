@@ -12,6 +12,7 @@ import { Session, SessionResponse } from "@/types/session.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Pagination,
@@ -165,7 +166,7 @@ export default function SessionPage({
                   onClick={() => handleDeleteSession(session.user_id)}
                   className="font-bold"
                 >
-                  Ya, Hapus Admin
+                  Ya, Hapus Session
                 </Button>
               </>
             )}
@@ -186,10 +187,11 @@ export default function SessionPage({
       });
 
       mutate();
-      toast.success("Session Berhasil Dihapus");
-    } catch (error) {
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
+      toast.success("Session berhasil dihapus");
+    } catch (error: any) {
       console.error(error);
+
+      toast.error(getError(error));
     }
   }
 
