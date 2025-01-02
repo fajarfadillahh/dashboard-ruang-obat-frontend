@@ -1,3 +1,3 @@
 export const customStyleInput = {
-  input: "font-semibold placeholder:font-semibold placeholder:text-gray",
+  input: "font-semibold placeholder:font-semibold !placeholder:text-black",
 };
