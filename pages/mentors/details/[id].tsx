@@ -78,12 +78,12 @@ export default function DetailsMentorPage({
 
                 <div className="grid gap-1">
                   <h1 className="font-bold text-black">Deskripsi Mentor</h1>
-                  <p
-                    className="text-sm font-medium leading-[170%] text-black"
+                  <div
+                    className="preventive-list preventive-table list-outside text-sm leading-[170%] text-black"
                     dangerouslySetInnerHTML={{
                       __html: data?.data.description as string,
                     }}
-                  ></p>
+                  ></div>
                 </div>
               </div>
 
