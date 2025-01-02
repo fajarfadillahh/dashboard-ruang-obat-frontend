@@ -144,7 +144,7 @@ export default function EditTestPage({
       mutate();
       toast.success("Soal berhasil ditambahkan");
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
 
       toast.error(getError(error));
     }
@@ -159,9 +159,9 @@ export default function EditTestPage({
       });
 
       mutate();
-      toast.success("Soal Berhasil Dihapus");
+      toast.success("Soal berhasil dihapus");
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
 
       toast.error(getError(error));
     }
@@ -187,7 +187,7 @@ export default function EditTestPage({
       mutate();
       toast.success("Soal berhasil diedit");
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
 
       toast.error(getError(error));
     }
