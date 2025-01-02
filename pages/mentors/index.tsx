@@ -10,7 +10,9 @@ import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import { Mentor, MentorResponse } from "@/types/mentor.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Pagination,
@@ -26,6 +28,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 
 function getUrl(query: ParsedUrlQuery) {
@@ -42,7 +45,9 @@ export default function MentorsPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const { setSearch, searchValue } = useSearch(800);
-  const { data, error, isLoading } = useSWR<SuccessResponse<MentorResponse>>({
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<MentorResponse>
+  >({
     url: getUrl(query),
     method: "GET",
     token,
@@ -181,8 +186,21 @@ export default function MentorsPage({
     }
   }
 
-  function handleDeleteMentor(id: string) {
-    alert("mentor terhapus");
+  async function handleDeleteMentor(id: string) {
+    try {
+      await fetcher({
+        url: `/admin/mentors/${id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      toast.success("Mentor berhasil dihapus");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error(getError(error));
+    }
   }
 
   if (error) {
