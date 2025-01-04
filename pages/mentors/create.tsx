@@ -2,17 +2,18 @@ import ButtonBack from "@/components/button/ButtonBack";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import getCroppedImg from "@/utils/cropImage";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
 import { Button, Input } from "@nextui-org/react";
-import { FloppyDisk, ImageSquare } from "@phosphor-icons/react";
+import { FloppyDisk } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import { useRouter } from "next/router";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 
 const CKEditor = dynamic(() => import("@/components/editor/CKEditor"), {
@@ -36,10 +37,13 @@ export default function CreateMentorPage({
     mentor_title: "",
   });
   const [description, setDescription] = useState("");
-  const [mentorImgFile, setMentorImgFile] = useState<File | null>();
-  const [imgPreview, setImgPreview] = useState<string | null>();
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const [fileImg, setFileImg] = useState<string | ArrayBuffer | null>();
+  const [cropImg, setCropImg] = useState({ x: 0, y: 0 });
+  const [zoomImg, setZoomImg] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
 
   useEffect(() => {
     const isFormValid = [
@@ -52,28 +56,39 @@ export default function CreateMentorPage({
     setButtonDisabled(!isFormValid);
   }, [input, description]);
 
+  function onCropComplete(croppedArea: any, croppedAreaPixels: any) {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }
+
   async function handleCreateMentor() {
     setLoading(true);
 
     try {
-      const fullname = session.data?.user.fullname;
       const formData = new FormData();
+      const fullname = session.data?.user.fullname;
+      
+      const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
+      const response = await fetch(croppedImage as string);
+      const blob = await response.blob();
+      const fileConvert = new File([blob], "mentor-img.jpg", {
+        type: "image/jpg",
+      });
 
       formData.append("fullname", input.fullname);
       formData.append("nickname", input.nickname);
       formData.append("mentor_title", input.mentor_title);
       formData.append("description", description);
-      formData.append("img_mentor", mentorImgFile as File);
+      formData.append("img_mentor", fileConvert);
       formData.append("by", fullname as string);
 
       await fetcher({
         url: "/admin/mentors",
         method: "POST",
         data: formData,
+        file: true,
         token,
       });
 
-      setMentorImgFile(null);
       toast.success("Mentor berhasil dibuat");
       router.push("/mentors");
     } catch (error: any) {
@@ -84,24 +99,8 @@ export default function CreateMentorPage({
     }
   }
 
-  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-
-    if (!file) {
-      setMentorImgFile(null);
-      setImgPreview(null);
-      return;
-    }
-    setMentorImgFile(file);
-
-    const imageUrl = URL.createObjectURL(file);
-    setImgPreview(imageUrl);
-
-    return () => URL.revokeObjectURL(imageUrl);
-  }
-
   return (
-    <Layout title="Buat Admin" className="scrollbar-hide">
+    <Layout title="Buat Mentor" className="scrollbar-hide">
       <Container>
         <section className="grid">
           <ButtonBack />
@@ -116,23 +115,19 @@ export default function CreateMentorPage({
             <div className="grid grid-cols-[300px_1fr] items-start gap-8 pt-8">
               <div className="grid gap-8">
                 <div className="grid gap-1">
-                  {imgPreview ? (
-                    <Image
-                      src={imgPreview as string}
-                      alt="preview qrcode image"
-                      width={300}
-                      height={300}
-                      className="aspect-square justify-self-center rounded-xl border-2 border-dashed border-gray/30 bg-gray/10 object-cover object-center p-1"
-                    />
-                  ) : (
-                    <div className="flex size-[300px] items-center justify-center rounded-xl border-2 border-gray/20">
-                      <ImageSquare
-                        weight="bold"
-                        size={48}
-                        className="text-gray/50"
+                  <div className="aspect-video size-[300px] rounded-xl border-2 border-dashed border-gray/20 p-1">
+                    <div className="relative flex h-full items-center justify-center overflow-hidden rounded-xl bg-gray/20">
+                      <Cropper
+                        image={fileImg as string}
+                        crop={cropImg}
+                        zoom={zoomImg}
+                        aspect={1 / 1}
+                        onCropChange={setCropImg}
+                        onCropComplete={onCropComplete}
+                        onZoomChange={setZoomImg}
                       />
                     </div>
-                  )}
+                  </div>
 
                   <p className="text-center text-sm font-medium leading-[170%] text-gray">
                     <strong className="mr-1 text-danger">*</strong>ratio gambar
@@ -150,7 +145,19 @@ export default function CreateMentorPage({
                     input:
                       "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
                   }}
-                  onChange={handleFileChange}
+                  onChange={(e) => {
+                    if (!e.target.value) return;
+
+                    const reader = new FileReader();
+                    reader.readAsDataURL(e.target.files?.[0] as File);
+                    reader.onload = () => {
+                      setFileImg(reader.result as string);
+                    };
+                    reader.onerror = function (error) {
+                      toast.error("Terjadi kesalahan saat memasukan gambar!");
+                      console.error(error);
+                    };
+                  }}
                 />
               </div>
 
@@ -224,7 +231,7 @@ export default function CreateMentorPage({
               onClick={handleCreateMentor}
               className="w-max justify-self-end font-bold"
             >
-              {loading ? "Tunggu Sebentar..." : "Buat Program"}
+              {loading ? "Tunggu Sebentar..." : "Buat Mentor"}
             </Button>
           </div>
         </section>

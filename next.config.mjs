@@ -11,6 +11,10 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "http",
+        hostname: "localhost",
+      },
+      {
+        protocol: "http",
         hostname: "dev.ruangobat.id",
       },
       {
