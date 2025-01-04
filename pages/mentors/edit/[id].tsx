@@ -97,17 +97,6 @@ export default function EditMentorPage({
       const formData = new FormData();
       const fullname = session.data?.user.fullname;
 
-      const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
-      const response = await fetch(croppedImage as string);
-      const blob = await response.blob();
-      const fileConvert = new File(
-        [blob],
-        `${data?.data.mentor_id}-mentor-img.jpg`,
-        {
-          type: "image/jpg",
-        },
-      );
-
       formData.append("mentor_id", data?.data.mentor_id as string);
       formData.append("fullname", input.fullname);
       formData.append("nickname", input.nickname);
@@ -117,6 +106,17 @@ export default function EditMentorPage({
 
       if (selected) {
         formData.append("with_image", "true");
+
+        const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
+        const response = await fetch(croppedImage as string);
+        const blob = await response.blob();
+        const fileConvert = new File(
+          [blob],
+          `${data?.data.mentor_id}-mentor-img.jpg`,
+          {
+            type: "image/jpg",
+          },
+        );
         formData.append("img_mentor", fileConvert);
       } else {
         formData.append("with_image", "false");
