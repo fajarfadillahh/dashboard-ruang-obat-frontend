@@ -1,7 +1,7 @@
 import CardProgram from "@/components/card/CardProgram";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -9,14 +9,12 @@ import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import { Program, ProgramsResponse } from "@/types/program.type";
-import { fetcher } from "@/utils/fetcher";
 import { Button, Pagination } from "@nextui-org/react";
 import { Plus } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
-import toast from "react-hot-toast";
 import useSWR from "swr";
 
 function getUrl(query: ParsedUrlQuery) {
@@ -48,31 +46,6 @@ export default function ProgramsPage({
       router.push("/programs");
     }
   }, [searchValue]);
-
-  async function handleUpdateStatus(
-    program_id: string,
-    is_active: boolean = true,
-  ) {
-    try {
-      await fetcher({
-        url: "/admin/programs/status",
-        method: "PATCH",
-        token,
-        data: {
-          program_id: program_id,
-          is_active: !is_active,
-        },
-      });
-
-      mutate();
-      is_active
-        ? toast.success("Program Berhasil Dinonaktifkan")
-        : toast.success("Program Berhasil Diaktifkan");
-    } catch (error) {
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
-      console.error(error);
-    }
-  }
 
   if (error) {
     return (
@@ -111,11 +84,10 @@ export default function ProgramsPage({
               />
 
               <Button
-                variant="solid"
                 color="secondary"
                 startContent={<Plus weight="bold" size={18} />}
                 onClick={() => router.push("/programs/create")}
-                className="font-semibold"
+                className="font-bold"
               >
                 Tambah Program
               </Button>
@@ -129,9 +101,8 @@ export default function ProgramsPage({
                   <CardProgram
                     key={program.program_id}
                     program={program}
-                    onStatusChange={() =>
-                      handleUpdateStatus(program.program_id, program.is_active)
-                    }
+                    token={token as string}
+                    mutate={mutate}
                   />
                 ))}
               </div>

@@ -1,6 +1,9 @@
-import { ProgramType } from "@/types/program.type";
+import { SuccessResponse } from "@/types/global.type";
+import { Program, ProgramsResponse } from "@/types/program.type";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
@@ -11,8 +14,8 @@ import {
   DropdownTrigger,
 } from "@nextui-org/react";
 import {
+  BookBookmark,
   CheckCircle,
-  ClipboardText,
   PencilLine,
   Power,
   Prohibit,
@@ -21,14 +24,45 @@ import {
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import toast from "react-hot-toast";
+import { KeyedMutator } from "swr";
 
 interface ProgramProps {
-  program: ProgramType;
-  onStatusChange: () => void;
+  program: Program;
+  token: string;
+  mutate: KeyedMutator<SuccessResponse<ProgramsResponse>>;
 }
 
-export default function CardProgram({ program, onStatusChange }: ProgramProps) {
+export default function CardProgram({ program, token, mutate }: ProgramProps) {
   const router = useRouter();
+
+  async function handleUpdateStatus(
+    program_id: string,
+    is_active: boolean = true,
+  ) {
+    try {
+      const paylod = {
+        program_id: program_id,
+        is_active: !is_active,
+      };
+
+      await fetcher({
+        url: "/admin/programs/status",
+        method: "PATCH",
+        data: paylod,
+        token,
+      });
+
+      mutate();
+      is_active
+        ? toast.success("Program berhasil dinonaktifkan")
+        : toast.success("Program berhasil diaktifkan");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error(getError(error));
+    }
+  }
 
   return (
     <div
@@ -40,7 +74,7 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
     >
       <div className="flex items-start gap-6">
         {program.is_active ? (
-          <ClipboardText weight="bold" size={28} className="text-purple" />
+          <BookBookmark weight="bold" size={28} className="text-purple" />
         ) : (
           <Prohibit weight="bold" size={28} className="text-danger" />
         )}
@@ -48,42 +82,41 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
         <div className="grid gap-4">
           <Link
             href={`/programs/details/${encodeURIComponent(program.program_id)}`}
-            className={`line-clamp-1 text-[20px] font-bold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
+            className={`line-clamp-1 text-xl font-bold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
           >
             {program.title}
           </Link>
 
           <div className="grid grid-cols-[repeat(3,120px),max-content] items-start gap-2">
             <div className="grid gap-1">
-              <span className="text-[12px] font-medium text-gray">
+              <span className="text-xs font-medium text-gray">
                 Harga Program:
               </span>
               {program.type == "free" ? (
                 <Chip
                   variant="flat"
-                  color="default"
                   size="sm"
                   startContent={
-                    <Tag weight="bold" size={16} className="text-black" />
+                    <Tag weight="fill" size={16} className="text-black" />
                   }
                   classNames={{
                     base: "px-2 gap-1",
-                    content: "font-semibold text-black",
+                    content: "font-bold text-black",
                   }}
                 >
                   Gratis
                 </Chip>
-              ) : program.price ? (
+              ) : (
                 <h5
                   className={`text-sm font-extrabold ${program.is_active ? "text-purple" : "text-danger"}`}
                 >
-                  {formatRupiah(program.price)}
+                  {formatRupiah(program.price as number)}
                 </h5>
-              ) : null}
+              )}
             </div>
 
             <div className="grid gap-1">
-              <span className="text-[12px] font-medium text-gray">
+              <span className="text-xs font-medium text-gray">
                 Jumlah Ujian:
               </span>
               <h5 className="text-sm font-semibold text-black">
@@ -92,7 +125,7 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
             </div>
 
             <div className="grid gap-1">
-              <span className="text-[12px] font-medium text-gray">
+              <span className="text-xs font-medium text-gray">
                 Status Program:
               </span>
               <Chip
@@ -108,7 +141,7 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
                 }
                 classNames={{
                   base: "px-2 gap-1",
-                  content: "font-semibold",
+                  content: "font-bold",
                 }}
               >
                 {program.is_active ? "Aktif" : "Tidak Aktif"}
@@ -116,7 +149,7 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
             </div>
 
             <div className="grid gap-1">
-              <span className="text-[12px] font-medium text-gray">
+              <span className="text-xs font-medium text-gray">
                 Dibuat Pada:
               </span>
               <h5 className="text-sm font-semibold text-black">
@@ -152,10 +185,12 @@ export default function CardProgram({ program, onStatusChange }: ProgramProps) {
             }}
           >
             <DropdownSection aria-label="action zone" title="Anda Yakin?">
-              <DropdownItem onClick={onStatusChange}>
-                {program.is_active
-                  ? "Non-aktifkan Program"
-                  : "Aktifkan Program"}
+              <DropdownItem
+                onClick={() =>
+                  handleUpdateStatus(program.program_id, program.is_active)
+                }
+              >
+                {program.is_active ? "Nonaktifkan program" : "Aktifkan program"}
               </DropdownItem>
             </DropdownSection>
           </DropdownMenu>

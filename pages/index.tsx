@@ -1,7 +1,8 @@
-import { getErrorMessage } from "@/utils/ errorHandler";
+import { customStyleInput } from "@/utils/customStyleInput";
+import { getError } from "@/utils/getError";
 import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input } from "@nextui-org/react";
-import { Eye, EyeSlash, Lock, User } from "@phosphor-icons/react";
+import { Eye, EyeSlash, IconContext, Lock, User } from "@phosphor-icons/react";
 import { signIn } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -19,7 +20,7 @@ export default function LoginPage() {
     admin_id: "",
     password: "",
   });
-  const [type, setType] = useState("password");
+  const [passwordType, setPasswordType] = useState("password");
   const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
@@ -39,15 +40,14 @@ export default function LoginPage() {
       }
 
       if (response?.ok) {
-        toast.success("Yeay, Anda Berhasil Login!");
+        toast.success("Yeay, anda berhasil login!");
         return router.push("/dashboard");
       }
     } catch (error: any) {
       setLoading(false);
+      console.error(error);
 
-      if (error?.status_code) {
-        return toast.error(getErrorMessage(error?.status_code));
-      }
+      toast.error(getError(error));
     }
   }
 
@@ -72,79 +72,64 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="grid gap-2">
-            <Input
-              type="text"
-              variant="flat"
-              color="default"
-              labelPlacement="outside"
-              placeholder="ID Admin"
-              name="admin_id"
-              onChange={(e) =>
-                setInput({
-                  ...input,
-                  [e.target.name]: e.target.value,
-                })
-              }
-              onKeyDown={(e) => handleKeyDown(e, handleLogin)}
-              startContent={
-                <User weight="bold" size={18} className="text-gray" />
-              }
-              classNames={{
-                input:
-                  "font-semibold placeholder:font-semibold placeholder:text-gray",
-              }}
-            />
+          <IconContext.Provider
+            value={{
+              weight: "bold",
+              size: 18,
+              className: "text-gray",
+            }}
+          >
+            <div className="grid gap-2">
+              <Input
+                type="text"
+                variant="flat"
+                labelPlacement="outside"
+                placeholder="ID Admin"
+                name="admin_id"
+                onChange={(e) =>
+                  setInput({
+                    ...input,
+                    [e.target.name]: e.target.value,
+                  })
+                }
+                onKeyDown={(e) => handleKeyDown(e, handleLogin)}
+                startContent={<User />}
+                classNames={customStyleInput}
+              />
 
-            <Input
-              type={type}
-              variant="flat"
-              color="default"
-              labelPlacement="outside"
-              placeholder="Kata Sandi"
-              name="password"
-              endContent={
-                <button
-                  onClick={() =>
-                    type == "password" ? setType("text") : setType("password")
-                  }
-                >
-                  {type == "password" ? (
-                    <Eye
-                      weight="bold"
-                      size={18}
-                      className="cursor-pointer text-gray-600"
-                    />
-                  ) : (
-                    <EyeSlash
-                      weight="bold"
-                      size={18}
-                      className="cursor-pointer text-gray-600"
-                    />
-                  )}
-                </button>
-              }
-              onChange={(e) =>
-                setInput({
-                  ...input,
-                  [e.target.name]: e.target.value,
-                })
-              }
-              onKeyDown={(e) => handleKeyDown(e, handleLogin)}
-              startContent={
-                <Lock weight="bold" size={18} className="text-gray" />
-              }
-              classNames={{
-                input:
-                  "font-semibold placeholder:font-semibold placeholder:text-gray",
-              }}
-            />
-          </div>
+              <Input
+                type={passwordType}
+                variant="flat"
+                labelPlacement="outside"
+                placeholder="Kata Sandi"
+                name="password"
+                endContent={
+                  <button
+                    onClick={() =>
+                      setPasswordType((prevType) =>
+                        prevType === "password" ? "text" : "password",
+                      )
+                    }
+                  >
+                    {passwordType === "password" ? <Eye /> : <EyeSlash />}
+                  </button>
+                }
+                onChange={(e) =>
+                  setInput({
+                    ...input,
+                    [e.target.name]: e.target.value,
+                  })
+                }
+                onKeyDown={(e) => handleKeyDown(e, handleLogin)}
+                startContent={<Lock />}
+                classNames={customStyleInput}
+              />
+            </div>
+          </IconContext.Provider>
 
           <Button
             isLoading={loading}
             isDisabled={!isFormEmpty() || loading}
-            variant="solid"
             color="secondary"
             onClick={handleLogin}
             className="font-bold"

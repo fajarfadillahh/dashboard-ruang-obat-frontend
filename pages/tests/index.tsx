@@ -1,7 +1,7 @@
 import CardTest from "@/components/card/CardTest";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -88,11 +88,10 @@ export default function TestsPage({
               />
 
               <Button
-                variant="solid"
                 color="secondary"
                 startContent={<Plus weight="bold" size={18} />}
                 onClick={() => router.push("/tests/create")}
-                className="font-semibold"
+                className="font-bold"
               >
                 Tambah Ujian
               </Button>
@@ -104,10 +103,12 @@ export default function TestsPage({
               <div className="grid gap-2">
                 {data?.data.tests.map((test: Test) => (
                   <CardTest
-                    key={test.test_id}
-                    test={test}
-                    token={token as string}
-                    mutate={mutate}
+                    {...{
+                      key: test.test_id as string,
+                      token: token as string,
+                      test: test,
+                      mutate,
+                    }}
                   />
                 ))}
               </div>

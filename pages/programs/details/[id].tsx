@@ -2,7 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalJoiningRequirement from "@/components/modal/ModalJoiningRequirement";
@@ -177,7 +177,7 @@ export default function DetailsProgramPage({
               }
               classNames={{
                 base: "px-2 gap-1",
-                content: "font-semibold capitalize",
+                content: "font-bold capitalize",
               }}
             >
               {participant.is_approved ? "Mengikuti" : "Menunggu konfirmasi"}
@@ -204,7 +204,7 @@ export default function DetailsProgramPage({
               }
               classNames={{
                 base: "px-2 gap-1",
-                content: "font-semibold capitalize",
+                content: "font-bold capitalize",
               }}
             >
               {participant.joined_at ? "Mengikuti" : "Belum Mengikuti"}
@@ -214,9 +214,7 @@ export default function DetailsProgramPage({
       case "joined_at":
         return (
           <div className="w-max font-medium text-black">
-            {participant.joined_at === null
-              ? "-"
-              : formatDate(participant.joined_at)}
+            {participant.joined_at ? formatDate(participant.joined_at) : "-"}
           </div>
         );
       case "action":
@@ -227,7 +225,7 @@ export default function DetailsProgramPage({
                 {...{
                   program_id: data?.data.program_id as string,
                   participant: participant,
-                  token: `${token}`,
+                  token: token as string,
                   mutate,
                 }}
               />
@@ -317,14 +315,14 @@ export default function DetailsProgramPage({
       });
 
       mutate();
-      toast.success("Berhasil Menghapus Partisipan");
-    } catch (error) {
-      toast.error("Gagal Menghapus Partisipan, Silakan Coba Lagi");
+      toast.success("Berhasil menghapus partisipan");
+    } catch (error: any) {
       console.error(error);
+      toast.error("Gagal menghapus partisipan, silakan coba lagi");
     }
   }
 
-  async function handleExport() {
+  async function handleExportDataParticipant() {
     try {
       const response: SuccessResponse<any[]> = await fetcher({
         url: `/admin/exports/codes/${data?.data.program_id}`,
@@ -343,10 +341,10 @@ export default function DetailsProgramPage({
       const dateExport = new Date();
       const fileName = `Data Kode Akses Program ${data?.data.title} - ${formatDate(dateExport.toLocaleString())}.xlsx`;
       XLSX.writeFile(workbook, fileName);
-      toast.success("Data Partisipan Berhasil Diexport 🎉");
-    } catch (error) {
+      toast.success("Data partisipan berhasil diexport 🎉");
+    } catch (error: any) {
       console.error(error);
-      toast.error("Uh oh! Terjadi Kesalahan, Silakan Ulangi 😵");
+      toast.error("Uh oh! terjadi kesalahan, silakan ulangi 😵");
     }
   }
 
@@ -380,7 +378,7 @@ export default function DetailsProgramPage({
                 {data?.data.qr_code ? (
                   <div className="group relative overflow-hidden rounded-xl">
                     <Image
-                      src={`${data?.data.qr_code}`}
+                      src={data?.data.qr_code as string}
                       alt="qrcode image"
                       width={160}
                       height={160}
@@ -406,14 +404,14 @@ export default function DetailsProgramPage({
                       size={28}
                       className="text-gray/50"
                     />
-                    <p className="text-[12px] font-bold text-gray/50">
+                    <p className="text-xs font-bold text-gray/50">
                       Belum ada QR!
                     </p>
                   </div>
                 )}
 
                 <div className="grid w-max">
-                  <h4 className="max-w-[700px] text-[24px] font-bold leading-[120%] -tracking-wide text-black">
+                  <h4 className="max-w-[700px] text-2xl font-bold leading-[120%] -tracking-wide text-black">
                     {data?.data.title}
                   </h4>
 
@@ -426,7 +424,7 @@ export default function DetailsProgramPage({
                           size="sm"
                           startContent={
                             <Tag
-                              weight="bold"
+                              weight="fill"
                               size={16}
                               className="text-black"
                             />
@@ -438,11 +436,11 @@ export default function DetailsProgramPage({
                         >
                           Gratis
                         </Chip>
-                      ) : data?.data.price ? (
+                      ) : (
                         <h5 className="font-extrabold text-purple">
-                          {formatRupiah(data?.data.price)}
+                          {formatRupiah(data?.data.price as number)}
                         </h5>
-                      ) : null}
+                      )}
 
                       <div className="inline-flex items-center gap-1 text-gray">
                         <Notepad weight="bold" size={18} />
@@ -475,7 +473,7 @@ export default function DetailsProgramPage({
 
                     <div className="grid grid-cols-3 items-end gap-12 pt-2">
                       <div>
-                        <p className="text-[12px] font-medium text-gray">
+                        <p className="text-xs font-medium text-gray">
                           Total Partisipan:
                         </p>
 
@@ -488,7 +486,7 @@ export default function DetailsProgramPage({
                       </div>
 
                       <div>
-                        <p className="text-[12px] font-medium text-gray">
+                        <p className="text-xs font-medium text-gray">
                           Approved Partisipan:
                         </p>
 
@@ -501,7 +499,7 @@ export default function DetailsProgramPage({
                       </div>
 
                       <div>
-                        <p className="text-[12px] font-medium text-gray">
+                        <p className="text-xs font-medium text-gray">
                           Pending Partisipan:
                         </p>
 
@@ -519,7 +517,6 @@ export default function DetailsProgramPage({
               </div>
 
               <Button
-                variant="solid"
                 color="secondary"
                 startContent={<PencilLine weight="bold" size={18} />}
                 onClick={() =>
@@ -583,9 +580,10 @@ export default function DetailsProgramPage({
                     >
                       <Button
                         isIconOnly
+                        isDisabled={data?.data.participants.length <= 0}
                         variant="ghost"
                         color="secondary"
-                        onClick={handleExport}
+                        onClick={handleExportDataParticipant}
                       >
                         <Export weight="bold" size={18} />
                       </Button>

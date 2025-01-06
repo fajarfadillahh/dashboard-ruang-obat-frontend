@@ -1,10 +1,12 @@
+import SearchInput from "@/components/SearchInput";
+import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
-import { UserType } from "@/types/user.type";
+import { User } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
+import { getError } from "@/utils/getError";
 import {
   Button,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
@@ -20,11 +22,10 @@ import {
   TableRow,
   useDisclosure,
 } from "@nextui-org/react";
-import { MagnifyingGlass, Plus } from "@phosphor-icons/react";
+import { Plus } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { KeyedMutator } from "swr";
-import { useDebounce } from "use-debounce";
 
 type ModalAddParticipantProps = {
   token: string;
@@ -33,8 +34,8 @@ type ModalAddParticipantProps = {
   mutate: KeyedMutator<any>;
 };
 
-type UsersType = {
-  users: UserType[];
+type UsersResponse = {
+  users: User[];
   page: number;
   total_users: number;
   total_pages: number;
@@ -47,25 +48,25 @@ export default function ModalAddParticipant({
   mutate,
 }: ModalAddParticipantProps) {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [users, setUsers] = useState<UsersType>();
+  const { setSearch, searchValue } = useSearch(800);
+  const [users, setUsers] = useState<UsersResponse>();
   const [page, setPage] = useState(1);
   const [value, setValue] = useState<Selection>(new Set([]));
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
-  const [searchValue] = useDebounce(search, 800);
 
   async function fetchUsers(url: string) {
     try {
-      const response: SuccessResponse<UsersType> = await fetcher({
+      const response: SuccessResponse<UsersResponse> = await fetcher({
         url,
         method: "GET",
         token,
       });
 
       setUsers(response.data);
-    } catch (error) {
-      toast.error("Coba Lagi, Data Pengguna Gagal Dimuat");
+    } catch (error: any) {
       console.error("Error fetching users:", error);
+
+      toast.error(getError(error));
     }
   }
 
@@ -85,23 +86,26 @@ export default function ModalAddParticipant({
     setLoading(true);
 
     try {
+      const payload = {
+        program_id,
+        users: Array.from(value),
+        by,
+      };
+
       await fetcher({
         url: "/admin/programs/invite",
         method: "POST",
         token,
-        data: {
-          program_id,
-          by,
-          users: Array.from(value),
-        },
+        data: payload,
       });
 
       mutate();
-      toast.success("Berhasil Menambahkan Partisipan");
-    } catch (error) {
+      toast.success("Berhasil menambahkan partisipan");
+    } catch (error: any) {
       setLoading(false);
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
+
+      toast.error(getError(error));
     }
   }
 
@@ -110,8 +114,8 @@ export default function ModalAddParticipant({
     { name: "Nama Lengkap", uid: "fullname" },
   ];
 
-  function renderCellUsers(user: UserType, columnKey: React.Key) {
-    const cellValue = user[columnKey as keyof UserType];
+  function renderCellUsers(user: User, columnKey: React.Key) {
+    const cellValue = user[columnKey as keyof User];
 
     switch (columnKey) {
       case "user_id":
@@ -129,7 +133,6 @@ export default function ModalAddParticipant({
   return (
     <>
       <Button
-        variant="solid"
         color="secondary"
         startContent={<Plus weight="bold" size={18} />}
         onClick={onOpen}
@@ -149,7 +152,7 @@ export default function ModalAddParticipant({
           setSearch("");
           setLoading(false);
         }}
-        size="xl"
+        size="2xl"
       >
         <ModalContent>
           {(onClose) => (
@@ -160,30 +163,16 @@ export default function ModalAddParticipant({
 
               <ModalBody className="scrollbar-hide">
                 <div className="grid gap-6">
-                  <p className="text-sm font-medium leading-[170%] text-gray">
+                  <p className="max-w-[500px] text-sm font-medium leading-[170%] text-gray">
                     Cari pengguna untuk ditambahkan pada program ini, pastikan
                     ID pengguna yang anda cari sudah benar!
                   </p>
 
                   <div className="grid gap-4">
-                    <Input
-                      type="text"
-                      variant="flat"
-                      labelPlacement="outside"
+                    <SearchInput
                       placeholder="Cari User ID atau Nama User"
-                      startContent={
-                        <MagnifyingGlass
-                          weight="bold"
-                          size={18}
-                          className="text-gray"
-                        />
-                      }
-                      classNames={{
-                        input:
-                          "font-semibold placeholder:font-semibold placeholder:text-gray",
-                      }}
-                      value={search}
                       onChange={(e) => setSearch(e.target.value)}
+                      onClear={() => setSearch("")}
                     />
 
                     <div className="max-h-[300px] overflow-x-scroll scrollbar-hide">
@@ -213,7 +202,7 @@ export default function ModalAddParticipant({
                             </span>
                           }
                         >
-                          {(item: UserType) => (
+                          {(item: User) => (
                             <TableRow key={item.user_id}>
                               {(columnKey) => (
                                 <TableCell>
@@ -226,20 +215,18 @@ export default function ModalAddParticipant({
                       </Table>
                     </div>
 
-                    {users ? (
-                      users.users.length ? (
-                        <Pagination
-                          isCompact
-                          showControls
-                          page={users?.page as number}
-                          total={users?.total_pages as number}
-                          onChange={(e) => setPage(e)}
-                          className="justify-self-center"
-                          classNames={{
-                            cursor: "bg-purple text-white",
-                          }}
-                        />
-                      ) : null
+                    {users?.users.length ? (
+                      <Pagination
+                        isCompact
+                        showControls
+                        page={users?.page as number}
+                        total={users?.total_pages as number}
+                        onChange={(e) => setPage(e)}
+                        className="justify-self-center"
+                        classNames={{
+                          cursor: "bg-purple text-white",
+                        }}
+                      />
                     ) : null}
                   </div>
                 </div>

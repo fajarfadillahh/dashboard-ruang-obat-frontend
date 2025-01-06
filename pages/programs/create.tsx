@@ -1,7 +1,7 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -9,8 +9,10 @@ import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import { Test, TestsResponse } from "@/types/test.type";
+import { customStyleInput } from "@/utils/customStyleInput";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
+import { getError } from "@/utils/getError";
 import {
   Button,
   getKeyValue,
@@ -109,13 +111,14 @@ export default function CreateProgramPage({
     setLoading(true);
 
     try {
-      const fullname: any = session.data?.user.fullname;
-
+      const fullname = session.data?.user.fullname;
       const formData = new FormData();
+
       formData.append("title", input.title);
       formData.append("qr_code", qrcodeFile as File);
       formData.append("url_qr_code", input.url_qr_code as string);
       formData.append("type", selectedType);
+      formData.append("by", fullname as string);
 
       if (selectedType == "paid") {
         formData.append("price", `${input.price}`);
@@ -124,7 +127,6 @@ export default function CreateProgramPage({
       Array.from(value).forEach((test: any) =>
         formData.append("tests[]", test),
       );
-      formData.append("by", fullname);
 
       await fetcher({
         url: "/admin/programs",
@@ -135,26 +137,30 @@ export default function CreateProgramPage({
       });
 
       setQrcodeFile(null);
-      toast.success("Program Berhasil Dibuat");
+      toast.success("Program berhasil dibuat");
       router.push("/programs");
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
+
+      toast.error(getError(error));
     }
   }
 
   function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) {
-      const file = e.target.files[0];
-      setQrcodeFile(file);
+    const file = e.target.files?.[0];
 
-      const imageUrl = URL.createObjectURL(file);
-      setImagePreview(imageUrl);
-    } else {
+    if (!file) {
       setQrcodeFile(null);
       setImagePreview(null);
+      return;
     }
+    setQrcodeFile(file);
+
+    const imageUrl = URL.createObjectURL(file);
+    setImagePreview(imageUrl);
+
+    return () => URL.revokeObjectURL(imageUrl);
   }
 
   if (error) {
@@ -197,7 +203,7 @@ export default function CreateProgramPage({
 
                 {imagePreview ? (
                   <Image
-                    src={`${imagePreview}`}
+                    src={imagePreview as string}
                     alt="preview qrcode image"
                     width={180}
                     height={180}
@@ -230,10 +236,7 @@ export default function CreateProgramPage({
                   onChange={(e) =>
                     setInput({ ...input, url_qr_code: e.target.value })
                   }
-                  classNames={{
-                    input:
-                      "font-semibold placeholder:font-normal placeholder:text-default-600",
-                  }}
+                  classNames={customStyleInput}
                   className="flex-1"
                 />
 
@@ -262,10 +265,7 @@ export default function CreateProgramPage({
                 name="title"
                 value={input.title}
                 onChange={(e) => setInput({ ...input, title: e.target.value })}
-                classNames={{
-                  input:
-                    "font-semibold placeholder:font-normal placeholder:text-default-600",
-                }}
+                classNames={customStyleInput}
                 className="flex-1"
               />
 
@@ -273,23 +273,20 @@ export default function CreateProgramPage({
                 <RadioGroup
                   isRequired
                   aria-label="select program type"
-                  label={
-                    <span className="text-sm font-normal text-foreground">
-                      Tipe Program
-                    </span>
-                  }
+                  label="Tipe Program"
                   color="secondary"
                   value={selectedType}
                   onValueChange={setSelectedType}
                   classNames={{
                     base: "font-semibold text-black",
+                    label: "text-sm font-normal text-foreground",
                   }}
                 >
                   <Radio value="free">Gratis</Radio>
                   <Radio value="paid">Berbayar</Radio>
                 </RadioGroup>
 
-                {selectedType == "paid" ? (
+                {selectedType == "paid" && (
                   <Input
                     isRequired
                     type="number"
@@ -307,13 +304,10 @@ export default function CreateProgramPage({
                         Rp
                       </span>
                     }
-                    classNames={{
-                      input:
-                        "font-semibold placeholder:font-semibold placeholder:text-gray",
-                    }}
+                    classNames={customStyleInput}
                     className="flex-1"
                   />
-                ) : null}
+                )}
               </div>
             </div>
 
@@ -329,7 +323,6 @@ export default function CreateProgramPage({
                 <Button
                   isLoading={loading}
                   isDisabled={isButtonDisabled || loading}
-                  variant="solid"
                   color="secondary"
                   startContent={
                     loading ? null : <FloppyDisk weight="bold" size={18} />

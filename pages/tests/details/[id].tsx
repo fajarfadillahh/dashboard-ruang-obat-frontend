@@ -2,7 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
@@ -73,7 +73,7 @@ export default function DetailsTestPage({
             <div className="grid grid-cols-[1fr_max-content] items-start gap-16">
               <div className="grid gap-6 pb-8">
                 <div>
-                  <h4 className="mb-2 text-[28px] font-bold capitalize leading-[120%] -tracking-wide text-black">
+                  <h4 className="mb-2 text-3xl font-bold capitalize leading-[120%] -tracking-wide text-black">
                     {data?.data.title}
                   </h4>
                   <p className="max-w-[700px] font-medium leading-[170%] text-gray">
@@ -130,7 +130,7 @@ export default function DetailsTestPage({
                       startContent={getStatusIcon(data?.data.status as string)}
                       classNames={{
                         base: "px-2 gap-1",
-                        content: "font-semibold capitalize",
+                        content: "font-bold capitalize",
                       }}
                     >
                       {data?.data.status}
@@ -156,7 +156,7 @@ export default function DetailsTestPage({
 
               <div className="grid gap-2 overflow-y-scroll scrollbar-hide">
                 {data?.data.questions.length === 0 ? (
-                  <EmptyData text="Belum Ada Soal Di Ujian Ini" />
+                  <EmptyData text="Belum ada soal diujian ini" />
                 ) : (
                   data?.data.questions.map((question) => (
                     <CardQuestionPreview

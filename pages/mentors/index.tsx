@@ -6,14 +6,17 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { Admin } from "@/types/admin.type";
+import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
+import { Mentor, MentorResponse } from "@/types/mentor.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { getError } from "@/utils/getError";
 import {
   Button,
+  Chip,
+  Pagination,
   Table,
   TableBody,
   TableCell,
@@ -21,48 +24,105 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, PencilLine, Plus, Trash } from "@phosphor-icons/react";
+import {
+  CheckCircle,
+  Eye,
+  PencilLine,
+  Plus,
+  Trash,
+  XCircle,
+} from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { ParsedUrlQuery } from "querystring";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 
-export default function AdminsPage({
+function getUrl(query: ParsedUrlQuery) {
+  if (query.q) {
+    return `/admin/mentors?q=${query.q}&page=${query.page ? query.page : 1}`;
+  }
+
+  return `/admin/mentors?page=${query.page ? query.page : 1}`;
+}
+
+export default function MentorsPage({
   token,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const [search, setSearch] = useState("");
-  const { data, error, isLoading, mutate } = useSWR<SuccessResponse<Admin[]>>({
-    url: "/admins",
+  const { setSearch, searchValue } = useSearch(800);
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<MentorResponse>
+  >({
+    url: getUrl(query),
     method: "GET",
     token,
   });
 
-  const columnsUser = [
-    { name: "ID Admin", uid: "admin_id" },
+  useEffect(() => {
+    if (searchValue) {
+      router.push({ query: { q: searchValue } });
+    } else {
+      router.push("/mentors");
+    }
+  }, [searchValue]);
+
+  const columnsMentor = [
+    { name: "ID Mentor", uid: "mentor_id" },
     { name: "Nama Lengkap", uid: "fullname" },
-    { name: "Role", uid: "role" },
+    { name: "Mentor", uid: "mentor_title" },
     { name: "Dibuat Pada", uid: "created_at" },
+    { name: "Status", uid: "status" },
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellUsers(admin: Admin, columnKey: React.Key) {
-    const cellValue = admin[columnKey as keyof Admin];
+  function renderCellMentors(mentor: Mentor, columnKey: React.Key) {
+    const cellValue = mentor[columnKey as keyof Mentor];
 
     switch (columnKey) {
-      case "admin_id":
+      case "mentor_id":
         return (
-          <div className="w-max font-medium text-black">{admin.admin_id}</div>
+          <div className="w-max font-medium text-black">{mentor.mentor_id}</div>
         );
       case "fullname":
-        return <div className="font-medium text-black">{admin.fullname}</div>;
-      case "role":
-        return <div className="w-max font-medium text-black">{admin.role}</div>;
+        return <div className="font-medium text-black">{mentor.fullname}</div>;
+      case "mentor_title":
+        return (
+          <div className="w-max font-medium text-black">
+            {mentor.mentor_title}
+          </div>
+        );
       case "created_at":
         return (
           <div className="w-max font-medium text-black">
-            {formatDate(admin.created_at)}
+            {formatDate(mentor.created_at)}
+          </div>
+        );
+      case "status":
+        return (
+          <div className="w-max font-medium text-black">
+            <Chip
+              variant="flat"
+              size="sm"
+              color={mentor.is_show ? "success" : "danger"}
+              startContent={
+                mentor.is_show ? (
+                  <CheckCircle weight="fill" size={16} />
+                ) : (
+                  <XCircle weight="fill" size={16} />
+                )
+              }
+              classNames={{
+                base: "px-2 gap-1",
+                content: "font-bold capitalize",
+              }}
+            >
+              {mentor.is_show
+                ? "Tampil di homepage"
+                : "Tidak tampil di homepage"}
+            </Chip>
           </div>
         );
       case "action":
@@ -73,7 +133,11 @@ export default function AdminsPage({
               variant="light"
               color="secondary"
               size="sm"
-              onClick={() => router.push(`/admins/details/${admin.admin_id}`)}
+              onClick={() =>
+                router.push(
+                  `/mentors/details/${encodeURIComponent(mentor.mentor_id)}`,
+                )
+              }
             >
               <Eye weight="bold" size={18} />
             </Button>
@@ -83,7 +147,11 @@ export default function AdminsPage({
               variant="light"
               color="secondary"
               size="sm"
-              onClick={() => router.push(`/admins/edit/${admin.admin_id}`)}
+              onClick={() =>
+                router.push(
+                  `/mentors/edit/${encodeURIComponent(mentor.mentor_id)}`,
+                )
+              }
             >
               <PencilLine weight="bold" size={18} />
             </Button>
@@ -94,17 +162,17 @@ export default function AdminsPage({
                   <Trash weight="bold" size={18} className="text-danger" />
                 </Button>
               }
-              header={<h1 className="font-bold text-black">Hapus Admin</h1>}
+              header={<h1 className="font-bold text-black">Hapus Mentor</h1>}
               body={
                 <div className="grid gap-3 text-sm font-medium">
                   <p className="leading-[170%] text-gray">
-                    Apakah anda ingin menghapus admin berikut secara permanen?
+                    Apakah anda ingin menghapus mentor berikut secara permanen?
                   </p>
 
                   <div className="grid gap-1">
                     {[
-                      ["ID Admin", `${admin.admin_id}`],
-                      ["Nama Lengkap", `${admin.fullname}`],
+                      ["ID Mentor", `${mentor.mentor_id}`],
+                      ["Nama Lengkap", `${mentor.fullname}`],
                     ].map(([label, value], index) => (
                       <div
                         key={index}
@@ -136,10 +204,10 @@ export default function AdminsPage({
 
                   <Button
                     color="danger"
-                    onClick={() => handleDeleteAdmin(admin.admin_id)}
                     className="font-bold"
+                    onClick={() => handleDeleteMentor(mentor.mentor_id)}
                   >
-                    Ya, Hapus Admin
+                    Ya, Hapus Mentor
                   </Button>
                 </>
               )}
@@ -152,16 +220,16 @@ export default function AdminsPage({
     }
   }
 
-  async function handleDeleteAdmin(id: string) {
+  async function handleDeleteMentor(id: string) {
     try {
       await fetcher({
-        url: `/admins/${id}`,
+        url: `/admin/mentors/${id}`,
         method: "DELETE",
         token,
       });
 
       mutate();
-      toast.success("Admin berhasil dihapus");
+      toast.success("Mentor berhasil dihapus");
     } catch (error: any) {
       console.error(error);
 
@@ -171,7 +239,7 @@ export default function AdminsPage({
 
   if (error) {
     return (
-      <Layout title="Admin">
+      <Layout title="Mentor">
         <Container>
           <ErrorPage
             {...{
@@ -187,25 +255,20 @@ export default function AdminsPage({
 
   if (isLoading) return <LoadingScreen />;
 
-  const filterAdmin = data?.data.filter((admin) =>
-    [admin.admin_id, admin.fullname].some((value) =>
-      value.toLowerCase().includes(search.toLowerCase()),
-    ),
-  );
-
   return (
-    <Layout title="Admin" className="scrollbar-hide">
+    <Layout title="Mentor" className="scrollbar-hide">
       <Container>
         <section className="grid gap-8">
           <TitleText
-            title="Daftar Admin 🧑🏽"
-            text="Tabel admin yang terdaftar di ruangobat.id"
+            title="Daftar Mentor 🧑🏽"
+            text="Mentor terbaik yang di miliki ruangobat.id"
           />
 
           <div className="grid">
             <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
               <SearchInput
-                placeholder="Cari Admin ID atau Nama Admin"
+                placeholder="Cari Mentor ID atau Nama Mentor"
+                defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
                 onClear={() => setSearch("")}
               />
@@ -213,37 +276,37 @@ export default function AdminsPage({
               <Button
                 color="secondary"
                 startContent={<Plus weight="bold" size={16} />}
-                onClick={() => router.push("/admins/create")}
+                onClick={() => router.push("/mentors/create")}
                 className="w-max font-bold"
               >
-                Tambah Admin
+                Tambah Mentor
               </Button>
             </div>
 
             <div className="overflow-x-scroll scrollbar-hide">
               <Table
                 isHeaderSticky
-                aria-label="admins table"
+                aria-label="mentors table"
                 color="secondary"
                 selectionMode="none"
                 classNames={customStyleTable}
                 className="scrollbar-hide"
               >
-                <TableHeader columns={columnsUser}>
+                <TableHeader columns={columnsMentor}>
                   {(column) => (
                     <TableColumn key={column.uid}>{column.name}</TableColumn>
                   )}
                 </TableHeader>
 
                 <TableBody
-                  items={filterAdmin}
-                  emptyContent={<EmptyData text="Admin tidak ditemukan!" />}
+                  items={data?.data.mentors}
+                  emptyContent={<EmptyData text="Mentor tidak ditemukan!" />}
                 >
-                  {(admin) => (
-                    <TableRow key={admin.admin_id}>
+                  {(mentor) => (
+                    <TableRow key={mentor.mentor_id}>
                       {(columnKey) => (
                         <TableCell>
-                          {renderCellUsers(admin, columnKey)}
+                          {renderCellMentors(mentor, columnKey)}
                         </TableCell>
                       )}
                     </TableRow>
@@ -252,6 +315,27 @@ export default function AdminsPage({
               </Table>
             </div>
           </div>
+
+          {data?.data.mentors.length ? (
+            <Pagination
+              isCompact
+              showControls
+              page={data?.data.page as number}
+              total={data?.data.total_pages as number}
+              onChange={(e) => {
+                router.push({
+                  query: {
+                    ...router.query,
+                    page: e,
+                  },
+                });
+              }}
+              className="justify-self-center"
+              classNames={{
+                cursor: "bg-purple text-white",
+              }}
+            />
+          ) : null}
         </section>
       </Container>
     </Layout>
@@ -260,10 +344,12 @@ export default function AdminsPage({
 
 export const getServerSideProps: GetServerSideProps<{
   token: string;
-}> = async ({ req }) => {
+  query: ParsedUrlQuery;
+}> = async ({ req, query }) => {
   return {
     props: {
       token: req.headers["access_token"] as string,
+      query,
     },
   };
 };

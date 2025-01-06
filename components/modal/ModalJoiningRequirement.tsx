@@ -1,7 +1,8 @@
 import { SuccessResponse } from "@/types/global.type";
-import { ParticipantType } from "@/types/user.type";
+import { Participant } from "@/types/user.type";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Image,
@@ -20,7 +21,7 @@ import { KeyedMutator } from "swr";
 
 type RequirementProps = {
   program_id: string;
-  participant: ParticipantType;
+  participant: Participant;
   token: string;
   mutate: KeyedMutator<any>;
 };
@@ -64,14 +65,15 @@ export default function ModalJoiningRequirement({
           program_id: program_id,
           user_id: user_id,
         },
-      })) as SuccessResponse<ParticipantType>;
+      })) as SuccessResponse<Participant>;
 
       mutate();
-      toast.success("Permintaan Berhasil Diterima");
-    } catch (error) {
+      toast.success("Permintaan berhasil diterima");
+    } catch (error: any) {
       setLoading(false);
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
+
+      toast.error(getError(error));
     }
   }
 
@@ -112,11 +114,7 @@ export default function ModalJoiningRequirement({
                       ["Asal Kampus", `${participant.university}`],
                       [
                         "Bergabung Pada",
-                        `${
-                          participant.joined_at === null
-                            ? "-"
-                            : formatDate(participant.joined_at)
-                        }`,
+                        `${participant.joined_at ? formatDate(participant.joined_at) : "-"}`,
                       ],
                     ].map(([label, value], index) => (
                       <div
@@ -165,7 +163,6 @@ export default function ModalJoiningRequirement({
                 {!participant.is_approved ? (
                   <Button
                     isLoading={loading}
-                    variant="solid"
                     color="secondary"
                     onClick={() =>
                       handleApprovalParticipant(program_id, participant.user_id)

@@ -1,17 +1,17 @@
 import ButtonBack from "@/components/button/ButtonBack";
-import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import TitleText from "@/components/TitleText";
+import VideoComponent from "@/components/VideoComponent";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { CreateQuestion } from "@/pages/tests/create";
 import { SuccessResponse } from "@/types/global.type";
 import { TestAnswerResponse } from "@/types/test.type";
+import { Accordion, AccordionItem, Radio, RadioGroup } from "@nextui-org/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Link from "next/link";
 import { ParsedUrlQuery } from "querystring";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import useSWR from "swr";
 
 export default function AnswersPage({
@@ -63,29 +63,25 @@ export default function AnswersPage({
               />
 
               <div className="inline-flex items-center gap-12">
-                <div className="grid gap-1 text-center">
-                  <p className="text-[14px] font-medium text-gray">
+                <div className="grid gap-1">
+                  <p className="text-sm font-medium text-gray">
                     Nilai Pengguna
                   </p>
-                  <h4 className="text-[24px] font-extrabold text-black">
+                  <h4 className="text-2xl font-extrabold text-black">
                     🏆 {data?.data.score}
                   </h4>
                 </div>
 
-                <div className="grid gap-1 text-center">
-                  <p className="text-[14px] font-medium text-gray">
-                    Jawaban Benar
-                  </p>
-                  <h4 className="text-[24px] font-extrabold text-black">
+                <div className="grid gap-1">
+                  <p className="text-sm font-medium text-gray">Jawaban Benar</p>
+                  <h4 className="text-2xl font-extrabold text-black">
                     ✅ {data?.data.total_correct}
                   </h4>
                 </div>
 
-                <div className="grid gap-1 text-center">
-                  <p className="text-[14px] font-medium text-gray">
-                    Jawaban Salah
-                  </p>
-                  <h4 className="text-[24px] font-extrabold text-black">
+                <div className="grid gap-1">
+                  <p className="text-sm font-medium text-gray">Jawaban Salah</p>
+                  <h4 className="text-2xl font-extrabold text-black">
                     ❌ {data?.data.total_incorrect}
                   </h4>
                 </div>
@@ -93,11 +89,90 @@ export default function AnswersPage({
             </div>
 
             <div className="grid grid-cols-[1fr_260px] gap-4">
-              <CardQuestionPreview
-                index={question?.number as number}
-                question={question as CreateQuestion}
-                className="h-auto"
-              />
+              <div className="flex h-auto items-start gap-6 rounded-xl border-2 border-gray/20 p-6">
+                <div className="font-extrabold text-purple">
+                  {question?.number}.
+                </div>
+
+                <div className="grid flex-1 gap-4">
+                  {question?.type == "video" ? (
+                    <Suspense fallback={<p>Loading video...</p>}>
+                      <VideoComponent url={question?.text as string} />
+                    </Suspense>
+                  ) : (
+                    <p
+                      className="preventive-list preventive-table list-outside text-[16px] font-semibold leading-[170%] text-black"
+                      dangerouslySetInnerHTML={{
+                        __html: question?.text as string,
+                      }}
+                    />
+                  )}
+
+                  <RadioGroup
+                    aria-label="select the answer"
+                    defaultValue="fase-s"
+                    classNames={{
+                      base: "font-semibold text-black",
+                    }}
+                    value={question?.user_answer}
+                  >
+                    {question?.options.map((option) => {
+                      const { is_correct, user_answer, correct_option } =
+                        question;
+
+                      const isCorrectAnswer =
+                        is_correct && user_answer === option.option_id;
+                      const isCorrectOption =
+                        correct_option === option.option_id;
+                      const isWrongAnswer = user_answer === option.option_id;
+
+                      const color =
+                        isCorrectAnswer || isCorrectOption
+                          ? "success"
+                          : "danger";
+                      const labelClass =
+                        isCorrectAnswer || isCorrectOption
+                          ? "text-success"
+                          : isWrongAnswer
+                            ? "text-danger"
+                            : "text-gray/80";
+
+                      return (
+                        <Radio
+                          key={option.option_id}
+                          isDisabled={false}
+                          value={option.option_id}
+                          color={color}
+                          classNames={{
+                            label: `${labelClass} font-semibold`,
+                          }}
+                        >
+                          {option.text}
+                        </Radio>
+                      );
+                    })}
+                  </RadioGroup>
+
+                  <Accordion variant="bordered">
+                    <AccordionItem
+                      aria-label="accordion answer"
+                      key="answer"
+                      title="Penjelasan:"
+                      classNames={{
+                        title: "font-semibold text-black",
+                        content: "font-medium text-black leading-[170%] pb-4",
+                      }}
+                    >
+                      <div
+                        className="preventive-list preventive-table list-outside text-[16px] leading-[170%] text-black"
+                        dangerouslySetInnerHTML={{
+                          __html: question?.explanation as string,
+                        }}
+                      />
+                    </AccordionItem>
+                  </Accordion>
+                </div>
+              </div>
 
               <div className="sticky right-0 top-0 h-max rounded-xl border-2 border-gray/20 p-6">
                 <div className="grid gap-4 overflow-hidden">

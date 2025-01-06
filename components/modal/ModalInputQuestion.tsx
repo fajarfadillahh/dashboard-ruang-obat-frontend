@@ -206,7 +206,6 @@ export default function ModalInputQuestion({
                 </Button>
 
                 <Button
-                  variant="solid"
                   color="secondary"
                   startContent={<FloppyDisk weight="bold" size={18} />}
                   onClick={() => {

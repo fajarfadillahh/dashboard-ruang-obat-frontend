@@ -42,7 +42,6 @@ export default function ErrorPage({ status_code, message, name }: ErrorProps) {
         </div>
 
         <Button
-          variant="solid"
           color="secondary"
           startContent={buttonIcon}
           onClick={buttonAction}

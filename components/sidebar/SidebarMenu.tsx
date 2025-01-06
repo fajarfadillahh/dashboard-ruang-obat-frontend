@@ -1,10 +1,10 @@
 import {
+  BookBookmark,
   ChatCircleText,
   ClipboardText,
   Clock,
   House,
   Icon,
-  ListChecks,
   User,
   Users,
 } from "@phosphor-icons/react";
@@ -15,7 +15,7 @@ type SidebarMenuType = {
   icon: Icon;
 };
 
-export default function SidebarMenu(adminId: string): SidebarMenuType[] {
+export function SidebarMainMenu(adminId: string): SidebarMenuType[] {
   const isSuperAdmin = adminId.startsWith("ROSA");
 
   return [
@@ -27,7 +27,7 @@ export default function SidebarMenu(adminId: string): SidebarMenuType[] {
     {
       label: "Program",
       path: "/programs",
-      icon: ListChecks,
+      icon: BookBookmark,
     },
     {
       label: "Ujian",
@@ -58,5 +58,15 @@ export default function SidebarMenu(adminId: string): SidebarMenuType[] {
           },
         ]
       : []),
+  ];
+}
+
+export function SidebarOtherMenu(): SidebarMenuType[] {
+  return [
+    {
+      label: "Mentor",
+      path: "/mentors",
+      icon: Users,
+    },
   ];
 }

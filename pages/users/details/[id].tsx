@@ -1,6 +1,6 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -8,9 +8,11 @@ import Layout from "@/components/wrapper/Layout";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
 import { SuccessResponse } from "@/types/global.type";
 import { DetailsUserResponse } from "@/types/user.type";
-import { getErrorMessage } from "@/utils/ errorHandler";
+import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { validateEmail, validatePhoneNumber } from "@/utils/formValidator";
+import { getError } from "@/utils/getError";
 import { Button, Checkbox, Input } from "@nextui-org/react";
 import {
   ArrowClockwise,
@@ -20,13 +22,18 @@ import {
 } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { ParsedUrlQuery } from "querystring";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 
-type InputType = {
+type InputState = {
   email: string;
   phone_number: string;
+};
+
+type ErrorState = {
+  email?: string;
+  phone_number?: string;
 };
 
 export default function DetailsUserPage({
@@ -40,44 +47,51 @@ export default function DetailsUserPage({
     method: "GET",
     token,
   });
-  const [input, setInput] = useState<InputType>({
+  const [input, setInput] = useState<InputState>({
     email: "",
     phone_number: "",
   });
-  const [errors, setErrors] = useState<any>();
+  const [errors, setErrors] = useState<ErrorState>({});
   const [isSelected, setIsSelected] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  async function handleEditDataUser(user_id: string, data: InputType) {
+  function handleInputChange(
+    e: ChangeEvent<HTMLInputElement>,
+    customValidator?: (value: string) => string | null,
+  ) {
+    const { name, value } = e.target;
+    setInput((prev) => ({ ...prev, [name]: value }));
+
+    if (customValidator) {
+      const error = customValidator(value);
+      setErrors((prev) => ({ ...prev, [name]: error }));
+    }
+  }
+
+  async function handleEditDataUser(user_id: string, data: InputState) {
     setLoading(true);
 
     try {
+      const payload = {
+        ...data,
+        user_id,
+        type: "edit",
+      };
+
       await fetcher({
         url: "/admin/users",
         method: "PATCH",
-        data: {
-          user_id,
-          type: "edit",
-          ...data,
-        },
+        data: payload,
         token,
       });
 
       mutate();
-      toast.success("Data User Berhasil DiPerbarui");
+      toast.success("Data pengguna berhasil diperbarui");
     } catch (error: any) {
       setLoading(false);
       console.error(error);
 
-      if (error?.status_code) {
-        const customMessages = {
-          400: "Email atau Nomor Telpon Sudah Digunakan",
-        };
-
-        toast.error(getErrorMessage(error?.status_code, customMessages), {
-          duration: 6000,
-        });
-      }
+      toast.error(getError(error), { duration: 5000 });
     }
   }
 
@@ -85,27 +99,27 @@ export default function DetailsUserPage({
     setLoading(true);
 
     try {
+      const payload = {
+        user_id,
+        type: "reset",
+      };
+
       await fetcher({
         url: "/admin/users",
         method: "PATCH",
-        data: {
-          user_id,
-          type: "reset",
-        },
+        data: payload,
         token,
       });
 
       mutate();
-      toast.success("Password User Berhasil Direset", {
+      toast.success("Password pengguna berhasil direset", {
         duration: 6000,
       });
     } catch (error: any) {
       setLoading(false);
       console.error(error);
 
-      if (error?.status_code) {
-        return toast.error(getErrorMessage(error?.status_code));
-      }
+      toast.error(getError(error));
     }
   }
 
@@ -177,7 +191,6 @@ export default function DetailsUserPage({
                     hideCloseButton={true}
                     trigger={
                       <Button
-                        variant="solid"
                         color="secondary"
                         size="sm"
                         startContent={<PencilLine weight="bold" size={16} />}
@@ -205,26 +218,9 @@ export default function DetailsUserPage({
                             placeholder="Alamat Email"
                             name="email"
                             value={input.email}
-                            onChange={(e) => {
-                              const email = e.target.value;
-                              const emailRegex =
-                                /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                              const isValidEmail = emailRegex.test(
-                                email.toLowerCase(),
-                              );
-
-                              setInput({
-                                ...input,
-                                [e.target.name]: email.toLowerCase(),
-                              });
-
-                              setErrors({
-                                ...errors,
-                                email: isValidEmail
-                                  ? null
-                                  : "Email Tidak Valid",
-                              });
-                            }}
+                            onChange={(e) =>
+                              handleInputChange(e, validateEmail)
+                            }
                             startContent={
                               <EnvelopeSimple
                                 weight="bold"
@@ -232,12 +228,9 @@ export default function DetailsUserPage({
                                 className="text-gray"
                               />
                             }
-                            classNames={{
-                              input:
-                                "font-semibold placeholder:font-semibold placeholder:text-gray",
-                            }}
-                            isInvalid={!!errors?.email}
-                            errorMessage={errors?.email}
+                            classNames={customStyleInput}
+                            isInvalid={!!errors.email}
+                            errorMessage={errors.email}
                           />
 
                           <Input
@@ -249,23 +242,9 @@ export default function DetailsUserPage({
                             placeholder="Nomor Telpon"
                             name="phone_number"
                             value={input.phone_number}
-                            onChange={(e) => {
-                              const { value, name } = e.target;
-                              setInput({ ...input, [name]: value });
-
-                              if (name === "phone_number") {
-                                const phoneNumberRegex =
-                                  /^(?:\+62|62|0)8[1-9][0-9]{7,11}$/;
-                                setErrors({
-                                  ...errors,
-                                  phone_number: value
-                                    ? phoneNumberRegex.test(value)
-                                      ? null
-                                      : "Nomor Telpon Tidak Valid"
-                                    : null,
-                                });
-                              }
-                            }}
+                            onChange={(e) =>
+                              handleInputChange(e, validatePhoneNumber)
+                            }
                             startContent={
                               <Phone
                                 weight="bold"
@@ -273,12 +252,9 @@ export default function DetailsUserPage({
                                 className="text-gray"
                               />
                             }
-                            classNames={{
-                              input:
-                                "font-semibold placeholder:font-semibold placeholder:text-gray",
-                            }}
-                            isInvalid={!!errors?.phone_number}
-                            errorMessage={errors?.phone_number}
+                            classNames={customStyleInput}
+                            isInvalid={!!errors.phone_number}
+                            errorMessage={errors.phone_number}
                           />
                         </div>
                       </div>
@@ -321,7 +297,7 @@ export default function DetailsUserPage({
                             }, 1000);
                           }}
                         >
-                          Simpan Data Terbaru
+                          Simpan Data
                         </Button>
                       </>
                     )}
@@ -342,7 +318,6 @@ export default function DetailsUserPage({
                   hideCloseButton={true}
                   trigger={
                     <Button
-                      variant="solid"
                       color="warning"
                       size="sm"
                       startContent={<ArrowClockwise weight="bold" size={18} />}
@@ -370,10 +345,11 @@ export default function DetailsUserPage({
                         color="secondary"
                         isSelected={isSelected}
                         onValueChange={setIsSelected}
+                        classNames={{
+                          label: "text-sm font-medium leading-[170%] text-gray",
+                        }}
                       >
-                        <span className="text-sm font-medium leading-[170%] text-gray">
-                          Ya, saya ingin me-reset password pada akun ini
-                        </span>
+                        Ya, saya ingin me-reset password pada akun ini
                       </Checkbox>
                     </div>
                   }

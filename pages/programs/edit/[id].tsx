@@ -2,7 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingData from "@/components/loading/LoadingData";
-import LoadingScreen from "@/components/LoadingScreen";
+import LoadingScreen from "@/components/loading/LoadingScreen";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -11,8 +11,10 @@ import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import { DetailsProgramResponse } from "@/types/program.type";
 import { Test, TestsResponse } from "@/types/test.type";
+import { customStyleInput } from "@/utils/customStyleInput";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
+import { getError } from "@/utils/getError";
 import {
   Button,
   getKeyValue,
@@ -102,20 +104,20 @@ export default function EditProgramPage({
   }, [searchValue]);
 
   useEffect(() => {
-    if (program?.data) {
-      const { type, title, price, url_qr_code, tests } = program.data;
-      const testIds = tests.map((test) => test.test_id);
+    if (!program?.data) return;
 
-      setValue(new Set(testIds));
-      setSelectedType(type);
-      setInput({
-        title,
-        price: price ?? 0,
-        url_qr_code,
-      });
-      setIsInputReady(true);
-    }
-  }, [program]);
+    const { type, title, price, url_qr_code, tests } = program.data;
+    const testIds = tests.map((test) => test.test_id);
+
+    setValue(new Set(testIds));
+    setSelectedType(type);
+    setInput({
+      title,
+      price: price ?? 0,
+      url_qr_code: url_qr_code ?? "",
+    });
+    setIsInputReady(true);
+  }, [program?.data]);
 
   useEffect(() => {
     const selectedTests = Array.from(value);
@@ -139,12 +141,15 @@ export default function EditProgramPage({
     setLoading(true);
 
     try {
-      const fullname: any = session.data?.user.fullname;
-
+      const fullname = session.data?.user.fullname;
       const formData = new FormData();
+
       formData.append("title", input.title);
       formData.append("type", selectedType);
       formData.append("program_id", program?.data.program_id as string);
+      formData.append("qr_code", qrcodeFile as File);
+      formData.append("url_qr_code", input.url_qr_code as string);
+      formData.append("by", fullname as string);
 
       if (selectedType == "paid") {
         formData.append("price", `${input.price}`);
@@ -153,9 +158,6 @@ export default function EditProgramPage({
       Array.from(value).forEach((test: any) =>
         formData.append("tests[]", test),
       );
-      formData.append("by", fullname);
-      formData.append("qr_code", qrcodeFile as File);
-      formData.append("url_qr_code", input.url_qr_code as string);
 
       await fetcher({
         url: "/admin/programs",
@@ -165,12 +167,13 @@ export default function EditProgramPage({
         file: true,
       });
 
-      toast.success("Program Berhasil Diperbarui");
+      toast.success("Program berhasil diperbarui");
       router.push("/programs");
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      toast.error("Terjadi Kesalahan, Silakan Coba Lagi");
       console.error(error);
+
+      toast.error(getError(error));
     }
   }
 
@@ -251,10 +254,7 @@ export default function EditProgramPage({
                       onChange={(e) =>
                         setInput({ ...input, url_qr_code: e.target.value })
                       }
-                      classNames={{
-                        input:
-                          "font-semibold placeholder:font-normal placeholder:text-default-600",
-                      }}
+                      classNames={customStyleInput}
                       className="flex-1"
                     />
 
@@ -291,10 +291,7 @@ export default function EditProgramPage({
                     onChange={(e) =>
                       setInput({ ...input, title: e.target.value })
                     }
-                    classNames={{
-                      input:
-                        "font-semibold placeholder:font-normal placeholder:text-default-600",
-                    }}
+                    classNames={customStyleInput}
                     className="flex-1"
                   />
 
@@ -302,23 +299,20 @@ export default function EditProgramPage({
                     <RadioGroup
                       isRequired
                       aria-label="select program type"
-                      label={
-                        <span className="text-sm font-normal text-foreground">
-                          Tipe Program
-                        </span>
-                      }
+                      label="Tipe Program"
                       color="secondary"
                       value={selectedType}
                       onValueChange={setSelectedType}
                       classNames={{
                         base: "font-semibold text-black",
+                        label: "text-sm font-normal text-foreground",
                       }}
                     >
                       <Radio value="free">Gratis</Radio>
                       <Radio value="paid">Berbayar</Radio>
                     </RadioGroup>
 
-                    {selectedType == "paid" ? (
+                    {selectedType == "paid" && (
                       <Input
                         isRequired
                         type="number"
@@ -338,13 +332,10 @@ export default function EditProgramPage({
                             Rp
                           </span>
                         }
-                        classNames={{
-                          input:
-                            "font-semibold placeholder:font-semibold placeholder:text-gray",
-                        }}
+                        classNames={customStyleInput}
                         className="flex-1"
                       />
-                    ) : null}
+                    )}
                   </div>
                 </div>
 
@@ -360,7 +351,6 @@ export default function EditProgramPage({
                     <Button
                       isLoading={loading}
                       isDisabled={isButtonDisabled || loading}
-                      variant="solid"
                       color="secondary"
                       startContent={
                         loading ? null : <FloppyDisk weight="bold" size={18} />
