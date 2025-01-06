@@ -6,7 +6,7 @@ import getCroppedImg from "@/utils/cropImage";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
-import { Button, Input } from "@nextui-org/react";
+import { Button, Input, Switch } from "@nextui-org/react";
 import { FloppyDisk } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
@@ -39,6 +39,7 @@ export default function CreateMentorPage({
   const [description, setDescription] = useState("");
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [isShow, setIsShow] = useState(true);
 
   const [fileImg, setFileImg] = useState<string | ArrayBuffer | null>();
   const [cropImg, setCropImg] = useState({ x: 0, y: 0 });
@@ -53,8 +54,8 @@ export default function CreateMentorPage({
       description,
     ].every(Boolean);
 
-    setButtonDisabled(!isFormValid);
-  }, [input, description]);
+    setButtonDisabled(!isFormValid || !fileImg);
+  }, [input, description, fileImg]);
 
   function onCropComplete(croppedArea: any, croppedAreaPixels: any) {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -66,7 +67,7 @@ export default function CreateMentorPage({
     try {
       const formData = new FormData();
       const fullname = session.data?.user.fullname;
-      
+
       const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
       const response = await fetch(croppedImage as string);
       const blob = await response.blob();
@@ -80,6 +81,7 @@ export default function CreateMentorPage({
       formData.append("description", description);
       formData.append("img_mentor", fileConvert);
       formData.append("by", fullname as string);
+      formData.append("is_show", `${isShow}`);
 
       await fetcher({
         url: "/admin/mentors",
@@ -90,7 +92,7 @@ export default function CreateMentorPage({
       });
 
       toast.success("Mentor berhasil dibuat");
-      router.push("/mentors");
+      router.back();
     } catch (error: any) {
       setLoading(false);
       console.error(error);
@@ -159,6 +161,17 @@ export default function CreateMentorPage({
                     };
                   }}
                 />
+
+                <Switch
+                  color="secondary"
+                  isSelected={isShow}
+                  onValueChange={setIsShow}
+                  classNames={{
+                    label: "text-black font-medium text-sm",
+                  }}
+                >
+                  Tampilkan Di Homepage
+                </Switch>
               </div>
 
               <div className="grid gap-4">

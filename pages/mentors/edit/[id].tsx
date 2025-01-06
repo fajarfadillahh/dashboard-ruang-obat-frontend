@@ -55,6 +55,7 @@ export default function EditMentorPage({
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [isShow, setIsShow] = useState(true);
 
   const [fileImg, setFileImg] = useState<string | ArrayBuffer | null>();
   const [cropImg, setCropImg] = useState({ x: 0, y: 0 });
@@ -64,7 +65,8 @@ export default function EditMentorPage({
   useEffect(() => {
     if (!data?.data) return;
 
-    const { fullname, nickname, mentor_title, description } = data.data;
+    const { fullname, nickname, mentor_title, description, is_show } =
+      data.data;
 
     setInput({
       fullname,
@@ -72,6 +74,7 @@ export default function EditMentorPage({
       mentor_title,
     });
     setDescription(description);
+    setIsShow(is_show);
   }, [data?.data]);
 
   useEffect(() => {
@@ -103,6 +106,7 @@ export default function EditMentorPage({
       formData.append("mentor_title", input.mentor_title);
       formData.append("description", description);
       formData.append("by", fullname as string);
+      formData.append("is_show", `${isShow}`);
 
       if (selected) {
         formData.append("with_image", "true");
@@ -243,6 +247,17 @@ export default function EditMentorPage({
                     }}
                   >
                     Aktifkan Untuk Ubah Foto
+                  </Switch>
+
+                  <Switch
+                    color="secondary"
+                    isSelected={isShow}
+                    onValueChange={setIsShow}
+                    classNames={{
+                      label: "text-black font-medium text-sm",
+                    }}
+                  >
+                    Tampilkan Di Homepage
                   </Switch>
                 </div>
 

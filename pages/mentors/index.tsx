@@ -15,6 +15,7 @@ import { formatDate } from "@/utils/formatDate";
 import { getError } from "@/utils/getError";
 import {
   Button,
+  Chip,
   Pagination,
   Table,
   TableBody,
@@ -23,7 +24,14 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye, PencilLine, Plus, Trash } from "@phosphor-icons/react";
+import {
+  CheckCircle,
+  Eye,
+  PencilLine,
+  Plus,
+  Trash,
+  XCircle,
+} from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
@@ -66,6 +74,7 @@ export default function MentorsPage({
     { name: "Nama Lengkap", uid: "fullname" },
     { name: "Mentor", uid: "mentor_title" },
     { name: "Dibuat Pada", uid: "created_at" },
+    { name: "Status", uid: "status" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -89,6 +98,31 @@ export default function MentorsPage({
         return (
           <div className="w-max font-medium text-black">
             {formatDate(mentor.created_at)}
+          </div>
+        );
+      case "status":
+        return (
+          <div className="w-max font-medium text-black">
+            <Chip
+              variant="flat"
+              size="sm"
+              color={mentor.is_show ? "success" : "danger"}
+              startContent={
+                mentor.is_show ? (
+                  <CheckCircle weight="fill" size={16} />
+                ) : (
+                  <XCircle weight="fill" size={16} />
+                )
+              }
+              classNames={{
+                base: "px-2 gap-1",
+                content: "font-bold capitalize",
+              }}
+            >
+              {mentor.is_show
+                ? "Tampil di homepage"
+                : "Tidak tampil di homepage"}
+            </Chip>
           </div>
         );
       case "action":

@@ -7,6 +7,8 @@ import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
 import { Mentor } from "@/types/mentor.type";
 import { formatDate } from "@/utils/formatDate";
+import { Chip } from "@nextui-org/react";
+import { CheckCircle, XCircle } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import Image from "next/image";
 import { ParsedUrlQuery } from "querystring";
@@ -63,6 +65,30 @@ export default function DetailsMentorPage({
                     [
                       "Dibuat Pada",
                       `${formatDate(data?.data.created_at ?? "-")}`,
+                    ],
+                    [
+                      "Status",
+                      <Chip
+                        key={data?.data.mentor_id}
+                        variant="flat"
+                        size="sm"
+                        color={data?.data.is_show ? "success" : "danger"}
+                        startContent={
+                          data?.data.is_show ? (
+                            <CheckCircle weight="fill" size={16} />
+                          ) : (
+                            <XCircle weight="fill" size={16} />
+                          )
+                        }
+                        classNames={{
+                          base: "px-2 gap-1",
+                          content: "font-bold capitalize",
+                        }}
+                      >
+                        {data?.data.is_show
+                          ? "Tampil di homepage"
+                          : "Tidak tampil di homepage"}
+                      </Chip>,
                     ],
                   ].map(([label, value], index) => (
                     <div

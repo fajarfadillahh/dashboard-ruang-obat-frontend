@@ -6,6 +6,7 @@ export type Mentor = {
   description: string;
   img_url: string;
   created_at: string;
+  is_show: boolean;
 };
 
 export type MentorResponse = {
