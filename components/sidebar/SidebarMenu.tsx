@@ -68,5 +68,10 @@ export function SidebarOtherMenu(): SidebarMenuType[] {
       path: "/mentors",
       icon: Users,
     },
+    {
+      label: "Kelas Apoteker",
+      path: "/kelas-masuk-apoteker",
+      icon: BookBookmark,
+    },
   ];
 }

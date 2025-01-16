@@ -1,9 +1,16 @@
+import ButtonSidebar from "@/components/button/ButtonSidebar";
 import {
   SidebarMainMenu,
   SidebarOtherMenu,
 } from "@/components/sidebar/SidebarMenu";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
-import { IconContext } from "@phosphor-icons/react";
+import { Accordion, AccordionItem } from "@nextui-org/react";
+import {
+  BookBookmark,
+  CaretRight,
+  Circle,
+  IconContext,
+} from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -29,7 +36,7 @@ export default function Sidebar() {
       </Link>
 
       <div className="overflow-y-scroll scrollbar-hide">
-        <div className="flex flex-1 flex-col gap-8">
+        <div className="mb-16 flex flex-1 flex-col gap-8">
           <IconContext.Provider
             value={{
               weight: "bold",
@@ -85,6 +92,154 @@ export default function Sidebar() {
                     </div>
                   </Link>
                 ))}
+
+                <Accordion
+                  isCompact
+                  className="p-0"
+                  itemClasses={{
+                    trigger:
+                      "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
+                    title: "font-bold text-gray text-sm",
+                  }}
+                >
+                  <AccordionItem
+                    aria-label="button"
+                    title="Kelas Matkul"
+                    indicator={<CaretRight size={14} className="text-gray" />}
+                    startContent={<BookBookmark className="text-gray" />}
+                    className="grid gap-1"
+                  >
+                    <Accordion
+                      isCompact
+                      className="p-0"
+                      itemClasses={{
+                        trigger:
+                          "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
+                        title: "font-bold text-gray text-sm",
+                      }}
+                    >
+                      <AccordionItem
+                        aria-label="button"
+                        title="Persiapan UTS/UAS"
+                        indicator={
+                          <CaretRight size={14} className="text-gray" />
+                        }
+                        className="mx-4 grid gap-1"
+                      >
+                        <ButtonSidebar
+                          label="Konten"
+                          path="/preparation/contents"
+                          icon={<Circle weight="fill" size={6} />}
+                          className="ml-4"
+                        />
+
+                        <ButtonSidebar
+                          label="Mentor"
+                          path="/preparation/mentors"
+                          icon={<Circle weight="fill" size={6} />}
+                          className="ml-4"
+                        />
+                      </AccordionItem>
+                    </Accordion>
+
+                    <Accordion
+                      isCompact
+                      className="p-0"
+                      itemClasses={{
+                        trigger:
+                          "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
+                        title: "font-bold text-gray text-sm",
+                      }}
+                    >
+                      <AccordionItem
+                        aria-label="button"
+                        title="Private Farmasi"
+                        indicator={
+                          <CaretRight size={14} className="text-gray" />
+                        }
+                        className="mx-4 grid gap-1"
+                      >
+                        <ButtonSidebar
+                          label="Konten"
+                          path="/private/contents"
+                          icon={<Circle weight="fill" size={6} />}
+                          className="ml-4"
+                        />
+
+                        <ButtonSidebar
+                          label="Mentor"
+                          path="/private/mentors"
+                          icon={<Circle weight="fill" size={6} />}
+                          className="ml-4"
+                        />
+                      </AccordionItem>
+                    </Accordion>
+                  </AccordionItem>
+                </Accordion>
+
+                <Accordion
+                  isCompact
+                  className="p-0"
+                  itemClasses={{
+                    trigger:
+                      "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
+                    title: "font-bold text-gray text-sm",
+                  }}
+                >
+                  <AccordionItem
+                    aria-label="button"
+                    title="Kelas Riset"
+                    indicator={<CaretRight size={14} className="text-gray" />}
+                    startContent={<BookBookmark className="text-gray" />}
+                    className="grid gap-1"
+                  >
+                    <ButtonSidebar
+                      label="Konten"
+                      path="/research/contents"
+                      icon={<Circle weight="fill" size={6} />}
+                      className="mx-4"
+                    />
+
+                    <ButtonSidebar
+                      label="Mentor"
+                      path="/research/mentors"
+                      icon={<Circle weight="fill" size={6} />}
+                      className="mx-4"
+                    />
+                  </AccordionItem>
+                </Accordion>
+
+                <Accordion
+                  isCompact
+                  className="p-0"
+                  itemClasses={{
+                    trigger:
+                      "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
+                    title: "font-bold text-gray text-sm",
+                  }}
+                >
+                  <AccordionItem
+                    aria-label="button"
+                    title="Kelas Skripsi"
+                    indicator={<CaretRight size={14} className="text-gray" />}
+                    startContent={<BookBookmark className="text-gray" />}
+                    className="grid gap-1"
+                  >
+                    <ButtonSidebar
+                      label="Konten"
+                      path="/theses/contents"
+                      icon={<Circle weight="fill" size={6} />}
+                      className="mx-4"
+                    />
+
+                    <ButtonSidebar
+                      label="Mentor"
+                      path="/theses/mentors"
+                      icon={<Circle weight="fill" size={6} />}
+                      className="mx-4"
+                    />
+                  </AccordionItem>
+                </Accordion>
               </div>
             </div>
           </IconContext.Provider>
