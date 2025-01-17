@@ -45,7 +45,7 @@ function getUrl(query: ParsedUrlQuery) {
   return `/admin/theses?page=${query.page ? query.page : 1}`;
 }
 
-export default function ThesesContensPage({
+export default function ThesesContentPage({
   token,
   query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {

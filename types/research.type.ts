@@ -1,12 +1,12 @@
-export type ThesesResponse = {
-  theses: Theses[];
+export type ResearchResponse = {
+  research: Research[];
   page: number;
-  total_theses: number;
+  total_research: number;
   total_pages: number;
 };
 
-export type Theses = {
-  thesis_id: string;
+export type Research = {
+  research_id: string;
   title: string;
   description: string;
   slug: string;
