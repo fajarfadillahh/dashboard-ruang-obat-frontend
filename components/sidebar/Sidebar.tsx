@@ -128,14 +128,14 @@ export default function Sidebar() {
                       >
                         <ButtonSidebar
                           label="Konten"
-                          path="/preparation/contents"
+                          path="/preparation/content"
                           icon={<Circle weight="fill" size={6} />}
                           className="ml-4"
                         />
 
                         <ButtonSidebar
                           label="Mentor"
-                          path="/preparation/mentors"
+                          path="/preparation/mentor"
                           icon={<Circle weight="fill" size={6} />}
                           className="ml-4"
                         />
@@ -161,14 +161,14 @@ export default function Sidebar() {
                       >
                         <ButtonSidebar
                           label="Konten"
-                          path="/private/contents"
+                          path="/private/content"
                           icon={<Circle weight="fill" size={6} />}
                           className="ml-4"
                         />
 
                         <ButtonSidebar
                           label="Mentor"
-                          path="/private/mentors"
+                          path="/private/mentor"
                           icon={<Circle weight="fill" size={6} />}
                           className="ml-4"
                         />
@@ -195,14 +195,14 @@ export default function Sidebar() {
                   >
                     <ButtonSidebar
                       label="Konten"
-                      path="/research/contents"
+                      path="/research/content"
                       icon={<Circle weight="fill" size={6} />}
                       className="mx-4"
                     />
 
                     <ButtonSidebar
                       label="Mentor"
-                      path="/research/mentors"
+                      path="/research/mentor"
                       icon={<Circle weight="fill" size={6} />}
                       className="mx-4"
                     />
@@ -227,14 +227,14 @@ export default function Sidebar() {
                   >
                     <ButtonSidebar
                       label="Konten"
-                      path="/theses/contents"
+                      path="/theses/content"
                       icon={<Circle weight="fill" size={6} />}
                       className="mx-4"
                     />
 
                     <ButtonSidebar
                       label="Mentor"
-                      path="/theses/mentors"
+                      path="/theses/mentor"
                       icon={<Circle weight="fill" size={6} />}
                       className="mx-4"
                     />
