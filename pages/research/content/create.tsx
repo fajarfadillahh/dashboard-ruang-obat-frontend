@@ -22,7 +22,7 @@ type InputState = {
   link_order: string;
 };
 
-export default function CreateTheses({
+export default function CreateResearch({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
@@ -63,7 +63,7 @@ export default function CreateTheses({
     setCroppedAreaPixels(croppedAreaPixels);
   }
 
-  async function handleCreateTheses() {
+  async function handleCreateResearch() {
     setLoading(true);
 
     try {
@@ -85,20 +85,20 @@ export default function CreateTheses({
           type: "image/jpg",
         });
 
-        formData.append("thumbnail_theses", fileConvert);
+        formData.append("thumbnail_research", fileConvert);
       } else {
         formData.append("video_url", videoUrl);
       }
 
       await fetcher({
-        url: "/admin/theses",
+        url: "/admin/research",
         method: "POST",
         data: formData,
         file: true,
         token,
       });
 
-      toast.success("Kelas Farmasi berhasil dibuat");
+      toast.success("Kelas riset berhasil dibuat");
       router.back();
     } catch (error: any) {
       setLoading(false);
@@ -109,13 +109,13 @@ export default function CreateTheses({
   }
 
   return (
-    <Layout title="Buat Kelas Skripsi Farmasi" className="scrollbar-hide">
+    <Layout title="Buat Kelas Riset Farmasi" className="scrollbar-hide">
       <Container>
         <section className="grid">
           <ButtonBack />
 
           <TitleText
-            title="Buat Kelas Skripsi Farmasi 📖"
+            title="Buat Kelas Riset Farmasi 🔍"
             text="Tambahkan kelas lainnya"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
@@ -211,7 +211,7 @@ export default function CreateTheses({
                   variant="flat"
                   label="Nama Kelas"
                   labelPlacement="outside"
-                  placeholder="Contoh: Kelas Skripsi Farmasi"
+                  placeholder="Contoh: Kelas Riset Farmasi"
                   name="title"
                   value={input.title}
                   onChange={(e) =>
@@ -275,7 +275,7 @@ export default function CreateTheses({
               startContent={
                 loading ? null : <FloppyDisk weight="bold" size={18} />
               }
-              onClick={handleCreateTheses}
+              onClick={handleCreateResearch}
               className="w-max justify-self-end font-bold"
             >
               {loading ? "Tunggu Sebentar..." : "Buat Kelas"}
