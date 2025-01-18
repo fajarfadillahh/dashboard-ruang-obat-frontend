@@ -14,6 +14,12 @@ import {
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+
+const defaultItemClasses = {
+  trigger: "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
+  title: "font-bold text-gray text-sm",
+};
 
 export default function Sidebar() {
   const router = useRouter();
@@ -22,6 +28,94 @@ export default function Sidebar() {
   const adminId = session.data?.user.admin_id || "";
   const route = SidebarMainMenu(adminId);
   const otherRoute = SidebarOtherMenu();
+
+  const [subjectActive, setSubjectActive] = useState<{
+    trigger: string;
+    title: string;
+  }>({
+    trigger: "",
+    title: "",
+  });
+
+  const [preparationActive, setPreparationActive] = useState<{
+    trigger: string;
+    title: string;
+  }>({
+    trigger: "",
+    title: "",
+  });
+
+  const [privateActive, setPrivateActive] = useState<{
+    trigger: string;
+    title: string;
+  }>({
+    trigger: "",
+    title: "",
+  });
+
+  const [thesisActive, setThesisActive] = useState<{
+    trigger: string;
+    title: string;
+  }>({
+    trigger: "",
+    title: "",
+  });
+
+  const [researchActive, setResearchActive] = useState<{
+    trigger: string;
+    title: string;
+  }>({
+    trigger: "",
+    title: "",
+  });
+
+  useEffect(() => {
+    setColor();
+
+    function setColor() {
+      const trigger =
+        "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl bg-purple hover:bg-purple/90";
+      const title = "font-bold text-white text-sm";
+
+      if (router.pathname.startsWith("/preparation")) {
+        setSubjectActive({
+          trigger,
+          title,
+        });
+
+        setPreparationActive({
+          trigger,
+          title,
+        });
+      }
+
+      if (router.pathname.startsWith("/private")) {
+        setSubjectActive({
+          trigger,
+          title,
+        });
+
+        setPrivateActive({
+          trigger,
+          title,
+        });
+      }
+
+      if (router.pathname.startsWith("/research")) {
+        setResearchActive({
+          trigger,
+          title,
+        });
+      }
+
+      if (router.pathname.startsWith("/theses")) {
+        setThesisActive({
+          trigger,
+          title,
+        });
+      }
+    }
+  }, [router]);
 
   return (
     <div className="static left-0 top-0 z-50 grid h-screen min-w-[250px] grid-rows-[24px_1fr] gap-8 border-r border-gray/15 bg-gray/5 [padding:2rem_1rem]">
@@ -97,32 +191,58 @@ export default function Sidebar() {
                   isCompact
                   className="p-0"
                   itemClasses={{
-                    trigger:
-                      "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
-                    title: "font-bold text-gray text-sm",
+                    trigger: subjectActive.trigger
+                      ? subjectActive.trigger
+                      : defaultItemClasses.trigger,
+                    title: subjectActive.title
+                      ? subjectActive.title
+                      : defaultItemClasses.title,
                   }}
                 >
                   <AccordionItem
                     aria-label="button"
                     title="Kelas Matkul"
-                    indicator={<CaretRight size={14} className="text-gray" />}
-                    startContent={<BookBookmark className="text-gray" />}
+                    indicator={
+                      <CaretRight
+                        size={14}
+                        className={
+                          subjectActive.trigger ? "text-white" : "text-gray"
+                        }
+                      />
+                    }
+                    startContent={
+                      <BookBookmark
+                        className={
+                          subjectActive.trigger ? "text-white" : "text-gray"
+                        }
+                      />
+                    }
                     className="grid gap-1"
                   >
                     <Accordion
                       isCompact
                       className="p-0"
                       itemClasses={{
-                        trigger:
-                          "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
-                        title: "font-bold text-gray text-sm",
+                        trigger: preparationActive.trigger
+                          ? preparationActive.trigger
+                          : defaultItemClasses.trigger,
+                        title: preparationActive.title
+                          ? preparationActive.title
+                          : defaultItemClasses.title,
                       }}
                     >
                       <AccordionItem
                         aria-label="button"
                         title="Persiapan UTS/UAS"
                         indicator={
-                          <CaretRight size={14} className="text-gray" />
+                          <CaretRight
+                            size={14}
+                            className={
+                              preparationActive.trigger
+                                ? "text-white"
+                                : "text-gray"
+                            }
+                          />
                         }
                         className="mx-4 grid gap-1"
                       >
@@ -146,16 +266,24 @@ export default function Sidebar() {
                       isCompact
                       className="p-0"
                       itemClasses={{
-                        trigger:
-                          "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
-                        title: "font-bold text-gray text-sm",
+                        trigger: privateActive.trigger
+                          ? privateActive.trigger
+                          : defaultItemClasses.trigger,
+                        title: privateActive.title
+                          ? privateActive.title
+                          : defaultItemClasses.title,
                       }}
                     >
                       <AccordionItem
                         aria-label="button"
                         title="Private Farmasi"
                         indicator={
-                          <CaretRight size={14} className="text-gray" />
+                          <CaretRight
+                            size={14}
+                            className={
+                              privateActive.trigger ? "text-white" : "text-gray"
+                            }
+                          />
                         }
                         className="mx-4 grid gap-1"
                       >
@@ -181,16 +309,32 @@ export default function Sidebar() {
                   isCompact
                   className="p-0"
                   itemClasses={{
-                    trigger:
-                      "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
-                    title: "font-bold text-gray text-sm",
+                    trigger: researchActive.trigger
+                      ? researchActive.trigger
+                      : defaultItemClasses.trigger,
+                    title: researchActive.title
+                      ? researchActive.title
+                      : defaultItemClasses.title,
                   }}
                 >
                   <AccordionItem
                     aria-label="button"
                     title="Kelas Riset"
-                    indicator={<CaretRight size={14} className="text-gray" />}
-                    startContent={<BookBookmark className="text-gray" />}
+                    indicator={
+                      <CaretRight
+                        size={14}
+                        className={
+                          researchActive.trigger ? "text-white" : "text-gray"
+                        }
+                      />
+                    }
+                    startContent={
+                      <BookBookmark
+                        className={
+                          researchActive.trigger ? "text-white" : "text-gray"
+                        }
+                      />
+                    }
                     className="grid gap-1"
                   >
                     <ButtonSidebar
@@ -213,16 +357,32 @@ export default function Sidebar() {
                   isCompact
                   className="p-0"
                   itemClasses={{
-                    trigger:
-                      "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
-                    title: "font-bold text-gray text-sm",
+                    trigger: thesisActive.trigger
+                      ? thesisActive.trigger
+                      : defaultItemClasses.trigger,
+                    title: thesisActive.title
+                      ? thesisActive.title
+                      : defaultItemClasses.title,
                   }}
                 >
                   <AccordionItem
                     aria-label="button"
                     title="Kelas Skripsi"
-                    indicator={<CaretRight size={14} className="text-gray" />}
-                    startContent={<BookBookmark className="text-gray" />}
+                    indicator={
+                      <CaretRight
+                        size={14}
+                        className={
+                          thesisActive.trigger ? "text-white" : "text-gray"
+                        }
+                      />
+                    }
+                    startContent={
+                      <BookBookmark
+                        className={
+                          thesisActive.trigger ? "text-white" : "text-gray"
+                        }
+                      />
+                    }
                     className="grid gap-1"
                   >
                     <ButtonSidebar
