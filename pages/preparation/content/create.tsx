@@ -115,7 +115,7 @@ export default function CreatePreparationClass({
           <ButtonBack />
 
           <TitleText
-            title="Buat Kelas Kelas Persiapan UTS/UAS 📚"
+            title="Buat Kelas Persiapan UTS/UAS 📚"
             text="Tambahkan kelas lainnya"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
