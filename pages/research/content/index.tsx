@@ -10,8 +10,10 @@ import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import { Research, ResearchResponse } from "@/types/research.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
@@ -35,6 +37,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 
 function getUrl(query: ParsedUrlQuery) {
@@ -51,11 +54,21 @@ export default function ResearchContensPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const { setSearch, searchValue } = useSearch(800);
-  const { data, error, isLoading } = useSWR<SuccessResponse<ResearchResponse>>({
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<ResearchResponse>
+  >({
     url: getUrl(query) as string,
     method: "GET",
     token,
   });
+
+  useEffect(() => {
+    if (searchValue) {
+      router.push({ query: { q: searchValue } });
+    } else {
+      router.push("/research/content");
+    }
+  }, [searchValue]);
 
   const columnsResearchClass = [
     { name: "ID Kelas", uid: "research_id" },
@@ -192,7 +205,11 @@ export default function ResearchContensPage({
                     Tutup
                   </Button>
 
-                  <Button color="danger" className="font-bold">
+                  <Button
+                    color="danger"
+                    className="font-bold"
+                    onClick={() => handleDeleteResearch(research.research_id)}
+                  >
                     Ya, Hapus Kelas
                   </Button>
                 </>
@@ -206,13 +223,22 @@ export default function ResearchContensPage({
     }
   }
 
-  useEffect(() => {
-    if (searchValue) {
-      router.push({ query: { q: searchValue } });
-    } else {
-      router.push("/research/content");
+  async function handleDeleteResearch(id: string) {
+    try {
+      await fetcher({
+        url: `/admin/research/${id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      toast.success("Kelas berhasil dihapus");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error(getError(error));
     }
-  }, [searchValue]);
+  }
 
   if (error) {
     return (

@@ -10,8 +10,10 @@ import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import { Theses, ThesesResponse } from "@/types/theses.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
@@ -35,6 +37,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 
 function getUrl(query: ParsedUrlQuery) {
@@ -51,11 +54,21 @@ export default function ThesesContentPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const { setSearch, searchValue } = useSearch(800);
-  const { data, error, isLoading } = useSWR<SuccessResponse<ThesesResponse>>({
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<ThesesResponse>
+  >({
     url: getUrl(query) as string,
     method: "GET",
     token,
   });
+
+  useEffect(() => {
+    if (searchValue) {
+      router.push({ query: { q: searchValue } });
+    } else {
+      router.push("/theses/content");
+    }
+  }, [searchValue]);
 
   const columnsThesesClass = [
     { name: "ID Kelas", uid: "thesis_id" },
@@ -190,7 +203,11 @@ export default function ThesesContentPage({
                     Tutup
                   </Button>
 
-                  <Button color="danger" className="font-bold">
+                  <Button
+                    color="danger"
+                    className="font-bold"
+                    onClick={() => handleDeleteTheses(thesis.thesis_id)}
+                  >
                     Ya, Hapus Kelas
                   </Button>
                 </>
@@ -204,13 +221,22 @@ export default function ThesesContentPage({
     }
   }
 
-  useEffect(() => {
-    if (searchValue) {
-      router.push({ query: { q: searchValue } });
-    } else {
-      router.push("/theses/content");
+  async function handleDeleteTheses(id: string) {
+    try {
+      await fetcher({
+        url: `/admin/theses/${id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      toast.success("Kelas berhasil dihapus");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error(getError(error));
     }
-  }, [searchValue]);
+  }
 
   if (error) {
     return (

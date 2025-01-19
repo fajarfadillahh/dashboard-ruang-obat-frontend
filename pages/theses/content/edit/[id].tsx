@@ -164,7 +164,7 @@ export default function EditTheses({
         token,
       });
 
-      toast.success("Kelas Farmasi berhasil diubah");
+      toast.success("Kelas farmasi berhasil diubah");
       router.back();
     } catch (error: any) {
       setLoading(false);
