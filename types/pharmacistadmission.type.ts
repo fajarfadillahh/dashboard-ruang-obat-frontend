@@ -5,6 +5,15 @@ export type PharmacistAdmissionUniversityResponse = {
   total_pages: number;
 };
 
+export type PharmacistAdmissionProductResponse = {
+  pa_products: PharmacistAdmissionProduct[];
+  page: number;
+  total_pa_products: number;
+  total_pages: number;
+};
+
+// ===== seperated =====
+
 export type PharmacistAdmissionUniversity = {
   university_id: string;
   name: string;
@@ -14,4 +23,17 @@ export type PharmacistAdmissionUniversity = {
   img_url: string;
   created_at: string;
   total_class: number;
+};
+
+export type PharmacistAdmissionProduct = {
+  pa_id: string;
+  title: string;
+  description: string;
+  slug: string;
+  price: number;
+  link_order: string;
+  thumbnail_url: string;
+  thumbnail_type: string;
+  is_active: boolean;
+  created_at: string;
 };
