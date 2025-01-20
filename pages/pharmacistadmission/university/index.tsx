@@ -13,7 +13,9 @@ import {
   PharmacistAdmissionUniversityResponse,
 } from "@/types/pharmacistadmission.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
@@ -36,6 +38,7 @@ import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 
 function getUrl(query: ParsedUrlQuery) {
@@ -201,7 +204,11 @@ export default function PharmacistAdmissionUniversityPage({
                   <Button
                     color="danger"
                     className="font-bold"
-                    onClick={handleDeletePharmacistAdmissionUniversity}
+                    onClick={() =>
+                      handleDeletePharmacistAdmissionUniversity(
+                        pauniversity.university_id,
+                      )
+                    }
                   >
                     Ya, Hapus Universitas
                   </Button>
@@ -216,8 +223,21 @@ export default function PharmacistAdmissionUniversityPage({
     }
   }
 
-  function handleDeletePharmacistAdmissionUniversity() {
-    alert("Kelas berhasil dihapus");
+  async function handleDeletePharmacistAdmissionUniversity(id: string) {
+    try {
+      await fetcher({
+        url: `/admin/pharmacistadmission/${id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      toast.success("Universitas berhasil dihapus");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error(getError(error));
+    }
   }
 
   if (error) {
