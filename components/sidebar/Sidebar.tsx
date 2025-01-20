@@ -53,6 +53,14 @@ export default function Sidebar() {
     title: "",
   });
 
+  const [pharmacistAdmissionActive, setPharmacistAdmissionActive] = useState<{
+    trigger: string;
+    title: string;
+  }>({
+    trigger: "",
+    title: "",
+  });
+
   const [thesisActive, setThesisActive] = useState<{
     trigger: string;
     title: string;
@@ -110,6 +118,13 @@ export default function Sidebar() {
 
       if (router.pathname.startsWith("/theses")) {
         setThesisActive({
+          trigger,
+          title,
+        });
+      }
+
+      if (router.pathname.startsWith("/pharmacistadmission")) {
+        setPharmacistAdmissionActive({
           trigger,
           title,
         });
@@ -302,6 +317,58 @@ export default function Sidebar() {
                         />
                       </AccordionItem>
                     </Accordion>
+                  </AccordionItem>
+                </Accordion>
+
+                <Accordion
+                  isCompact
+                  className="p-0"
+                  itemClasses={{
+                    trigger: pharmacistAdmissionActive.trigger
+                      ? pharmacistAdmissionActive.trigger
+                      : defaultItemClasses.trigger,
+                    title: pharmacistAdmissionActive.title
+                      ? pharmacistAdmissionActive.title
+                      : defaultItemClasses.title,
+                  }}
+                >
+                  <AccordionItem
+                    aria-label="button"
+                    title="Kelas Apoteker"
+                    indicator={
+                      <CaretRight
+                        size={14}
+                        className={
+                          pharmacistAdmissionActive.trigger
+                            ? "text-white"
+                            : "text-gray"
+                        }
+                      />
+                    }
+                    startContent={
+                      <BookBookmark
+                        className={
+                          pharmacistAdmissionActive.trigger
+                            ? "text-white"
+                            : "text-gray"
+                        }
+                      />
+                    }
+                    className="grid gap-1"
+                  >
+                    <ButtonSidebar
+                      label="Universitas"
+                      path="/pharmacistadmission/university"
+                      icon={<Circle weight="fill" size={6} />}
+                      className="mx-4"
+                    />
+
+                    <ButtonSidebar
+                      label="Produk"
+                      path="/pharmacistadmission/product"
+                      icon={<Circle weight="fill" size={6} />}
+                      className="mx-4"
+                    />
                   </AccordionItem>
                 </Accordion>
 
