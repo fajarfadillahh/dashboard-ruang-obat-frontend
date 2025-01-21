@@ -6,10 +6,7 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
-import {
-  PharmacistAdmissionProduct,
-  PharmacistAdmissionUniversityResponse,
-} from "@/types/pharmacistadmission.type";
+import { PharmacistAdmissionProduct } from "@/types/pharmacistadmission.type";
 import getCroppedImg from "@/utils/cropImage";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
@@ -41,7 +38,6 @@ type InputState = {
 };
 
 export default function EditPharmacistAdmissionProduct({
-  data: university,
   params,
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -420,33 +416,13 @@ export default function EditPharmacistAdmissionProduct({
 }
 
 export const getServerSideProps: GetServerSideProps<{
-  token?: string;
-  params?: ParsedUrlQuery;
-  data?: PharmacistAdmissionUniversityResponse;
+  token: string;
+  params: ParsedUrlQuery;
 }> = async ({ req, params }) => {
-  const token = req.headers["access_token"] as string;
-
-  try {
-    const response = (await fetcher({
-      url: "/admin/pharmacistadmission",
-      method: "GET",
-      token,
-    })) as SuccessResponse<PharmacistAdmissionUniversityResponse>;
-
-    return {
-      props: {
-        data: response.data,
-        params: params as ParsedUrlQuery,
-        token,
-      },
-    };
-  } catch (error: any) {
-    console.error(error);
-
-    return {
-      props: {
-        error,
-      },
-    };
-  }
+  return {
+    props: {
+      token: req.headers["access_token"] as string,
+      params: params as ParsedUrlQuery,
+    },
+  };
 };
