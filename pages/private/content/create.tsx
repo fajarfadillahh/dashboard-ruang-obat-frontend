@@ -10,7 +10,7 @@ import { FloppyDisk, Plus, Trash } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 type InputState = {
@@ -49,25 +49,26 @@ export default function CreatePrivateContentPage({
     setButtonDisabled(!(isFormValid && areSubjectPartsValid));
   }, [input, subjectParts]);
 
-  const addSubjectPart = useCallback(() => {
+  function addSubjectPart() {
     setSubjectParts((prev) => [
       ...prev,
       { description: "", price: 0, link_order: "" },
     ]);
-  }, []);
+  }
 
-  const updateSubjectPart = useCallback(
-    (index: number, key: keyof SubjectPart, value: any) => {
-      setSubjectParts((prev) =>
-        prev.map((part, i) => (i === index ? { ...part, [key]: value } : part)),
-      );
-    },
-    [],
-  );
+  function updateSubjectPart(
+    index: number,
+    key: keyof SubjectPart,
+    value: any,
+  ) {
+    setSubjectParts((prev) =>
+      prev.map((part, i) => (i === index ? { ...part, [key]: value } : part)),
+    );
+  }
 
-  const removeSubjectPart = useCallback((index: number) => {
+  function removeSubjectPart(index: number) {
     setSubjectParts((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+  }
 
   async function handleCreatePackage() {
     setLoading(true);
