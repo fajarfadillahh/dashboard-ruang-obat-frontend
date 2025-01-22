@@ -178,7 +178,7 @@ export default function EditPreparationClass({
 
   if (error) {
     return (
-      <Layout title="Buat Kelas Persiapan UTS/UAS">
+      <Layout title="Edit Kelas Persiapan UTS/UAS">
         <Container>
           <ErrorPage
             {...{
@@ -195,14 +195,14 @@ export default function EditPreparationClass({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Buat Kelas Persiapan UTS/UAS" className="scrollbar-hide">
+    <Layout title="Edit Kelas Persiapan UTS/UAS" className="scrollbar-hide">
       <Container>
         <section className="grid">
           <ButtonBack />
 
           <TitleText
             title="Edit Kelas Persiapan UTS/UAS 📚"
-            text="Tambahkan kelas lainnya"
+            text="Edit dan sesuaikan data kelas persiapan"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 

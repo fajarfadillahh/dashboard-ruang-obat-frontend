@@ -116,7 +116,7 @@ export default function CreatePreparationClass({
 
           <TitleText
             title="Buat Kelas Persiapan UTS/UAS 📚"
-            text="Tambahkan kelas lainnya"
+            text="Tambahkan kelas persiapan lainnya"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 

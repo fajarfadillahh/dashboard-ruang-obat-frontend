@@ -178,7 +178,7 @@ export default function EditPrivateContentPage({
 
           <TitleText
             title="Edit Paket Kelas Private Farmasi 🔏"
-            text="Sesuaikan data paket"
+            text="Edit dan sesuaikan data paket kelas"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 

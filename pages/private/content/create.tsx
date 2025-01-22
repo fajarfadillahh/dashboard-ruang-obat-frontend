@@ -107,7 +107,7 @@ export default function CreatePrivateContentPage({
 
           <TitleText
             title="Buat Paket Kelas Private Farmasi 🔏"
-            text="Tambahkan paket lainnya"
+            text="Tambahkan paket kelas lainnya"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 

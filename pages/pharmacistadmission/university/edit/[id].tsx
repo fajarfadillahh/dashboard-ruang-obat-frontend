@@ -148,7 +148,7 @@ export default function EditPharmacistAdmissionUniversity({
 
           <TitleText
             title="Edit Universitas 🏫"
-            text="Sesuaikan data universitas"
+            text="Edit dan sesuaikan data universitas"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 

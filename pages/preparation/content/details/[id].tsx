@@ -56,7 +56,7 @@ export default function PreparationContentDetailsPage({
           <div className="grid gap-8 pb-12">
             <TitleText
               title="Detail Kelas 📚"
-              text="Anda bisa melihat data kelas lebih detail disini"
+              text="Anda bisa melihat data kelas persiapan lebih detail disini"
             />
 
             <div className="grid grid-cols-[600px_1fr] items-start gap-16">

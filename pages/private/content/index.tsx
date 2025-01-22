@@ -266,7 +266,7 @@ export default function PrivateContentsPage({
         <section className="grid gap-8">
           <TitleText
             title="Daftar Paket Kelas Private Farmasi 🔏"
-            text="Semua paket kelas akan muncul disini"
+            text="Semua paket kelas private akan muncul disini"
           />
 
           <div className="grid">

@@ -267,7 +267,7 @@ export default function ResearchContensPage({
         <section className="grid gap-8">
           <TitleText
             title="Daftar Konten Kelas Riset Farmasi 🔍"
-            text="Semua konten/data kelas akan muncul semuanya disini"
+            text="Semua konten/data kelas akan muncul disini"
           />
 
           <div className="grid">

@@ -200,7 +200,7 @@ export default function EditResearch({
 
           <TitleText
             title="Edit Kelas Riset Farmasi 🔍"
-            text="Tambahkan kelas lainnya"
+            text="Edit dan sesuaikan data kelas"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 

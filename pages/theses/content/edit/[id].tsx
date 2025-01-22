@@ -200,7 +200,7 @@ export default function EditTheses({
 
           <TitleText
             title="Edit Kelas Skripsi Farmasi 📖"
-            text="Tambahkan kelas lainnya"
+            text="Edit dan sesuaikan kelas"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 

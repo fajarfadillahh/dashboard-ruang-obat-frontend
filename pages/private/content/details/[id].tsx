@@ -56,7 +56,7 @@ export default function SubjectPrivateDetailsPage({
           <div className="grid gap-8 pb-12">
             <TitleText
               title="Detail Paket Kelas Private Farmasi 🔏"
-              text="Anda bisa melihat data paket lebih detail disini"
+              text="Anda bisa melihat data paket kelas lebih detail disini"
             />
 
             <div className="grid max-w-[600px] gap-10 rounded-xl border-2 border-l-8 border-gray/20 p-8">

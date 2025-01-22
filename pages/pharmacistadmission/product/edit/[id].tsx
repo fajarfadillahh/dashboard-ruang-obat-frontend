@@ -202,7 +202,7 @@ export default function EditPharmacistAdmissionProduct({
 
           <TitleText
             title="Edit Produk/Kelas per Universitas 📦"
-            text="Tambahkan produk/kelas lainnya"
+            text="Edit dan sesuaikan data produk/kelas"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 
