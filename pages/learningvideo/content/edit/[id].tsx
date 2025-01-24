@@ -6,7 +6,7 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
-import { SubjectPreparation } from "@/types/preparation.type";
+import { LearningVideo } from "@/types/learningvideo.type";
 import getCroppedImg from "@/utils/cropImage";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
@@ -43,9 +43,7 @@ export default function EditPreparationClass({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const session = useSession();
-  const { data, error, isLoading } = useSWR<
-    SuccessResponse<SubjectPreparation>
-  >({
+  const { data, error, isLoading } = useSWR<SuccessResponse<LearningVideo>>({
     url: `/admin/subjects/preparation/${encodeURIComponent(params?.id as string)}`,
     method: "GET",
     token,
@@ -143,7 +141,7 @@ export default function EditPreparationClass({
           const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
           const response = await fetch(croppedImage as string);
           const blob = await response.blob();
-          const fileConvert = new File([blob], "kelas-img.jpg", {
+          const fileConvert = new File([blob], "thumbnail-video.jpg", {
             type: "image/jpg",
           });
 
@@ -166,7 +164,7 @@ export default function EditPreparationClass({
         token,
       });
 
-      toast.success("Kelas persiapan berhasil diubah");
+      toast.success("Video pembelajaran berhasil diubah");
       router.back();
     } catch (error: any) {
       setLoading(false);
@@ -178,7 +176,7 @@ export default function EditPreparationClass({
 
   if (error) {
     return (
-      <Layout title="Edit Kelas Persiapan UTS/UAS">
+      <Layout title="Edit Video Pembelajaran Matkul Farmasi">
         <Container>
           <ErrorPage
             {...{
@@ -195,14 +193,17 @@ export default function EditPreparationClass({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Edit Kelas Persiapan UTS/UAS" className="scrollbar-hide">
+    <Layout
+      title="Edit Video Pembelajaran Matkul Farmasi"
+      className="scrollbar-hide"
+    >
       <Container>
         <section className="grid">
           <ButtonBack />
 
           <TitleText
-            title="Edit Kelas Persiapan UTS/UAS 📚"
-            text="Edit dan sesuaikan data kelas persiapan"
+            title="Edit Video Pembelajaran Matkul Farmasi 🎬"
+            text="Edit dan sesuaikan data video pembelajaran"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 
@@ -268,7 +269,7 @@ export default function EditPreparationClass({
                             accept="image/jpg, image/jpeg, image/png"
                             variant="flat"
                             labelPlacement="outside"
-                            placeholder="Thumbnail Kelas"
+                            placeholder="Thumbnail Video"
                             classNames={{
                               input:
                                 "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
@@ -337,9 +338,9 @@ export default function EditPreparationClass({
                     isRequired
                     type="text"
                     variant="flat"
-                    label="Nama Kelas"
+                    label="Nama Video"
                     labelPlacement="outside"
-                    placeholder="Contoh: Kelas Persiapan UTS/UAS"
+                    placeholder="Contoh: Video Pembelajaran Bio Farmasi"
                     name="title"
                     value={input.title}
                     onChange={(e) =>
@@ -352,7 +353,7 @@ export default function EditPreparationClass({
                     isRequired
                     type="text"
                     variant="flat"
-                    label="Harga Kelas"
+                    label="Harga Video"
                     labelPlacement="outside"
                     placeholder="Contoh: 200000"
                     name="price"
@@ -383,7 +384,7 @@ export default function EditPreparationClass({
                     maxRows={6}
                     type="text"
                     variant="flat"
-                    label="Deskripsi Kelas"
+                    label="Deskripsi Video"
                     labelPlacement="outside"
                     placeholder="Masukan Deskripsi"
                     name="description"
@@ -406,7 +407,7 @@ export default function EditPreparationClass({
               onClick={handleEditPreparationClass}
               className="w-max justify-self-end font-bold"
             >
-              {loading ? "Tunggu Sebentar..." : "Simpan Kelas"}
+              {loading ? "Tunggu Sebentar..." : "Simpan Video"}
             </Button>
           </div>
         </section>

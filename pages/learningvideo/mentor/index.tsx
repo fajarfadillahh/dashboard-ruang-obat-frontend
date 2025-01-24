@@ -45,7 +45,7 @@ export default function PreparationMentorsPage({
 
   if (error) {
     return (
-      <Layout title="Kelas Skripsi">
+      <Layout title="Video Pembelajaran Matkul Farmasi">
         <Container>
           <ErrorPage
             {...{
@@ -63,14 +63,14 @@ export default function PreparationMentorsPage({
 
   return (
     <Layout
-      title="Daftar Mentor Kelas Persiapan UTS/UAS"
+      title="Daftar Mentor Kelas Video Pembelajaran Matkul Farmasi"
       className="scrollbar-hide"
     >
       <Container>
         <section className="grid gap-8">
           <TitleText
-            title="Daftar Mentor Kelas Persiapan UTS/UAS 📢"
-            text="Semua mentor yang bertugas akan muncul semuanya disini"
+            title="Daftar Mentor Video Pembelajaran Matkul Farmasi 📢"
+            text="Semua mentor yang bertugas akan muncul disini"
           />
 
           <div className="grid">

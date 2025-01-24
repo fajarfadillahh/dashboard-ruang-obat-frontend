@@ -1,11 +1,11 @@
-export type SubjectPreparationResponse = {
-  preparation_classes: SubjectPreparation[];
+export type LearningVideoResponse = {
+  preparation_classes: LearningVideo[];
   page: number;
   total_preparation_classes: number;
   total_pages: number;
 };
 
-export type SubjectPreparation = {
+export type LearningVideo = {
   subject_id: string;
   title: string;
   description: string;

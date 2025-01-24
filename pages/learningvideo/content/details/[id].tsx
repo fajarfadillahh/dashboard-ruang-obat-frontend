@@ -6,7 +6,7 @@ import VideoComponent from "@/components/VideoComponent";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { SuccessResponse } from "@/types/global.type";
-import { SubjectPreparation } from "@/types/preparation.type";
+import { LearningVideo } from "@/types/learningvideo.type";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import { Chip } from "@nextui-org/react";
@@ -21,9 +21,7 @@ export default function PreparationContentDetailsPage({
   params,
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { data, error, isLoading } = useSWR<
-    SuccessResponse<SubjectPreparation>
-  >({
+  const { data, error, isLoading } = useSWR<SuccessResponse<LearningVideo>>({
     url: `/admin/subjects/preparation/${encodeURIComponent(params.id as string)}`,
     method: "GET",
     token,
@@ -31,7 +29,7 @@ export default function PreparationContentDetailsPage({
 
   if (error) {
     return (
-      <Layout title="Detail Kelas">
+      <Layout title="Detail Video">
         <Container>
           <ErrorPage
             {...{
@@ -48,25 +46,25 @@ export default function PreparationContentDetailsPage({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Detail Kelas">
+    <Layout title="Detail Video">
       <Container>
         <section className="grid gap-8">
           <ButtonBack />
 
           <div className="grid gap-8 pb-12">
             <TitleText
-              title="Detail Kelas 📚"
-              text="Anda bisa melihat data kelas persiapan lebih detail disini"
+              title="Detail Video 🎬"
+              text="Anda bisa melihat data video lebih detail disini"
             />
 
             <div className="grid grid-cols-[600px_1fr] items-start gap-16">
               <div className="grid gap-10 rounded-xl border-2 border-l-8 border-gray/20 p-8">
                 <div className="grid flex-1 gap-1.5">
                   {[
-                    ["ID Kelas", `${data?.data.subject_id}`],
-                    ["Nama Kelas", `${data?.data.title}`],
+                    ["ID Video", `${data?.data.subject_id}`],
+                    ["Nama Video", `${data?.data.title}`],
                     [
-                      "Harga Kelas",
+                      "Harga Video",
                       `${formatRupiah(data?.data.price as number)}`,
                     ],
                     [
@@ -125,7 +123,7 @@ export default function PreparationContentDetailsPage({
                 </div>
 
                 <div className="grid gap-1">
-                  <h1 className="font-bold text-black">Deskripsi Kelas</h1>
+                  <h1 className="font-bold text-black">Deskripsi Video</h1>
                   <p className="text-sm leading-[170%] text-black">
                     {data?.data.description}
                   </p>
@@ -136,7 +134,7 @@ export default function PreparationContentDetailsPage({
                 <Image
                   priority
                   src={data?.data.thumbnail_url as string}
-                  alt={"thumbnail kelas"}
+                  alt={"thumbnail video"}
                   width={500}
                   height={500}
                   className="aspect-square size-[300px] rounded-xl object-cover object-center"

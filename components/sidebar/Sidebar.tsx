@@ -37,7 +37,7 @@ export default function Sidebar() {
     title: "",
   });
 
-  const [preparationActive, setPreparationActive] = useState<{
+  const [LearningVideoActive, setLearningVideoActive] = useState<{
     trigger: string;
     title: string;
   }>({
@@ -85,13 +85,13 @@ export default function Sidebar() {
         "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl bg-purple hover:bg-purple/90";
       const title = "font-bold text-white text-sm";
 
-      if (router.pathname.startsWith("/preparation")) {
+      if (router.pathname.startsWith("/learningvideo")) {
         setSubjectActive({
           trigger,
           title,
         });
 
-        setPreparationActive({
+        setLearningVideoActive({
           trigger,
           title,
         });
@@ -238,22 +238,22 @@ export default function Sidebar() {
                       isCompact
                       className="p-0"
                       itemClasses={{
-                        trigger: preparationActive.trigger
-                          ? preparationActive.trigger
+                        trigger: LearningVideoActive.trigger
+                          ? LearningVideoActive.trigger
                           : defaultItemClasses.trigger,
-                        title: preparationActive.title
-                          ? preparationActive.title
+                        title: LearningVideoActive.title
+                          ? LearningVideoActive.title
                           : defaultItemClasses.title,
                       }}
                     >
                       <AccordionItem
                         aria-label="button"
-                        title="Persiapan UTS/UAS"
+                        title="Video Pembelajaran"
                         indicator={
                           <CaretRight
                             size={14}
                             className={
-                              preparationActive.trigger
+                              LearningVideoActive.trigger
                                 ? "text-white"
                                 : "text-gray"
                             }
@@ -263,14 +263,14 @@ export default function Sidebar() {
                       >
                         <ButtonSidebar
                           label="Konten"
-                          path="/preparation/content"
+                          path="/learningvideo/content"
                           icon={<Circle weight="fill" size={6} />}
                           className="ml-4"
                         />
 
                         <ButtonSidebar
                           label="Mentor"
-                          path="/preparation/mentor"
+                          path="/learningvideo/mentor"
                           icon={<Circle weight="fill" size={6} />}
                           className="ml-4"
                         />

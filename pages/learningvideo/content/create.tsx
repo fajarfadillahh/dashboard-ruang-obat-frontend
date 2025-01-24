@@ -81,7 +81,7 @@ export default function CreatePreparationClass({
         const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
         const response = await fetch(croppedImage as string);
         const blob = await response.blob();
-        const fileConvert = new File([blob], "kelas-img.jpg", {
+        const fileConvert = new File([blob], "thumbnail-video.jpg", {
           type: "image/jpg",
         });
 
@@ -98,7 +98,7 @@ export default function CreatePreparationClass({
         token,
       });
 
-      toast.success("Kelas persiapan berhasil dibuat");
+      toast.success("Video pembelajaran berhasil dibuat");
       router.back();
     } catch (error: any) {
       setLoading(false);
@@ -109,14 +109,17 @@ export default function CreatePreparationClass({
   }
 
   return (
-    <Layout title="Buat Kelas Persiapan UTS/UAS" className="scrollbar-hide">
+    <Layout
+      title="Buat Video Pembelajaran Matkul Farmasi"
+      className="scrollbar-hide"
+    >
       <Container>
         <section className="grid">
           <ButtonBack />
 
           <TitleText
-            title="Buat Kelas Persiapan UTS/UAS 📚"
-            text="Tambahkan kelas persiapan lainnya"
+            title="Buat Video Pembelajaran Matkul Farmasi 🎬"
+            text="Tambahkan video pembelajaran lainnya"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 
@@ -166,7 +169,7 @@ export default function CreatePreparationClass({
                       accept="image/jpg, image/jpeg, image/png"
                       variant="flat"
                       labelPlacement="outside"
-                      placeholder="Thumbnail Kelas"
+                      placeholder="Thumbnail Video"
                       classNames={{
                         input:
                           "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
@@ -209,9 +212,9 @@ export default function CreatePreparationClass({
                   isRequired
                   type="text"
                   variant="flat"
-                  label="Nama Kelas"
+                  label="Nama Video"
                   labelPlacement="outside"
-                  placeholder="Contoh: Kelas Persiapan UTS/UAS"
+                  placeholder="Contoh: Video Pembelajaran Bio Farmasi"
                   name="title"
                   value={input.title}
                   onChange={(e) =>
@@ -224,7 +227,7 @@ export default function CreatePreparationClass({
                   isRequired
                   type="text"
                   variant="flat"
-                  label="Harga Kelas"
+                  label="Harga Video"
                   labelPlacement="outside"
                   placeholder="Contoh: 200000"
                   name="price"
@@ -255,7 +258,7 @@ export default function CreatePreparationClass({
                   maxRows={6}
                   type="text"
                   variant="flat"
-                  label="Deskripsi Kelas"
+                  label="Deskripsi Video"
                   labelPlacement="outside"
                   placeholder="Masukan Deskripsi"
                   name="description"
@@ -278,7 +281,7 @@ export default function CreatePreparationClass({
               onClick={handleCreatePreparationClass}
               className="w-max justify-self-end font-bold"
             >
-              {loading ? "Tunggu Sebentar..." : "Buat Kelas"}
+              {loading ? "Tunggu Sebentar..." : "Buat Video"}
             </Button>
           </div>
         </section>

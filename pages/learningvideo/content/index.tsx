@@ -9,9 +9,9 @@ import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
 import { SuccessResponse } from "@/types/global.type";
 import {
-  SubjectPreparation,
-  SubjectPreparationResponse,
-} from "@/types/preparation.type";
+  LearningVideo,
+  LearningVideoResponse,
+} from "@/types/learningvideo.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
@@ -58,7 +58,7 @@ export default function PreparationContentsPage({
   const router = useRouter();
   const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading, mutate } = useSWR<
-    SuccessResponse<SubjectPreparationResponse>
+    SuccessResponse<LearningVideoResponse>
   >({
     url: getUrl(query) as string,
     method: "GET",
@@ -69,46 +69,39 @@ export default function PreparationContentsPage({
     if (searchValue) {
       router.push({ query: { q: searchValue } });
     } else {
-      router.push("/preparation/content");
+      router.push("/learningvideo/content");
     }
   }, [searchValue]);
 
-  const columnsPreparationClass = [
-    { name: "ID Kelas", uid: "subject_id" },
-    { name: "Nama Kelas", uid: "title" },
-    { name: "Harga Kelas", uid: "price" },
+  const columnsLearningVideo = [
+    { name: "ID Video", uid: "subject_id" },
+    { name: "Nama Video", uid: "title" },
+    { name: "Harga Video", uid: "price" },
     { name: "Dibuat Pada", uid: "created_at" },
     { name: "Status", uid: "status" },
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellPreparation(
-    preparation: SubjectPreparation,
-    columnKey: React.Key,
-  ) {
-    const cellValue = preparation[columnKey as keyof SubjectPreparation];
+  function renderCellLearningVideo(video: LearningVideo, columnKey: React.Key) {
+    const cellValue = video[columnKey as keyof LearningVideo];
 
     switch (columnKey) {
       case "subject_id":
         return (
-          <div className="w-max font-medium text-black">
-            {preparation.subject_id}
-          </div>
+          <div className="w-max font-medium text-black">{video.subject_id}</div>
         );
       case "title":
-        return (
-          <div className="font-medium text-black">{preparation.title}</div>
-        );
+        return <div className="font-medium text-black">{video.title}</div>;
       case "price":
         return (
           <div className="w-max font-medium text-black">
-            {formatRupiah(preparation.price)}
+            {formatRupiah(video.price)}
           </div>
         );
       case "created_at":
         return (
           <div className="w-max font-medium text-black">
-            {formatDate(preparation.created_at)}
+            {formatDate(video.created_at)}
           </div>
         );
       case "status":
@@ -117,9 +110,9 @@ export default function PreparationContentsPage({
             <Chip
               variant="flat"
               size="sm"
-              color={preparation.is_active ? "success" : "danger"}
+              color={video.is_active ? "success" : "danger"}
               startContent={
-                preparation.is_active ? (
+                video.is_active ? (
                   <CheckCircle weight="fill" size={16} />
                 ) : (
                   <XCircle weight="fill" size={16} />
@@ -130,7 +123,7 @@ export default function PreparationContentsPage({
                 content: "font-bold capitalize",
               }}
             >
-              {preparation.is_active
+              {video.is_active
                 ? "Tampil di homepage"
                 : "Tidak tampil di homepage"}
             </Chip>
@@ -146,7 +139,7 @@ export default function PreparationContentsPage({
               size="sm"
               onClick={() =>
                 router.push(
-                  `/preparation/content/details/${encodeURIComponent(preparation.subject_id)}`,
+                  `/learningvideo/content/details/${encodeURIComponent(video.subject_id)}`,
                 )
               }
             >
@@ -160,7 +153,7 @@ export default function PreparationContentsPage({
               size="sm"
               onClick={() =>
                 router.push(
-                  `/preparation/content/edit/${encodeURIComponent(preparation.subject_id)}`,
+                  `/learningvideo/content/edit/${encodeURIComponent(video.subject_id)}`,
                 )
               }
             >
@@ -173,17 +166,17 @@ export default function PreparationContentsPage({
                   <Trash weight="bold" size={18} className="text-danger" />
                 </Button>
               }
-              header={<h1 className="font-bold text-black">Hapus Kelas</h1>}
+              header={<h1 className="font-bold text-black">Hapus Video</h1>}
               body={
                 <div className="grid gap-3 text-sm font-medium">
                   <p className="leading-[170%] text-gray">
-                    Apakah anda ingin menghapus kelas berikut secara permanen?
+                    Apakah anda ingin menghapus video berikut secara permanen?
                   </p>
 
                   <div className="grid gap-1">
                     {[
-                      ["ID Kelas", `${preparation.subject_id}`],
-                      ["Nama Kelas", `${preparation.title}`],
+                      ["ID Video", `${video.subject_id}`],
+                      ["Nama Video", `${video.title}`],
                     ].map(([label, value], index) => (
                       <div
                         key={index}
@@ -217,10 +210,10 @@ export default function PreparationContentsPage({
                     color="danger"
                     className="font-bold"
                     onClick={() =>
-                      handleDeletePreparationClass(preparation.subject_id)
+                      handleDeletePreparationClass(video.subject_id)
                     }
                   >
-                    Ya, Hapus Kelas
+                    Ya, Hapus Video
                   </Button>
                 </>
               )}
@@ -242,7 +235,7 @@ export default function PreparationContentsPage({
       });
 
       mutate();
-      toast.success("Kelas berhasil dihapus");
+      toast.success("Video berhasil dihapus");
     } catch (error: any) {
       console.error(error);
 
@@ -252,7 +245,7 @@ export default function PreparationContentsPage({
 
   if (error) {
     return (
-      <Layout title="Daftar Konten Kelas Persiapan UTS/UAS">
+      <Layout title="Daftar Video Pembelajaran Matkul Farmasi">
         <Container>
           <ErrorPage
             {...{
@@ -270,20 +263,20 @@ export default function PreparationContentsPage({
 
   return (
     <Layout
-      title="Daftar Konten Kelas Persiapan UTS/UAS"
+      title="Daftar Video Pembelajaran Matkul Farmasi"
       className="scrollbar-hide"
     >
       <Container>
         <section className="grid gap-8">
           <TitleText
-            title="Daftar Konten Kelas Persiapan UTS/UAS 📚"
-            text="Semua konten/data kelas akan muncul disini"
+            title="Daftar Video Pembelajaran Matkul Farmasi 🎬"
+            text="Semua video kelas pembelajaran akan muncul disini"
           />
 
           <div className="grid">
             <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
               <SearchInput
-                placeholder="Cari Kelas ID atau Nama Kelas"
+                placeholder="Cari Video ID atau Nama Video"
                 defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
                 onClear={() => setSearch("")}
@@ -292,23 +285,23 @@ export default function PreparationContentsPage({
               <Button
                 color="secondary"
                 startContent={<Plus weight="bold" size={18} />}
-                onClick={() => router.push("/preparation/content/create")}
+                onClick={() => router.push("/learningvideo/content/create")}
                 className="font-bold"
               >
-                Tambah Kelas
+                Tambah Video
               </Button>
             </div>
 
             <div className="overflow-x-scroll scrollbar-hide">
               <Table
                 isHeaderSticky
-                aria-label="preparation class table"
+                aria-label="video class table"
                 color="secondary"
                 selectionMode="none"
                 classNames={customStyleTable}
                 className="scrollbar-hide"
               >
-                <TableHeader columns={columnsPreparationClass}>
+                <TableHeader columns={columnsLearningVideo}>
                   {(column) => (
                     <TableColumn key={column.uid}>{column.name}</TableColumn>
                   )}
@@ -316,13 +309,13 @@ export default function PreparationContentsPage({
 
                 <TableBody
                   items={data?.data.preparation_classes}
-                  emptyContent={<EmptyData text="Kelas tidak ditemukan!" />}
+                  emptyContent={<EmptyData text="Video tidak ditemukan!" />}
                 >
-                  {(preparation) => (
-                    <TableRow key={preparation.subject_id}>
+                  {(video) => (
+                    <TableRow key={video.subject_id}>
                       {(columnKey) => (
                         <TableCell>
-                          {renderCellPreparation(preparation, columnKey)}
+                          {renderCellLearningVideo(video, columnKey)}
                         </TableCell>
                       )}
                     </TableRow>

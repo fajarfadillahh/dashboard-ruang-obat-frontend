@@ -112,7 +112,7 @@ export default function TableClassMentor({
 
       <TableBody
         items={mentors}
-        emptyContent={<EmptyData text="Kelas tidak ditemukan!" />}
+        emptyContent={<EmptyData text="Mentor tidak ditemukan!" />}
       >
         {(mentor) => (
           <TableRow key={mentor.mentor_id}>
