@@ -141,7 +141,7 @@ export default function EditResearch({
           const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
           const response = await fetch(croppedImage as string);
           const blob = await response.blob();
-          const fileConvert = new File([blob], "kelas-img.jpg", {
+          const fileConvert = new File([blob], "thumbnail.jpg", {
             type: "image/jpg",
           });
 

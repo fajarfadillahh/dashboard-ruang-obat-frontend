@@ -57,7 +57,7 @@ export default function CreatePharmacistAdmissionUniversity({
       const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
       const response = await fetch(croppedImage as string);
       const blob = await response.blob();
-      const fileConvert = new File([blob], "universitas-kelas-img.jpg", {
+      const fileConvert = new File([blob], "university-img.jpg", {
         type: "image/jpg",
       });
 

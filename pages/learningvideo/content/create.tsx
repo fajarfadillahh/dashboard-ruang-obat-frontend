@@ -81,7 +81,7 @@ export default function CreatePreparationClass({
         const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
         const response = await fetch(croppedImage as string);
         const blob = await response.blob();
-        const fileConvert = new File([blob], "thumbnail-video.jpg", {
+        const fileConvert = new File([blob], "thumbnail.jpg", {
           type: "image/jpg",
         });
 
