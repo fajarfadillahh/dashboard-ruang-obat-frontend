@@ -22,6 +22,10 @@ const nextConfig = {
         hostname: "dev.ruangobat.id",
       },
       {
+        protocol: "https",
+        hostname: "www.youtube.com",
+      },
+      {
         protocol: "http",
         hostname: "api.ruangobat.id",
       },

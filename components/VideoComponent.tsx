@@ -1,8 +1,14 @@
+import { twMerge } from "tailwind-merge";
+
 type VideoComponentProps = {
   url: string;
+  className?: string;
 };
 
-export default function VideoComponent({ url }: VideoComponentProps) {
+export default function VideoComponent({
+  url,
+  className,
+}: VideoComponentProps) {
   const videoID = new URL(url).searchParams.get("v");
   const embedURL = `https://www.youtube.com/embed/${videoID}`;
 
@@ -13,7 +19,7 @@ export default function VideoComponent({ url }: VideoComponentProps) {
       width={350}
       height={270}
       title="Video Player"
-      className="border-0"
+      className={twMerge(`border-0 ${className}`)}
     />
   );
 }

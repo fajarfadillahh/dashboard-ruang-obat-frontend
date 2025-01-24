@@ -114,13 +114,9 @@ export default function EditMentorPage({
         const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
         const response = await fetch(croppedImage as string);
         const blob = await response.blob();
-        const fileConvert = new File(
-          [blob],
-          `${data?.data.mentor_id}-mentor-img.jpg`,
-          {
-            type: "image/jpg",
-          },
-        );
+        const fileConvert = new File([blob], "mentor-img.jpg", {
+          type: "image/jpg",
+        });
         formData.append("img_mentor", fileConvert);
       } else {
         formData.append("with_image", "false");
