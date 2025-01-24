@@ -230,6 +230,11 @@ export default function Sidebar() {
                         className={
                           subjectActive.trigger ? "text-white" : "text-gray"
                         }
+                        weight={
+                          router.asPath.includes("/learningvideo")
+                            ? "fill"
+                            : "bold"
+                        }
                       />
                     }
                     className="grid gap-1"
@@ -352,6 +357,11 @@ export default function Sidebar() {
                             ? "text-white"
                             : "text-gray"
                         }
+                        weight={
+                          router.asPath.includes("/pharmacistadmission")
+                            ? "fill"
+                            : "bold"
+                        }
                       />
                     }
                     className="grid gap-1"
@@ -400,6 +410,9 @@ export default function Sidebar() {
                         className={
                           researchActive.trigger ? "text-white" : "text-gray"
                         }
+                        weight={
+                          router.asPath.includes("/research") ? "fill" : "bold"
+                        }
                       />
                     }
                     className="grid gap-1"
@@ -447,6 +460,9 @@ export default function Sidebar() {
                       <BookBookmark
                         className={
                           thesisActive.trigger ? "text-white" : "text-gray"
+                        }
+                        weight={
+                          router.asPath.includes("/theses") ? "fill" : "bold"
                         }
                       />
                     }
