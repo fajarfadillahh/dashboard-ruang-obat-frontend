@@ -45,7 +45,7 @@ export default function ResearchMentorsPage({
 
   if (error) {
     return (
-      <Layout title="Kelas Skripsi">
+      <Layout title="Daftar Mentor Kelas Riset Farmasi">
         <Container>
           <ErrorPage
             {...{
@@ -70,7 +70,7 @@ export default function ResearchMentorsPage({
         <section className="grid gap-8">
           <TitleText
             title="Daftar Mentor Kelas Riset Farmasi 📢"
-            text="Semua mentor yang bertugas akan muncul semuanya disini"
+            text="Semua mentor yang bertugas akan muncul disini"
           />
 
           <div className="grid">

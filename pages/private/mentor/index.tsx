@@ -45,7 +45,7 @@ export default function PrivateMentorsPage({
 
   if (error) {
     return (
-      <Layout title="Kelas Skripsi">
+      <Layout title="Daftar Mentor Kelas Private Farmasi">
         <Container>
           <ErrorPage
             {...{
@@ -70,7 +70,7 @@ export default function PrivateMentorsPage({
         <section className="grid gap-8">
           <TitleText
             title="Daftar Mentor Kelas Private Farmasi 📢"
-            text="Semua mentor yang bertugas akan muncul semuanya disini"
+            text="Semua mentor yang bertugas akan muncul disini"
           />
 
           <div className="grid">
