@@ -94,7 +94,7 @@ export default function CreatePharmacistAdmissionProduct({
         const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
         const response = await fetch(croppedImage as string);
         const blob = await response.blob();
-        const fileConvert = new File([blob], "kelas-img.jpg", {
+        const fileConvert = new File([blob], "thumbnail.jpg", {
           type: "image/jpg",
         });
 
@@ -111,7 +111,7 @@ export default function CreatePharmacistAdmissionProduct({
         token,
       });
 
-      toast.success("Produk kelas berhasil dibuat");
+      toast.success("Produk video berhasil dibuat");
       router.back();
     } catch (error: any) {
       setLoading(false);
@@ -122,14 +122,17 @@ export default function CreatePharmacistAdmissionProduct({
   }
 
   return (
-    <Layout title="Buat Produk per Universitas" className="scrollbar-hide">
+    <Layout
+      title="Buat Produk Video per Universitas"
+      className="scrollbar-hide"
+    >
       <Container>
         <section className="grid">
           <ButtonBack />
 
           <TitleText
-            title="Buat Produk/Kelas per Universitas 📦"
-            text="Tambahkan produk/kelas lainnya"
+            title="Buat Produk Video per Universitas 🎬"
+            text="Tambahkan produk video lainnya"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 
@@ -179,7 +182,7 @@ export default function CreatePharmacistAdmissionProduct({
                       accept="image/jpg, image/jpeg, image/png"
                       variant="flat"
                       labelPlacement="outside"
-                      placeholder="Thumbnail Kelas"
+                      placeholder="Thumbnail Video"
                       classNames={{
                         input:
                           "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
@@ -222,9 +225,9 @@ export default function CreatePharmacistAdmissionProduct({
                   isRequired
                   type="text"
                   variant="flat"
-                  label="Nama Kelas/Produk"
+                  label="Nama Video"
                   labelPlacement="outside"
-                  placeholder="Contoh: Video Kelas Masuk Apoteker"
+                  placeholder="Contoh: Video Masuk Jurusan Apoteker"
                   name="title"
                   value={input.title}
                   onChange={(e) =>
@@ -237,7 +240,7 @@ export default function CreatePharmacistAdmissionProduct({
                   isRequired
                   type="text"
                   variant="flat"
-                  label="Harga Kelas"
+                  label="Harga Video"
                   labelPlacement="outside"
                   placeholder="Contoh: 200000"
                   name="price"
@@ -295,7 +298,7 @@ export default function CreatePharmacistAdmissionProduct({
                   maxRows={6}
                   type="text"
                   variant="flat"
-                  label="Deskripsi Kelas"
+                  label="Deskripsi Video"
                   labelPlacement="outside"
                   placeholder="Masukan Deskripsi"
                   name="description"
@@ -318,7 +321,7 @@ export default function CreatePharmacistAdmissionProduct({
               onClick={handleCreateProduct}
               className="w-max justify-self-end font-bold"
             >
-              {loading ? "Tunggu Sebentar..." : "Buat Produk Kelas"}
+              {loading ? "Tunggu Sebentar..." : "Buat Video"}
             </Button>
           </div>
         </section>

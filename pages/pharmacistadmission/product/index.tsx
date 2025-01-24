@@ -74,9 +74,9 @@ export default function PharmacistAdmissionProductPage({
   }, [searchValue]);
 
   const columnsPharmacistAdmissionProduct = [
-    { name: "ID Kelas", uid: "pa_id" },
-    { name: "Nama Kelas", uid: "title" },
-    { name: "Harga Kelas", uid: "price" },
+    { name: "ID Video", uid: "pa_id" },
+    { name: "Nama Video", uid: "title" },
+    { name: "Harga Video", uid: "price" },
     { name: "Dibuat Pada", uid: "created_at" },
     { name: "Status", uid: "status" },
     { name: "Aksi", uid: "action" },
@@ -169,17 +169,17 @@ export default function PharmacistAdmissionProductPage({
                   <Trash weight="bold" size={18} className="text-danger" />
                 </Button>
               }
-              header={<h1 className="font-bold text-black">Hapus Kelas</h1>}
+              header={<h1 className="font-bold text-black">Hapus Video</h1>}
               body={
                 <div className="grid gap-3 text-sm font-medium">
                   <p className="leading-[170%] text-gray">
-                    Apakah anda ingin menghapus kelas berikut secara permanen?
+                    Apakah anda ingin menghapus video berikut secara permanen?
                   </p>
 
                   <div className="grid gap-1">
                     {[
-                      ["ID Kelas", `${pa_product.pa_id}`],
-                      ["Nama Kelas", `${pa_product.title}`],
+                      ["ID Video", `${pa_product.pa_id}`],
+                      ["Nama Video", `${pa_product.title}`],
                     ].map(([label, value], index) => (
                       <div
                         key={index}
@@ -216,7 +216,7 @@ export default function PharmacistAdmissionProductPage({
                       handleDeletePharmacistAdmissionProduct(pa_product.pa_id)
                     }
                   >
-                    Ya, Hapus Kelas
+                    Ya, Hapus Video
                   </Button>
                 </>
               )}
@@ -238,7 +238,7 @@ export default function PharmacistAdmissionProductPage({
       });
 
       mutate();
-      toast.success("Produk kelas berhasil dihapus");
+      toast.success("Produk video berhasil dihapus");
     } catch (error: any) {
       console.error(error);
 
@@ -248,7 +248,7 @@ export default function PharmacistAdmissionProductPage({
 
   if (error) {
     return (
-      <Layout title="Daftar Produk per Universitas">
+      <Layout title="Daftar Produk Video per Universitas">
         <Container>
           <ErrorPage
             {...{
@@ -265,18 +265,21 @@ export default function PharmacistAdmissionProductPage({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Daftar Produk per Universitas" className="scrollbar-hide">
+    <Layout
+      title="Daftar Produk Video per Universitas"
+      className="scrollbar-hide"
+    >
       <Container>
         <section className="grid gap-8">
           <TitleText
-            title="Daftar Produk per Universitas 📦"
-            text="Semua produk kelas akan muncul disini"
+            title="Daftar Produk Video per Universitas 🎬"
+            text="Semua produk video per universitas akan muncul disini"
           />
 
           <div className="grid">
             <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
               <SearchInput
-                placeholder="Cari Kelas ID atau Nama Kelas"
+                placeholder="Cari Video ID atau Nama Video"
                 defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
                 onClear={() => setSearch("")}
@@ -290,7 +293,7 @@ export default function PharmacistAdmissionProductPage({
                 }
                 className="font-bold"
               >
-                Tambah Kelas
+                Tambah Video
               </Button>
             </div>
 
@@ -312,7 +315,7 @@ export default function PharmacistAdmissionProductPage({
                 <TableBody
                   items={data?.data.pa_products}
                   emptyContent={
-                    <EmptyData text="Produk kelas tidak ditemukan!" />
+                    <EmptyData text="Produk video tidak ditemukan!" />
                   }
                 >
                   {(pa_product) => (

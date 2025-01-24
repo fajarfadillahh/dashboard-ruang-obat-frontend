@@ -143,7 +143,7 @@ export default function EditPharmacistAdmissionProduct({
           const croppedImage = await getCroppedImg(fileImg, croppedAreaPixels);
           const response = await fetch(croppedImage as string);
           const blob = await response.blob();
-          const fileConvert = new File([blob], "kelas-img.jpg", {
+          const fileConvert = new File([blob], "thumbnail.jpg", {
             type: "image/jpg",
           });
 
@@ -166,7 +166,7 @@ export default function EditPharmacistAdmissionProduct({
         token,
       });
 
-      toast.success("Produk kelas berhasil diubah");
+      toast.success("Produk video berhasil diubah");
       router.back();
     } catch (error: any) {
       setLoading(false);
@@ -178,7 +178,7 @@ export default function EditPharmacistAdmissionProduct({
 
   if (error) {
     return (
-      <Layout title="Edit Produk per Universitas">
+      <Layout title="Edit Produk Video per Universitas">
         <Container>
           <ErrorPage
             {...{
@@ -195,14 +195,17 @@ export default function EditPharmacistAdmissionProduct({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Edit Produk per Universitas" className="scrollbar-hide">
+    <Layout
+      title="Edit Produk Video per Universitas"
+      className="scrollbar-hide"
+    >
       <Container>
         <section className="grid">
           <ButtonBack />
 
           <TitleText
-            title="Edit Produk/Kelas per Universitas 📦"
-            text="Edit dan sesuaikan data produk/kelas"
+            title="Edit Produk Video per Universitas 🎬"
+            text="Edit dan sesuaikan data produk video"
             className="border-b-2 border-dashed border-gray/20 py-8"
           />
 
@@ -268,7 +271,7 @@ export default function EditPharmacistAdmissionProduct({
                             accept="image/jpg, image/jpeg, image/png"
                             variant="flat"
                             labelPlacement="outside"
-                            placeholder="Thumbnail Kelas"
+                            placeholder="Thumbnail Video"
                             classNames={{
                               input:
                                 "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
@@ -337,9 +340,9 @@ export default function EditPharmacistAdmissionProduct({
                     isRequired
                     type="text"
                     variant="flat"
-                    label="Nama Kelas/Produk"
+                    label="Nama Video"
                     labelPlacement="outside"
-                    placeholder="Contoh: Video Kelas Masuk Apoteker"
+                    placeholder="Contoh: Video Masuk Jurusan Apoteker"
                     name="title"
                     value={input.title}
                     onChange={(e) =>
@@ -352,7 +355,7 @@ export default function EditPharmacistAdmissionProduct({
                     isRequired
                     type="text"
                     variant="flat"
-                    label="Harga Kelas"
+                    label="Harga Video"
                     labelPlacement="outside"
                     placeholder="Contoh: 200000"
                     name="price"
@@ -383,7 +386,7 @@ export default function EditPharmacistAdmissionProduct({
                     maxRows={6}
                     type="text"
                     variant="flat"
-                    label="Deskripsi Kelas"
+                    label="Deskripsi Video"
                     labelPlacement="outside"
                     placeholder="Masukan Deskripsi"
                     name="description"
@@ -406,7 +409,7 @@ export default function EditPharmacistAdmissionProduct({
               onClick={handleEditProduct}
               className="w-max justify-self-end font-bold"
             >
-              {loading ? "Tunggu Sebentar..." : "Simpan Produk Kelas"}
+              {loading ? "Tunggu Sebentar..." : "Simpan Produk Video"}
             </Button>
           </div>
         </section>
