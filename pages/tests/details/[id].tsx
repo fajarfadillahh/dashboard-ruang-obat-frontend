@@ -76,6 +76,7 @@ export default function DetailsTestPage({
                   <h4 className="mb-2 text-3xl font-bold capitalize leading-[120%] -tracking-wide text-black">
                     {data?.data.title}
                   </h4>
+
                   <p className="max-w-[700px] font-medium leading-[170%] text-gray">
                     {data?.data.description}
                   </p>
@@ -86,6 +87,7 @@ export default function DetailsTestPage({
                     <span className="text-sm font-medium text-gray">
                       Tanggal Mulai:
                     </span>
+
                     <h1 className="font-semibold text-black">
                       {formatDateWithoutTime(`${data?.data.start}`)}
                     </h1>
@@ -95,6 +97,7 @@ export default function DetailsTestPage({
                     <span className="text-sm font-medium text-gray">
                       Tanggal Selesai:
                     </span>
+
                     <h1 className="font-semibold text-black">
                       {formatDateWithoutTime(`${data?.data.end}`)}
                     </h1>
@@ -104,6 +107,7 @@ export default function DetailsTestPage({
                     <span className="text-sm font-medium text-gray">
                       Durasi Pengerjaan:
                     </span>
+
                     <h1 className="font-semibold text-black">
                       {data?.data.duration} Menit
                     </h1>
@@ -113,6 +117,7 @@ export default function DetailsTestPage({
                     <span className="text-sm font-medium text-gray">
                       Jumlah Soal:
                     </span>
+
                     <h1 className="font-semibold text-black">
                       {data?.data.total_questions} Butir
                     </h1>

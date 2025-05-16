@@ -49,12 +49,12 @@ export default function CardQuestionPreview({
               <div key={index} className="inline-flex items-center gap-2">
                 {option.is_correct ? (
                   <CheckCircle
-                    weight="bold"
+                    weight="duotone"
                     size={18}
                     className="text-success"
                   />
                 ) : (
-                  <XCircle weight="bold" size={18} className="text-danger" />
+                  <XCircle weight="duotone" size={18} className="text-danger" />
                 )}
                 <p
                   className={`flex-1 font-semibold ${
