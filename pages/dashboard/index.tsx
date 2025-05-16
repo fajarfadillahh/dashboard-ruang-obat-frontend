@@ -87,7 +87,7 @@ export default function DashboardPage({
 
             <IconContext.Provider
               value={{
-                weight: "bold",
+                weight: "duotone",
                 size: 64,
                 className: "text-purple",
               }}

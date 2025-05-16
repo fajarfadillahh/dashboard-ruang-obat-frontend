@@ -148,7 +148,6 @@ export default function Sidebar() {
         <div className="mb-16 flex flex-1 flex-col gap-8">
           <IconContext.Provider
             value={{
-              weight: "bold",
               size: 18,
             }}
           >
@@ -181,27 +180,6 @@ export default function Sidebar() {
               </span>
 
               <div className="grid gap-1">
-                {otherRoute.map((item, index) => (
-                  <Link
-                    key={index}
-                    href={item.path}
-                    className={`flex h-10 items-center justify-between rounded-xl [padding:0.5rem_1rem] ${
-                      router.asPath.includes(item.path)
-                        ? "bg-purple text-white hover:bg-purple/90"
-                        : "bg-transparent text-gray hover:bg-gray/10"
-                    }`}
-                  >
-                    <div className="flex flex-1 items-center gap-2">
-                      <item.icon
-                        weight={
-                          router.asPath.includes(item.path) ? "fill" : "bold"
-                        }
-                      />
-                      <div className="text-sm font-bold">{item.label}</div>
-                    </div>
-                  </Link>
-                ))}
-
                 <Accordion
                   isCompact
                   className="p-0"
@@ -483,6 +461,27 @@ export default function Sidebar() {
                     />
                   </AccordionItem>
                 </Accordion>
+
+                {otherRoute.map((item, index) => (
+                  <Link
+                    key={index}
+                    href={item.path}
+                    className={`flex h-10 items-center justify-between rounded-xl [padding:0.5rem_1rem] ${
+                      router.asPath.includes(item.path)
+                        ? "bg-purple text-white hover:bg-purple/90"
+                        : "bg-transparent text-gray hover:bg-gray/10"
+                    }`}
+                  >
+                    <div className="flex flex-1 items-center gap-2">
+                      <item.icon
+                        weight={
+                          router.asPath.includes(item.path) ? "fill" : "bold"
+                        }
+                      />
+                      <div className="text-sm font-bold">{item.label}</div>
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
           </IconContext.Provider>

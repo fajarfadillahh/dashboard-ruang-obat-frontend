@@ -5,6 +5,7 @@ import {
   Clock,
   House,
   Icon,
+  Robot,
   User,
   Users,
 } from "@phosphor-icons/react";
@@ -63,6 +64,11 @@ export function SidebarMainMenu(adminId: string): SidebarMenuType[] {
 
 export function SidebarOtherMenu(): SidebarMenuType[] {
   return [
+    {
+      label: "Rosa (AI)",
+      path: "/ai",
+      icon: Robot,
+    },
     {
       label: "Mentor",
       path: "/mentors",
