@@ -10,7 +10,7 @@ export default function SearchInput(props: InputProps) {
       variant="flat"
       labelPlacement="outside"
       startContent={
-        <MagnifyingGlass weight="bold" size={18} className="text-gray" />
+        <MagnifyingGlass weight="duotone" size={18} className="text-gray" />
       }
       classNames={customStyleInput}
       className="max-w-[500px]"
