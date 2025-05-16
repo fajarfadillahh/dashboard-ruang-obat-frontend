@@ -77,7 +77,7 @@ export default function ProgramsPage({
           <div className="grid">
             <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
               <SearchInput
-                placeholder="Cari Program ID atau Nama Program"
+                placeholder="Cari Nama Program atau ID Program..."
                 defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
                 onClear={() => setSearch("")}

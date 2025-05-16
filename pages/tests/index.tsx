@@ -81,7 +81,7 @@ export default function TestsPage({
           <div className="grid">
             <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
               <SearchInput
-                placeholder="Cari Ujian ID atau Nama Ujian"
+                placeholder="Cari Nama Ujian atau ID Ujian..."
                 defaultValue={query.q as string}
                 onChange={(e) => setSearch(e.target.value)}
                 onClear={() => setSearch("")}
