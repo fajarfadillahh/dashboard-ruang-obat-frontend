@@ -166,25 +166,25 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
       </div>
 
       <div className="inline-flex items-center gap-1">
-        <CustomTooltip content="Edit Program">
-          <Button
-            isIconOnly
-            variant="light"
-            size="sm"
-            color="secondary"
-            onClick={() => router.push(`/programs/edit/${program.program_id}`)}
-          >
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          color="secondary"
+          onClick={() => router.push(`/programs/edit/${program.program_id}`)}
+        >
+          <CustomTooltip content="Edit Program">
             <PencilLine weight="duotone" size={18} />
-          </Button>
-        </CustomTooltip>
+          </CustomTooltip>
+        </Button>
 
         <Dropdown>
           <DropdownTrigger>
-            <CustomTooltip content="Aktif/Nonaktif Program">
-              <Button isIconOnly variant="light" size="sm">
+            <Button isIconOnly variant="light" size="sm">
+              <CustomTooltip content="Aktif/Nonaktif Program">
                 <Power weight="duotone" size={18} className="text-danger" />
-              </Button>
-            </CustomTooltip>
+              </CustomTooltip>
+            </Button>
           </DropdownTrigger>
 
           <DropdownMenu

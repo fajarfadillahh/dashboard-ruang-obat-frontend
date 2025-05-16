@@ -25,6 +25,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import { KeyedMutator } from "swr";
+import CustomTooltip from "../CustomTooltip";
 
 interface TestProps {
   test: Test;
@@ -75,9 +76,9 @@ export default function CardTest({ test, token, mutate }: TestProps) {
     >
       <div className="inline-flex flex-1 items-start gap-3">
         {test.is_active ? (
-          <ClipboardText weight="bold" size={28} className="text-purple" />
+          <ClipboardText weight="duotone" size={28} className="text-purple" />
         ) : (
-          <Prohibit weight="bold" size={28} className="text-danger" />
+          <Prohibit weight="duotone" size={28} className="text-danger" />
         )}
 
         <div className="grid gap-6">
@@ -93,6 +94,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
               <span className="text-xs font-medium text-gray">
                 Tanggal Mulai:
               </span>
+
               <h1 className="text-sm font-semibold text-black">
                 {formatDateWithoutTime(test.start)}
               </h1>
@@ -102,6 +104,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
               <span className="text-xs font-medium text-gray">
                 Tanggal Selesai:
               </span>
+
               <h1 className="text-sm font-semibold text-black">
                 {formatDateWithoutTime(test.end)}
               </h1>
@@ -111,6 +114,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
               <span className="text-xs font-medium text-gray">
                 Durasi Pengerjaan:
               </span>
+
               <h1 className="text-sm font-semibold text-black">
                 {test.duration} Menit
               </h1>
@@ -140,7 +144,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
                     variant="flat"
                     color="danger"
                     size="sm"
-                    startContent={<XCircle weight="fill" size={16} />}
+                    startContent={<XCircle weight="duotone" size={16} />}
                     classNames={{
                       base: "px-2 gap-1",
                       content: "font-bold capitalize",
@@ -163,13 +167,17 @@ export default function CardTest({ test, token, mutate }: TestProps) {
           color="secondary"
           onClick={() => router.push(`/tests/edit/${test.test_id}`)}
         >
-          <PencilLine weight="bold" size={18} />
+          <CustomTooltip content="Edit Ujian">
+            <PencilLine weight="duotone" size={18} />
+          </CustomTooltip>
         </Button>
 
         <Dropdown>
           <DropdownTrigger>
             <Button isIconOnly variant="light" size="sm">
-              <Power weight="bold" size={18} className="text-danger" />
+              <CustomTooltip content="Aktif/Nonaktif Ujian">
+                <Power weight="duotone" size={18} className="text-danger" />
+              </CustomTooltip>
             </Button>
           </DropdownTrigger>
 
