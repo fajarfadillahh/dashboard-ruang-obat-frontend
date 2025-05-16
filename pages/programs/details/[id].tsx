@@ -1,5 +1,6 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import CardTest from "@/components/card/CardTest";
+import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/loading/LoadingScreen";
@@ -29,7 +30,6 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-  Tooltip,
 } from "@nextui-org/react";
 import {
   Check,
@@ -162,17 +162,9 @@ export default function DetailsProgramPage({
               color={participant.is_approved ? "success" : "warning"}
               startContent={
                 participant.is_approved ? (
-                  <CheckCircle
-                    weight="fill"
-                    size={18}
-                    className="text-success"
-                  />
+                  <CheckCircle weight="duotone" size={18} />
                 ) : (
-                  <ClockCountdown
-                    weight="fill"
-                    size={18}
-                    className="text-warning"
-                  />
+                  <ClockCountdown weight="duotone" size={18} />
                 )
               }
               classNames={{
@@ -193,13 +185,9 @@ export default function DetailsProgramPage({
               color={participant.joined_at ? "success" : "danger"}
               startContent={
                 participant.joined_at ? (
-                  <CheckCircle
-                    weight="fill"
-                    size={18}
-                    className="text-success"
-                  />
+                  <CheckCircle weight="duotone" size={18} />
                 ) : (
-                  <XCircle weight="fill" size={18} className="text-danger" />
+                  <XCircle weight="duotone" size={18} />
                 )
               }
               classNames={{
@@ -234,7 +222,9 @@ export default function DetailsProgramPage({
             <ModalConfirm
               trigger={
                 <Button isIconOnly variant="light" color="danger" size="sm">
-                  <Trash weight="bold" size={18} className="text-danger" />
+                  <CustomTooltip content="Hapus Partisipan">
+                    <Trash weight="duotone" size={18} className="text-danger" />
+                  </CustomTooltip>
                 </Button>
               }
               header={
@@ -400,7 +390,7 @@ export default function DetailsProgramPage({
                 ) : (
                   <div className="flex aspect-square size-[160px] flex-col items-center justify-center gap-2 rounded-xl bg-gray/10">
                     <ImageBroken
-                      weight="bold"
+                      weight="duotone"
                       size={28}
                       className="text-gray/50"
                     />
@@ -424,7 +414,7 @@ export default function DetailsProgramPage({
                           size="sm"
                           startContent={
                             <Tag
-                              weight="fill"
+                              weight="duotone"
                               size={16}
                               className="text-black"
                             />
@@ -443,7 +433,8 @@ export default function DetailsProgramPage({
                       )}
 
                       <div className="inline-flex items-center gap-1 text-gray">
-                        <Notepad weight="bold" size={18} />
+                        <Notepad weight="duotone" size={18} />
+
                         <p className="text-sm font-bold">
                           {data?.data.total_tests} Ujian
                         </p>
@@ -455,9 +446,9 @@ export default function DetailsProgramPage({
                         size="sm"
                         startContent={
                           data?.data.is_active ? (
-                            <CheckCircle weight="fill" size={16} />
+                            <CheckCircle weight="duotone" size={16} />
                           ) : (
-                            <XCircle weight="fill" size={16} />
+                            <XCircle weight="duotone" size={16} />
                           )
                         }
                         classNames={{
@@ -478,7 +469,8 @@ export default function DetailsProgramPage({
                         </p>
 
                         <div className="inline-flex items-center gap-1 text-gray">
-                          <Users weight="bold" size={18} />
+                          <Users weight="duotone" size={18} />
+
                           <p className="text-sm font-bold">
                             {data?.data.total_users}
                           </p>
@@ -491,7 +483,8 @@ export default function DetailsProgramPage({
                         </p>
 
                         <div className="inline-flex items-center gap-1 text-gray">
-                          <Users weight="bold" size={18} />
+                          <Users weight="duotone" size={18} />
+
                           <p className="text-sm font-bold">
                             {data?.data.total_approved_users}
                           </p>
@@ -504,7 +497,8 @@ export default function DetailsProgramPage({
                         </p>
 
                         <div className="inline-flex items-center gap-1 text-gray">
-                          <Users weight="bold" size={18} />
+                          <Users weight="duotone" size={18} />
+
                           <p className="text-sm font-bold">
                             {(data?.data.total_users ?? 0) -
                               (data?.data.total_approved_users ?? 0)}
@@ -552,7 +546,7 @@ export default function DetailsProgramPage({
 
               <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white py-4">
                 <SearchInput
-                  placeholder="Cari Partisipan ID atau Nama Partisipan"
+                  placeholder="Cari Nama Partisipan atau ID Partisipan..."
                   defaultValue={query.q as string}
                   onChange={(e) => setSearch(e.target.value)}
                   onClear={() => setSearch("")}
@@ -572,22 +566,17 @@ export default function DetailsProgramPage({
                       }}
                     />
 
-                    <Tooltip
-                      content="Export Data Partisipan"
-                      classNames={{
-                        content: "max-w-[350px] font-semibold text-black",
-                      }}
+                    <Button
+                      isIconOnly
+                      isDisabled={data?.data.participants.length <= 0}
+                      variant="ghost"
+                      color="secondary"
+                      onClick={handleExportDataParticipant}
                     >
-                      <Button
-                        isIconOnly
-                        isDisabled={data?.data.participants.length <= 0}
-                        variant="ghost"
-                        color="secondary"
-                        onClick={handleExportDataParticipant}
-                      >
-                        <Export weight="bold" size={18} />
-                      </Button>
-                    </Tooltip>
+                      <CustomTooltip content="Export Data Partisipan">
+                        <Export weight="duotone" size={18} />
+                      </CustomTooltip>
+                    </Button>
                   </div>
                 )}
               </div>
