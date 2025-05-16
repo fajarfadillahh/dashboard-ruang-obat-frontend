@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 
 const defaultItemClasses = {
   trigger: "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
-  title: "font-bold text-gray text-sm",
+  title: "font-semibold text-gray text-sm",
 };
 
 export default function Sidebar() {
@@ -51,7 +51,7 @@ export default function Sidebar() {
   useEffect(() => {
     const trigger =
       "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl bg-purple hover:bg-purple/90";
-    const title = "font-bold text-white text-sm";
+    const title = "font-semibold text-white text-sm";
 
     const pathMap = [
       "learningvideo",
@@ -160,10 +160,10 @@ export default function Sidebar() {
                   <div className="flex flex-1 items-center gap-2">
                     <item.icon
                       weight={
-                        router.asPath.includes(item.path) ? "fill" : "bold"
+                        router.asPath.includes(item.path) ? "fill" : "duotone"
                       }
                     />
-                    <div className="text-sm font-bold">{item.label}</div>
+                    <div className="text-sm font-semibold">{item.label}</div>
                   </div>
                 </Link>
               ))}
@@ -210,7 +210,7 @@ export default function Sidebar() {
                                 : "text-gray"
                             }
                             weight={
-                              router.asPath.includes(path) ? "fill" : "bold"
+                              router.asPath.includes(path) ? "fill" : "duotone"
                             }
                           />
                         }
@@ -243,10 +243,10 @@ export default function Sidebar() {
                     <div className="flex flex-1 items-center gap-2">
                       <item.icon
                         weight={
-                          router.asPath.includes(item.path) ? "fill" : "bold"
+                          router.asPath.includes(item.path) ? "fill" : "duotone"
                         }
                       />
-                      <div className="text-sm font-bold">{item.label}</div>
+                      <div className="text-sm font-semibold">{item.label}</div>
                     </div>
                   </Link>
                 ))}
