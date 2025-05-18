@@ -9,7 +9,7 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
-import { ProvidersAI } from "@/types/ai/providers.type";
+import { ProviderAI } from "@/types/ai/provider.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
@@ -45,7 +45,7 @@ export default function AIProvidersPage({
   const router = useRouter();
   const [search, setSearch] = useState("");
   const { data, isLoading, error, mutate } = useSWR<
-    SuccessResponse<ProvidersAI[]>
+    SuccessResponse<ProviderAI[]>
   >({
     url: "/ai/providers",
     method: "GET",
@@ -60,8 +60,8 @@ export default function AIProvidersPage({
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellProviders(provider: ProvidersAI, columnKey: React.Key) {
-    const cellValue = provider[columnKey as keyof ProvidersAI];
+  function renderCellProviders(provider: ProviderAI, columnKey: React.Key) {
+    const cellValue = provider[columnKey as keyof ProviderAI];
 
     switch (columnKey) {
       case "name":
@@ -256,7 +256,7 @@ export default function AIProvidersPage({
                   items={filterProvider}
                   emptyContent={<EmptyData text="Layanan tidak ditemukan!" />}
                 >
-                  {(provider: ProvidersAI) => (
+                  {(provider: ProviderAI) => (
                     <TableRow key={provider.provider_id}>
                       {(columnKey) => (
                         <TableCell>

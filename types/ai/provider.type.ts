@@ -1,4 +1,4 @@
-export type ProvidersAI = {
+export type ProviderAI = {
   provider_id: string;
   name: string;
   model: string;
