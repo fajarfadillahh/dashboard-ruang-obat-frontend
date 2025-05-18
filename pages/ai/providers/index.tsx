@@ -3,6 +3,7 @@ import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/loading/LoadingScreen";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -11,7 +12,9 @@ import { withToken } from "@/lib/getToken";
 import { ProvidersAI } from "@/types/ai/providers.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
@@ -33,6 +36,7 @@ import {
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 
 export default function AIProvidersPage({
@@ -40,7 +44,9 @@ export default function AIProvidersPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const { data, isLoading, error } = useSWR<SuccessResponse<ProvidersAI[]>>({
+  const { data, isLoading, error, mutate } = useSWR<
+    SuccessResponse<ProvidersAI[]>
+  >({
     url: "/ai/providers",
     method: "GET",
     token,
@@ -113,16 +119,65 @@ export default function AIProvidersPage({
               </CustomTooltip>
             </Button>
 
-            <Button isIconOnly variant="light" size="sm" color="danger">
-              <CustomTooltip content="Hapus Layanan">
-                <Trash weight="duotone" size={18} />
-              </CustomTooltip>
-            </Button>
+            <ModalConfirm
+              trigger={
+                <Button isIconOnly variant="light" color="danger" size="sm">
+                  <CustomTooltip content="Edit Layanan">
+                    <Trash weight="bold" size={18} className="text-danger" />
+                  </CustomTooltip>
+                </Button>
+              }
+              header={<h1 className="font-bold text-black">Hapus Layanan</h1>}
+              body={
+                <div className="grid gap-3 text-sm font-medium">
+                  <p className="leading-[170%] text-gray">
+                    Apakah anda ingin menghapus layanan{" "}
+                    <strong className="text-black">{provider.name}</strong>?
+                  </p>
+                </div>
+              }
+              footer={(onClose: any) => (
+                <>
+                  <Button
+                    color="danger"
+                    variant="light"
+                    onPress={onClose}
+                    className="font-bold"
+                  >
+                    Tutup
+                  </Button>
+
+                  <Button
+                    color="danger"
+                    className="font-bold"
+                    onClick={() => handleDeleteProvider(provider.provider_id)}
+                  >
+                    Ya, Hapus Layanan
+                  </Button>
+                </>
+              )}
+            />
           </div>
         );
 
       default:
         return cellValue;
+    }
+  }
+
+  async function handleDeleteProvider(provider_id: string) {
+    try {
+      await fetcher({
+        url: `/ai/providers/${provider_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      toast.success("Layanan berhasil dihapus");
+    } catch (errora: any) {
+      console.error(error);
+      toast.error(getError(error));
     }
   }
 
@@ -158,7 +213,7 @@ export default function AIProvidersPage({
 
           <TitleText
             title="Daftar Layanan AI 📋"
-            text="Semua layanan AI yang tersedia akan muncul di sini."
+            text="Semua layanan AI yang tersedia akan muncul di sini"
           />
 
           <div className="grid">

@@ -61,7 +61,7 @@ export default function RosaAIPage() {
         <section className="grid gap-8">
           <TitleText
             title="ROSA (Ruang Obat Smart Assistant) 🤖"
-            text="Atur semua kebutuhan AI di sini."
+            text="Atur semua kebutuhan AI di sini"
           />
 
           <div className="grid grid-cols-2 gap-4">
