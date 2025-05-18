@@ -132,7 +132,10 @@ export default function AIProvidersPage({
                 <div className="grid gap-3 text-sm font-medium">
                   <p className="leading-[170%] text-gray">
                     Apakah anda ingin menghapus layanan{" "}
-                    <strong className="text-black">{provider.name}</strong>?
+                    <strong className="font-extrabold text-purple">
+                      {provider.name}
+                    </strong>
+                    ?
                   </p>
                 </div>
               }
