@@ -7,6 +7,7 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { withToken } from "@/lib/getToken";
 import { ProvidersAI } from "@/types/ai/providers.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
@@ -29,7 +30,7 @@ import {
   Trash,
   XCircle,
 } from "@phosphor-icons/react";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import useSWR from "swr";
@@ -216,12 +217,4 @@ export default function AIProvidersPage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps<{
-  token: string;
-}> = async ({ req }) => {
-  return {
-    props: {
-      token: req.headers["access_token"] as string,
-    },
-  };
-};
+export const getServerSideProps = withToken<{ token: string }>();
