@@ -10,6 +10,7 @@ import {
   IconContext,
   ShieldCheck,
 } from "@phosphor-icons/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
 type DataRequirementsType = {
@@ -45,6 +46,14 @@ const dataRequirements: DataRequirementsType[] = [
 
 export default function RosaAIPage() {
   const router = useRouter();
+  const { data } = useSession();
+
+  const filteredDataRequirements = dataRequirements.filter((item) => {
+    if (item.title === "Layanan AI") {
+      return data?.user?.admin_id === "ROSA1";
+    }
+    return true;
+  });
 
   return (
     <Layout title="ROSA (AI)" className="scrollbar-hide">
@@ -56,7 +65,7 @@ export default function RosaAIPage() {
           />
 
           <div className="grid grid-cols-2 gap-4">
-            {dataRequirements.map((item, index) => (
+            {filteredDataRequirements.map((item, index) => (
               <IconContext.Provider
                 key={index}
                 value={{
