@@ -98,7 +98,7 @@ export default function RosaAIPage() {
                         />
                       }
                       onClick={() => router.push(item.path as string)}
-                      className="font-bold"
+                      className="font-semibold"
                     >
                       Atur Selengkapnya
                     </Button>

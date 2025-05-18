@@ -11,7 +11,7 @@ import { FloppyDisk } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 type InputType = {
@@ -35,6 +35,7 @@ export default function CreateProviderAI({
     type: "",
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isDisableButton, setIsDisableButton] = useState<boolean>(true);
 
   async function handleAddProvider() {
     const payload = {
@@ -64,6 +65,13 @@ export default function CreateProviderAI({
       setIsLoading(false);
     }
   }
+
+  useEffect(() => {
+    const isInputValid =
+      input.name && input.model && input.api_key && input.api_url && input.type;
+
+    setIsDisableButton(!isInputValid);
+  }, [input]);
 
   return (
     <Layout title="Tambah Layanan" className="scrollbar-hide">
@@ -159,13 +167,13 @@ export default function CreateProviderAI({
 
           <Button
             isLoading={isLoading}
-            isDisabled={!input || isLoading}
+            isDisabled={isDisableButton || isLoading}
             color="secondary"
             startContent={
               isLoading ? null : <FloppyDisk weight="bold" size={18} />
             }
             onClick={handleAddProvider}
-            className="w-max justify-self-end font-bold"
+            className="w-max justify-self-end font-semibold"
           >
             {isLoading ? "Tunggu Sebentar..." : "Tambah Layanan"}
           </Button>

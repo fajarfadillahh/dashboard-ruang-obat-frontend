@@ -145,14 +145,14 @@ export default function AIProvidersPage({
                     color="danger"
                     variant="light"
                     onPress={onClose}
-                    className="font-bold"
+                    className="font-semibold"
                   >
                     Tutup
                   </Button>
 
                   <Button
                     color="danger"
-                    className="font-bold"
+                    className="font-semibold"
                     onClick={() => handleDeleteProvider(provider.provider_id)}
                   >
                     Ya, Hapus Layanan
@@ -231,7 +231,7 @@ export default function AIProvidersPage({
                 color="secondary"
                 startContent={<Plus weight="bold" size={16} />}
                 onClick={() => router.push("/ai/providers/create")}
-                className="w-max font-bold"
+                className="w-max font-semibold"
               >
                 Tambah Layanan
               </Button>

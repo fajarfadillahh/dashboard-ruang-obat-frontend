@@ -28,7 +28,7 @@ export default function ButtonSidebar({
     >
       <div className="flex flex-1 items-center gap-2">
         <>{icon}</>
-        <div className="text-sm font-bold">{label}</div>
+        <div className="text-sm font-semibold">{label}</div>
       </div>
     </Link>
   );
