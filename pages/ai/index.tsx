@@ -58,16 +58,14 @@ export default function RosaAIPage() {
           <div className="grid grid-cols-2 gap-4">
             {dataRequirements.map((item, index) => (
               <IconContext.Provider
+                key={index}
                 value={{
                   weight: "duotone",
                   size: 64,
                   className: "text-purple",
                 }}
               >
-                <div
-                  key={index}
-                  className="flex items-start gap-6 rounded-xl border-2 border-purple/10 p-6 hover:border-purple hover:bg-purple/10"
-                >
+                <div className="flex items-start gap-6 rounded-xl border-2 border-purple/10 p-6 hover:border-purple hover:bg-purple/10">
                   <item.icon />
 
                   <div className="grid flex-1 gap-6">

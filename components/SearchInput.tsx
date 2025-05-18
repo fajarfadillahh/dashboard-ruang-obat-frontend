@@ -13,7 +13,7 @@ export default function SearchInput(props: InputProps) {
         <MagnifyingGlass weight="duotone" size={18} className="text-gray" />
       }
       classNames={customStyleInput}
-      className="max-w-[500px]"
+      className="flex-1"
       {...props}
     />
   );
