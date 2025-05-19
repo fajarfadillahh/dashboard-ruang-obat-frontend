@@ -14,7 +14,9 @@ import { getUrl } from "@/lib/getUrl";
 import { ContextAI, ContextAIResponse } from "@/types/ai/context.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
@@ -37,6 +39,7 @@ import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 
 export default function AIContextsPage({
@@ -45,13 +48,13 @@ export default function AIContextsPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const { setSearch, searchValue } = useSearch(800);
-  const { data, isLoading, error } = useSWR<SuccessResponse<ContextAIResponse>>(
-    {
-      url: getUrl("/ai/contexts", query),
-      method: "GET",
-      token,
-    },
-  );
+  const { data, isLoading, error, mutate } = useSWR<
+    SuccessResponse<ContextAIResponse>
+  >({
+    url: getUrl("/ai/contexts", query),
+    method: "GET",
+    token,
+  });
 
   useEffect(() => {
     if (searchValue) {
@@ -159,7 +162,11 @@ export default function AIContextsPage({
                     Tutup
                   </Button>
 
-                  <Button color="danger" className="font-semibold">
+                  <Button
+                    color="danger"
+                    className="font-semibold"
+                    onClick={() => handleDeleteContext(context.context_id)}
+                  >
                     Ya, Hapus Konteks
                   </Button>
                 </>
@@ -170,6 +177,22 @@ export default function AIContextsPage({
 
       default:
         return cellValue;
+    }
+  }
+
+  async function handleDeleteContext(context_id: string) {
+    try {
+      await fetcher({
+        url: `/ai/contexts/${context_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      toast.success("Konteks berhasil dihapus");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
     }
   }
 
