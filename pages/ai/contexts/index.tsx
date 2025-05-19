@@ -92,7 +92,9 @@ export default function AIContextsPage({
       case "type":
         return (
           <div className="font-medium text-black">
-            {context.type === "umum" ? "General" : "Spesifik"}
+            {context.type === "umum"
+              ? "Seputar Ruang Obat"
+              : "Biasa Ditanyakan"}
           </div>
         );
       case "is_active":
