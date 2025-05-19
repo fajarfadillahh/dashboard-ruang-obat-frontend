@@ -218,88 +218,86 @@ export default function AIContextsPage({
 
   return (
     <Layout title="Daftar Konteks AI">
-      <Container>
-        <section className="grid gap-8">
-          <ButtonBack href="/ai" />
+      <Container className="gap-8">
+        <ButtonBack href="/ai" />
 
-          <TitleText
-            title="Daftar Konteks AI 📋"
-            text="Semua konteks untuk melatih AI akan muncul di sini"
-          />
+        <TitleText
+          title="Daftar Konteks AI 📋"
+          text="Semua konteks untuk melatih AI akan muncul di sini"
+        />
 
-          <div className="grid">
-            <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
-              <SearchInput
-                placeholder="Cari Konteks..."
-                defaultValue={query.q as string}
-                onChange={(e) => setSearch(e.target.value)}
-                onClear={() => setSearch("")}
-              />
+        <div className="grid">
+          <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+            <SearchInput
+              placeholder="Cari Konteks..."
+              defaultValue={query.q as string}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
+            />
 
-              <Button
-                color="secondary"
-                startContent={<Plus weight="bold" size={16} />}
-                onClick={() => router.push("/ai/contexts/create")}
-                className="w-max font-semibold"
-              >
-                Tambah Konteks
-              </Button>
-            </div>
-
-            <div className="overflow-x-scroll scrollbar-hide">
-              <Table
-                isHeaderSticky
-                aria-label="contexts table"
-                color="secondary"
-                selectionMode="none"
-                classNames={customStyleTable}
-                className="scrollbar-hide"
-              >
-                <TableHeader columns={columnsContext}>
-                  {(column) => (
-                    <TableColumn key={column.uid}>{column.name}</TableColumn>
-                  )}
-                </TableHeader>
-
-                <TableBody
-                  items={data?.data.contexts}
-                  emptyContent={<EmptyData text="Konteks tidak ditemukan!" />}
-                >
-                  {(context: ContextAI) => (
-                    <TableRow key={context.context_id}>
-                      {(columnKey) => (
-                        <TableCell>
-                          {renderCellContexts(context, columnKey)}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <Button
+              color="secondary"
+              startContent={<Plus weight="bold" size={16} />}
+              onClick={() => router.push("/ai/contexts/create")}
+              className="w-max font-semibold"
+            >
+              Tambah Konteks
+            </Button>
           </div>
 
-          {data?.data.contexts.length ? (
-            <Pagination
-              isCompact
-              showControls
-              page={data?.data.page as number}
-              total={data?.data.total_pages as number}
-              onChange={(e) => {
-                router.push({
-                  query: {
-                    ...router.query,
-                    page: e,
-                  },
-                });
-              }}
-              className="justify-self-center"
-              classNames={{
-                cursor: "bg-purple text-white",
-              }}
-            />
-          ) : null}
-        </section>
+          <div className="overflow-x-scroll scrollbar-hide">
+            <Table
+              isHeaderSticky
+              aria-label="contexts table"
+              color="secondary"
+              selectionMode="none"
+              classNames={customStyleTable}
+              className="scrollbar-hide"
+            >
+              <TableHeader columns={columnsContext}>
+                {(column) => (
+                  <TableColumn key={column.uid}>{column.name}</TableColumn>
+                )}
+              </TableHeader>
+
+              <TableBody
+                items={data?.data.contexts}
+                emptyContent={<EmptyData text="Konteks tidak ditemukan!" />}
+              >
+                {(context: ContextAI) => (
+                  <TableRow key={context.context_id}>
+                    {(columnKey) => (
+                      <TableCell>
+                        {renderCellContexts(context, columnKey)}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {data?.data.contexts.length ? (
+          <Pagination
+            isCompact
+            showControls
+            page={data?.data.page as number}
+            total={data?.data.total_pages as number}
+            onChange={(e) => {
+              router.push({
+                query: {
+                  ...router.query,
+                  page: e,
+                },
+              });
+            }}
+            className="justify-self-center"
+            classNames={{
+              cursor: "bg-purple text-white",
+            }}
+          />
+        ) : null}
       </Container>
     </Layout>
   );
