@@ -22,7 +22,7 @@ type InputType = {
   type: string;
 };
 
-export default function CreateProviderAI({
+export default function CreateAIProvidersPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
@@ -183,4 +183,4 @@ export default function CreateProviderAI({
   );
 }
 
-export const getServerSideProps = withToken<{ token: string }>();
+export const getServerSideProps = withToken();

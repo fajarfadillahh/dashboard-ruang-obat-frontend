@@ -210,69 +210,67 @@ export default function AIProvidersPage({
 
   return (
     <Layout title="Daftar Layanan AI" className="scrollbar-hide">
-      <Container>
-        <section className="grid gap-8">
-          <ButtonBack href="/ai" />
+      <Container className="gap-8">
+        <ButtonBack href="/ai" />
 
-          <TitleText
-            title="Daftar Layanan AI 📋"
-            text="Semua layanan AI yang tersedia akan muncul di sini"
-          />
+        <TitleText
+          title="Daftar Layanan AI 📋"
+          text="Semua layanan AI yang tersedia akan muncul di sini"
+        />
 
-          <div className="grid">
-            <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
-              <SearchInput
-                placeholder="Cari Nama Layanan..."
-                onChange={(e) => setSearch(e.target.value)}
-                onClear={() => setSearch("")}
-              />
+        <div className="grid">
+          <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+            <SearchInput
+              placeholder="Cari Nama Layanan..."
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
+            />
 
-              <Button
-                color="secondary"
-                startContent={<Plus weight="bold" size={16} />}
-                onClick={() => router.push("/ai/providers/create")}
-                className="w-max font-semibold"
-              >
-                Tambah Layanan
-              </Button>
-            </div>
-
-            <div className="overflow-x-scroll scrollbar-hide">
-              <Table
-                isHeaderSticky
-                aria-label="providers table"
-                color="secondary"
-                selectionMode="none"
-                classNames={customStyleTable}
-                className="scrollbar-hide"
-              >
-                <TableHeader columns={columnsProvider}>
-                  {(column) => (
-                    <TableColumn key={column.uid}>{column.name}</TableColumn>
-                  )}
-                </TableHeader>
-
-                <TableBody
-                  items={filterProvider}
-                  emptyContent={<EmptyData text="Layanan tidak ditemukan!" />}
-                >
-                  {(provider: ProviderAI) => (
-                    <TableRow key={provider.provider_id}>
-                      {(columnKey) => (
-                        <TableCell>
-                          {renderCellProviders(provider, columnKey)}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <Button
+              color="secondary"
+              startContent={<Plus weight="bold" size={16} />}
+              onClick={() => router.push("/ai/providers/create")}
+              className="w-max font-semibold"
+            >
+              Tambah Layanan
+            </Button>
           </div>
-        </section>
+
+          <div className="overflow-x-scroll scrollbar-hide">
+            <Table
+              isHeaderSticky
+              aria-label="providers table"
+              color="secondary"
+              selectionMode="none"
+              classNames={customStyleTable}
+              className="scrollbar-hide"
+            >
+              <TableHeader columns={columnsProvider}>
+                {(column) => (
+                  <TableColumn key={column.uid}>{column.name}</TableColumn>
+                )}
+              </TableHeader>
+
+              <TableBody
+                items={filterProvider}
+                emptyContent={<EmptyData text="Layanan tidak ditemukan!" />}
+              >
+                {(provider: ProviderAI) => (
+                  <TableRow key={provider.provider_id}>
+                    {(columnKey) => (
+                      <TableCell>
+                        {renderCellProviders(provider, columnKey)}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
       </Container>
     </Layout>
   );
 }
 
-export const getServerSideProps = withToken<{ token: string }>();
+export const getServerSideProps = withToken();
