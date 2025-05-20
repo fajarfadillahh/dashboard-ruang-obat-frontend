@@ -152,7 +152,11 @@ export default function AILimitsPage({
                     Tutup
                   </Button>
 
-                  <Button color="danger" className="font-semibold">
+                  <Button
+                    color="danger"
+                    className="font-semibold"
+                    onClick={() => handleDeleteLimit(limit.limit_id)}
+                  >
                     Ya, Hapus Limit
                   </Button>
                 </>
@@ -192,6 +196,23 @@ export default function AILimitsPage({
       toast.error(getError(error));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDeleteLimit(limit_id: string) {
+    try {
+      await fetcher({
+        url: `/ai/limits/${limit_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      toast.success("Limitasi berhasil dihapus");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error(getError(error));
     }
   }
 
