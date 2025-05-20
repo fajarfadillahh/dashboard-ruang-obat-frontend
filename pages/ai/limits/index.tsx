@@ -33,13 +33,7 @@ import {
   TableRow,
   useDisclosure,
 } from "@nextui-org/react";
-import {
-  CurrencyDollar,
-  FloppyDisk,
-  PencilLine,
-  Plus,
-  Trash,
-} from "@phosphor-icons/react";
+import { CurrencyDollar, PencilLine, Plus, Trash } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -67,7 +61,8 @@ export default function AILimitsPage({
     type: "",
     total: 0,
   });
-  const [loading, setLoading] = useState<boolean>(false);
+  const [limitId, setLimitId] = useState<string>("");
+  const [typeModal, setTypeModal] = useState<"create" | "edit">("create");
   const [isDisableButton, setIsDisableButton] = useState<boolean>(true);
 
   useEffect(() => {
@@ -115,8 +110,23 @@ export default function AILimitsPage({
       case "action":
         return (
           <div className="inline-flex items-center gap-2">
-            <Button isIconOnly variant="light" size="sm" color="secondary">
-              <CustomTooltip content="Edit Layanan">
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              color="secondary"
+              onClick={() => {
+                onOpen();
+                setTypeModal("edit");
+
+                setLimitId(limit.limit_id);
+                setInput({
+                  total: limit.total,
+                  type: limit.type,
+                });
+              }}
+            >
+              <CustomTooltip content="Edit Limit">
                 <PencilLine weight="duotone" size={18} />
               </CustomTooltip>
             </Button>
@@ -124,7 +134,7 @@ export default function AILimitsPage({
             <ModalConfirm
               trigger={
                 <Button isIconOnly variant="light" color="danger" size="sm">
-                  <CustomTooltip content="Edit Layanan">
+                  <CustomTooltip content="Hapus Limit">
                     <Trash weight="bold" size={18} className="text-danger" />
                   </CustomTooltip>
                 </Button>
@@ -178,8 +188,6 @@ export default function AILimitsPage({
     };
 
     try {
-      setLoading(true);
-
       await fetcher({
         url: "/ai/limits",
         method: "POST",
@@ -191,11 +199,33 @@ export default function AILimitsPage({
       toast.success("Limitasi berhasil ditambahkan");
     } catch (error: any) {
       console.error(error);
-      setLoading(false);
 
       toast.error(getError(error));
-    } finally {
-      setLoading(false);
+    }
+  }
+
+  async function handleEditLimit() {
+    const payload = {
+      ...input,
+      limit_id: limitId,
+      by: session.data?.user.fullname,
+      token,
+    };
+
+    try {
+      await fetcher({
+        url: "/ai/limits",
+        method: "PATCH",
+        data: payload,
+        token,
+      });
+
+      mutate();
+      toast.success("Limitasi berhasil diubah");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error(getError(error));
     }
   }
 
@@ -249,7 +279,10 @@ export default function AILimitsPage({
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
-              onClick={onOpen}
+              onClick={() => {
+                onOpen();
+                setTypeModal("create");
+              }}
               className="font-semibold"
             >
               Tambah Limitasi
@@ -271,7 +304,7 @@ export default function AILimitsPage({
                 {(onClose) => (
                   <>
                     <ModalHeader className="font-extrabold capitalize text-black">
-                      Tambah Limitasi
+                      {typeModal == "create" ? "Tambah" : "Edit"} Limitasi
                     </ModalHeader>
 
                     <ModalBody>
@@ -330,20 +363,18 @@ export default function AILimitsPage({
                       </Button>
 
                       <Button
-                        isDisabled={isDisableButton || loading}
-                        isLoading={loading}
+                        isDisabled={isDisableButton}
                         color="secondary"
-                        startContent={
-                          loading ? null : (
-                            <FloppyDisk weight="bold" size={18} />
-                          )
-                        }
                         onClick={() => {
-                          onClose(), handleAddLimit();
+                          typeModal == "create"
+                            ? handleAddLimit()
+                            : handleEditLimit();
+
+                          onClose();
                         }}
                         className="font-semibold"
                       >
-                        Ya, Tambahan
+                        Ya, {typeModal == "create" ? "Tambahan" : "Simpan"}
                       </Button>
                     </ModalFooter>
                   </>
