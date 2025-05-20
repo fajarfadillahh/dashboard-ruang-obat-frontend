@@ -10,29 +10,71 @@ import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { LimitAI } from "@/types/ai/limit.type";
 import { SuccessResponse } from "@/types/global.type";
+import { customStyleInput } from "@/utils/customStyleInput";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  Radio,
+  RadioGroup,
   Table,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
   TableRow,
+  useDisclosure,
 } from "@nextui-org/react";
-import { CurrencyDollar, PencilLine, Plus, Trash } from "@phosphor-icons/react";
+import {
+  CurrencyDollar,
+  FloppyDisk,
+  PencilLine,
+  Plus,
+  Trash,
+} from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
+
+type InputType = {
+  type: string;
+  total: number;
+};
 
 export default function AILimitsPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const { data, isLoading, error } = useSWR<SuccessResponse<LimitAI[]>>({
-    url: "/ai/limits",
-    method: "GET",
-    token,
+  const session = useSession();
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+  const { data, isLoading, error, mutate } = useSWR<SuccessResponse<LimitAI[]>>(
+    {
+      url: "/ai/limits",
+      method: "GET",
+      token,
+    },
+  );
+  const [input, setInput] = useState<InputType>({
+    type: "",
+    total: 0,
   });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isDisableButton, setIsDisableButton] = useState<boolean>(true);
+
+  useEffect(() => {
+    const isInputValid = input.total && input.type;
+
+    setIsDisableButton(!isInputValid);
+  }, [input]);
 
   const columnsLimit = [
     { name: "Tipe Limit", uid: "type" },
@@ -124,6 +166,35 @@ export default function AILimitsPage({
     }
   }
 
+  async function handleAddLimit() {
+    const payload = {
+      ...input,
+      by: session.data?.user.fullname,
+      token,
+    };
+
+    try {
+      setLoading(true);
+
+      await fetcher({
+        url: "/ai/limits",
+        method: "POST",
+        data: payload,
+        token,
+      });
+
+      mutate();
+      toast.success("Limitasi berhasil ditambahkan");
+    } catch (error: any) {
+      console.error(error);
+      setLoading(false);
+
+      toast.error(getError(error));
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (error) {
     return (
       <Layout title="Limitasi Pengguna AI">
@@ -157,10 +228,107 @@ export default function AILimitsPage({
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
+              onClick={onOpen}
               className="font-semibold"
             >
               Tambah Limitasi
             </Button>
+
+            <Modal
+              isDismissable={false}
+              isOpen={isOpen}
+              onOpenChange={onOpenChange}
+              onClose={() => {
+                onClose(),
+                  setInput({
+                    total: 0,
+                    type: "",
+                  });
+              }}
+            >
+              <ModalContent>
+                {(onClose) => (
+                  <>
+                    <ModalHeader className="font-extrabold capitalize text-black">
+                      Tambah Limitasi
+                    </ModalHeader>
+
+                    <ModalBody>
+                      <div className="grid gap-6">
+                        <Input
+                          isRequired
+                          type="number"
+                          variant="flat"
+                          label="Jumlah Limitasi"
+                          labelPlacement="outside"
+                          name="total"
+                          value={input.total.toString()}
+                          onChange={(e) =>
+                            setInput({
+                              ...input,
+                              total: Number(e.target.value),
+                            })
+                          }
+                          classNames={customStyleInput}
+                        />
+
+                        <RadioGroup
+                          isRequired
+                          aria-label="select limit type"
+                          label="Tipe Limitasi"
+                          color="secondary"
+                          value={input.type}
+                          onValueChange={(value) =>
+                            setInput((prev) => ({ ...prev, type: value }))
+                          }
+                          classNames={{
+                            base: "font-semibold text-black",
+                            label: "text-sm font-normal text-foreground",
+                          }}
+                        >
+                          <Radio value="free">Gratis</Radio>
+                          <Radio value="paid">Berbayar</Radio>
+                        </RadioGroup>
+                      </div>
+                    </ModalBody>
+
+                    <ModalFooter>
+                      <Button
+                        color="danger"
+                        variant="light"
+                        className="font-semibold"
+                        onClick={() => {
+                          onClose(),
+                            setInput({
+                              total: 0,
+                              type: "",
+                            });
+                        }}
+                      >
+                        Tutup
+                      </Button>
+
+                      <Button
+                        isDisabled={isDisableButton || loading}
+                        isLoading={loading}
+                        color="secondary"
+                        startContent={
+                          loading ? null : (
+                            <FloppyDisk weight="bold" size={18} />
+                          )
+                        }
+                        onClick={() => {
+                          onClose(), handleAddLimit();
+                        }}
+                        className="font-semibold"
+                      >
+                        Ya, Tambahan
+                      </Button>
+                    </ModalFooter>
+                  </>
+                )}
+              </ModalContent>
+            </Modal>
           </div>
 
           <div className="overflow-x-scroll scrollbar-hide">
