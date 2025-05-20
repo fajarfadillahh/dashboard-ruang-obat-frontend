@@ -248,7 +248,7 @@ export default function AILimitsPage({
 
   if (error) {
     return (
-      <Layout title="Limitasi Pengguna AI">
+      <Layout title="Limitasi AI">
         <Container>
           <ErrorPage
             {...{
@@ -265,12 +265,12 @@ export default function AILimitsPage({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Daftar Limitasi Pengguna AI">
+    <Layout title="Daftar Limitasi AI">
       <Container className="gap-8">
         <ButtonBack href="/ai" />
 
         <TitleText
-          title="Daftar Limitasi Pengguna AI 📋"
+          title="Daftar Limitasi AI 📋"
           text="Semua data limitasi akan muncul di sini"
         />
 

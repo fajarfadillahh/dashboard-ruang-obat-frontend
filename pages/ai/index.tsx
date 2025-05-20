@@ -4,6 +4,8 @@ import Layout from "@/components/wrapper/Layout";
 import { Button } from "@nextui-org/react";
 import {
   ArrowRight,
+  ClockCounterClockwise,
+  Cloud,
   Database,
   GearSix,
   Icon,
@@ -28,7 +30,7 @@ const dataRequirements: DataRequirementsType[] = [
     description:
       "Tambahkan atau hapus layanan untuk mengatur model AI yang tersedia bagi pengguna.",
     path: "/ai/providers",
-    icon: GearSix,
+    icon: Cloud,
   },
   {
     id: 2,
@@ -40,11 +42,27 @@ const dataRequirements: DataRequirementsType[] = [
   },
   {
     id: 3,
-    title: "Limitasi Penggunaan AI",
+    title: "Limitasi AI",
     description:
       "Tetapkan limitasi harian penggunaan AI untuk menjaga efisiensi dan kontrol sistem.",
     path: "/ai/limits",
     icon: ShieldCheck,
+  },
+  {
+    id: 4,
+    title: "Custom Limitasi Pengguna",
+    description:
+      "Tetapkan kustomisasi limit harian penggunaan AI untuk pengguna spesial.",
+    path: "/ai/limits-users",
+    icon: GearSix,
+  },
+  {
+    id: 5,
+    title: "History Chat Pengguna",
+    description:
+      "Pantau semua history chat pengguna untuk bahan riset dan analisis.",
+    path: "/ai/logs",
+    icon: ClockCounterClockwise,
   },
 ];
 
