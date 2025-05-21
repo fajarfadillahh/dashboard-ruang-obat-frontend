@@ -33,7 +33,12 @@ import {
   TableRow,
   useDisclosure,
 } from "@nextui-org/react";
-import { CurrencyDollar, PencilLine, Plus, Trash } from "@phosphor-icons/react";
+import {
+  CurrencyCircleDollar,
+  PencilLine,
+  Plus,
+  Trash,
+} from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -90,10 +95,10 @@ export default function AILimitsPage({
             ) : (
               <p className="inline-flex items-center">
                 Berbayar
-                <CurrencyDollar
-                  weight="bold"
-                  size={16}
-                  className="text-success"
+                <CurrencyCircleDollar
+                  weight="duotone"
+                  size={20}
+                  className="ml-1 text-success"
                 />
               </p>
             )}
@@ -135,7 +140,7 @@ export default function AILimitsPage({
               trigger={
                 <Button isIconOnly variant="light" color="danger" size="sm">
                   <CustomTooltip content="Hapus Limit">
-                    <Trash weight="bold" size={18} className="text-danger" />
+                    <Trash weight="duotone" size={18} className="text-danger" />
                   </CustomTooltip>
                 </Button>
               }

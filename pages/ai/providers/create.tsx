@@ -170,7 +170,7 @@ export default function CreateAIProvidersPage({
             isDisabled={isDisableButton || isLoading}
             color="secondary"
             startContent={
-              isLoading ? null : <FloppyDisk weight="bold" size={18} />
+              isLoading ? null : <FloppyDisk weight="duotone" size={18} />
             }
             onClick={handleAddProvider}
             className="w-max justify-self-end font-semibold"

@@ -50,19 +50,19 @@ const dataRequirements: DataRequirementsType[] = [
   },
   {
     id: 4,
+    title: "History AI",
+    description:
+      "Pantau semua history chat pengguna untuk bahan riset dan analisis.",
+    path: "/ai/logs",
+    icon: ClockCounterClockwise,
+  },
+  {
+    id: 5,
     title: "Custom Limitasi Pengguna",
     description:
       "Tetapkan kustomisasi limit harian penggunaan AI untuk pengguna spesial.",
     path: "/ai/limits-users",
     icon: GearSix,
-  },
-  {
-    id: 5,
-    title: "History Chat Pengguna",
-    description:
-      "Pantau semua history chat pengguna untuk bahan riset dan analisis.",
-    path: "/ai/logs",
-    icon: ClockCounterClockwise,
   },
 ];
 
