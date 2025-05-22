@@ -27,7 +27,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { PencilLine, Plus, Trash } from "@phosphor-icons/react";
+import { Plus, Trash } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
@@ -90,55 +90,47 @@ export default function AILimitsCustomPage({
         );
       case "action":
         return (
-          <div className="inline-flex items-center gap-2">
-            <Button isIconOnly variant="light" size="sm" color="secondary">
-              <CustomTooltip content="Edit Pengguna">
-                <PencilLine weight="duotone" size={18} />
-              </CustomTooltip>
-            </Button>
-
-            <ModalConfirm
-              trigger={
-                <Button isIconOnly variant="light" color="danger" size="sm">
-                  <CustomTooltip content="Hapus LPengguna">
-                    <Trash weight="duotone" size={18} className="text-danger" />
-                  </CustomTooltip>
+          <ModalConfirm
+            trigger={
+              <Button isIconOnly variant="light" color="danger" size="sm">
+                <CustomTooltip content="Hapus LPengguna">
+                  <Trash weight="duotone" size={18} className="text-danger" />
+                </CustomTooltip>
+              </Button>
+            }
+            header={<h1 className="font-bold text-black">Hapus Pengguna</h1>}
+            body={
+              <div className="grid gap-3 text-sm font-medium">
+                <p className="leading-[170%] text-gray">
+                  Apakah anda ingin menghapus limit{" "}
+                  <strong className="font-extrabold text-purple">
+                    {user.fullname}
+                  </strong>
+                  ?
+                </p>
+              </div>
+            }
+            footer={(onClose: any) => (
+              <>
+                <Button
+                  color="danger"
+                  variant="light"
+                  onPress={onClose}
+                  className="font-semibold"
+                >
+                  Tutup
                 </Button>
-              }
-              header={<h1 className="font-bold text-black">Hapus Pengguna</h1>}
-              body={
-                <div className="grid gap-3 text-sm font-medium">
-                  <p className="leading-[170%] text-gray">
-                    Apakah anda ingin menghapus limit{" "}
-                    <strong className="font-extrabold text-purple">
-                      {user.fullname}
-                    </strong>
-                    ?
-                  </p>
-                </div>
-              }
-              footer={(onClose: any) => (
-                <>
-                  <Button
-                    color="danger"
-                    variant="light"
-                    onPress={onClose}
-                    className="font-semibold"
-                  >
-                    Tutup
-                  </Button>
 
-                  <Button
-                    color="danger"
-                    className="font-semibold"
-                    onClick={() => handleDeleteUser(user.user_id)}
-                  >
-                    Ya, Hapus Pengguna
-                  </Button>
-                </>
-              )}
-            />
-          </div>
+                <Button
+                  color="danger"
+                  className="font-semibold"
+                  onClick={() => handleDeleteUser(user.user_id)}
+                >
+                  Ya, Hapus Pengguna
+                </Button>
+              </>
+            )}
+          />
         );
 
       default:
@@ -187,7 +179,7 @@ export default function AILimitsCustomPage({
 
         <TitleText
           title="Custom Limitasi Pengguna 📋"
-          text="Semua data kustomisasi limit pengguna ada di sini."
+          text="Semua data kustomisasi limit pengguna ada di sini"
         />
 
         <div className="grid">
