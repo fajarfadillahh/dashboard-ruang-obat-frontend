@@ -18,6 +18,11 @@ import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownSection,
+  DropdownTrigger,
   Table,
   TableBody,
   TableCell,
@@ -28,6 +33,7 @@ import {
 import {
   CheckCircle,
   CurrencyCircleDollar,
+  DotsThree,
   PencilLine,
   Plus,
   Trash,
@@ -113,6 +119,42 @@ export default function AIProvidersPage({
       case "action":
         return (
           <div className="inline-flex items-center gap-2">
+            {!provider.is_active ? (
+              <Dropdown>
+                <DropdownTrigger>
+                  <Button
+                    isIconOnly
+                    variant="light"
+                    size="sm"
+                    color="secondary"
+                  >
+                    <CustomTooltip content="Lainnya">
+                      <DotsThree weight="bold" size={18} />
+                    </CustomTooltip>
+                  </Button>
+                </DropdownTrigger>
+
+                <DropdownMenu
+                  aria-label="actions"
+                  itemClasses={{
+                    title: "font-semibold text-black",
+                  }}
+                >
+                  <DropdownSection aria-label="action zone" title="Anda Yakin?">
+                    <DropdownItem
+                      onClick={() =>
+                        alert(`Layanan berhasil diubah ke ${provider.name}`)
+                      }
+                    >
+                      {provider.is_active
+                        ? "Nonaktifkan layanan ini"
+                        : "Gunakan layanan ini!"}
+                    </DropdownItem>
+                  </DropdownSection>
+                </DropdownMenu>
+              </Dropdown>
+            ) : null}
+
             <Button
               isIconOnly
               variant="light"
