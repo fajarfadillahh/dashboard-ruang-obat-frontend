@@ -113,7 +113,15 @@ export default function AIProvidersPage({
       case "action":
         return (
           <div className="inline-flex items-center gap-2">
-            <Button isIconOnly variant="light" size="sm" color="secondary">
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              color="secondary"
+              onClick={() =>
+                router.push(`/ai/providers/${provider.provider_id}`)
+              }
+            >
               <CustomTooltip content="Edit Layanan">
                 <PencilLine weight="duotone" size={18} />
               </CustomTooltip>
