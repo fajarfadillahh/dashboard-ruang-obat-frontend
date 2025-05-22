@@ -179,6 +179,7 @@ export default function AILimitsCustomPage({
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={16} />}
+              onClick={() => router.push("/ai/limits-users/create")}
               className="w-max font-semibold"
             >
               Tambah Pengguna
