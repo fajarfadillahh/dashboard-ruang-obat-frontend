@@ -14,7 +14,9 @@ import { getUrl } from "@/lib/getUrl";
 import { LimitAIUser, LimitAIUserResponse } from "@/types/ai/limit.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Pagination,
@@ -30,6 +32,7 @@ import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 
 export default function AILimitsCustomPage({
@@ -38,7 +41,7 @@ export default function AILimitsCustomPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const { setSearch, searchValue } = useSearch(800);
-  const { data, isLoading, error } = useSWR<
+  const { data, isLoading, error, mutate } = useSWR<
     SuccessResponse<LimitAIUserResponse>
   >({
     url: getUrl("/ai/limits/users", query),
@@ -125,7 +128,11 @@ export default function AILimitsCustomPage({
                     Tutup
                   </Button>
 
-                  <Button color="danger" className="font-semibold">
+                  <Button
+                    color="danger"
+                    className="font-semibold"
+                    onClick={() => handleDeleteUser(user.user_id)}
+                  >
                     Ya, Hapus Pengguna
                   </Button>
                 </>
@@ -136,6 +143,22 @@ export default function AILimitsCustomPage({
 
       default:
         return cellValue;
+    }
+  }
+
+  async function handleDeleteUser(user_id: string) {
+    try {
+      await fetcher({
+        url: `/ai/limits/users/${user_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      toast.success("Pengguna berhasil dihapus");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
     }
   }
 
