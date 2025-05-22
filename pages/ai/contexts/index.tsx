@@ -127,7 +127,13 @@ export default function AIContextsPage({
       case "action":
         return (
           <div className="inline-flex items-center gap-2">
-            <Button isIconOnly variant="light" size="sm" color="secondary">
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              color="secondary"
+              onClick={() => router.push(`/ai/contexts/${context.context_id}`)}
+            >
               <CustomTooltip content="Edit Konteks">
                 <PencilLine weight="duotone" size={18} />
               </CustomTooltip>
