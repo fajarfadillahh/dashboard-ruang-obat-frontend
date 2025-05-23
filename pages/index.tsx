@@ -2,7 +2,13 @@ import { customStyleInput } from "@/utils/customStyleInput";
 import { getError } from "@/utils/getError";
 import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input } from "@nextui-org/react";
-import { Eye, EyeSlash, IconContext, Lock, User } from "@phosphor-icons/react";
+import {
+  Eye,
+  EyeSlash,
+  IconContext,
+  Lock,
+  UserCircle,
+} from "@phosphor-icons/react";
 import { signIn } from "next-auth/react";
 import Head from "next/head";
 import { useRouter } from "next/router";
@@ -51,10 +57,6 @@ export default function LoginPage() {
     }
   }
 
-  function isFormEmpty() {
-    return Object.values(input).every((value) => value.trim() !== "");
-  }
-
   return (
     <>
       <Head>
@@ -63,10 +65,11 @@ export default function LoginPage() {
 
       <main className="flex h-screen w-full items-center justify-center py-20">
         <div className="grid w-max gap-8 justify-self-center">
-          <div className="text-center">
-            <h1 className="text-[36px] font-bold -tracking-wide text-black">
-              Hi, Admin Ruangobat 👋
+          <div className="grid gap-1 text-center">
+            <h1 className="text-4xl font-bold -tracking-wide text-black">
+              Hi, Admin RuangObat 👋
             </h1>
+
             <p className="font-medium text-gray">
               Silakan login dulu untuk bisa mengatur semuanya
             </p>
@@ -74,8 +77,8 @@ export default function LoginPage() {
 
           <IconContext.Provider
             value={{
-              weight: "bold",
-              size: 18,
+              weight: "duotone",
+              size: 22,
               className: "text-gray",
             }}
           >
@@ -93,7 +96,7 @@ export default function LoginPage() {
                   })
                 }
                 onKeyDown={(e) => handleKeyDown(e, handleLogin)}
-                startContent={<User />}
+                startContent={<UserCircle />}
                 classNames={customStyleInput}
               />
 
@@ -129,10 +132,13 @@ export default function LoginPage() {
 
           <Button
             isLoading={loading}
-            isDisabled={!isFormEmpty() || loading}
+            isDisabled={
+              !Object.values(input).every((value) => value.trim() !== "") ||
+              loading
+            }
             color="secondary"
             onClick={handleLogin}
-            className="font-bold"
+            className="font-semibold"
           >
             {loading ? "Tunggu Sebentar..." : "Masuk Sekarang"}
           </Button>
