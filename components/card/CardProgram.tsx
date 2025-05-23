@@ -16,6 +16,7 @@ import {
 import {
   BookBookmark,
   CheckCircle,
+  Eye,
   PencilLine,
   Power,
   Prohibit,
@@ -166,6 +167,18 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
       </div>
 
       <div className="inline-flex items-center gap-1">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          color="secondary"
+          onClick={() => router.push(`/programs/details/${program.program_id}`)}
+        >
+          <CustomTooltip content="Detail Program">
+            <Eye weight="duotone" size={18} />
+          </CustomTooltip>
+        </Button>
+
         <Button
           isIconOnly
           variant="light"
