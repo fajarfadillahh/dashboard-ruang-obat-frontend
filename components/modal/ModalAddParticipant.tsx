@@ -7,6 +7,7 @@ import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
 import {
   Button,
+  getKeyValue,
   Modal,
   ModalBody,
   ModalContent,
@@ -47,7 +48,7 @@ export default function ModalAddParticipant({
   program_id,
   mutate,
 }: ModalAddParticipantProps) {
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
   const { setSearch, searchValue } = useSearch(800);
   const [users, setUsers] = useState<UsersResponse>();
   const [page, setPage] = useState(1);
@@ -114,29 +115,13 @@ export default function ModalAddParticipant({
     { name: "Nama Lengkap", uid: "fullname" },
   ];
 
-  function renderCellUsers(user: User, columnKey: React.Key) {
-    const cellValue = user[columnKey as keyof User];
-
-    switch (columnKey) {
-      case "user_id":
-        return (
-          <div className="w-max font-medium text-black">{user.user_id}</div>
-        );
-      case "fullname":
-        return <div className="font-medium text-black">{user.fullname}</div>;
-
-      default:
-        return cellValue;
-    }
-  }
-
   return (
     <>
       <Button
         color="secondary"
         startContent={<Plus weight="bold" size={18} />}
         onClick={onOpen}
-        className="w-max font-bold"
+        className="w-max font-semibold"
       >
         Tambah Partisipan
       </Button>
@@ -157,7 +142,7 @@ export default function ModalAddParticipant({
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 font-bold text-black">
+              <ModalHeader className="font-bold text-black">
                 Daftar Pengguna
               </ModalHeader>
 
@@ -170,14 +155,14 @@ export default function ModalAddParticipant({
 
                   <div className="grid gap-4">
                     <SearchInput
-                      placeholder="Cari User ID atau Nama User"
+                      placeholder="Cari Nama Pengguna atau ID Pengguna..."
                       onChange={(e) => setSearch(e.target.value)}
                       onClear={() => setSearch("")}
                     />
 
                     <div className="max-h-[300px] overflow-x-scroll scrollbar-hide">
                       <Table
-                        isHeaderSticky
+                        isStriped
                         aria-label="users table"
                         color="secondary"
                         selectionMode="multiple"
@@ -206,7 +191,7 @@ export default function ModalAddParticipant({
                             <TableRow key={item.user_id}>
                               {(columnKey) => (
                                 <TableCell>
-                                  {renderCellUsers(item, columnKey)}
+                                  {getKeyValue(item, columnKey)}
                                 </TableCell>
                               )}
                             </TableRow>
@@ -242,7 +227,7 @@ export default function ModalAddParticipant({
                     setValue(new Set([]));
                     setSearch("");
                   }}
-                  className="font-bold"
+                  className="font-semibold"
                 >
                   Tutup
                 </Button>
@@ -256,7 +241,7 @@ export default function ModalAddParticipant({
                       onClose();
                     }, 500);
                   }}
-                  className="font-bold"
+                  className="font-semibold"
                 >
                   Tambah Partisipan
                 </Button>

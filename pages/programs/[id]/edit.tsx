@@ -10,6 +10,7 @@ import useSearch from "@/hooks/useSearch";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
+import { DetailsProgramResponse } from "@/types/program.type";
 import { Test, TestsResponse } from "@/types/test.type";
 import getCroppedImg from "@/utils/cropImage";
 import { customStyleInput } from "@/utils/customStyleInput";
@@ -36,7 +37,6 @@ import { FloppyDisk } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
@@ -49,9 +49,11 @@ type InputType = {
   url_qr_code?: string;
 };
 
-export default function CreateProgramPage({
+export default function EditProgramPage({
   query,
   token,
+  program,
+  id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const session = useSession();
@@ -62,14 +64,19 @@ export default function CreateProgramPage({
     token,
   });
   const [input, setInput] = useState<InputType>({
-    title: "",
-    price: 0,
-    type: "",
-    url_qr_code: "",
+    title: program.title,
+    price: program.price ?? 0,
+    type: program.type,
+    url_qr_code: program.url_qr_code ?? "",
   });
-  const [dataTest, setDataTest] = useState<Selection>(new Set([]));
 
-  const [file, setFile] = useState<string | ArrayBuffer | null>();
+  const [dataTest, setDataTest] = useState<Selection>(
+    new Set(program.tests.map((test) => test.test_id)),
+  );
+
+  const [file, setFile] = useState<string | ArrayBuffer | null>(
+    program.qr_code,
+  );
   const [filename, setFilename] = useState<string>("");
   const [type, setType] = useState<string>("");
   const [zoomImage, setZoomImage] = useState<number>(1);
@@ -82,12 +89,13 @@ export default function CreateProgramPage({
   useEffect(() => {
     if (searchValue) {
       router.push({
+        pathname: `/programs/${id}/edit`,
         query: {
           q: searchValue,
         },
       });
     } else {
-      router.push("/programs/create");
+      router.push(`/programs/${id}/edit`);
     }
   }, [searchValue]);
 
@@ -98,7 +106,7 @@ export default function CreateProgramPage({
       input.title,
       input.type,
       input.url_qr_code,
-      input.type !== "paid" || input.price,
+      input.type !== "paid" || input.price > 0,
       isSelectedTest.length > 0,
     ].every(Boolean);
 
@@ -110,21 +118,25 @@ export default function CreateProgramPage({
     { name: "Judul Ujian", uid: "title" },
   ];
 
-  async function handleCreateProgram() {
+  async function handleEditProgram() {
     setLoading(true);
 
     try {
       const formData = new FormData();
 
-      const croppedImage = await getCroppedImg(file, croppedAreaPixels);
-      const response = await fetch(croppedImage as string);
-      const blob = await response.blob();
-      const fileConvert = new File([blob], `${filename}`, {
-        type,
-      });
-      formData.append("qr_code", fileConvert);
-      formData.append("url_qr_code", input.url_qr_code as string);
+      if (filename) {
+        const croppedImage = await getCroppedImg(file, croppedAreaPixels);
+        const response = await fetch(croppedImage as string);
+        const blob = await response.blob();
+        const fileConvert = new File([blob], `${filename}`, {
+          type,
+        });
 
+        formData.append("qr_code", fileConvert);
+      }
+
+      formData.append("url_qr_code", input.url_qr_code as string);
+      formData.append("program_id", program.program_id);
       formData.append("title", input.title);
       formData.append("type", input.type);
       formData.append("by", session.data?.user.fullname as string);
@@ -139,13 +151,13 @@ export default function CreateProgramPage({
 
       await fetcher({
         url: "/admin/programs",
-        method: "POST",
+        method: "PATCH",
         data: formData,
         file: true,
         token,
       });
 
-      toast.success("Program berhasil dibuat");
+      toast.success("Data program berhasil diubah");
       router.push("/programs");
     } catch (error: any) {
       setLoading(false);
@@ -159,7 +171,7 @@ export default function CreateProgramPage({
 
   if (error) {
     return (
-      <Layout title="Buat Program">
+      <Layout title="Edit Program">
         <Container>
           <ErrorPage
             {...{
@@ -176,13 +188,13 @@ export default function CreateProgramPage({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Buat Program">
+    <Layout title="Edit Program">
       <Container>
-        <ButtonBack href="/programs" />
+        <ButtonBack />
 
         <TitleText
-          title="Buat Program ✏️"
-          text="Buatlah program yang menarik untuk para mahasiswa"
+          title="Edit Program ✏️"
+          text="Sesuaikan data program agar menjadi lebih menarik"
           className="border-b-2 border-dashed border-gray/20 py-8"
         />
 
@@ -405,10 +417,10 @@ export default function CreateProgramPage({
               startContent={
                 loading ? null : <FloppyDisk weight="duotone" size={18} />
               }
-              onClick={handleCreateProgram}
+              onClick={handleEditProgram}
               className="justify-self-end font-semibold"
             >
-              {loading ? "Tunggu Sebentar..." : "Buat Program"}
+              {loading ? "Tunggu Sebentar..." : "Simpan Program"}
             </Button>
           </div>
         </div>
@@ -417,12 +429,21 @@ export default function CreateProgramPage({
   );
 }
 
-export const getServerSideProps = withToken(async (ctx) => {
-  const { query } = ctx;
+export const getServerSideProps = withToken(async (ctx, token) => {
+  const id = ctx.params?.id as string;
+  const query = ctx.query;
+
+  const response = (await fetcher({
+    url: `/admin/programs/${encodeURIComponent(id)}`,
+    method: "GET",
+    token,
+  })) as SuccessResponse<DetailsProgramResponse>;
 
   return {
     props: {
-      query: query as ParsedUrlQuery,
+      program: response.data,
+      query,
+      id,
     },
   };
 });

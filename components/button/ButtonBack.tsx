@@ -18,7 +18,7 @@ export default function ButtonBack({ href }: ButtonBackProps) {
       variant="light"
       startContent={<ArrowLeft weight="bold" size={16} />}
       onClick={handleClick}
-      className="w-max px-4 font-bold text-black"
+      className="w-max px-4 font-semibold text-black"
     >
       Kembali
     </Button>

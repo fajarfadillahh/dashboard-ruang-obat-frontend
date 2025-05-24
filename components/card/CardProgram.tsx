@@ -83,7 +83,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
 
         <div className="grid gap-4">
           <Link
-            href={`/programs/details/${encodeURIComponent(program.program_id)}`}
+            href={`/programs/${encodeURIComponent(program.program_id)}`}
             className={`line-clamp-1 text-xl font-bold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
           >
             {program.title}
@@ -172,7 +172,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
           variant="light"
           size="sm"
           color="secondary"
-          onClick={() => router.push(`/programs/details/${program.program_id}`)}
+          onClick={() => router.push(`/programs/${program.program_id}`)}
         >
           <CustomTooltip content="Detail Program">
             <Eye weight="duotone" size={18} />
@@ -184,7 +184,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
           variant="light"
           size="sm"
           color="secondary"
-          onClick={() => router.push(`/programs/edit/${program.program_id}`)}
+          onClick={() => router.push(`/programs/${program.program_id}/edit`)}
         >
           <CustomTooltip content="Edit Program">
             <PencilLine weight="duotone" size={18} />
