@@ -132,7 +132,9 @@ export default function AIContextsPage({
               variant="light"
               size="sm"
               color="secondary"
-              onClick={() => router.push(`/ai/contexts/${context.context_id}`)}
+              onClick={() =>
+                router.push(`/ai/contexts/${context.context_id}/edit`)
+              }
             >
               <CustomTooltip content="Edit Konteks">
                 <PencilLine weight="duotone" size={18} />

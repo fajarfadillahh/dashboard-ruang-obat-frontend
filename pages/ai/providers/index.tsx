@@ -161,7 +161,7 @@ export default function AIProvidersPage({
               size="sm"
               color="secondary"
               onClick={() =>
-                router.push(`/ai/providers/${provider.provider_id}`)
+                router.push(`/ai/providers/${provider.provider_id}/edit`)
               }
             >
               <CustomTooltip content="Edit Layanan">
