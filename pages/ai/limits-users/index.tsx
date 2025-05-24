@@ -93,7 +93,7 @@ export default function AILimitsCustomPage({
           <ModalConfirm
             trigger={
               <Button isIconOnly variant="light" color="danger" size="sm">
-                <CustomTooltip content="Hapus LPengguna">
+                <CustomTooltip content="Hapus Pengguna">
                   <Trash weight="duotone" size={18} className="text-danger" />
                 </CustomTooltip>
               </Button>

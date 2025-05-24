@@ -172,7 +172,7 @@ export default function AIProvidersPage({
             <ModalConfirm
               trigger={
                 <Button isIconOnly variant="light" color="danger" size="sm">
-                  <CustomTooltip content="Edit Layanan">
+                  <CustomTooltip content="Hapus Layanan">
                     <Trash weight="duotone" size={18} className="text-danger" />
                   </CustomTooltip>
                 </Button>

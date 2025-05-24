@@ -142,7 +142,7 @@ export default function AIContextsPage({
             <ModalConfirm
               trigger={
                 <Button isIconOnly variant="light" color="danger" size="sm">
-                  <CustomTooltip content="Edit Konteks">
+                  <CustomTooltip content="Hapus Konteks">
                     <Trash weight="duotone" size={18} className="text-danger" />
                   </CustomTooltip>
                 </Button>
