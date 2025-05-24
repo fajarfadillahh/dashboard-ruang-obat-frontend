@@ -16,6 +16,7 @@ import {
 } from "@nextui-org/react";
 import {
   ClipboardText,
+  Eye,
   PencilLine,
   Power,
   Prohibit,
@@ -160,6 +161,18 @@ export default function CardTest({ test, token, mutate }: TestProps) {
       </div>
 
       <div className="inline-flex items-center gap-2">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          color="secondary"
+          onClick={() => router.push(`/tests/details/${test.test_id}`)}
+        >
+          <CustomTooltip content="Detail Ujian">
+            <Eye weight="duotone" size={18} />
+          </CustomTooltip>
+        </Button>
+
         <Button
           isIconOnly
           variant="light"
