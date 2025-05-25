@@ -1,4 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/loading/LoadingScreen";
@@ -8,6 +9,8 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
+import { withToken } from "@/lib/getToken";
+import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
 import { GradeTest, GradeTestResponse } from "@/types/test.type";
 import { customStyleTable } from "@/utils/customStyleTable";
@@ -25,24 +28,14 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import { Eye, Trash, XCircle } from "@phosphor-icons/react";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 
-function getUrl(query: ParsedUrlQuery, id: string) {
-  if (query.q) {
-    return `/admin/tests/results/${encodeURIComponent(id)}?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/tests/results/${encodeURIComponent(id)}?page=${query.page ? query.page : 1}`;
-}
-
 export default function GradeUsersPage({
   token,
-  params,
   query,
   id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
@@ -51,7 +44,7 @@ export default function GradeUsersPage({
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<GradeTestResponse>
   >({
-    url: getUrl(query, params?.id as string),
+    url: getUrl(`/admin/tests/results/${encodeURIComponent(id)}`, query),
     method: "GET",
     token,
   });
@@ -59,13 +52,13 @@ export default function GradeUsersPage({
   useEffect(() => {
     if (searchValue) {
       router.push({
-        pathname: `/tests/grades/${id}`,
+        pathname: `/tests/${id}/grades`,
         query: {
           q: searchValue,
         },
       });
     } else {
-      router.push(`/tests/grades/${id}`);
+      router.push(`/tests/${id}/grades`);
     }
   }, [searchValue]);
 
@@ -128,45 +121,30 @@ export default function GradeUsersPage({
               variant="light"
               color="secondary"
               size="sm"
-              startContent={<Eye weight="bold" size={16} />}
-              className="w-max font-bold"
-              onClick={() => router.push(`/tests/answers/${user.result_id}`)}
+              startContent={<Eye weight="duotone" size={18} />}
+              className="w-max font-semibold"
+              onClick={() => router.push(`/tests/${user.result_id}/answers`)}
             >
-              Lihat Jawaban
+              Jawaban
             </Button>
 
             <ModalConfirm
               trigger={
                 <Button isIconOnly variant="light" color="danger" size="sm">
-                  <Trash weight="bold" size={18} className="text-danger" />
+                  <CustomTooltip content="Hapus Jawaban">
+                    <Trash weight="duotone" size={18} className="text-danger" />
+                  </CustomTooltip>
                 </Button>
               }
               header={<h1 className="font-bold text-black">Hapus Nilai</h1>}
               body={
                 <div className="grid gap-3 text-sm font-medium">
                   <p className="leading-[170%] text-gray">
-                    Apakah anda ingin menghapus nilai berikut secara permanen?
-                  </p>
-
-                  <div className="grid gap-1">
-                    {[
-                      ["ID Pengguna", `${user.user_id}`],
-                      ["Nama Lengkap", `${user.fullname}`],
-                    ].map(([label, value], index) => (
-                      <div
-                        key={index}
-                        className="grid gap-4 [grid-template-columns:110px_2px_1fr;]"
-                      >
-                        <h1 className="text-gray">{label}</h1>
-                        <span>:</span>
-                        <h1 className="font-extrabold text-purple">{value}</h1>
-                      </div>
-                    ))}
-                  </div>
-
-                  <p className="leading-[170%] text-gray">
-                    Tindakan ini tidak dapat dibatalkan, dan data yang sudah
-                    dihapus tidak dapat dipulihkan.
+                    Apakah anda ingin menghapus nilai{" "}
+                    <strong className="font-extrabold text-purple">
+                      {user.fullname}
+                    </strong>
+                    ?
                   </p>
                 </div>
               }
@@ -176,7 +154,7 @@ export default function GradeUsersPage({
                     color="danger"
                     variant="light"
                     onPress={onClose}
-                    className="font-bold"
+                    className="font-semibold"
                   >
                     Tutup
                   </Button>
@@ -184,7 +162,7 @@ export default function GradeUsersPage({
                   <Button
                     color="danger"
                     onClick={() => handleDeleteAnswer(user.result_id)}
-                    className="font-bold"
+                    className="font-semibold"
                   >
                     Ya, Hapus Nilai
                   </Button>
@@ -239,113 +217,101 @@ export default function GradeUsersPage({
       title={`Daftar Nilai ${data?.data.title}`}
       className="scrollbar-hide"
     >
-      <Container>
-        <section className="grid gap-8">
-          <ButtonBack />
+      <Container className="gap-8">
+        <ButtonBack />
 
-          <div className="grid gap-8">
-            <TitleText
-              title={`Daftar Nilai ${data?.data.title} 🎯`}
-              text="Lihat semua nilai dari para mahasiswa/i"
+        <TitleText
+          title={`Daftar Nilai ${data?.data.title} 🎯`}
+          text="Lihat semua nilai dari para mahasiswa/i"
+        />
+
+        <div className="grid">
+          <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+            <SearchInput
+              placeholder="Cari Nama Pengguna atau ID Pengguna..."
+              defaultValue={query.q as string}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
             />
 
-            <div className="grid">
-              <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
-                <SearchInput
-                  placeholder="Cari User ID atau Nama User"
-                  defaultValue={query.q as string}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onClear={() => setSearch("")}
-                />
-
-                <p className="text-sm font-medium text-gray">
-                  Total Jawaban{" "}
-                  <strong className="font-black text-purple">
-                    {data?.data.total_results ? data.data.total_results : "-"}/
-                    {data?.data.total_participants
-                      ? data.data.total_participants
-                      : "-"}
-                  </strong>
-                </p>
-              </div>
-
-              <div className="overflow-x-scroll scrollbar-hide">
-                <Table
-                  isHeaderSticky
-                  aria-label="grade users table"
-                  color="secondary"
-                  selectionMode="none"
-                  classNames={customStyleTable}
-                  className="scrollbar-hide"
-                >
-                  <TableHeader columns={columnsGrade}>
-                    {(column) => (
-                      <TableColumn key={column.uid}>{column.name}</TableColumn>
-                    )}
-                  </TableHeader>
-
-                  <TableBody
-                    items={data?.data.results}
-                    emptyContent={
-                      <EmptyData text="Nilai pengguna tidak ditemukan!" />
-                    }
-                  >
-                    {(item: GradeTest) => (
-                      <TableRow key={item.result_id}>
-                        {(columnKey) => (
-                          <TableCell>
-                            {renderCellUsers(item, columnKey)}
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-
-            {data?.data.results.length ? (
-              <Pagination
-                isCompact
-                showControls
-                page={data.data.page as number}
-                total={data.data.total_pages as number}
-                onChange={(e) => {
-                  router.push({
-                    pathname: `/tests/grades/${id}`,
-                    query: {
-                      ...router.query,
-                      page: e,
-                    },
-                  });
-                }}
-                className="justify-self-center"
-                classNames={{
-                  cursor: "bg-purple text-white",
-                }}
-              />
-            ) : null}
+            <p className="text-sm font-medium text-gray">
+              Total Jawaban{" "}
+              <strong className="font-black text-purple">
+                {data?.data.total_results ? data.data.total_results : "-"}/
+                {data?.data.total_participants
+                  ? data.data.total_participants
+                  : "-"}
+              </strong>
+            </p>
           </div>
-        </section>
+
+          <div className="overflow-x-scroll scrollbar-hide">
+            <Table
+              isStriped
+              aria-label="grade users table"
+              color="secondary"
+              selectionMode="none"
+              classNames={customStyleTable}
+              className="scrollbar-hide"
+            >
+              <TableHeader columns={columnsGrade}>
+                {(column) => (
+                  <TableColumn key={column.uid}>{column.name}</TableColumn>
+                )}
+              </TableHeader>
+
+              <TableBody
+                items={data?.data.results}
+                emptyContent={
+                  <EmptyData text="Nilai pengguna tidak ditemukan!" />
+                }
+              >
+                {(item: GradeTest) => (
+                  <TableRow key={item.result_id}>
+                    {(columnKey) => (
+                      <TableCell>{renderCellUsers(item, columnKey)}</TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {data?.data.results.length ? (
+          <Pagination
+            isCompact
+            showControls
+            page={data.data.page as number}
+            total={data.data.total_pages as number}
+            onChange={(e) => {
+              router.push({
+                pathname: `/tests/grades/${id}`,
+                query: {
+                  ...router.query,
+                  page: e,
+                },
+              });
+            }}
+            className="justify-self-center"
+            classNames={{
+              cursor: "bg-purple text-white",
+            }}
+          />
+        ) : null}
       </Container>
     </Layout>
   );
 }
 
-export const getServerSideProps: GetServerSideProps<{
-  token: string;
-  id: string;
-  params: ParsedUrlQuery;
-  query: ParsedUrlQuery;
-}> = async ({ req, params, query }) => {
-  const id = params?.id as string;
+export const getServerSideProps = withToken(async (ctx) => {
+  const id = ctx.params?.id as string;
+  const query = ctx.query;
 
   return {
     props: {
-      token: req.headers["access_token"] as string,
-      params: params as ParsedUrlQuery,
       query,
       id,
     },
   };
-};
+});

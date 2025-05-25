@@ -1,4 +1,5 @@
 import { CreateQuestion } from "@/types/question.type";
+import { customStyleInput } from "@/utils/customStyleInput";
 import {
   Button,
   Checkbox,
@@ -45,12 +46,12 @@ export default function ModalInputQuestion({
   return (
     <>
       <Button
-        variant="bordered"
+        size="md"
+        variant="light"
         color="secondary"
         startContent={<Plus weight="bold" size={18} />}
-        className="w-max justify-self-end font-bold"
         onClick={onOpen}
-        size="md"
+        className="w-max justify-self-end font-semibold"
       >
         Tambah Soal
       </Button>
@@ -76,17 +77,20 @@ export default function ModalInputQuestion({
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 font-bold text-black">
+              <ModalHeader className="font-bold text-black">
                 Buat Soal
               </ModalHeader>
 
               <ModalBody>
                 <div className="grid gap-6">
                   <RadioGroup
+                    isRequired
                     aria-label="select program type"
                     orientation="horizontal"
                     label={
-                      <span className="font-medium text-black">Tipe Soal</span>
+                      <span className="text-sm font-medium text-black">
+                        Tipe Soal
+                      </span>
                     }
                     color="secondary"
                     value={typeQuestion}
@@ -102,7 +106,9 @@ export default function ModalInputQuestion({
 
                   {typeQuestion == "text" || typeQuestion == "image" ? (
                     <div className="grid gap-2">
-                      <p className="font-medium text-black">Pertanyaan</p>
+                      <p className="text-sm font-medium text-black after:ml-0.5 after:text-base after:text-danger after:content-['*']">
+                        Pertanyaan
+                      </p>
 
                       <CKEditor
                         value={text}
@@ -112,25 +118,23 @@ export default function ModalInputQuestion({
                     </div>
                   ) : (
                     <Input
+                      isRequired
                       type="text"
                       variant="flat"
                       label="Pertanyaan"
                       labelPlacement="outside"
-                      placeholder="Masukan Link Soal Video"
+                      placeholder="Contoh: https://youtube.com/watch?v=xxxxx"
                       name="video"
                       value={text}
                       onChange={(e) => setText(e.target.value)}
-                      classNames={{
-                        input:
-                          "font-semibold placeholder:font-normal placeholder:text-default-600",
-                        label: "font-medium text-black text-[16px]",
-                      }}
-                      className="flex-1"
+                      classNames={customStyleInput}
                     />
                   )}
 
                   <div className="grid gap-2">
-                    <p className="font-medium text-black">Jawaban</p>
+                    <p className="text-sm font-medium text-black after:ml-0.5 after:text-base after:text-danger after:content-['*']">
+                      Jawaban
+                    </p>
 
                     {options.map((option, index) => (
                       <div key={index} className="flex">
@@ -173,7 +177,9 @@ export default function ModalInputQuestion({
                   </div>
 
                   <div className="grid gap-2">
-                    <p className="font-medium text-black">Pembahasan</p>
+                    <p className="text-sm font-medium text-black after:ml-0.5 after:text-base after:text-danger after:content-['*']">
+                      Pembahasan
+                    </p>
 
                     <CKEditor
                       value={explanation}
@@ -200,14 +206,14 @@ export default function ModalInputQuestion({
                       { text: "", is_correct: false },
                     ]);
                   }}
-                  className="font-bold"
+                  className="font-semibold"
                 >
                   Tutup
                 </Button>
 
                 <Button
                   color="secondary"
-                  startContent={<FloppyDisk weight="bold" size={18} />}
+                  startContent={<FloppyDisk weight="duotone" size={18} />}
                   onClick={() => {
                     handleAddQuestion({
                       text,
@@ -226,7 +232,7 @@ export default function ModalInputQuestion({
                       { text: "", is_correct: false },
                     ]);
                   }}
-                  className="w-max justify-self-end font-bold"
+                  className="w-max justify-self-end font-semibold"
                 >
                   {page == "create" ? "Simpan Draft" : "Simpan Soal"}
                 </Button>

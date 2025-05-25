@@ -308,7 +308,7 @@ export default function AILimitsPage({
               <ModalContent>
                 {(onClose) => (
                   <>
-                    <ModalHeader className="font-extrabold capitalize text-black">
+                    <ModalHeader className="font-bold text-black">
                       {typeModal == "create" ? "Tambah" : "Edit"} Limitasi
                     </ModalHeader>
 

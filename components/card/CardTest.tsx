@@ -84,7 +84,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
 
         <div className="grid gap-6">
           <Link
-            href={`/tests/details/${test.test_id}`}
+            href={`/tests/${test.test_id}`}
             className={`line-clamp-1 text-xl font-bold leading-[120%] text-black ${test.is_active ? "hover:text-purple" : "hover:text-danger"}`}
           >
             {test.title}
@@ -166,7 +166,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
           variant="light"
           size="sm"
           color="secondary"
-          onClick={() => router.push(`/tests/details/${test.test_id}`)}
+          onClick={() => router.push(`/tests/${test.test_id}`)}
         >
           <CustomTooltip content="Detail Ujian">
             <Eye weight="duotone" size={18} />
@@ -178,7 +178,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
           variant="light"
           size="sm"
           color="secondary"
-          onClick={() => router.push(`/tests/edit/${test.test_id}`)}
+          onClick={() => router.push(`/tests/${test.test_id}/edit`)}
         >
           <CustomTooltip content="Edit Ujian">
             <PencilLine weight="duotone" size={18} />
@@ -214,8 +214,8 @@ export default function CardTest({ test, token, mutate }: TestProps) {
           <Button
             size="sm"
             color="secondary"
-            onClick={() => router.push(`/tests/grades/${test.test_id}`)}
-            className="px-6 font-bold"
+            onClick={() => router.push(`/tests/${test.test_id}/grades`)}
+            className="px-6 font-semibold"
           >
             Lihat Nilai
           </Button>

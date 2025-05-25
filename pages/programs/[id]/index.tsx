@@ -490,7 +490,7 @@ export default function DetailsProgramPage({
               />
 
               {data?.data.type === "paid" && (
-                <div className="inline-flex items-center gap-2">
+                <div className="inline-flex items-center gap-4">
                   <ModalAddParticipant
                     {...{
                       by:
