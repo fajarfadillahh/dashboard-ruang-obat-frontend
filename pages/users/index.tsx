@@ -139,7 +139,7 @@ export default function UsersPage({
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
-              isHeaderSticky
+              isStriped
               aria-label="users table"
               color="secondary"
               selectionMode="none"
