@@ -1,3 +1,4 @@
+import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/loading/LoadingScreen";
@@ -7,6 +8,8 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
+import { withToken } from "@/lib/getToken";
+import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
 import { User, UsersResponse } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
@@ -21,19 +24,11 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import { Eye } from "@phosphor-icons/react";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
 import useSWR from "swr";
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/users?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/users?page=${query.page ? query.page : 1}`;
-}
 
 export default function UsersPage({
   token,
@@ -42,7 +37,7 @@ export default function UsersPage({
   const router = useRouter();
   const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading } = useSWR<SuccessResponse<UsersResponse>>({
-    url: getUrl(query),
+    url: getUrl("/admin/users", query),
     method: "GET",
     token,
   });
@@ -90,10 +85,12 @@ export default function UsersPage({
             size="sm"
             color="secondary"
             onClick={() =>
-              router.push(`/users/details/${encodeURIComponent(user.user_id)}`)
+              router.push(`/users/${encodeURIComponent(user.user_id)}`)
             }
           >
-            <Eye weight="bold" size={18} />
+            <CustomTooltip content="Detail Pengguna">
+              <Eye weight="duotone" size={18} />
+            </CustomTooltip>
           </Button>
         );
 
@@ -122,92 +119,86 @@ export default function UsersPage({
 
   return (
     <Layout title="Pengguna" className="scrollbar-hide">
-      <Container>
-        <section className="grid gap-8">
-          <TitleText
-            title="Daftar Pengguna 🧑🏽‍💻"
-            text="Tabel pengguna yang sudah terdaftar di ruangobat.id"
-          />
+      <Container className="gap-8">
+        <TitleText
+          title="Daftar Pengguna 🧑🏽‍💻"
+          text="Tabel pengguna yang sudah terdaftar di ruangobat.id"
+        />
 
-          <div className="grid">
-            <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
-              <SearchInput
-                placeholder="Cari User ID atau Nama User"
-                defaultValue={query.q as string}
-                onChange={(e) => setSearch(e.target.value)}
-                onClear={() => setSearch("")}
-              />
+        <div className="grid">
+          <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+            <SearchInput
+              placeholder="Cari Nama Pengguna atau ID Pengguna..."
+              defaultValue={query.q as string}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
+            />
 
-              <ModalExportDataUser {...{ token }} />
-            </div>
-
-            <div className="overflow-x-scroll scrollbar-hide">
-              <Table
-                isHeaderSticky
-                aria-label="users table"
-                color="secondary"
-                selectionMode="none"
-                classNames={customStyleTable}
-                className="scrollbar-hide"
-              >
-                <TableHeader columns={columnsUser}>
-                  {(column) => (
-                    <TableColumn key={column.uid}>{column.name}</TableColumn>
-                  )}
-                </TableHeader>
-
-                <TableBody
-                  items={data?.data.users}
-                  emptyContent={<EmptyData text="Pengguna tidak ditemukan!" />}
-                >
-                  {(user: User) => (
-                    <TableRow key={user.user_id}>
-                      {(columnKey) => (
-                        <TableCell>
-                          {renderCellUsers(user, columnKey)}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <ModalExportDataUser {...{ token }} />
           </div>
 
-          {data?.data.users.length ? (
-            <Pagination
-              isCompact
-              showControls
-              page={data?.data.page as number}
-              total={data?.data.total_pages as number}
-              onChange={(e) => {
-                router.push({
-                  query: {
-                    ...router.query,
-                    page: e,
-                  },
-                });
-              }}
-              className="justify-self-center"
-              classNames={{
-                cursor: "bg-purple text-white",
-              }}
-            />
-          ) : null}
-        </section>
+          <div className="overflow-x-scroll scrollbar-hide">
+            <Table
+              isHeaderSticky
+              aria-label="users table"
+              color="secondary"
+              selectionMode="none"
+              classNames={customStyleTable}
+              className="scrollbar-hide"
+            >
+              <TableHeader columns={columnsUser}>
+                {(column) => (
+                  <TableColumn key={column.uid}>{column.name}</TableColumn>
+                )}
+              </TableHeader>
+
+              <TableBody
+                items={data?.data.users}
+                emptyContent={<EmptyData text="Pengguna tidak ditemukan!" />}
+              >
+                {(user: User) => (
+                  <TableRow key={user.user_id}>
+                    {(columnKey) => (
+                      <TableCell>{renderCellUsers(user, columnKey)}</TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {data?.data.users.length ? (
+          <Pagination
+            isCompact
+            showControls
+            page={data?.data.page as number}
+            total={data?.data.total_pages as number}
+            onChange={(e) => {
+              router.push({
+                query: {
+                  ...router.query,
+                  page: e,
+                },
+              });
+            }}
+            className="justify-self-center"
+            classNames={{
+              cursor: "bg-purple text-white",
+            }}
+          />
+        ) : null}
       </Container>
     </Layout>
   );
 }
 
-export const getServerSideProps: GetServerSideProps<{
-  token: string;
-  query: ParsedUrlQuery;
-}> = async ({ req, query }) => {
+export const getServerSideProps = withToken(async (ctx) => {
+  const { query } = ctx;
+
   return {
     props: {
-      token: req.headers["access_token"] as string,
-      query,
+      query: query as ParsedUrlQuery,
     },
   };
-};
+});
