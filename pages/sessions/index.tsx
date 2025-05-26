@@ -122,28 +122,11 @@ export default function SessionPage({
             body={
               <div className="grid gap-3 text-sm font-medium">
                 <p className="leading-[170%] text-gray">
-                  Apakah anda ingin menghapus session berikut secara permanen?
-                </p>
-
-                <div className="grid gap-1">
-                  {[
-                    ["ID Pengguna", `${session.user_id}`],
-                    ["Nama Lengkap", `${session.fullname}`],
-                  ].map(([label, value], index) => (
-                    <div
-                      key={index}
-                      className="grid gap-4 [grid-template-columns:110px_2px_1fr;]"
-                    >
-                      <h1 className="text-gray">{label}</h1>
-                      <span>:</span>
-                      <h1 className="font-extrabold text-purple">{value}</h1>
-                    </div>
-                  ))}
-                </div>
-
-                <p className="leading-[170%] text-gray">
-                  Tindakan ini tidak dapat dibatalkan, dan data yang sudah
-                  dihapus tidak dapat dipulihkan.
+                  Apakah anda ingin menghapus session{" "}
+                  <strong className="font-extrabold text-purple">
+                    {session.fullname}
+                  </strong>
+                  ?
                 </p>
               </div>
             }

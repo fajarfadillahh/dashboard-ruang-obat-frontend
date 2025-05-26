@@ -3,6 +3,8 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
+import { Admin } from "@/types/admin.type";
+import { SuccessResponse } from "@/types/global.type";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
@@ -21,31 +23,37 @@ type InputState = {
   access_key: string;
 };
 
-export default function CreateAdminPage({
+export default function EditAdminPage({
   token,
+  admin,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [input, setInput] = useState<InputState>({
-    fullname: "",
-    role: "",
+    fullname: admin.fullname,
+    role: admin.role,
     password: "",
     access_key: "",
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
-  async function handleCreateAdmin() {
+  async function handleEditAdmin() {
     setLoading(true);
 
     try {
+      const payload = {
+        ...input,
+        admin_id: admin.admin_id,
+      };
+
       await fetcher({
-        url: "/auth/register/admins",
-        method: "POST",
+        url: "/admins",
+        method: "PATCH",
+        data: payload,
         token,
-        data: input,
       });
 
-      toast.success("Admin berhasil dibuat");
+      toast.success("Data admin berhasil diubah");
       router.push("/admins");
     } catch (error: any) {
       setLoading(false);
@@ -66,13 +74,13 @@ export default function CreateAdminPage({
   }, [input]);
 
   return (
-    <Layout title="Buat Admin" className="scrollbar-hide">
+    <Layout title="Edit Admin" className="scrollbar-hide">
       <Container>
-        <ButtonBack />
+        <ButtonBack href="/admins" />
 
         <TitleText
-          title="Buat Admin 🧑🏽"
-          text="Tambahkan admin untuk dapat membantu yang lain"
+          title="Edit Admin 🧑🏽"
+          text="Sesuaikan kembali data admin yang sudah dibuat"
           className="border-b-2 border-dashed border-gray/20 py-8"
         />
 
@@ -87,13 +95,13 @@ export default function CreateAdminPage({
                 labelPlacement="outside"
                 placeholder="Masukan Nama Lengkap"
                 name="fullname"
+                value={input.fullname}
                 onChange={(e) =>
                   setInput({ ...input, fullname: e.target.value })
                 }
                 startContent={
                   <User weight="duotone" size={18} className="text-gray" />
                 }
-                classNames={customStyleInput}
               />
 
               <Select
@@ -105,14 +113,14 @@ export default function CreateAdminPage({
                 placeholder="Pilih Role"
                 name="role"
                 selectedKeys={[input.role]}
-                onChange={(e) =>
+                onChange={(e) => {
                   setInput({
                     ...input,
                     role: e.target.value,
-                  })
-                }
+                  });
+                }}
                 startContent={
-                  <UserGear weight="duotone" size={18} className="text-gray" />
+                  <UserGear weight="bold" size={18} className="text-gray" />
                 }
                 classNames={{
                   value: "font-semibold text-gray",
@@ -133,7 +141,7 @@ export default function CreateAdminPage({
               name="password"
               onChange={(e) => setInput({ ...input, password: e.target.value })}
               startContent={
-                <Lock weight="duotone" size={18} className="text-default-600" />
+                <Lock weight="bold" size={18} className="text-default-600" />
               }
               classNames={customStyleInput}
             />
@@ -152,9 +160,9 @@ export default function CreateAdminPage({
                   access_key: e.target.value,
                 })
               }
-              onKeyDown={(e) => handleKeyDown(e, handleCreateAdmin)}
+              onKeyDown={(e) => handleKeyDown(e, handleEditAdmin)}
               startContent={
-                <Lock weight="duotone" size={18} className="text-default-600" />
+                <Lock weight="duotone" size={18} className="text-gray" />
               }
               classNames={customStyleInput}
             />
@@ -167,10 +175,10 @@ export default function CreateAdminPage({
             startContent={
               loading ? null : <FloppyDisk weight="duotone" size={18} />
             }
-            onClick={handleCreateAdmin}
+            onClick={handleEditAdmin}
             className="w-max justify-self-end font-semibold"
           >
-            {loading ? "Tunggu Sebentar..." : "Buat Admin"}
+            {loading ? "Tunggu Sebentar..." : "Simpan Perubahan"}
           </Button>
         </div>
       </Container>
@@ -178,4 +186,19 @@ export default function CreateAdminPage({
   );
 }
 
-export const getServerSideProps = withToken();
+export const getServerSideProps = withToken(async (ctx, token) => {
+  const id = ctx.params?.id as string;
+
+  const response = (await fetcher({
+    url: `/admins/${encodeURIComponent(id)}`,
+    method: "GET",
+    token,
+  })) as SuccessResponse<Admin>;
+
+  return {
+    props: {
+      admin: response.data,
+      id,
+    },
+  };
+});
