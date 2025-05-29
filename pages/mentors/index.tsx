@@ -1,3 +1,4 @@
+import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/loading/LoadingScreen";
@@ -7,6 +8,8 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
+import { withToken } from "@/lib/getToken";
+import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
 import { Mentor, MentorResponse } from "@/types/mentor.type";
 import { customStyleTable } from "@/utils/customStyleTable";
@@ -32,20 +35,12 @@ import {
   Trash,
   XCircle,
 } from "@phosphor-icons/react";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/mentors?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/mentors?page=${query.page ? query.page : 1}`;
-}
 
 export default function MentorsPage({
   token,
@@ -56,7 +51,7 @@ export default function MentorsPage({
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<MentorResponse>
   >({
-    url: getUrl(query),
+    url: getUrl("/admin/mentors", query),
     method: "GET",
     token,
   });
@@ -134,12 +129,12 @@ export default function MentorsPage({
               color="secondary"
               size="sm"
               onClick={() =>
-                router.push(
-                  `/mentors/details/${encodeURIComponent(mentor.mentor_id)}`,
-                )
+                router.push(`/mentors/${encodeURIComponent(mentor.mentor_id)}`)
               }
             >
-              <Eye weight="bold" size={18} />
+              <CustomTooltip content="Detail Mentor">
+                <Eye weight="duotone" size={18} />
+              </CustomTooltip>
             </Button>
 
             <Button
@@ -149,45 +144,32 @@ export default function MentorsPage({
               size="sm"
               onClick={() =>
                 router.push(
-                  `/mentors/edit/${encodeURIComponent(mentor.mentor_id)}`,
+                  `/mentors/${encodeURIComponent(mentor.mentor_id)}/edit`,
                 )
               }
             >
-              <PencilLine weight="bold" size={18} />
+              <CustomTooltip content="Edit Mentor">
+                <PencilLine weight="duotone" size={18} />
+              </CustomTooltip>
             </Button>
 
             <ModalConfirm
               trigger={
                 <Button isIconOnly variant="light" color="danger" size="sm">
-                  <Trash weight="bold" size={18} className="text-danger" />
+                  <CustomTooltip content="Hapus Mentor">
+                    <Trash weight="duotone" size={18} className="text-danger" />
+                  </CustomTooltip>
                 </Button>
               }
               header={<h1 className="font-bold text-black">Hapus Mentor</h1>}
               body={
                 <div className="grid gap-3 text-sm font-medium">
                   <p className="leading-[170%] text-gray">
-                    Apakah anda ingin menghapus mentor berikut secara permanen?
-                  </p>
-
-                  <div className="grid gap-1">
-                    {[
-                      ["ID Mentor", `${mentor.mentor_id}`],
-                      ["Nama Lengkap", `${mentor.fullname}`],
-                    ].map(([label, value], index) => (
-                      <div
-                        key={index}
-                        className="grid gap-4 [grid-template-columns:110px_2px_1fr;]"
-                      >
-                        <h1 className="text-gray">{label}</h1>
-                        <span>:</span>
-                        <h1 className="font-extrabold text-purple">{value}</h1>
-                      </div>
-                    ))}
-                  </div>
-
-                  <p className="leading-[170%] text-gray">
-                    Tindakan ini tidak dapat dibatalkan, dan data yang sudah
-                    dihapus tidak dapat dipulihkan.
+                    Apakah anda ingin menghapus mentor{" "}
+                    <strong className="font-extrabold text-purple">
+                      {mentor.fullname}
+                    </strong>
+                    ?
                   </p>
                 </div>
               }
@@ -197,14 +179,14 @@ export default function MentorsPage({
                     color="danger"
                     variant="light"
                     onPress={onClose}
-                    className="font-bold"
+                    className="font-semibold"
                   >
                     Tutup
                   </Button>
 
                   <Button
                     color="danger"
-                    className="font-bold"
+                    className="font-semibold"
                     onClick={() => handleDeleteMentor(mentor.mentor_id)}
                   >
                     Ya, Hapus Mentor
@@ -257,99 +239,95 @@ export default function MentorsPage({
 
   return (
     <Layout title="Mentor" className="scrollbar-hide">
-      <Container>
-        <section className="grid gap-8">
-          <TitleText
-            title="Daftar Mentor 🧑🏽"
-            text="Mentor terbaik yang di miliki ruangobat.id"
-          />
+      <Container className="gap-8">
+        <TitleText
+          title="Daftar Mentor 🧑🏽"
+          text="Mentor terbaik yang di miliki ruangobat.id"
+        />
 
-          <div className="grid">
-            <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
-              <SearchInput
-                placeholder="Cari Mentor ID atau Nama Mentor"
-                defaultValue={query.q as string}
-                onChange={(e) => setSearch(e.target.value)}
-                onClear={() => setSearch("")}
-              />
+        <div className="grid">
+          <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+            <SearchInput
+              placeholder="Cari Nama Mentor atau ID Mentor..."
+              defaultValue={query.q as string}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
+            />
 
-              <Button
-                color="secondary"
-                startContent={<Plus weight="bold" size={16} />}
-                onClick={() => router.push("/mentors/create")}
-                className="w-max font-bold"
-              >
-                Tambah Mentor
-              </Button>
-            </div>
-
-            <div className="overflow-x-scroll scrollbar-hide">
-              <Table
-                isHeaderSticky
-                aria-label="mentors table"
-                color="secondary"
-                selectionMode="none"
-                classNames={customStyleTable}
-                className="scrollbar-hide"
-              >
-                <TableHeader columns={columnsMentor}>
-                  {(column) => (
-                    <TableColumn key={column.uid}>{column.name}</TableColumn>
-                  )}
-                </TableHeader>
-
-                <TableBody
-                  items={data?.data.mentors}
-                  emptyContent={<EmptyData text="Mentor tidak ditemukan!" />}
-                >
-                  {(mentor) => (
-                    <TableRow key={mentor.mentor_id}>
-                      {(columnKey) => (
-                        <TableCell>
-                          {renderCellMentors(mentor, columnKey)}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <Button
+              color="secondary"
+              startContent={<Plus weight="bold" size={16} />}
+              onClick={() => router.push("/mentors/create")}
+              className="w-max font-semibold"
+            >
+              Tambah Mentor
+            </Button>
           </div>
 
-          {data?.data.mentors.length ? (
-            <Pagination
-              isCompact
-              showControls
-              page={data?.data.page as number}
-              total={data?.data.total_pages as number}
-              onChange={(e) => {
-                router.push({
-                  query: {
-                    ...router.query,
-                    page: e,
-                  },
-                });
-              }}
-              className="justify-self-center"
-              classNames={{
-                cursor: "bg-purple text-white",
-              }}
-            />
-          ) : null}
-        </section>
+          <div className="overflow-x-scroll scrollbar-hide">
+            <Table
+              isHeaderSticky
+              aria-label="mentors table"
+              color="secondary"
+              selectionMode="none"
+              classNames={customStyleTable}
+              className="scrollbar-hide"
+            >
+              <TableHeader columns={columnsMentor}>
+                {(column) => (
+                  <TableColumn key={column.uid}>{column.name}</TableColumn>
+                )}
+              </TableHeader>
+
+              <TableBody
+                items={data?.data.mentors}
+                emptyContent={<EmptyData text="Mentor tidak ditemukan!" />}
+              >
+                {(mentor) => (
+                  <TableRow key={mentor.mentor_id}>
+                    {(columnKey) => (
+                      <TableCell>
+                        {renderCellMentors(mentor, columnKey)}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {data?.data.mentors.length ? (
+          <Pagination
+            isCompact
+            showControls
+            page={data?.data.page as number}
+            total={data?.data.total_pages as number}
+            onChange={(e) => {
+              router.push({
+                query: {
+                  ...router.query,
+                  page: e,
+                },
+              });
+            }}
+            className="justify-self-center"
+            classNames={{
+              cursor: "bg-purple text-white",
+            }}
+          />
+        ) : null}
       </Container>
     </Layout>
   );
 }
 
-export const getServerSideProps: GetServerSideProps<{
-  token: string;
-  query: ParsedUrlQuery;
-}> = async ({ req, query }) => {
+export const getServerSideProps = withToken(async (ctx) => {
+  const { query } = ctx;
+
   return {
     props: {
-      token: req.headers["access_token"] as string,
-      query,
+      query: query as ParsedUrlQuery,
     },
   };
-};
+});
