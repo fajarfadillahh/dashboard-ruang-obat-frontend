@@ -88,13 +88,19 @@ export function SidebarMenuClass(): SidebarMenuClassType[] {
       ],
     },
     {
-      key: "pharmacistadmission",
+      key: "apotekerclass",
       title: "Masuk Apoteker",
       icon: BookBookmark,
-      path: "/pharmacistadmission",
+      path: "/apotekerclass",
       items: [
-        { label: "Universitas", path: "/pharmacistadmission/university" },
-        { label: "Produk", path: "/pharmacistadmission/product" },
+        { label: "Kategori", path: "/apotekerclass/categories" },
+        { label: "Tryout", path: "/apotekerclass/tryouts" },
+        { label: "Kuis", path: "/apotekerclass/quizzes" },
+        { label: "Flashcard", path: "/apotekerclass/cards" },
+        { label: "Konten", path: "/apotekerclass/courses" },
+        { label: "Universitas", path: "/apotekerclass/universities" },
+        { label: "Paket Berlangganan", path: "/apotekerclass/subscriptions" },
+        { label: "Access List", path: "/apotekerclass/accesses" },
       ],
     },
   ];
