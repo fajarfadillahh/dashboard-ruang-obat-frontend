@@ -33,6 +33,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "api.ruangobat.id",
       },
+      {
+        protocol: "https",
+        hostname: "is3.cloudhost.id",
+      },
     ],
   },
   eslint: {
