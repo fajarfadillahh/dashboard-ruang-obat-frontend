@@ -1,9 +1,15 @@
 import { ParsedUrlQuery } from "querystring";
 
 export function getUrl(url: string, query: ParsedUrlQuery) {
+  const params = new URLSearchParams();
+
   if (query.q) {
-    return `${url}?q=${query.q}&page=${query.page ? query.page : 1}`;
+    params.set("q", String(query.q));
   }
 
-  return `${url}?page=${query.page ? query.page : 1}`;
+  params.set("page", String(query.page ?? 1));
+
+  const connector = url.includes("?") ? "&" : "?";
+
+  return `${url}${connector}${params.toString()}`;
 }
