@@ -3,11 +3,9 @@ import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
-import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import {
@@ -16,8 +14,10 @@ import {
 } from "@/types/apotekerclass/packages.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
@@ -39,6 +39,7 @@ import {
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 
 export default function SubscriptionsPage({
@@ -46,7 +47,6 @@ export default function SubscriptionsPage({
   query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { setSearch, searchValue } = useSearch(800);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<SubscriptionsResponse>
   >({
@@ -120,7 +120,17 @@ export default function SubscriptionsPage({
       case "action":
         return (
           <div className="inline-flex items-center gap-2">
-            <Button isIconOnly variant="light" size="sm" color="secondary">
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              color="secondary"
+              onClick={() =>
+                router.push(
+                  `/apotekerclass/subscriptions/${packageSubscription.package_id}/edit`,
+                )
+              }
+            >
               <CustomTooltip content="Edit Langganan">
                 <PencilLine weight="duotone" size={18} />
               </CustomTooltip>
@@ -134,7 +144,7 @@ export default function SubscriptionsPage({
                   </CustomTooltip>
                 </Button>
               }
-              header={<h1 className="font-bold text-black">Hapus Langganan</h1>}
+              header={<h1 className="font-bold text-black">Hapus Paket</h1>}
               body={
                 <div className="grid gap-3 text-sm font-medium">
                   <p className="leading-[170%] text-gray">
@@ -160,7 +170,9 @@ export default function SubscriptionsPage({
                   <Button
                     color="danger"
                     className="font-semibold"
-                    onClick={() => alert("clicked")}
+                    onClick={() =>
+                      handleDeletePackage(packageSubscription.package_id)
+                    }
                   >
                     Ya, Hapus
                   </Button>
@@ -172,6 +184,22 @@ export default function SubscriptionsPage({
 
       default:
         return cellValue;
+    }
+  }
+
+  async function handleDeletePackage(package_id: string) {
+    try {
+      await fetcher({
+        url: `/subscriptions/packages/${package_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      toast.success("Paket berhasil dihapus");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
     }
   }
 
@@ -202,18 +230,12 @@ export default function SubscriptionsPage({
         />
 
         <div className="grid">
-          <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
-            <SearchInput
-              placeholder="Cari Langganan..."
-              defaultValue={query.q as string}
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch("")}
-            />
-
+          <div className="sticky left-0 top-0 z-50 flex justify-end gap-4 bg-white pb-4">
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={16} />}
-              className="w-max font-semibold"
+              onClick={() => router.push("/apotekerclass/subscriptions/create")}
+              className="w-max justify-self-end font-semibold"
             >
               Tambah Langganan
             </Button>
