@@ -50,7 +50,7 @@ export default function SubscriptionsPage({
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<SubscriptionsResponse>
   >({
-    url: getUrl("/subscriptions/packages?type=apotekerclass", query),
+    url: getUrl("/subscriptions/packages?type=videocourse", query),
     method: "GET",
     token,
   });
@@ -127,7 +127,7 @@ export default function SubscriptionsPage({
               color="secondary"
               onClick={() =>
                 router.push(
-                  `/apotekerclass/subscriptions/${packageSubscription.package_id}/edit`,
+                  `/learningvideo/subscriptions/${packageSubscription.package_id}/edit`,
                 )
               }
             >
@@ -226,7 +226,7 @@ export default function SubscriptionsPage({
       <Container className="gap-8">
         <TitleText
           title="Daftar Paket Langganan 📚"
-          text="Paket langganan yang tersedia pada kelas masuk apoteker."
+          text="Paket langganan yang tersedia pada kelas video pembelajaran."
         />
 
         <div className="grid">
@@ -234,7 +234,7 @@ export default function SubscriptionsPage({
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={16} />}
-              onClick={() => router.push("/apotekerclass/subscriptions/create")}
+              onClick={() => router.push("/learningvideo/subscriptions/create")}
               className="w-max justify-self-end font-semibold"
             >
               Tambah Paket

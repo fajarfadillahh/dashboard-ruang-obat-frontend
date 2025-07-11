@@ -18,7 +18,7 @@ type InputState = {
   name: string;
   price: number;
   duration: number;
-  type: "apotekerclass";
+  type: "videocourse";
   link_order: string;
   benefits: string[];
 };
@@ -32,7 +32,7 @@ export default function CreatePackagePage({
     name: "",
     price: 0,
     duration: 0,
-    type: "apotekerclass",
+    type: "videocourse",
     link_order: "",
     benefits: [""],
   });
@@ -84,7 +84,7 @@ export default function CreatePackagePage({
       });
 
       toast.success("Paket berhasil ditambahkan");
-      router.push("/apotekerclass/subscriptions");
+      router.push("/learningvideo/subscriptions");
     } catch (error) {
       setIsLoading(false);
       console.error(error);
@@ -101,7 +101,7 @@ export default function CreatePackagePage({
       input.duration > 0 &&
       input.price > 0 &&
       input.link_order.trim() !== "" &&
-      input.type === "apotekerclass" &&
+      input.type === "videocourse" &&
       input.benefits.length > 0 &&
       input.benefits.every((b) => b.trim() !== "");
 
@@ -115,7 +115,7 @@ export default function CreatePackagePage({
 
         <TitleText
           title="Tambah Paket 📋"
-          text="Tambahkan paket untuk kelas masuk Apoteker"
+          text="Tambahkan paket untuk kelas Video Pembelajaran"
           className="border-b-2 border-dashed border-gray/20 py-8"
         />
 
@@ -127,7 +127,7 @@ export default function CreatePackagePage({
               variant="flat"
               label="Nama Paket"
               labelPlacement="outside"
-              placeholder="Contoh: Paket Masuk Apoteker Keren"
+              placeholder="Contoh: Paket Video Pembelajaran Keren"
               name="name"
               value={input.name}
               onChange={(e) => handleChange("name", e.target.value)}
@@ -196,7 +196,7 @@ export default function CreatePackagePage({
                       labelPlacement="outside"
                       value={benefit}
                       onChange={(e) => updateBenefit(index, e.target.value)}
-                      placeholder="Contoh: Akses Semua Video Belajar Masuk Apoteker"
+                      placeholder="Contoh: Akses Semua Video Pembelajaran"
                       classNames={customStyleInput}
                     />
 
