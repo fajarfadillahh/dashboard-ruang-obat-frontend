@@ -48,19 +48,17 @@ export function SidebarMenuTryout(): SidebarMenuType[] {
 export function SidebarMenuClass(): SidebarMenuClassType[] {
   return [
     {
-      key: "learningvideo",
+      key: "videocourse",
       title: "Video Pembelajaran",
       icon: Video,
-      path: "/learningvideo",
+      path: "/videocourse",
       items: [
-        { label: "Kategori", path: "/learningvideo/categories" },
-        { label: "Kuis", path: "/learningvideo/kuis" },
-        { label: "Flashcard", path: "/learningvideo/flashcard" },
-        { label: "Konten", path: "/learningvideo/content" },
-        { label: "Paket Berlangganan", path: "/learningvideo/subscriptions" },
-        { label: "Daftar Akses", path: "/learningvideo/accesses" },
-        // { label: "Konten", path: "/learningvideo/content" },
-        // { label: "Mentor", path: "/learningvideo/mentor" },
+        { label: "Kategori", path: "/videocourse/categories" },
+        { label: "Kuis", path: "/videocourse/kuis" },
+        { label: "Flashcard", path: "/videocourse/flashcard" },
+        { label: "Konten", path: "/videocourse/content" },
+        { label: "Paket Berlangganan", path: "/videocourse/subscriptions" },
+        { label: "Daftar Akses", path: "/videocourse/accesses" },
       ],
     },
     {

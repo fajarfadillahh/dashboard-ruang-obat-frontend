@@ -127,7 +127,7 @@ export default function SubscriptionsPage({
               color="secondary"
               onClick={() =>
                 router.push(
-                  `/learningvideo/subscriptions/${packageSubscription.package_id}/edit`,
+                  `/videocourse/subscriptions/${packageSubscription.package_id}/edit`,
                 )
               }
             >
@@ -234,7 +234,7 @@ export default function SubscriptionsPage({
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={16} />}
-              onClick={() => router.push("/learningvideo/subscriptions/create")}
+              onClick={() => router.push("/videocourse/subscriptions/create")}
               className="w-max justify-self-end font-semibold"
             >
               Tambah Paket

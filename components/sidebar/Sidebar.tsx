@@ -35,7 +35,7 @@ export default function Sidebar() {
   const [activeMenu, setActiveMenu] = useState<{
     [key: string]: { trigger: string; title: string };
   }>({
-    learningvideo: defaultStyle,
+    videocourse: defaultStyle,
     private: defaultStyle,
     theses: defaultStyle,
     research: defaultStyle,
@@ -48,7 +48,7 @@ export default function Sidebar() {
     const title = "font-semibold text-white text-sm";
 
     const pathMap = [
-      "learningvideo",
+      "videocourse",
       "private",
       "research",
       "theses",

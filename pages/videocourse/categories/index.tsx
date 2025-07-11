@@ -205,7 +205,7 @@ export default function CategoriesPage({
                 key={category.category_id}
                 className="group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
                 onClick={() =>
-                  router.push(`/learningvideo/categories/${category.slug}`)
+                  router.push(`/videocourse/categories/${category.slug}`)
                 }
               >
                 <Button

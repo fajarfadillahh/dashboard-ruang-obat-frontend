@@ -84,7 +84,7 @@ export default function CreatePackagePage({
       });
 
       toast.success("Paket berhasil ditambahkan");
-      router.push("/learningvideo/subscriptions");
+      router.push("/videocourse/subscriptions");
     } catch (error) {
       setIsLoading(false);
       console.error(error);
