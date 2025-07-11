@@ -1,11 +1,13 @@
+import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/loading/LoadingScreen";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
-import { Category } from "@/types/categories/category.type";
+import { SubCategory } from "@/types/categories/subcategory.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
@@ -22,21 +24,20 @@ import {
 import { FileText, Gear, Plus } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 
-export default function CategoriesPage({
+export default function SubCategoriesPage({
   token,
+  slug,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const router = useRouter();
   const session = useSession();
   const { isOpen, onOpenChange, onClose, onOpen } = useDisclosure();
   const { data, error, isLoading, mutate } = useSWR<
-    SuccessResponse<Category[]>
+    SuccessResponse<SubCategory>
   >({
-    url: "/categories?type=videocourse",
+    url: `/categories/${encodeURIComponent(slug)}/videocourse`,
     method: "GET",
     token,
   });
@@ -44,22 +45,22 @@ export default function CategoriesPage({
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleAddCategory() {
+  async function handleAddSubCategory() {
     setLoading(true);
 
     try {
       const formData = new FormData();
+      formData.append("category_id", data?.data.category_id as string);
       formData.append("name", name);
       formData.append("image", image as Blob);
-      formData.append("type", "videocourse");
       formData.append("by", session.data?.user.fullname as string);
 
       await fetcher({
-        url: "/categories",
+        url: "/subcategories",
         method: "POST",
         data: formData,
-        token,
         file: true,
+        token,
       });
 
       onClose();
@@ -68,11 +69,11 @@ export default function CategoriesPage({
       setImage(null);
       setName("");
 
-      toast.success("Kategori berhasil ditambahkan");
+      toast.success("Sub Kategori berhasil ditambahkan");
     } catch (error: any) {
       console.error(error);
 
-      toast.error("Gagal menambahkan kategori");
+      toast.error("Gagal menambahkan sub kategori");
     } finally {
       setLoading(false);
     }
@@ -80,7 +81,7 @@ export default function CategoriesPage({
 
   if (error) {
     return (
-      <Layout title="Kategori">
+      <Layout title={data?.data.name}>
         <Container>
           <ErrorPage
             {...{
@@ -97,11 +98,13 @@ export default function CategoriesPage({
   if (isLoading) return <LoadingScreen />;
 
   return (
-    <Layout title="Kategori" className="scrollbar-hide">
+    <Layout title={data?.data.name} className="scrollbar-hide">
       <Container className="gap-8">
+        <ButtonBack />
+
         <TitleText
-          title="Daftar Kategori 📚"
-          text="Kategori yang tersedia pada kelas video pembelajaran."
+          title={`${data?.data.name} 📚`}
+          text={`Daftar sub Kategori yang tersedia dari ${data?.data.name}`}
         />
 
         <div className="grid gap-4">
@@ -112,7 +115,7 @@ export default function CategoriesPage({
               onClick={onOpen}
               className="font-semibold"
             >
-              Tambah Kategori
+              Tambah Sub Kategori
             </Button>
 
             <Modal
@@ -130,7 +133,7 @@ export default function CategoriesPage({
                 {(onClose) => (
                   <>
                     <ModalHeader className="font-bold text-black">
-                      Tambah Kategori
+                      Tambah Sub Kategori
                     </ModalHeader>
 
                     <ModalBody className="scrollbar-hide">
@@ -161,9 +164,9 @@ export default function CategoriesPage({
                         isRequired
                         type="text"
                         variant="flat"
-                        label="Nama Kategori"
+                        label="Nama Sub Kategori"
                         labelPlacement="outside"
-                        placeholder="Contoh: Farmakoterapi"
+                        placeholder="Contoh: Sub Farmakoterapi"
                         classNames={customStyleInput}
                         onChange={(e) => setName(e.target.value)}
                       />
@@ -185,12 +188,12 @@ export default function CategoriesPage({
 
                       <Button
                         color="secondary"
-                        onClick={handleAddCategory}
+                        onClick={handleAddSubCategory}
                         className="font-semibold"
                         isDisabled={!name || !image}
                         isLoading={loading}
                       >
-                        Tambah Kategori
+                        Tambah Sub Kategori
                       </Button>
                     </ModalFooter>
                   </>
@@ -199,43 +202,54 @@ export default function CategoriesPage({
             </Modal>
           </div>
 
-          <div className="grid grid-cols-5 items-start gap-4">
-            {data?.data.map((category) => (
-              <div
-                key={category.category_id}
-                className="group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
-                onClick={() =>
-                  router.push(`/learningvideo/categories/${category.slug}`)
-                }
-              >
-                <Button
-                  isIconOnly
-                  variant="flat"
-                  size="sm"
-                  color="secondary"
-                  className="absolute right-4 top-4"
+          {data?.data.sub_categories.length ? (
+            <div className="grid grid-cols-5 items-start gap-4">
+              {data?.data.sub_categories.map((subcategory) => (
+                <div
+                  key={subcategory.sub_category_id}
+                  className="group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
                 >
-                  <CustomTooltip content="Edit Kategori">
-                    <Gear weight="bold" size={18} />
-                  </CustomTooltip>
-                </Button>
+                  <Button
+                    isIconOnly
+                    variant="flat"
+                    size="sm"
+                    color="secondary"
+                    className="absolute right-4 top-4"
+                  >
+                    <CustomTooltip content="Edit Sub Kategori">
+                      <Gear weight="bold" size={18} />
+                    </CustomTooltip>
+                  </Button>
 
-                <img
-                  src={category.img_url}
-                  alt={category.name}
-                  className="size-20 rounded-full object-cover"
-                />
+                  <img
+                    src={subcategory.img_url}
+                    alt={subcategory.name}
+                    className="size-20 rounded-full object-cover"
+                  />
 
-                <h4 className="line-clamp-2 text-center font-extrabold text-black group-hover:line-clamp-none">
-                  {category.name}
-                </h4>
-              </div>
-            ))}
-          </div>
+                  <h4 className="line-clamp-2 text-center font-extrabold text-black group-hover:line-clamp-none">
+                    {subcategory.name}
+                  </h4>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
+              <EmptyData text="Data sub kategori belum tersedia." />
+            </div>
+          )}
         </div>
       </Container>
     </Layout>
   );
 }
 
-export const getServerSideProps = withToken();
+export const getServerSideProps = withToken(async (ctx) => {
+  const slug = ctx.params?.slug as string;
+
+  return {
+    props: {
+      slug,
+    },
+  };
+});
