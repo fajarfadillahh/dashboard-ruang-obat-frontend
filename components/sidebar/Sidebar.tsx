@@ -12,6 +12,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+
 const defaultItemClasses = {
   trigger: "pl-4 pr-[4px] h-10 items-center gap-2 rounded-xl hover:bg-gray/10",
   title: "font-semibold text-gray text-sm",

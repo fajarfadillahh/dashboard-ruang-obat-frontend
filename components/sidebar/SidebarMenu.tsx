@@ -53,8 +53,14 @@ export function SidebarMenuClass(): SidebarMenuClassType[] {
       icon: Video,
       path: "/learningvideo",
       items: [
+        { label: "Kategori", path: "/learningvideo/categories" },
+        { label: "Kuis", path: "/learningvideo/kuis" },
+        { label: "Flashcard", path: "/learningvideo/flashcard" },
         { label: "Konten", path: "/learningvideo/content" },
-        { label: "Mentor", path: "/learningvideo/mentor" },
+        { label: "Paket Berlangganan", path: "/learningvideo/subscriptions" },
+        { label: "Daftar Akses", path: "/learningvideo/accesses" },
+        // { label: "Konten", path: "/learningvideo/content" },
+        // { label: "Mentor", path: "/learningvideo/mentor" },
       ],
     },
     {
@@ -100,7 +106,7 @@ export function SidebarMenuClass(): SidebarMenuClassType[] {
         { label: "Konten", path: "/apotekerclass/courses" },
         { label: "Universitas", path: "/apotekerclass/universities" },
         { label: "Paket Berlangganan", path: "/apotekerclass/subscriptions" },
-        { label: "Access List", path: "/apotekerclass/accesses" },
+        { label: "Daftar Akses", path: "/apotekerclass/accesses" },
       ],
     },
   ];

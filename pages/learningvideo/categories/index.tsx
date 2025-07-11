@@ -19,7 +19,7 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
-import { FileText, Gear, Plus, Trash } from "@phosphor-icons/react";
+import { FileText, Gear, Plus } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -30,18 +30,51 @@ export default function CategoriesPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
-
+  const { isOpen, onOpenChange, onClose, onOpen } = useDisclosure();
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<Category[]>
   >({
-    url: "/categories?type=apotekerclass",
+    url: "/categories?type=videocourse",
     method: "GET",
     token,
   });
-  const { isOpen, onOpenChange, onClose, onOpen } = useDisclosure();
   const [name, setName] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+
+  async function handleAddCategory() {
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("image", image as Blob);
+      formData.append("type", "videocourse");
+      formData.append("by", session.data?.user.fullname as string);
+
+      await fetcher({
+        url: "/categories",
+        method: "POST",
+        data: formData,
+        token,
+        file: true,
+      });
+
+      onClose();
+      mutate();
+
+      setImage(null);
+      setName("");
+
+      toast.success("Kategori berhasil ditambahkan");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error("Gagal menambahkan kategori");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   if (error) {
     return (
@@ -61,41 +94,12 @@ export default function CategoriesPage({
 
   if (isLoading) return <LoadingScreen />;
 
-  async function handleAddCategory() {
-    setLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("name", name);
-      formData.append("image", image as Blob);
-      formData.append("type", "apotekerclass");
-      formData.append("by", session.data?.user.fullname as string);
-
-      await fetcher({
-        url: "/categories",
-        method: "POST",
-        data: formData,
-        token,
-        file: true,
-      });
-
-      onClose();
-      mutate();
-      toast.success("Kategori berhasil ditambahkan");
-      setImage(null);
-      setName("");
-    } catch (error) {
-      toast.error("Gagal menambahkan kategori");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <Layout title="Kategori" className="scrollbar-hide">
       <Container className="gap-8">
         <TitleText
           title="Daftar Kategori 📚"
-          text="Kategori yang tersedia pada kelas masuk apoteker."
+          text="Kategori yang tersedia pada kelas video pembelajaran."
         />
 
         <div className="grid gap-4">
@@ -193,25 +197,23 @@ export default function CategoriesPage({
             </Modal>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid grid-cols-5 items-start gap-4">
             {data?.data.map((category) => (
               <div
                 key={category.category_id}
                 className="group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
               >
-                <div className="absolute right-4 top-4 grid gap-2">
-                  <Button isIconOnly variant="flat" size="sm" color="secondary">
-                    <CustomTooltip content="Ubah Kategori">
-                      <Gear weight="bold" size={18} />
-                    </CustomTooltip>
-                  </Button>
-
-                  <Button isIconOnly variant="flat" size="sm" color="danger">
-                    <CustomTooltip content="Hapus Kategori">
-                      <Trash weight="bold" size={18} className="text-danger" />
-                    </CustomTooltip>
-                  </Button>
-                </div>
+                <Button
+                  isIconOnly
+                  variant="flat"
+                  size="sm"
+                  color="secondary"
+                  className="absolute right-4 top-4"
+                >
+                  <CustomTooltip content="Edit Kategori">
+                    <Gear weight="bold" size={18} />
+                  </CustomTooltip>
+                </Button>
 
                 <img
                   src={category.img_url}
