@@ -19,7 +19,7 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
-import { FileText, Gear, Plus, Trash } from "@phosphor-icons/react";
+import { FileText, Gear, Plus } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
@@ -199,19 +199,17 @@ export default function CategoriesPage({
                 key={category.category_id}
                 className="group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
               >
-                <div className="absolute right-4 top-4 grid gap-2">
-                  <Button isIconOnly variant="flat" size="sm" color="secondary">
-                    <CustomTooltip content="Ubah Kategori">
-                      <Gear weight="bold" size={18} />
-                    </CustomTooltip>
-                  </Button>
-
-                  <Button isIconOnly variant="flat" size="sm" color="danger">
-                    <CustomTooltip content="Hapus Kategori">
-                      <Trash weight="bold" size={18} className="text-danger" />
-                    </CustomTooltip>
-                  </Button>
-                </div>
+                <Button
+                  isIconOnly
+                  variant="flat"
+                  size="sm"
+                  color="secondary"
+                  className="absolute right-4 top-4"
+                >
+                  <CustomTooltip content="Edit Kategori">
+                    <Gear weight="bold" size={18} />
+                  </CustomTooltip>
+                </Button>
 
                 <img
                   src={category.img_url}
