@@ -13,12 +13,14 @@ import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { getError } from "@/utils/getError";
-import { Button, Checkbox, Input } from "@nextui-org/react";
+import { Button, Checkbox, Chip, Input } from "@nextui-org/react";
 import {
   ArrowClockwise,
+  CheckCircle,
   EnvelopeSimple,
   PencilLine,
   Phone,
+  XCircle,
 } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useState } from "react";
@@ -128,7 +130,7 @@ export default function DetailsUserPage({
   return (
     <Layout title="Detail Pengguna" className="scrollbar-hide">
       <Container className="gap-8">
-        <ButtonBack href="/users" />
+        <ButtonBack />
 
         <TitleText
           title="Detail Pengguna 🧑🏽‍💻"
@@ -149,6 +151,30 @@ export default function DetailsUserPage({
                 ["No. Telpon", `${data?.data.phone_number}`],
                 ["Asal Kampus", `${data?.data.university}`],
                 ["Dibuat Pada", `${formatDate(data?.data.created_at ?? "-")}`],
+                [
+                  "Status",
+                  <Chip
+                    key={data?.data.user_id as string}
+                    variant="flat"
+                    size="sm"
+                    color={data?.data.is_verified ? "success" : "danger"}
+                    startContent={
+                      data?.data.is_verified ? (
+                        <CheckCircle weight="duotone" size={18} />
+                      ) : (
+                        <XCircle weight="duotone" size={18} />
+                      )
+                    }
+                    classNames={{
+                      base: "px-2 gap-1",
+                      content: "font-bold capitalize",
+                    }}
+                  >
+                    {data?.data.is_verified
+                      ? "Terverifikasi"
+                      : "Belum Terverifikasi"}
+                  </Chip>,
+                ],
               ].map(([label, value], index) => (
                 <div
                   key={index}
