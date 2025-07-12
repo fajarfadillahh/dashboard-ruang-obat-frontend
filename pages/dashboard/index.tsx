@@ -7,6 +7,7 @@ import { withToken } from "@/lib/getToken";
 import { DashboardResponse } from "@/types/dashboard.type";
 import { SuccessResponse } from "@/types/global.type";
 import { formatDayWithoutTime } from "@/utils/formatDate";
+import { formatRupiah } from "@/utils/formatRupiah";
 import { Button } from "@nextui-org/react";
 import {
   ArrowRight,
@@ -14,6 +15,7 @@ import {
   ClipboardText,
   Icon,
   IconContext,
+  Robot,
   UserCircle,
   UserCircleCheck,
 } from "@phosphor-icons/react";
@@ -25,7 +27,7 @@ import useSWR from "swr";
 type DataDashboardType = {
   id: number;
   title: string;
-  total?: number;
+  total?: number | string;
   path: string;
   icon: Icon;
 };
@@ -73,6 +75,18 @@ export default function DashboardPage({
       path: "/tests",
       total: data?.data.total_tests,
       icon: ClipboardText,
+    },
+    {
+      id: 5,
+      title: "Saldo AI",
+      path: "/statistics/rosa",
+      total: formatRupiah(
+        Math.round(
+          (data?.data.remaining_credits as number) *
+            (data?.data.usd_to_idr_rate as number),
+        ),
+      ),
+      icon: Robot,
     },
   ];
 
