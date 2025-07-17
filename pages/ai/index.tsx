@@ -7,11 +7,11 @@ import {
   ClockCounterClockwise,
   Cloud,
   Database,
-  GearSix,
+  Globe,
   Icon,
   IconContext,
   Quotes,
-  ShieldCheck,
+  User,
 } from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -27,9 +27,9 @@ type DataRequirementsType = {
 const dataRequirements: DataRequirementsType[] = [
   {
     id: 1,
-    title: "Layanan AI",
+    title: "Provider AI",
     description:
-      "Tambahkan atau hapus layanan untuk mengatur model AI yang tersedia bagi pengguna.",
+      "Pilih dan aktifkan model AI yang ingin disediakan di platform RuangObat.",
     path: "/ai/providers",
     icon: Cloud,
   },
@@ -37,7 +37,7 @@ const dataRequirements: DataRequirementsType[] = [
     id: 2,
     title: "Prompt AI",
     description:
-      "Atur prompt AI untuk meningkatkan kualitas respons yang diberikan.",
+      "Optimalkan prompt AI agar respons yang dihasilkan lebih tepat dan relevan.",
     path: "/ai/prompts",
     icon: Quotes,
   },
@@ -45,33 +45,33 @@ const dataRequirements: DataRequirementsType[] = [
     id: 3,
     title: "Konteks AI",
     description:
-      "Latih dan sesuaikan konteks AI agar dapat memberikan respons yang relevan dan sesuai kebutuhan.",
+      "Latih dan sesuaikan konteks AI agar dapat menghasilkan respon yang lebih relevan dan sesuai kebutuhan.",
     path: "/ai/contexts",
     icon: Database,
   },
   {
     id: 4,
-    title: "Limitasi AI",
-    description:
-      "Tetapkan limitasi harian penggunaan AI untuk menjaga efisiensi dan kontrol sistem.",
-    path: "/ai/limits",
-    icon: ShieldCheck,
-  },
-  {
-    id: 5,
     title: "History AI",
     description:
-      "Pantau semua history chat pengguna untuk bahan riset dan analisis.",
+      "Lihat seluruh riwayat chat pengguna sebagai bahan analisis dan pengembangan.",
     path: "/ai/logs",
     icon: ClockCounterClockwise,
   },
   {
-    id: 6,
-    title: "Custom Limitasi Pengguna",
+    id: 5,
+    title: "Global Limit",
     description:
-      "Tetapkan kustomisasi limit harian penggunaan AI untuk pengguna spesial.",
+      "Batas harian yang berlaku untuk semua pengguna, baik gratis maupun berbayar.",
+    path: "/ai/limits",
+    icon: Globe,
+  },
+  {
+    id: 6,
+    title: "Custom Limit",
+    description:
+      "Batas harian tambahan untuk pengguna tertentu, diberikan sebagai bonus atau penyesuaian khusus.",
     path: "/ai/limits-users",
-    icon: GearSix,
+    icon: User,
   },
 ];
 
