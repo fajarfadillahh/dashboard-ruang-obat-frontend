@@ -2,13 +2,11 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { LimitAIUser, LimitAIUserResponse } from "@/types/ai/limit.type";
@@ -20,6 +18,7 @@ import { getError } from "@/utils/getError";
 import {
   Button,
   Pagination,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -30,32 +29,32 @@ import {
 import { Plus, Trash } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
+import { useQueryState } from "nuqs";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect } from "react";
+import { useRef } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
+import { useDebounce } from "use-debounce";
 
 export default function AILimitsCustomPage({
   token,
   query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { setSearch, searchValue } = useSearch(800);
+  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [searchValue] = useDebounce(search, 800);
+  const divRef = useRef<HTMLDivElement | null>(null);
   const { data, isLoading, error, mutate } = useSWR<
     SuccessResponse<LimitAIUserResponse>
   >({
-    url: getUrl("/ai/limits/users", query),
+    url: getUrl("/ai/limits/users", {
+      q: searchValue,
+      page,
+    }),
     method: "GET",
     token,
   });
-
-  useEffect(() => {
-    if (searchValue) {
-      router.push({ query: { q: searchValue } });
-    } else {
-      router.push("/ai/limits-users");
-    }
-  }, [searchValue]);
 
   const columnsLimitUser = [
     { name: "ID Pengguna", uid: "user_id" },
@@ -170,19 +169,17 @@ export default function AILimitsCustomPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Custom Limitasi Pengguna">
       <Container className="gap-8">
-        <ButtonBack href="/ai" />
+        <ButtonBack />
 
         <TitleText
           title="Custom Limitasi Pengguna 📋"
           text="Semua data kustomisasi limit pengguna ada di sini"
         />
 
-        <div className="grid">
+        <div className="grid" ref={divRef}>
           <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
             <SearchInput
               placeholder="Cari Nama Pengguna atau ID Pengguna..."
@@ -217,7 +214,11 @@ export default function AILimitsCustomPage({
               </TableHeader>
 
               <TableBody
-                items={data?.data.users}
+                items={data?.data.users || []}
+                isLoading={isLoading}
+                loadingContent={
+                  <Spinner label="Loading..." color="secondary" />
+                }
                 emptyContent={<EmptyData text="Pengguna tidak ditemukan!" />}
               >
                 {(user: LimitAIUser) => (
@@ -234,19 +235,15 @@ export default function AILimitsCustomPage({
           </div>
         </div>
 
-        {data?.data.users.length ? (
+        {!isLoading && data?.data.users.length ? (
           <Pagination
             isCompact
             showControls
             page={data?.data.page as number}
             total={data?.data.total_pages as number}
             onChange={(e) => {
-              router.push({
-                query: {
-                  ...router.query,
-                  page: e,
-                },
-              });
+              setPage(`${e}`);
+              divRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
             className="justify-self-center"
             classNames={{

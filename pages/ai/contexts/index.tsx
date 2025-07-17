@@ -2,13 +2,11 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { ContextAI, ContextAIResponse } from "@/types/ai/context.type";
@@ -21,6 +19,7 @@ import {
   Button,
   Chip,
   Pagination,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -37,32 +36,32 @@ import {
 } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
+import { useQueryState } from "nuqs";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect } from "react";
+import { useRef } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
+import { useDebounce } from "use-debounce";
 
 export default function AIContextsPage({
   token,
-  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { setSearch, searchValue } = useSearch(800);
+  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [searchValue] = useDebounce(search, 800);
+  const divRef = useRef<HTMLDivElement | null>(null);
+
   const { data, isLoading, error, mutate } = useSWR<
     SuccessResponse<ContextAIResponse>
   >({
-    url: getUrl("/ai/contexts", query),
+    url: getUrl("/ai/contexts", {
+      q: searchValue,
+      page,
+    }),
     method: "GET",
     token,
   });
-
-  useEffect(() => {
-    if (searchValue) {
-      router.push({ query: { q: searchValue } });
-    } else {
-      router.push("/ai/contexts");
-    }
-  }, [searchValue]);
 
   const columnsContext = [
     { name: "Judul Konteks", uid: "title" },
@@ -222,23 +221,21 @@ export default function AIContextsPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Daftar Konteks AI">
       <Container className="gap-8">
-        <ButtonBack href="/ai" />
+        <ButtonBack />
 
         <TitleText
           title="Daftar Konteks AI 📋"
           text="Semua konteks untuk melatih AI akan muncul di sini"
         />
 
-        <div className="grid">
+        <div className="grid" ref={divRef}>
           <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
             <SearchInput
               placeholder="Cari Konteks..."
-              defaultValue={query.q as string}
+              defaultValue={search}
               onChange={(e) => setSearch(e.target.value)}
               onClear={() => setSearch("")}
             />
@@ -269,8 +266,12 @@ export default function AIContextsPage({
               </TableHeader>
 
               <TableBody
-                items={data?.data.contexts}
+                items={data?.data.contexts || []}
                 emptyContent={<EmptyData text="Konteks tidak ditemukan!" />}
+                loadingContent={
+                  <Spinner label="Loading..." color="secondary" />
+                }
+                isLoading={isLoading}
               >
                 {(context: ContextAI) => (
                   <TableRow key={context.context_id}>
@@ -286,18 +287,17 @@ export default function AIContextsPage({
           </div>
         </div>
 
-        {data?.data.contexts.length ? (
+        {!isLoading && data?.data.contexts.length ? (
           <Pagination
             isCompact
             showControls
             page={data?.data.page as number}
             total={data?.data.total_pages as number}
             onChange={(e) => {
-              router.push({
-                query: {
-                  ...router.query,
-                  page: e,
-                },
+              setPage(`${e}`);
+              divRef.current?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
               });
             }}
             className="justify-self-center"

@@ -2,7 +2,6 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -25,6 +24,7 @@ import {
   ModalHeader,
   Radio,
   RadioGroup,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -267,12 +267,10 @@ export default function AILimitsPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Daftar Limitasi AI">
       <Container className="gap-8">
-        <ButtonBack href="/ai" />
+        <ButtonBack />
 
         <TitleText
           title="Daftar Limitasi AI 📋"
@@ -280,113 +278,115 @@ export default function AILimitsPage({
         />
 
         <div className="grid">
-          <div className="sticky left-0 top-0 z-50 flex justify-end bg-white pb-4">
-            <Button
-              color="secondary"
-              startContent={<Plus weight="bold" size={18} />}
-              onClick={() => {
-                onOpen();
-                setTypeModal("create");
-              }}
-              className="font-semibold"
-            >
-              Tambah Limitasi
-            </Button>
+          {!isLoading && data?.data.length && data.data.length < 2 ? (
+            <div className="sticky left-0 top-0 z-50 flex justify-end bg-white pb-4">
+              <Button
+                color="secondary"
+                startContent={<Plus weight="bold" size={18} />}
+                onClick={() => {
+                  onOpen();
+                  setTypeModal("create");
+                }}
+                className="font-semibold"
+              >
+                Tambah Limitasi
+              </Button>
 
-            <Modal
-              isDismissable={false}
-              isOpen={isOpen}
-              onOpenChange={onOpenChange}
-              onClose={() => {
-                onClose(),
-                  setInput({
-                    total: 0,
-                    type: "",
-                  });
-              }}
-            >
-              <ModalContent>
-                {(onClose) => (
-                  <>
-                    <ModalHeader className="font-bold text-black">
-                      {typeModal == "create" ? "Tambah" : "Edit"} Limitasi
-                    </ModalHeader>
+              <Modal
+                isDismissable={false}
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+                onClose={() => {
+                  onClose(),
+                    setInput({
+                      total: 0,
+                      type: "",
+                    });
+                }}
+              >
+                <ModalContent>
+                  {(onClose) => (
+                    <>
+                      <ModalHeader className="font-bold text-black">
+                        {typeModal == "create" ? "Tambah" : "Edit"} Limitasi
+                      </ModalHeader>
 
-                    <ModalBody>
-                      <div className="grid gap-6">
-                        <Input
-                          isRequired
-                          type="number"
-                          variant="flat"
-                          label="Jumlah Limitasi"
-                          labelPlacement="outside"
-                          name="total"
-                          value={input.total.toString()}
-                          onChange={(e) =>
-                            setInput({
-                              ...input,
-                              total: Number(e.target.value),
-                            })
-                          }
-                          classNames={customStyleInput}
-                        />
+                      <ModalBody>
+                        <div className="grid gap-6">
+                          <Input
+                            isRequired
+                            type="number"
+                            variant="flat"
+                            label="Jumlah Limitasi"
+                            labelPlacement="outside"
+                            name="total"
+                            value={input.total.toString()}
+                            onChange={(e) =>
+                              setInput({
+                                ...input,
+                                total: Number(e.target.value),
+                              })
+                            }
+                            classNames={customStyleInput}
+                          />
 
-                        <RadioGroup
-                          isRequired
-                          aria-label="select limit type"
-                          label="Tipe Limitasi"
-                          color="secondary"
-                          value={input.type}
-                          onValueChange={(value) =>
-                            setInput((prev) => ({ ...prev, type: value }))
-                          }
-                          classNames={{
-                            base: "font-semibold text-black",
-                            label: "text-sm font-normal text-foreground",
+                          <RadioGroup
+                            isRequired
+                            aria-label="select limit type"
+                            label="Tipe Limitasi"
+                            color="secondary"
+                            value={input.type}
+                            onValueChange={(value) =>
+                              setInput((prev) => ({ ...prev, type: value }))
+                            }
+                            classNames={{
+                              base: "font-semibold text-black",
+                              label: "text-sm font-normal text-foreground",
+                            }}
+                          >
+                            <Radio value="free">Gratis</Radio>
+                            <Radio value="paid">Berbayar</Radio>
+                          </RadioGroup>
+                        </div>
+                      </ModalBody>
+
+                      <ModalFooter>
+                        <Button
+                          color="danger"
+                          variant="light"
+                          className="font-semibold"
+                          onClick={() => {
+                            onClose(),
+                              setInput({
+                                total: 0,
+                                type: "",
+                              });
                           }}
                         >
-                          <Radio value="free">Gratis</Radio>
-                          <Radio value="paid">Berbayar</Radio>
-                        </RadioGroup>
-                      </div>
-                    </ModalBody>
+                          Tutup
+                        </Button>
 
-                    <ModalFooter>
-                      <Button
-                        color="danger"
-                        variant="light"
-                        className="font-semibold"
-                        onClick={() => {
-                          onClose(),
-                            setInput({
-                              total: 0,
-                              type: "",
-                            });
-                        }}
-                      >
-                        Tutup
-                      </Button>
+                        <Button
+                          isDisabled={isDisableButton}
+                          color="secondary"
+                          onClick={() => {
+                            typeModal == "create"
+                              ? handleAddLimit()
+                              : handleEditLimit();
 
-                      <Button
-                        isDisabled={isDisableButton}
-                        color="secondary"
-                        onClick={() => {
-                          typeModal == "create"
-                            ? handleAddLimit()
-                            : handleEditLimit();
-
-                          onClose();
-                        }}
-                        className="font-semibold"
-                      >
-                        Ya, {typeModal == "create" ? "Tambahan" : "Simpan"}
-                      </Button>
-                    </ModalFooter>
-                  </>
-                )}
-              </ModalContent>
-            </Modal>
-          </div>
+                            onClose();
+                          }}
+                          className="font-semibold"
+                        >
+                          Ya, {typeModal == "create" ? "Tambahan" : "Simpan"}
+                        </Button>
+                      </ModalFooter>
+                    </>
+                  )}
+                </ModalContent>
+              </Modal>
+            </div>
+          ) : null}
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
@@ -404,8 +404,12 @@ export default function AILimitsPage({
               </TableHeader>
 
               <TableBody
-                items={data?.data}
+                items={data?.data || []}
                 emptyContent={<EmptyData text="Limit tidak ditemukan!" />}
+                loadingContent={
+                  <Spinner label="Loading..." color="secondary" />
+                }
+                isLoading={isLoading}
               >
                 {(limit: LimitAI) => (
                   <TableRow key={limit.limit_id}>

@@ -2,18 +2,16 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
-import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { LogsAI, LogsAIResponse } from "@/types/ai/logs.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { formatDate } from "@/utils/formatDate";
+import { formatRupiah } from "@/utils/formatRupiah";
 import {
   Button,
   Modal,
@@ -22,6 +20,7 @@ import {
   ModalFooter,
   ModalHeader,
   Pagination,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -30,40 +29,44 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import { Eye } from "@phosphor-icons/react";
-import { InferGetServerSidePropsType } from "next";
-import { useRouter } from "next/router";
-import { ParsedUrlQuery } from "querystring";
-import { useEffect, useState } from "react";
+import "katex/dist/katex.min.css";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { useQueryState } from "nuqs";
+import { useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import rehypeKatex from "rehype-katex";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
 import useSWR from "swr";
+import { useDebounce } from "use-debounce";
 
 export default function AILogsPage({
   token,
-  query,
+  rates,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const router = useRouter();
-  const { setSearch, searchValue } = useSearch(800);
+  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [searchValue] = useDebounce(search, 800);
+  const divRef = useRef<HTMLDivElement | null>(null);
+
   const { data, isLoading, error } = useSWR<SuccessResponse<LogsAIResponse>>({
-    url: getUrl("/ai/chat/logs", query),
+    url: getUrl("/ai/chat/logs", {
+      q: searchValue,
+      page,
+    }),
     method: "GET",
     token,
   });
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [isSelectedDetail, setIsSelectedDetail] = useState<LogsAI | null>(null);
 
-  useEffect(() => {
-    if (searchValue) {
-      router.push({ query: { q: searchValue } });
-    } else {
-      router.push("/ai/logs");
-    }
-  }, [searchValue]);
-
   const columnsLogs = [
     { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Pengguna", uid: "fullname" },
     { name: "Pertanyaan", uid: "question" },
     { name: "Ditanyakan Pada", uid: "created_at" },
+    { name: "Jumlah Token", uid: "total_tokens" },
+    { name: "Biaya", uid: "total_cost" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -87,6 +90,24 @@ export default function AILogsPage({
         return (
           <div className="line-clamp-2 w-full max-w-[300px] font-medium text-black">
             {logs.question}
+          </div>
+        );
+      case "total_tokens":
+        return (
+          <div className="line-clamp-2 w-full max-w-[300px] font-medium text-black">
+            {logs.total_tokens
+              ? logs.total_tokens.toLocaleString("id-ID")
+              : "-"}
+          </div>
+        );
+      case "total_cost":
+        return (
+          <div className="line-clamp-2 w-full max-w-[300px] font-medium text-black">
+            {logs.total_cost
+              ? rates
+                ? formatRupiah(Math.round((logs.total_cost as number) * rates))
+                : `$${logs.total_cost}`
+              : "-"}
           </div>
         );
       case "created_at":
@@ -136,23 +157,21 @@ export default function AILogsPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="History AI">
       <Container className="gap-8">
-        <ButtonBack href="/ai" />
+        <ButtonBack />
 
         <TitleText
           title="History AI 📋"
           text="Pantau semua history chat ai pengguna di sini"
         />
 
-        <div className="grid">
+        <div className="grid" ref={divRef}>
           <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
             <SearchInput
               placeholder="Cari Nama Pengguna atau ID Pengguna..."
-              defaultValue={query.q as string}
+              defaultValue={search}
               onChange={(e) => setSearch(e.target.value)}
               onClear={() => setSearch("")}
             />
@@ -174,8 +193,12 @@ export default function AILogsPage({
               </TableHeader>
 
               <TableBody
-                items={data?.data.logs}
+                items={data?.data.logs || []}
                 emptyContent={<EmptyData text="History tidak ditemukan!" />}
+                loadingContent={
+                  <Spinner label="Loading..." color="secondary" />
+                }
+                isLoading={isLoading}
               >
                 {(logs: LogsAI) => (
                   <TableRow key={logs.chat_id}>
@@ -220,6 +243,8 @@ export default function AILogsPage({
 
                           <p className="font-medium leading-[170%] text-black">
                             <ReactMarkdown
+                              remarkPlugins={[remarkMath, remarkGfm]}
+                              rehypePlugins={[rehypeKatex]}
                               components={{
                                 ol: ({ children, ...props }) => (
                                   <ol className="list-decimal pl-4" {...props}>
@@ -230,6 +255,16 @@ export default function AILogsPage({
                                   <ul className="list-disc pl-4" {...props}>
                                     {children}
                                   </ul>
+                                ),
+                                table: ({ children, ...props }) => (
+                                  <div className="overflow-x-scroll scrollbar-hide">
+                                    <table
+                                      className="my-4 table-auto border border-black [&_td]:border [&_td]:p-4 [&_th]:whitespace-nowrap [&_th]:border [&_th]:bg-gray/20 [&_th]:p-4 [&_tr:last-child]:border-b-0 [&_tr]:border-b"
+                                      {...props}
+                                    >
+                                      {children}
+                                    </table>
+                                  </div>
                                 ),
                               }}
                             >
@@ -257,19 +292,15 @@ export default function AILogsPage({
           </Modal>
         </div>
 
-        {data?.data.logs.length ? (
+        {!isLoading && data?.data.logs.length ? (
           <Pagination
             isCompact
             showControls
             page={data?.data.page as number}
             total={data?.data.total_pages as number}
             onChange={(e) => {
-              router.push({
-                query: {
-                  ...router.query,
-                  page: e,
-                },
-              });
+              divRef.current?.scrollIntoView({ behavior: "smooth" });
+              setPage(`${e}`);
             }}
             className="justify-self-center"
             classNames={{
@@ -282,12 +313,26 @@ export default function AILogsPage({
   );
 }
 
-export const getServerSideProps = withToken(async (ctx) => {
-  const { query } = ctx;
+export const getServerSideProps: GetServerSideProps<{
+  token: string;
+  rates: number;
+}> = async ({ req }) => {
+  let rates: number;
+
+  try {
+    const response = await fetch("https://open.er-api.com/v6/latest/usd");
+    const data: { rates: { IDR: number } } = await response.json();
+
+    rates = data.rates.IDR;
+  } catch (error) {
+    console.error("Error fetching exchange rates:", error);
+    rates = 0;
+  }
 
   return {
     props: {
-      query: query as ParsedUrlQuery,
+      token: req.headers["access_token"] as string,
+      rates,
     },
   };
-});
+};

@@ -2,7 +2,6 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
@@ -23,6 +22,7 @@ import {
   DropdownMenu,
   DropdownSection,
   DropdownTrigger,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -250,18 +250,19 @@ export default function AIProvidersPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
-  const filterProvider = data?.data.filter((provider) =>
-    [provider.provider_id, provider.name].some((value) =>
-      value.toLowerCase().includes(search.toLowerCase()),
-    ),
-  );
+  const filterProvider =
+    !isLoading || data?.data.length
+      ? data?.data.filter((provider) =>
+          [provider.provider_id, provider.name].some((value) =>
+            value.toLowerCase().includes(search.toLowerCase()),
+          ),
+        )
+      : [];
 
   return (
     <Layout title="Daftar Layanan AI" className="scrollbar-hide">
       <Container className="gap-8">
-        <ButtonBack href="/ai" />
+        <ButtonBack />
 
         <TitleText
           title="Daftar Layanan AI 📋"
@@ -304,6 +305,10 @@ export default function AIProvidersPage({
               <TableBody
                 items={filterProvider}
                 emptyContent={<EmptyData text="Layanan tidak ditemukan!" />}
+                isLoading={isLoading}
+                loadingContent={
+                  <Spinner label="Loading..." color="secondary" />
+                }
               >
                 {(provider: ProviderAI) => (
                   <TableRow key={provider.provider_id}>

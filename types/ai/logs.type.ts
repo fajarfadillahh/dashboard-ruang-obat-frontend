@@ -13,5 +13,7 @@ export type LogsAI = {
   source: string;
   question: string;
   answer: string;
+  total_tokens: number;
+  total_cost: number;
   created_at: string;
 };
