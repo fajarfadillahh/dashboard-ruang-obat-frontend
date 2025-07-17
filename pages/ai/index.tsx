@@ -10,6 +10,7 @@ import {
   GearSix,
   Icon,
   IconContext,
+  Quotes,
   ShieldCheck,
 } from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
@@ -34,6 +35,14 @@ const dataRequirements: DataRequirementsType[] = [
   },
   {
     id: 2,
+    title: "Prompt AI",
+    description:
+      "Atur prompt AI untuk meningkatkan kualitas respons yang diberikan.",
+    path: "/ai/prompts",
+    icon: Quotes,
+  },
+  {
+    id: 3,
     title: "Konteks AI",
     description:
       "Latih dan sesuaikan konteks AI agar dapat memberikan respons yang relevan dan sesuai kebutuhan.",
@@ -41,7 +50,7 @@ const dataRequirements: DataRequirementsType[] = [
     icon: Database,
   },
   {
-    id: 3,
+    id: 4,
     title: "Limitasi AI",
     description:
       "Tetapkan limitasi harian penggunaan AI untuk menjaga efisiensi dan kontrol sistem.",
@@ -49,7 +58,7 @@ const dataRequirements: DataRequirementsType[] = [
     icon: ShieldCheck,
   },
   {
-    id: 4,
+    id: 5,
     title: "History AI",
     description:
       "Pantau semua history chat pengguna untuk bahan riset dan analisis.",
@@ -57,7 +66,7 @@ const dataRequirements: DataRequirementsType[] = [
     icon: ClockCounterClockwise,
   },
   {
-    id: 5,
+    id: 6,
     title: "Custom Limitasi Pengguna",
     description:
       "Tetapkan kustomisasi limit harian penggunaan AI untuk pengguna spesial.",
