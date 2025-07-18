@@ -1,50 +1,47 @@
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { FeedbackResponse } from "@/types/feedback.type";
 import { SuccessResponse } from "@/types/global.type";
 import { formatDate } from "@/utils/formatDate";
-import { Avatar, Pagination } from "@nextui-org/react";
+import { Avatar, Pagination, Spinner } from "@nextui-org/react";
 import { Star } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
-import { useRouter } from "next/router";
+import { useQueryState } from "nuqs";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect } from "react";
+import { ReactElement, useEffect, useRef } from "react";
 import useSWR from "swr";
+import { useDebounce } from "use-debounce";
 
 export default function FeedbackPage({
   token,
-  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
-  const router = useRouter();
-  const { setSearch, searchValue } = useSearch(800);
+  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [searchValue] = useDebounce(search, 800);
+  const divRef = useRef<HTMLDivElement | null>(null);
   const { data, error, isLoading } = useSWR<SuccessResponse<FeedbackResponse>>({
-    url: getUrl("/admin/feedback", query),
+    url: getUrl("/admin/feedback", {
+      q: searchValue,
+      page,
+    }),
     method: "GET",
     token,
   });
 
   useEffect(() => {
     if (searchValue) {
-      router.push({
-        query: {
-          q: searchValue,
-        },
-      });
-    } else {
-      router.push("/feedback");
+      divRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [searchValue]);
 
   function renderStars(rating: number) {
-    let stars = [];
+    const stars: ReactElement[] = [];
     for (let i = 0; i < 5; i++) {
       stars.push(
         <Star
@@ -74,8 +71,6 @@ export default function FeedbackPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Feedback" className="scrollbar-hide">
       <Container className="gap-8">
@@ -84,17 +79,23 @@ export default function FeedbackPage({
           text="Semua masukan dan saran akan tampil disini"
         />
 
-        <div className="grid">
+        <div className="grid" ref={divRef}>
           <div className="sticky left-0 top-0 z-50 bg-white pb-4">
             <SearchInput
               placeholder="Cari Nama Pengguna atau ID Pengguna..."
-              defaultValue={query.q as string}
+              defaultValue={search}
               onChange={(e) => setSearch(e.target.value)}
               onClear={() => setSearch("")}
             />
           </div>
 
-          {searchValue && data?.data.feedback.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2 py-16">
+              <Spinner label="Loading..." color="secondary" />
+            </div>
+          ) : null}
+
+          {!data?.data.feedback.length && !isLoading ? (
             <EmptyData text="Pengguna tidak ditemukan!" />
           ) : (
             <div className="grid grid-cols-2 items-start gap-x-4 gap-y-2">
@@ -151,19 +152,15 @@ export default function FeedbackPage({
           )}
         </div>
 
-        {data?.data.feedback.length ? (
+        {!isLoading && data?.data.feedback.length ? (
           <Pagination
             isCompact
             showControls
             page={data?.data.page as number}
             total={data?.data.total_pages as number}
             onChange={(e) => {
-              router.push({
-                query: {
-                  ...router.query,
-                  page: e,
-                },
-              });
+              setPage(`${e}`);
+              divRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
             className="justify-self-center"
             classNames={{
