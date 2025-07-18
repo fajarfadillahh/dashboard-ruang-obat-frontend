@@ -7,7 +7,7 @@ export function getUrl(url: string, query: ParsedUrlQuery) {
     params.set("q", String(query.q));
   }
 
-  params.set("page", String(query.page ?? 1));
+  params.set("page", String(query.page ? query.page : 1));
 
   const connector = url.includes("?") ? "&" : "?";
 
