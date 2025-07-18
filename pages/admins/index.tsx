@@ -1,7 +1,6 @@
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
@@ -16,6 +15,7 @@ import { formatDate } from "@/utils/formatDate";
 import { getError } from "@/utils/getError";
 import {
   Button,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -176,13 +176,14 @@ export default function AdminsPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
-  const filterAdmin = data?.data.filter((admin) =>
-    [admin.admin_id, admin.fullname].some((value) =>
-      value.toLowerCase().includes(search.toLowerCase()),
-    ),
-  );
+  const filterAdmin =
+    !isLoading || data?.data.length
+      ? data?.data.filter((admin) =>
+          [admin.admin_id, admin.fullname].some((value) =>
+            value.toLowerCase().includes(search.toLowerCase()),
+          ),
+        )
+      : [];
 
   return (
     <Layout title="Admin" className="scrollbar-hide">
@@ -228,6 +229,10 @@ export default function AdminsPage({
               <TableBody
                 items={filterAdmin}
                 emptyContent={<EmptyData text="Admin tidak ditemukan!" />}
+                isLoading={isLoading}
+                loadingContent={
+                  <Spinner label="Loading..." color="secondary" />
+                }
               >
                 {(admin) => (
                   <TableRow key={admin.admin_id}>
