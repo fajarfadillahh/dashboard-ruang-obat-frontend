@@ -1,6 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -13,7 +12,7 @@ import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
 import { getError } from "@/utils/getError";
-import { Button, Checkbox, Chip, Input } from "@nextui-org/react";
+import { Button, Checkbox, Chip, Input, Skeleton } from "@nextui-org/react";
 import {
   ArrowClockwise,
   CheckCircle,
@@ -125,8 +124,6 @@ export default function DetailsUserPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Detail Pengguna" className="scrollbar-hide">
       <Container className="gap-8">
@@ -138,160 +135,173 @@ export default function DetailsUserPage({
         />
 
         <div className="mb-8 grid grid-cols-[650px_auto] items-center gap-16">
-          <div className="flex items-start gap-4 rounded-xl border-2 border-l-8 border-gray/20 p-8">
-            <div className="grid flex-1 gap-1.5">
-              {[
-                ["ID Pengguna", `${data?.data.user_id}`],
-                ["Nama Lengkap", `${data?.data.fullname}`],
-                ["Email", `${data?.data.email}`],
-                [
-                  "Jenis Kelamin",
-                  `${data?.data.gender === "M" ? "Laki-Laki" : "Perempuan"}`,
-                ],
-                ["No. Telpon", `${data?.data.phone_number}`],
-                ["Asal Kampus", `${data?.data.university}`],
-                ["Dibuat Pada", `${formatDate(data?.data.created_at ?? "-")}`],
-                [
-                  "Status",
-                  <Chip
-                    key={data?.data.user_id as string}
-                    variant="flat"
+          {isLoading ? (
+            <Skeleton className="h-[275px] w-full rounded-xl" />
+          ) : (
+            <div className="flex items-start gap-4 rounded-xl border-2 border-l-8 border-gray/20 p-8">
+              <div className="grid flex-1 gap-1.5">
+                {[
+                  ["ID Pengguna", `${data?.data.user_id}`],
+                  ["Nama Lengkap", `${data?.data.fullname}`],
+                  ["Email", `${data?.data.email}`],
+                  [
+                    "Jenis Kelamin",
+                    `${data?.data.gender === "M" ? "Laki-Laki" : "Perempuan"}`,
+                  ],
+                  ["No. Telpon", `${data?.data.phone_number}`],
+                  ["Asal Kampus", `${data?.data.university}`],
+                  [
+                    "Dibuat Pada",
+                    `${formatDate(data?.data.created_at ?? "-")}`,
+                  ],
+                  [
+                    "Status",
+                    <Chip
+                      key={data?.data.user_id as string}
+                      variant="flat"
+                      size="sm"
+                      color={data?.data.is_verified ? "success" : "danger"}
+                      startContent={
+                        data?.data.is_verified ? (
+                          <CheckCircle weight="duotone" size={18} />
+                        ) : (
+                          <XCircle weight="duotone" size={18} />
+                        )
+                      }
+                      classNames={{
+                        base: "px-2 gap-1",
+                        content: "font-bold capitalize",
+                      }}
+                    >
+                      {data?.data.is_verified
+                        ? "Terverifikasi"
+                        : "Belum Terverifikasi"}
+                    </Chip>,
+                  ],
+                ].map(([label, value], index) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-[150px_2px_1fr] gap-4 text-sm font-medium text-black"
+                  >
+                    <p>{label}</p>
+                    <span>:</span>
+                    <p className="font-bold">{value}</p>
+                  </div>
+                ))}
+              </div>
+
+              <ModalConfirm
+                hideCloseButton={true}
+                trigger={
+                  <Button
                     size="sm"
-                    color={data?.data.is_verified ? "success" : "danger"}
-                    startContent={
-                      data?.data.is_verified ? (
-                        <CheckCircle weight="duotone" size={18} />
-                      ) : (
-                        <XCircle weight="duotone" size={18} />
-                      )
-                    }
-                    classNames={{
-                      base: "px-2 gap-1",
-                      content: "font-bold capitalize",
-                    }}
-                  >
-                    {data?.data.is_verified
-                      ? "Terverifikasi"
-                      : "Belum Terverifikasi"}
-                  </Chip>,
-                ],
-              ].map(([label, value], index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-[150px_2px_1fr] gap-4 text-sm font-medium text-black"
-                >
-                  <p>{label}</p>
-                  <span>:</span>
-                  <p className="font-bold">{value}</p>
-                </div>
-              ))}
-            </div>
-
-            <ModalConfirm
-              hideCloseButton={true}
-              trigger={
-                <Button
-                  size="sm"
-                  color="secondary"
-                  variant="light"
-                  startContent={<PencilLine weight="duotone" size={16} />}
-                  className="font-semibold"
-                >
-                  Edit Data
-                </Button>
-              }
-              header={<h1 className="font-bold text-black">Edit Data User</h1>}
-              body={
-                <div className="grid gap-6">
-                  <p className="leading-[170%] text-gray">
-                    Pastikan Anda mengisi data dengan lengkap dan benar sebelum
-                    melakukan perubahan pada akun pengguna.
-                  </p>
-
-                  <Input
-                    type="email"
-                    variant="flat"
-                    label="Alamat Email"
-                    labelPlacement="outside"
-                    placeholder="Contoh: ahmad@example.com"
-                    name="email"
-                    value={input.email}
-                    onChange={(e) =>
-                      setInput({ ...input, email: e.target.value })
-                    }
-                    startContent={
-                      <EnvelopeSimple
-                        weight="duotone"
-                        size={18}
-                        className="text-gray"
-                      />
-                    }
-                    classNames={customStyleInput}
-                  />
-
-                  <Input
-                    type="text"
-                    inputMode="numeric"
-                    variant="flat"
-                    label="Nomor Telpon"
-                    labelPlacement="outside"
-                    placeholder="Contoh: 08XXXXXXXXXX"
-                    name="phone_number"
-                    value={input.phone_number}
-                    onChange={(e) =>
-                      setInput({ ...input, phone_number: e.target.value })
-                    }
-                    startContent={
-                      <Phone weight="duotone" size={18} className="text-gray" />
-                    }
-                    classNames={customStyleInput}
-                  />
-                </div>
-              }
-              footer={(onClose: any) => (
-                <>
-                  <Button
-                    color="danger"
-                    variant="light"
-                    onClick={() => {
-                      onClose();
-                      setLoading(false);
-                      setInput({
-                        email: "",
-                        phone_number: "",
-                      });
-                    }}
-                    className="font-bold"
-                  >
-                    Tutup
-                  </Button>
-
-                  <Button
-                    isLoading={loading}
-                    isDisabled={!isFormEmpty() || loading}
                     color="secondary"
-                    className="font-bold"
-                    onClick={() => {
-                      handleEditDataUser(data?.data.user_id as string, {
-                        email: input.email,
-                        phone_number: input.phone_number,
-                      });
-                      setTimeout(() => {
+                    variant="light"
+                    startContent={<PencilLine weight="duotone" size={16} />}
+                    className="font-semibold"
+                  >
+                    Edit Data
+                  </Button>
+                }
+                header={
+                  <h1 className="font-bold text-black">Edit Data User</h1>
+                }
+                body={
+                  <div className="grid gap-6">
+                    <p className="leading-[170%] text-gray">
+                      Pastikan Anda mengisi data dengan lengkap dan benar
+                      sebelum melakukan perubahan pada akun pengguna.
+                    </p>
+
+                    <Input
+                      type="email"
+                      variant="flat"
+                      label="Alamat Email"
+                      labelPlacement="outside"
+                      placeholder="Contoh: ahmad@example.com"
+                      name="email"
+                      value={input.email}
+                      onChange={(e) =>
+                        setInput({ ...input, email: e.target.value })
+                      }
+                      startContent={
+                        <EnvelopeSimple
+                          weight="duotone"
+                          size={18}
+                          className="text-gray"
+                        />
+                      }
+                      classNames={customStyleInput}
+                    />
+
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      variant="flat"
+                      label="Nomor Telpon"
+                      labelPlacement="outside"
+                      placeholder="Contoh: 08XXXXXXXXXX"
+                      name="phone_number"
+                      value={input.phone_number}
+                      onChange={(e) =>
+                        setInput({ ...input, phone_number: e.target.value })
+                      }
+                      startContent={
+                        <Phone
+                          weight="duotone"
+                          size={18}
+                          className="text-gray"
+                        />
+                      }
+                      classNames={customStyleInput}
+                    />
+                  </div>
+                }
+                footer={(onClose: any) => (
+                  <>
+                    <Button
+                      color="danger"
+                      variant="light"
+                      onClick={() => {
                         onClose();
                         setLoading(false);
                         setInput({
                           email: "",
                           phone_number: "",
                         });
-                      }, 1000);
-                    }}
-                  >
-                    Simpan Data
-                  </Button>
-                </>
-              )}
-            />
-          </div>
+                      }}
+                      className="font-bold"
+                    >
+                      Tutup
+                    </Button>
+
+                    <Button
+                      isLoading={loading}
+                      isDisabled={!isFormEmpty() || loading}
+                      color="secondary"
+                      className="font-bold"
+                      onClick={() => {
+                        handleEditDataUser(data?.data.user_id as string, {
+                          email: input.email,
+                          phone_number: input.phone_number,
+                        });
+                        setTimeout(() => {
+                          onClose();
+                          setLoading(false);
+                          setInput({
+                            email: "",
+                            phone_number: "",
+                          });
+                        }, 1000);
+                      }}
+                    >
+                      Simpan Data
+                    </Button>
+                  </>
+                )}
+              />
+            </div>
+          )}
 
           <LogoRuangobat className="h-[200px] w-auto justify-self-center text-gray/20 grayscale" />
         </div>
