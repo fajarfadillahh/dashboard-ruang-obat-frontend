@@ -3,14 +3,12 @@ import CardTest from "@/components/card/CardTest";
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalAddParticipant from "@/components/modal/ModalAddParticipant";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalJoiningRequirement from "@/components/modal/ModalJoiningRequirement";
 import SearchInput from "@/components/SearchInput";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
@@ -26,6 +24,7 @@ import {
   Chip,
   Pagination,
   Snippet,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -37,7 +36,6 @@ import {
   CheckCircle,
   ClockCountdown,
   Copy,
-  Export,
   ImageBroken,
   PencilLine,
   Tag,
@@ -49,10 +47,11 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useQueryState } from "nuqs";
+import { useRef } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import * as XLSX from "xlsx";
+import { useDebounce } from "use-debounce";
 
 export default function DetailsProgramPage({
   token,
@@ -61,39 +60,22 @@ export default function DetailsProgramPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const session = useSession();
-  const { setSearch, searchValue } = useSearch(800);
+  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [searchValue] = useDebounce(search, 800);
+  const divRef = useRef<HTMLDivElement | null>(null);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<DetailsProgramResponse>
   >({
-    url: getUrl(`/admin/programs/${encodeURIComponent(id)}`, query),
+    url: getUrl(`/admin/programs/${encodeURIComponent(id)}`, {
+      q: searchValue,
+      page,
+    }),
     method: "GET",
     token,
   });
 
-  useEffect(() => {
-    if (searchValue) {
-      router.push({
-        pathname: `/programs/${id}`,
-        query: {
-          q: searchValue,
-        },
-      });
-    } else {
-      router.push(`/programs/${id}`);
-    }
-  }, [searchValue]);
-
-  const columnsParticipantPaid = [
-    { name: "ID Partisipan", uid: "user_id" },
-    { name: "Nama Lengkap", uid: "fullname" },
-    { name: "Kode Akses", uid: "code" },
-    { name: "Asal Kampus", uid: "university" },
-    { name: "Status", uid: "joined_status" },
-    { name: "Bergabung Pada", uid: "joined_at" },
-    { name: "Aksi", uid: "action" },
-  ];
-
-  const columnsParticipantFree = [
+  const columnsParticipantDefault = [
     { name: "ID Partisipan", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
     { name: "Asal Kampus", uid: "university" },
@@ -283,31 +265,31 @@ export default function DetailsProgramPage({
     }
   }
 
-  async function handleExportDataParticipant() {
-    try {
-      const response: SuccessResponse<any[]> = await fetcher({
-        url: `/admin/exports/codes/${data?.data.program_id}`,
-        method: "GET",
-        token,
-      });
+  // async function handleExportDataParticipant() {
+  //   try {
+  //     const response: SuccessResponse<any[]> = await fetcher({
+  //       url: `/admin/exports/codes/${data?.data.program_id}`,
+  //       method: "GET",
+  //       token,
+  //     });
 
-      const { data: item } = response;
-      const headers = Object.keys(item[0]);
+  //     const { data: item } = response;
+  //     const headers = Object.keys(item[0]);
 
-      const worksheetData = [headers, ...item.map((row) => Object.values(row))];
-      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Data Partisipan");
+  //     const worksheetData = [headers, ...item.map((row) => Object.values(row))];
+  //     const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+  //     const workbook = XLSX.utils.book_new();
+  //     XLSX.utils.book_append_sheet(workbook, worksheet, "Data Partisipan");
 
-      const dateExport = new Date();
-      const fileName = `Data Kode Akses Program ${data?.data.title} - ${formatDate(dateExport.toLocaleString())}.xlsx`;
-      XLSX.writeFile(workbook, fileName);
-      toast.success("Data partisipan berhasil diexport 🎉");
-    } catch (error: any) {
-      console.error(error);
-      toast.error("Uh oh! terjadi kesalahan, silakan ulangi 😵");
-    }
-  }
+  //     const dateExport = new Date();
+  //     const fileName = `Data Kode Akses Program ${data?.data.title} - ${formatDate(dateExport.toLocaleString())}.xlsx`;
+  //     XLSX.writeFile(workbook, fileName);
+  //     toast.success("Data partisipan berhasil diexport 🎉");
+  //   } catch (error: any) {
+  //     console.error(error);
+  //     toast.error("Uh oh! terjadi kesalahan, silakan ulangi 😵");
+  //   }
+  // }
 
   if (error) {
     return (
@@ -324,8 +306,6 @@ export default function DetailsProgramPage({
       </Layout>
     );
   }
-
-  if (isLoading) return <LoadingScreen />;
 
   return (
     <Layout title={`${data?.data.title}`}>
@@ -425,12 +405,6 @@ export default function DetailsProgramPage({
                     ],
                     ["jumlah ujian", data?.data.total_tests],
                     ["total partisipan", data?.data.total_participants],
-                    ["approved partisipan", data?.data.total_approved_users],
-                    [
-                      "pending partisipan",
-                      (data?.data.total_users ?? 0) -
-                        (data?.data.total_approved_users ?? 0),
-                    ],
                   ].map(([label, value], index) => (
                     <div key={index} className="grid gap-1">
                       <span className="text-xs font-medium capitalize text-gray">
@@ -457,7 +431,6 @@ export default function DetailsProgramPage({
             </Button>
           </div>
 
-          {/* data list tests */}
           <div className="grid gap-4">
             <h4 className="text-xl font-bold -tracking-wide text-black">
               Daftar Ujian 📋
@@ -475,8 +448,7 @@ export default function DetailsProgramPage({
             </div>
           </div>
 
-          {/* data list participants */}
-          <div className="grid">
+          <div className="grid" ref={divRef}>
             <h4 className="text-xl font-bold -tracking-wide text-black">
               Daftar Partisipan 🧑🏻‍🤝‍🧑🏻
             </h4>
@@ -502,18 +474,6 @@ export default function DetailsProgramPage({
                       mutate,
                     }}
                   />
-
-                  <Button
-                    isIconOnly
-                    isDisabled={data?.data.participants.length <= 0}
-                    variant="light"
-                    color="secondary"
-                    onClick={handleExportDataParticipant}
-                  >
-                    <CustomTooltip content="Export Data Partisipan">
-                      <Export weight="duotone" size={18} />
-                    </CustomTooltip>
-                  </Button>
                 </div>
               )}
             </div>
@@ -526,21 +486,19 @@ export default function DetailsProgramPage({
               classNames={customStyleTable}
               className="scrollbar-hide"
             >
-              <TableHeader
-                columns={
-                  data?.data.type === "paid"
-                    ? columnsParticipantPaid
-                    : columnsParticipantFree
-                }
-              >
+              <TableHeader columns={columnsParticipantDefault}>
                 {(column) => (
                   <TableColumn key={column.uid}>{column.name}</TableColumn>
                 )}
               </TableHeader>
 
               <TableBody
-                items={data?.data.participants}
+                items={data?.data.participants || []}
                 emptyContent={<EmptyData text="Partisipan tidak ditemukan!" />}
+                isLoading={isLoading}
+                loadingContent={
+                  <Spinner label="Loading..." color="secondary" />
+                }
               >
                 {(participant: Participant) => (
                   <TableRow key={participant.user_id}>
@@ -554,20 +512,15 @@ export default function DetailsProgramPage({
               </TableBody>
             </Table>
 
-            {data?.data.participants.length ? (
+            {!isLoading && data?.data.participants.length ? (
               <Pagination
                 isCompact
                 showControls
                 page={data?.data.page}
                 total={data?.data.total_pages}
                 onChange={(e) => {
-                  router.push({
-                    pathname: `/programs/${id}`,
-                    query: {
-                      ...router.query,
-                      page: e,
-                    },
-                  });
+                  setPage(`${e}`);
+                  divRef.current?.scrollIntoView({ behavior: "smooth" });
                 }}
                 classNames={{
                   wrapper: "mt-4 justify-self-center",
