@@ -1,47 +1,46 @@
 import CardTest from "@/components/card/CardTest";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
 import { Test, TestsResponse } from "@/types/test.type";
-import { Button, Pagination } from "@nextui-org/react";
+import { Button, Pagination, Spinner } from "@nextui-org/react";
 import { Plus } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
+import { useQueryState } from "nuqs";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useSWR from "swr";
+import { useDebounce } from "use-debounce";
 
 export default function TestsPage({
   token,
-  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { setSearch, searchValue } = useSearch(800);
+  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [searchValue] = useDebounce(search, 800);
+  const divRef = useRef<HTMLDivElement | null>(null);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<TestsResponse>
   >({
-    url: getUrl("/admin/tests", query),
+    url: getUrl("/admin/tests", {
+      q: searchValue,
+      page,
+    }),
     method: "GET",
     token,
   });
 
   useEffect(() => {
     if (searchValue) {
-      router.push({
-        query: {
-          q: searchValue,
-        },
-      });
-    } else {
-      router.push("/tests");
+      divRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [searchValue]);
 
@@ -61,8 +60,6 @@ export default function TestsPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Ujian" className="scrollbar-hide">
       <Container className="gap-8">
@@ -71,11 +68,11 @@ export default function TestsPage({
           text="Ujian yang disesuaikan dengan kebutuhan"
         />
 
-        <div className="grid">
+        <div className="grid" ref={divRef}>
           <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
             <SearchInput
               placeholder="Cari Nama Ujian atau ID Ujian..."
-              defaultValue={query.q as string}
+              defaultValue={search}
               onChange={(e) => setSearch(e.target.value)}
               onClear={() => setSearch("")}
             />
@@ -90,14 +87,20 @@ export default function TestsPage({
             </Button>
           </div>
 
-          {searchValue && data?.data.tests.length === 0 ? (
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2 py-16">
+              <Spinner label="Loading..." color="secondary" />
+            </div>
+          ) : null}
+
+          {!isLoading && !data?.data.tests.length ? (
             <EmptyData text="Ujian tidak ditemukan!" />
           ) : (
             <div className="grid gap-2">
               {data?.data.tests.map((test: Test) => (
                 <CardTest
+                  key={test.test_id}
                   {...{
-                    key: test.test_id as string,
                     token: token as string,
                     test: test,
                     mutate,
@@ -108,19 +111,15 @@ export default function TestsPage({
           )}
         </div>
 
-        {data?.data.tests.length ? (
+        {!isLoading && data?.data.tests.length ? (
           <Pagination
             isCompact
             showControls
             page={data?.data.page as number}
             total={data?.data.total_pages as number}
             onChange={(e) => {
-              router.push({
-                query: {
-                  ...router.query,
-                  page: e,
-                },
-              });
+              setPage(`${e}`);
+              divRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
             className="justify-self-center"
             classNames={{
