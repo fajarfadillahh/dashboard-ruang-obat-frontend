@@ -1,13 +1,11 @@
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
@@ -20,6 +18,7 @@ import {
   Button,
   Chip,
   Pagination,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -37,32 +36,31 @@ import {
 } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
+import { useQueryState } from "nuqs";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect } from "react";
+import { useRef } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
+import { useDebounce } from "use-debounce";
 
 export default function MentorsPage({
   token,
-  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { setSearch, searchValue } = useSearch(800);
+  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [searchValue] = useDebounce(search, 800);
+  const divRef = useRef<HTMLDivElement | null>(null);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<MentorResponse>
   >({
-    url: getUrl("/admin/mentors", query),
+    url: getUrl("/admin/mentors", {
+      q: searchValue,
+      page,
+    }),
     method: "GET",
     token,
   });
-
-  useEffect(() => {
-    if (searchValue) {
-      router.push({ query: { q: searchValue } });
-    } else {
-      router.push("/mentors");
-    }
-  }, [searchValue]);
 
   const columnsMentor = [
     { name: "ID Mentor", uid: "mentor_id" },
@@ -235,8 +233,6 @@ export default function MentorsPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Mentor" className="scrollbar-hide">
       <Container className="gap-8">
@@ -245,11 +241,11 @@ export default function MentorsPage({
           text="Mentor terbaik yang di miliki ruangobat.id"
         />
 
-        <div className="grid">
+        <div className="grid" ref={divRef}>
           <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
             <SearchInput
               placeholder="Cari Nama Mentor atau ID Mentor..."
-              defaultValue={query.q as string}
+              defaultValue={search}
               onChange={(e) => setSearch(e.target.value)}
               onClear={() => setSearch("")}
             />
@@ -280,8 +276,12 @@ export default function MentorsPage({
               </TableHeader>
 
               <TableBody
-                items={data?.data.mentors}
+                items={data?.data.mentors || []}
                 emptyContent={<EmptyData text="Mentor tidak ditemukan!" />}
+                isLoading={isLoading}
+                loadingContent={
+                  <Spinner label="Loading..." color="secondary" />
+                }
               >
                 {(mentor) => (
                   <TableRow key={mentor.mentor_id}>
@@ -297,19 +297,15 @@ export default function MentorsPage({
           </div>
         </div>
 
-        {data?.data.mentors.length ? (
+        {!isLoading && data?.data.mentors.length ? (
           <Pagination
             isCompact
             showControls
             page={data?.data.page as number}
             total={data?.data.total_pages as number}
             onChange={(e) => {
-              router.push({
-                query: {
-                  ...router.query,
-                  page: e,
-                },
-              });
+              setPage(`${e}`);
+              divRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
             className="justify-self-center"
             classNames={{
