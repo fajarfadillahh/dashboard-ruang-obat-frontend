@@ -1,6 +1,6 @@
 import CustomTooltip from "@/components/CustomTooltip";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
@@ -17,6 +17,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Skeleton,
   useDisclosure,
 } from "@nextui-org/react";
 import { FileText, Gear, Plus } from "@phosphor-icons/react";
@@ -93,8 +94,6 @@ export default function CategoriesPage({
       </Layout>
     );
   }
-
-  if (isLoading) return <LoadingScreen />;
 
   return (
     <Layout title="Kategori" className="scrollbar-hide">
@@ -200,37 +199,49 @@ export default function CategoriesPage({
           </div>
 
           <div className="grid grid-cols-5 items-start gap-4">
-            {data?.data.map((category) => (
-              <div
-                key={category.category_id}
-                className="group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
-                onClick={() =>
-                  router.push(`/videocourse/categories/${category.slug}`)
-                }
-              >
-                <Button
-                  isIconOnly
-                  variant="flat"
-                  size="sm"
-                  color="secondary"
-                  className="absolute right-4 top-4"
+            {isLoading ? (
+              Array.from({ length: data?.data.length || 10 }).map(
+                (_, index) => (
+                  <Skeleton key={index} className="h-40 w-full rounded-xl" />
+                ),
+              )
+            ) : data?.data.length ? (
+              data?.data.map((category) => (
+                <div
+                  key={category.category_id}
+                  className="group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
+                  onClick={() =>
+                    router.push(`/videocourse/categories/${category.slug}`)
+                  }
                 >
-                  <CustomTooltip content="Edit Kategori">
-                    <Gear weight="bold" size={18} />
-                  </CustomTooltip>
-                </Button>
+                  <Button
+                    isIconOnly
+                    variant="flat"
+                    size="sm"
+                    color="secondary"
+                    className="absolute right-4 top-4"
+                  >
+                    <CustomTooltip content="Edit Kategori">
+                      <Gear weight="bold" size={18} />
+                    </CustomTooltip>
+                  </Button>
 
-                <img
-                  src={category.img_url}
-                  alt={category.name}
-                  className="size-20 rounded-full object-cover"
-                />
+                  <img
+                    src={category.img_url}
+                    alt={category.name}
+                    className="size-20 rounded-full object-cover"
+                  />
 
-                <h4 className="line-clamp-2 text-center font-extrabold text-black group-hover:line-clamp-none">
-                  {category.name}
-                </h4>
+                  <h4 className="line-clamp-2 text-center font-extrabold text-black group-hover:line-clamp-none">
+                    {category.name}
+                  </h4>
+                </div>
+              ))
+            ) : (
+              <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
+                <EmptyData text="Data kategori belum tersedia." />
               </div>
-            ))}
+            )}
           </div>
         </div>
       </Container>

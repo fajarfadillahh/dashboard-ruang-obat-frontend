@@ -2,7 +2,6 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
@@ -19,6 +18,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Skeleton,
   useDisclosure,
 } from "@nextui-org/react";
 import { FileText, Gear, Plus } from "@phosphor-icons/react";
@@ -94,8 +94,6 @@ export default function SubCategoriesPage({
       </Layout>
     );
   }
-
-  if (isLoading) return <LoadingScreen />;
 
   return (
     <Layout title={data?.data.name} className="scrollbar-hide">
@@ -202,8 +200,16 @@ export default function SubCategoriesPage({
             </Modal>
           </div>
 
-          {data?.data.sub_categories.length ? (
-            <div className="grid grid-cols-5 items-start gap-4">
+          {isLoading ? (
+            <div className="grid grid-cols-5 gap-4">
+              {Array.from({
+                length: data?.data.sub_categories.length || 10,
+              }).map((_, index) => (
+                <Skeleton key={index} className="h-40 w-full rounded-xl" />
+              ))}
+            </div>
+          ) : data?.data.sub_categories.length ? (
+            <div className="grid grid-cols-5 gap-4">
               {data?.data.sub_categories.map((subcategory) => (
                 <div
                   key={subcategory.sub_category_id}
