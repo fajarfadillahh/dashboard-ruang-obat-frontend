@@ -96,10 +96,10 @@ export default function CategoriesPage({
   }
 
   return (
-    <Layout title="Kategori" className="scrollbar-hide">
+    <Layout title="Kategori - Video Pembelajaran" className="scrollbar-hide">
       <Container className="gap-8">
         <TitleText
-          title="Daftar Kategori 📚"
+          title="Daftar Kategori - Video Pembelajaran 📚"
           text="Kategori yang tersedia pada kelas video pembelajaran."
         />
 

@@ -5,18 +5,18 @@ import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { InferGetServerSidePropsType } from "next";
 
-export default function FlascardPage({
+export default function QuizPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
-    <Layout title="Flashcard - Video Pembelajaran" className="scrollbar-hide">
+    <Layout title="Kuis - Video Pembelajaran" className="scrollbar-hide">
       <Container className="gap-8">
         <TitleText
-          title="Daftar Flashcard - Video Pembelajaran 📚"
-          text="Flashcard yang tersedia pada kelas video pembelajaran."
+          title="Daftar Kuis - Video Pembelajaran 📝"
+          text="Kuis yang tersedia pada kelas video pembelajaran."
         />
 
-        <SectionSubCategory token={token} path="/videocourse/flashcard" />
+        <SectionSubCategory token={token} path="/videocourse/quiz" />
       </Container>
     </Layout>
   );

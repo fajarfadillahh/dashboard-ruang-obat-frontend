@@ -220,10 +220,13 @@ export default function SubscriptionsPage({
   }
 
   return (
-    <Layout title="Paket Langganan" className="scrollbar-hide">
+    <Layout
+      title="Paket Langganan - Video Pembelajaran"
+      className="scrollbar-hide"
+    >
       <Container className="gap-8">
         <TitleText
-          title="Daftar Paket Langganan 📚"
+          title="Daftar Paket Langganan - Video Pembelajaran 📚"
           text="Paket langganan yang tersedia pada kelas video pembelajaran."
         />
 
