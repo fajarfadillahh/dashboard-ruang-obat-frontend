@@ -54,7 +54,7 @@ export function SidebarMenuClass(): SidebarMenuClassType[] {
       path: "/videocourse",
       items: [
         { label: "Kategori", path: "/videocourse/categories" },
-        { label: "Kuis", path: "/videocourse/kuis" },
+        { label: "Kuis", path: "/videocourse/quiz" },
         { label: "Flashcard", path: "/videocourse/flashcard" },
         { label: "Konten", path: "/videocourse/content" },
         { label: "Paket Berlangganan", path: "/videocourse/subscriptions" },

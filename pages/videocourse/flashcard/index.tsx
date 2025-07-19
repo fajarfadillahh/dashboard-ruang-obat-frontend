@@ -1,4 +1,4 @@
-import SectionCategory from "@/components/section/SectionCategory";
+import SectionSubCategory from "@/components/section/SectionSubCategory";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
@@ -16,7 +16,7 @@ export default function FlascardPage({
           text="Flashcard yang tersedia pada kelas video pembelajaran."
         />
 
-        <SectionCategory token={token} />
+        <SectionSubCategory token={token} path="/videocourse/flashcard" />
       </Container>
     </Layout>
   );
