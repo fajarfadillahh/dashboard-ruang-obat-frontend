@@ -1,7 +1,6 @@
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -22,6 +21,7 @@ import {
   Button,
   Chip,
   Pagination,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -219,8 +219,6 @@ export default function SubscriptionsPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Paket Langganan" className="scrollbar-hide">
       <Container className="gap-8">
@@ -257,8 +255,12 @@ export default function SubscriptionsPage({
               </TableHeader>
 
               <TableBody
-                items={data?.data.packages}
+                items={data?.data.packages || []}
                 emptyContent={<EmptyData text="Paket tidak ditemukan!" />}
+                isLoading={isLoading}
+                loadingContent={
+                  <Spinner label="Loading..." color="secondary" />
+                }
               >
                 {(packageSubscription: PackageSubscription) => (
                   <TableRow key={packageSubscription.package_id}>
@@ -277,7 +279,7 @@ export default function SubscriptionsPage({
           </div>
         </div>
 
-        {data?.data.packages.length ? (
+        {!isLoading && data?.data.packages.length ? (
           <Pagination
             isCompact
             showControls
