@@ -59,7 +59,7 @@ export default function SectionSubCategory({
       </div>
 
       {filterSubCategory?.length ? (
-        <div className="grid grid-cols-5 items-start gap-4">
+        <div className="grid grid-cols-5 gap-4">
           {filterSubCategory?.map((subcategory) => (
             <div
               key={subcategory.sub_category_id}
