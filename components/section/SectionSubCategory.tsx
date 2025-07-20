@@ -85,7 +85,6 @@ export default function SectionSubCategory({
           placeholder="Cari Sub Kategori..."
           onChange={(e) => setSearch(e.target.value)}
           onClear={() => setSearch("")}
-          className="max-w-[500px]"
         />
       </div>
 
