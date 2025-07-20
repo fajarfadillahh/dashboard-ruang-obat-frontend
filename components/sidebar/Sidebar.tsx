@@ -40,6 +40,7 @@ export default function Sidebar() {
     theses: defaultStyle,
     research: defaultStyle,
     apotekerclass: defaultStyle,
+    statistics: defaultStyle,
   });
 
   useEffect(() => {
@@ -53,6 +54,7 @@ export default function Sidebar() {
       "research",
       "theses",
       "apotekerclass",
+      "statistics",
     ];
 
     const updatedState: typeof activeMenu = { ...activeMenu };

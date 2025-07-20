@@ -1,6 +1,7 @@
 import {
   BookBookmark,
   Books,
+  ChartLine,
   ChatCircleDots,
   ChatCircleText,
   ClipboardText,
@@ -105,6 +106,17 @@ export function SidebarMenuClass(): SidebarMenuClassType[] {
         { label: "Universitas", path: "/apotekerclass/universities" },
         { label: "Paket Berlangganan", path: "/apotekerclass/subscriptions" },
         { label: "Daftar Akses", path: "/apotekerclass/accesses" },
+      ],
+    },
+    {
+      key: "statistics",
+      title: "Statistik",
+      icon: ChartLine,
+      path: "/statistics",
+      items: [
+        { label: "Aktivitas Login", path: "/statistics/login" },
+        { label: "Pendaftar", path: "/statistics/registered" },
+        { label: "ROSA (AI)", path: "/statistics/ai" },
       ],
     },
   ];
