@@ -7,7 +7,12 @@ import {
 } from "@/components/sidebar/SidebarMenu";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
 import { Accordion, AccordionItem } from "@nextui-org/react";
-import { CaretRight, Circle, House, IconContext } from "@phosphor-icons/react";
+import {
+  CaretRight,
+  Circle,
+  IconContext,
+  Monitor,
+} from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -94,7 +99,7 @@ export default function Sidebar() {
               label="Dashboard"
               path="/dashboard"
               icon={
-                <House
+                <Monitor
                   weight={
                     router.asPath.includes("/dashboard") ? "fill" : "duotone"
                   }
