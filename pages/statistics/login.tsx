@@ -68,23 +68,24 @@ export default function LoginStatistics({
   return (
     <Layout title="Aktivitas Login" className="scrollbar-hide">
       <Container className="gap-8">
-        <div className="grid justify-center justify-items-center gap-4 rounded-xl border-[2px] border-default-200 p-8">
-          <div className="text-center">
-            <h4 className="text-lg font-bold text-default-900">
-              Statistik Aktivitas Login Hari Ini
-            </h4>
-            <p className="text-lg font-bold text-secondary">
-              {data?.data.today.day}
-            </p>
+        <div className="mb-8 flex flex-col items-center justify-center gap-4">
+          <div className="mb-2 text-center text-lg font-bold text-gray-600">
+            {data?.data.today.day ?? "-"}
           </div>
-
-          <div className="py-2 text-[42px] font-bold text-default-900">
-            {data?.data.today.value}
+          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
+            <span className="mb-1 text-xs font-semibold text-gray-500">
+              Total Aktivitas Login Hari Ini
+            </span>
+            <span className="text-2xl font-bold text-secondary">
+              {data?.data.today.value.toLocaleString("id-ID") ?? 0}
+            </span>
           </div>
         </div>
 
         <div className="grid gap-4 rounded-xl border-[2px] border-default-200 p-8">
-          <h1>7 Hari Terakhir</h1>
+          <h1 className="text-md font-semibold text-gray-500">
+            7 Hari Terakhir
+          </h1>
 
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
@@ -98,7 +99,7 @@ export default function LoginStatistics({
                   dataKey="value"
                   stroke="#8884d8"
                   fill="#8884d8"
-                  name="Check"
+                  name="Aktivitas"
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -106,7 +107,9 @@ export default function LoginStatistics({
         </div>
 
         <div className="grid gap-4 overflow-scroll rounded-xl border-[2px] border-default-200 p-8">
-          <h1>Beberapa Bulan</h1>
+          <h1 className="text-md font-semibold text-gray-500">
+            Beberapa Bulan
+          </h1>
 
           <div
             className="h-[300px]"
