@@ -176,14 +176,22 @@ export default function DetailSubCategoryFlashcardPage({
     }
   }
 
-  async function handleDeleteFlashcard(
-    sub_category_id: string,
-    card_id: string,
-  ) {
-    toast("Fitur dalam masa pengembangan!", {
-      icon: "🚧",
-    });
-  }
+  // async function handleDeleteFlashcard(card_id: string) {
+  //   try {
+  //     await fetcher({
+  //       url: `/cards/${card_id}`,
+  //       method: "DELETE",
+  //       file: true,
+  //       token,
+  //     });
+
+  //     mutate();
+  //     toast.success("Flashcard berhasil di hapus!");
+  //   } catch (error: any) {
+  //     console.error(error);
+  //     toast.error(getError(error));
+  //   }
+  // }
 
   return (
     <Layout title={data?.data.name} className="scrollbar-hide">
@@ -478,12 +486,9 @@ export default function DetailSubCategoryFlashcardPage({
                             <Button
                               color="danger"
                               className="font-semibold"
-                              onClick={() =>
-                                handleDeleteFlashcard(
-                                  data.data.sub_category_id as string,
-                                  card.card_id,
-                                )
-                              }
+                              // onClick={() =>
+                              //   handleDeleteFlashcard(card.card_id)
+                              // }
                             >
                               Ya, Hapus
                             </Button>
