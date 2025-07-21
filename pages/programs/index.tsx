@@ -9,8 +9,14 @@ import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
 import { Program, ProgramsResponse } from "@/types/program.type";
-import { Button, Pagination, Spinner } from "@nextui-org/react";
-import { Plus } from "@phosphor-icons/react";
+import {
+  Button,
+  Pagination,
+  Select,
+  SelectItem,
+  Spinner,
+} from "@nextui-org/react";
+import { Funnel, Plus, SlidersHorizontal } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
@@ -25,6 +31,9 @@ export default function ProgramsPage({
   const router = useRouter();
   const [search, setSearch] = useQueryState("q", { defaultValue: "" });
   const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [filter, setFilter] = useQueryState("filter", { defaultValue: "" });
+  const [sort, setSort] = useQueryState("sort", { defaultValue: "" });
+
   const [searchValue] = useDebounce(search, 800);
   const divRef = useRef<HTMLDivElement | null>(null);
   const { data, error, isLoading, mutate } = useSWR<
@@ -33,6 +42,8 @@ export default function ProgramsPage({
     url: getUrl("/admin/programs", {
       q: searchValue,
       page,
+      filter,
+      sort,
     }),
     method: "GET",
     token,
@@ -76,6 +87,46 @@ export default function ProgramsPage({
               onChange={(e) => setSearch(e.target.value)}
               onClear={() => setSearch("")}
             />
+
+            <div className="flex w-[300px] gap-4">
+              <Select
+                className="max-w-xs"
+                variant="flat"
+                startContent={
+                  <SlidersHorizontal
+                    weight="duotone"
+                    size={18}
+                    className="text-gray"
+                  />
+                }
+                size="md"
+                placeholder="Filter"
+                selectedKeys={[filter]}
+                onChange={(e) => setFilter(e.target.value)}
+              >
+                <SelectItem key="free">Gratis</SelectItem>
+                <SelectItem key="paid">Berbayar</SelectItem>
+                <SelectItem key="active">Aktif</SelectItem>
+                <SelectItem key="inactive">Nonaktif</SelectItem>
+              </Select>
+
+              <Select
+                className="max-w-xs"
+                variant="flat"
+                startContent={
+                  <Funnel weight="duotone" size={18} className="text-gray" />
+                }
+                size="md"
+                placeholder="Sort"
+                selectedKeys={[sort]}
+                onChange={(e) => setSort(e.target.value)}
+              >
+                <SelectItem key="name.asc">Nama A-Z</SelectItem>
+                <SelectItem key="name.desc">Nama Z-A</SelectItem>
+                <SelectItem key="created_at.desc">Terbaru</SelectItem>
+                <SelectItem key="created_at.asc">Terlama</SelectItem>
+              </Select>
+            </div>
 
             <Button
               color="secondary"

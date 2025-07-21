@@ -18,12 +18,21 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
   Skeleton,
   useDisclosure,
 } from "@nextui-org/react";
-import { FileText, Gear, Plus } from "@phosphor-icons/react";
+import {
+  FileText,
+  Funnel,
+  Gear,
+  Plus,
+  SlidersHorizontal,
+} from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
+import { useQueryState } from "nuqs";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
@@ -34,10 +43,16 @@ export default function SubCategoriesPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
   const { isOpen, onOpenChange, onClose, onOpen } = useDisclosure();
+  const [filter, setFilter] = useQueryState("filter", { defaultValue: "" });
+  const [sort, setSort] = useQueryState("sort", { defaultValue: "" });
+
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<SubCategory>
   >({
-    url: `/categories/${encodeURIComponent(slug)}/videocourse`,
+    url:
+      `/categories/${encodeURIComponent(slug)}/videocourse` +
+      (filter ? `?filter=${filter}` : "") +
+      (sort ? (filter ? `&sort=${sort}` : `?sort=${sort}`) : ""),
     method: "GET",
     token,
   });
@@ -107,6 +122,44 @@ export default function SubCategoriesPage({
 
         <div className="grid gap-4">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
+            <div className="flex w-[300px] gap-4">
+              <Select
+                className="max-w-xs"
+                variant="flat"
+                startContent={
+                  <SlidersHorizontal
+                    weight="duotone"
+                    size={18}
+                    className="text-gray"
+                  />
+                }
+                size="md"
+                placeholder="Filter"
+                selectedKeys={[filter]}
+                onChange={(e) => setFilter(e.target.value)}
+              >
+                <SelectItem key="active">Aktif</SelectItem>
+                <SelectItem key="inactive">Nonaktif</SelectItem>
+              </Select>
+
+              <Select
+                className="max-w-xs"
+                variant="flat"
+                startContent={
+                  <Funnel weight="duotone" size={18} className="text-gray" />
+                }
+                size="md"
+                placeholder="Sort"
+                selectedKeys={[sort]}
+                onChange={(e) => setSort(e.target.value)}
+              >
+                <SelectItem key="name.asc">Nama A-Z</SelectItem>
+                <SelectItem key="name.desc">Nama Z-A</SelectItem>
+                <SelectItem key="created_at.desc">Terbaru</SelectItem>
+                <SelectItem key="created_at.asc">Terlama</SelectItem>
+              </Select>
+            </div>
+
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}

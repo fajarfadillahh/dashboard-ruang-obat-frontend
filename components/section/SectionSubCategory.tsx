@@ -1,7 +1,10 @@
 import SearchInput from "@/components/SearchInput";
+import { Category } from "@/types/categories/category.type";
 import { SuccessResponse } from "@/types/global.type";
-import { Skeleton } from "@nextui-org/react";
+import { Select, SelectItem, Skeleton } from "@nextui-org/react";
+import { SlidersHorizontal } from "@phosphor-icons/react";
 import { useRouter } from "next/router";
+import { useQueryState } from "nuqs";
 import { useState } from "react";
 import useSWR from "swr";
 import EmptyData from "../EmptyData";
@@ -29,8 +32,24 @@ export default function SectionSubCategory({
   path,
 }: SectionSubCategoryProps) {
   const router = useRouter();
+
+  const [filter, setFilter] = useQueryState("filter", { defaultValue: "" });
+  let url = "/subcategories/all/videocourse";
+
+  if (filter === "name.asc" || filter === "name.desc") {
+    url += `?sort=${filter}`;
+  } else if (filter && filter !== "") {
+    url = `/subcategories/${filter}/videocourse`;
+  }
+
   const { data, isLoading } = useSWR<SuccessResponse<SubCategories>>({
-    url: "/subcategories/all/videocourse",
+    url,
+    method: "GET",
+    token,
+  });
+
+  const { data: dataCategory } = useSWR<SuccessResponse<Category[]>>({
+    url: "/categories?type=videocourse",
     method: "GET",
     token,
   });
@@ -86,6 +105,40 @@ export default function SectionSubCategory({
           onChange={(e) => setSearch(e.target.value)}
           onClear={() => setSearch("")}
         />
+
+        <div className="flex w-[300px] gap-4">
+          <Select
+            className="max-w-xs"
+            variant="flat"
+            startContent={
+              <SlidersHorizontal
+                weight="duotone"
+                size={18}
+                className="text-gray"
+              />
+            }
+            size="md"
+            placeholder="Filter"
+            selectedKeys={[filter]}
+            onChange={(e) => setFilter(e.target.value)}
+            items={[
+              { key: "name.asc", label: "Nama A-Z" },
+              { key: "name.desc", label: "Nama Z-A" },
+              ...(dataCategory?.data.length
+                ? dataCategory?.data.map((category) => ({
+                    key: category.slug,
+                    label: category.name,
+                  }))
+                : []),
+            ]}
+          >
+            {(item) => (
+              <SelectItem key={item.key} value={item.key}>
+                {item.label}
+              </SelectItem>
+            )}
+          </Select>
+        </div>
       </div>
 
       <div className="grid grid-cols-5 gap-4">{renderContentSubCategory()}</div>
