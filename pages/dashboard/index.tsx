@@ -78,7 +78,7 @@ export default function DashboardPage({
     {
       id: 5,
       title: "Saldo AI",
-      path: "/statistics/rosa",
+      path: "/statistics/ai",
       total: formatRupiah(
         Math.round(
           (data?.data.remaining_credits as number) *
