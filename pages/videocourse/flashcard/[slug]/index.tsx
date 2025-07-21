@@ -2,6 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import LoadingTitleImage from "@/components/loading/LoadingTitleImage";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import TitleTextImage from "@/components/title/TitleTextImage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
@@ -12,10 +13,6 @@ import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
   Modal,
   ModalBody,
   ModalContent,
@@ -27,7 +24,6 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import {
-  DotsThreeOutlineVertical,
   FileText,
   IconContext,
   ImageSquare,
@@ -81,6 +77,8 @@ export default function DetailSubCategoryFlashcardPage({
   const [typeCard, setTypeCard] = useState<"image" | "document" | "text">(
     "image",
   );
+  const [typeModal, setTypeModal] = useState<"create" | "edit">("create");
+  const [cardId, setCardId] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   async function handleAddFlashcard() {
@@ -130,6 +128,63 @@ export default function DetailSubCategoryFlashcardPage({
     }
   }
 
+  async function handleEditFlashcard() {
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      const by = session.data?.user.fullname;
+
+      formData.append("card_id", cardId);
+      formData.append("type", typeCard);
+      formData.append("by", by as string);
+      formData.append("sub_category_id", data?.data.sub_category_id as string);
+
+      if (typeCard === "text") {
+        formData.append("text", text);
+      } else {
+        if (!file) {
+          toast.error("File harus diisi untuk image, document atau text!");
+          return;
+        }
+
+        formData.append("file", file);
+      }
+
+      await fetcher({
+        url: "/cards",
+        method: "PATCH",
+        data: formData,
+        file: true,
+        token,
+      });
+
+      setFile(null);
+      setText("");
+
+      mutate();
+      onClose();
+
+      toast.success("Flashcard berhasil di ubah!");
+    } catch (error: any) {
+      console.error(error);
+      setLoading(false);
+
+      toast.error(getError(error));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDeleteFlashcard(
+    sub_category_id: string,
+    card_id: string,
+  ) {
+    toast("Fitur dalam masa pengembangan!", {
+      icon: "🚧",
+    });
+  }
+
   return (
     <Layout title={data?.data.name} className="scrollbar-hide">
       <Container className="gap-8">
@@ -148,7 +203,10 @@ export default function DetailSubCategoryFlashcardPage({
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
-              onClick={onOpen}
+              onClick={() => {
+                onOpen();
+                setTypeModal("create");
+              }}
               className="font-semibold"
             >
               Tambah Flashcard
@@ -163,14 +221,16 @@ export default function DetailSubCategoryFlashcardPage({
               onOpenChange={onOpenChange}
               onClose={() => {
                 onClose();
+
                 setFile(null);
+                setText("");
               }}
             >
               <ModalContent>
                 {(onClose) => (
                   <>
                     <ModalHeader className="font-extrabold text-black">
-                      Tambah Flashcard
+                      {typeModal == "create" ? "Tambah" : "Edit"} Flashcard
                     </ModalHeader>
 
                     <ModalBody>
@@ -184,6 +244,7 @@ export default function DetailSubCategoryFlashcardPage({
                           value={typeCard}
                           onValueChange={(value) => {
                             setTypeCard(value as "image" | "document" | "text");
+                            setFile(null);
                             setText("");
                           }}
                           classNames={{
@@ -241,6 +302,13 @@ export default function DetailSubCategoryFlashcardPage({
                             token={`${token}`}
                           />
                         )}
+
+                        {typeModal == "edit" && (
+                          <p className="-mt-6 text-sm font-medium text-gray">
+                            Flashcard ID:{" "}
+                            <strong className="text-purple">{cardId}</strong>
+                          </p>
+                        )}
                       </div>
                     </ModalBody>
 
@@ -263,10 +331,14 @@ export default function DetailSubCategoryFlashcardPage({
                           isLoading={loading}
                           isDisabled={!typeCard || loading}
                           color="secondary"
-                          onPress={handleAddFlashcard}
+                          onPress={() =>
+                            typeModal == "create"
+                              ? handleAddFlashcard()
+                              : handleEditFlashcard()
+                          }
                           className="px-6 font-semibold"
                         >
-                          Simpan
+                          Simpan {typeModal == "edit" && "Perubahan"}
                         </Button>
                       </div>
                     </ModalFooter>
@@ -342,39 +414,83 @@ export default function DetailSubCategoryFlashcardPage({
                       )}
                     </div>
 
-                    <Dropdown>
-                      <DropdownTrigger>
-                        <Button isIconOnly variant="light" size="sm">
-                          <CustomTooltip content="Aksi">
-                            <DotsThreeOutlineVertical weight="fill" size={18} />
-                          </CustomTooltip>
-                        </Button>
-                      </DropdownTrigger>
+                    <div className="inline-flex items-center gap-2">
+                      <Button
+                        isIconOnly
+                        variant="light"
+                        size="sm"
+                        color="secondary"
+                        onClick={() => {
+                          onOpen();
+                          setTypeModal("edit");
 
-                      <DropdownMenu
-                        aria-label="actions"
-                        itemClasses={{
-                          title: "font-semibold",
+                          setTypeCard(card.type);
+                          setCardId(card.card_id);
+
+                          if (card.type == "text") {
+                            setText(card.text as string);
+                          }
                         }}
                       >
-                        <DropdownItem
-                          key="edit"
-                          startContent={
-                            <PencilLine weight="duotone" size={18} />
-                          }
-                        >
-                          Edit
-                        </DropdownItem>
-                        <DropdownItem
-                          key="delete"
-                          color="danger"
-                          startContent={<Trash weight="duotone" size={18} />}
-                          className="text-danger"
-                        >
-                          Hapus
-                        </DropdownItem>
-                      </DropdownMenu>
-                    </Dropdown>
+                        <CustomTooltip content="Edit Flashcard">
+                          <PencilLine weight="duotone" size={18} />
+                        </CustomTooltip>
+                      </Button>
+
+                      <ModalConfirm
+                        trigger={
+                          <Button
+                            isIconOnly
+                            variant="light"
+                            color="danger"
+                            size="sm"
+                          >
+                            <CustomTooltip content="Hapus Flashcard">
+                              <Trash
+                                weight="duotone"
+                                size={18}
+                                className="text-danger"
+                              />
+                            </CustomTooltip>
+                          </Button>
+                        }
+                        header={
+                          <h1 className="font-bold text-black">
+                            Hapus Flashcard
+                          </h1>
+                        }
+                        body={
+                          <p className="leading-[170%] text-gray">
+                            Apakah anda ingin menghapus flashcard ini?
+                          </p>
+                        }
+                        footer={(onClose: any) => (
+                          <>
+                            <Button
+                              color="danger"
+                              variant="light"
+                              onPress={onClose}
+                              className="font-semibold"
+                            >
+                              Tutup
+                            </Button>
+
+                            <Button
+                              color="danger"
+                              className="font-semibold"
+                              onClick={() =>
+                                handleDeleteFlashcard(
+                                  data.data.sub_category_id as string,
+                                  card.card_id,
+                                )
+                              }
+                            >
+                              Ya, Hapus
+                            </Button>
+                          </>
+                        )}
+                      />
+                    </div>
                   </div>
                 </div>
               );
