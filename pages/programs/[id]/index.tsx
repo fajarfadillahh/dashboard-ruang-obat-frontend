@@ -11,6 +11,7 @@ import { formatRupiah } from "@/utils/formatRupiah";
 import { Button, Chip } from "@nextui-org/react";
 import {
   CheckCircle,
+  Eye,
   ImageBroken,
   PencilLine,
   Tag,
@@ -161,17 +162,30 @@ export default function DetailsProgramPage({
               </div>
             </div>
 
-            <Button
-              variant="light"
-              color="secondary"
-              startContent={<PencilLine weight="duotone" size={18} />}
-              onClick={() =>
-                router.push(`/programs/${data?.data.program_id}/edit`)
-              }
-              className="font-semibold"
-            >
-              Edit Program
-            </Button>
+            <div className="inline-flex items-center gap-4">
+              <Button
+                variant="light"
+                color="secondary"
+                startContent={<PencilLine weight="duotone" size={18} />}
+                onClick={() =>
+                  router.push(`/programs/${data?.data.program_id}/edit`)
+                }
+                className="font-semibold"
+              >
+                Edit Program
+              </Button>
+
+              <Button
+                color="secondary"
+                startContent={<Eye weight="duotone" size={18} />}
+                onClick={() =>
+                  router.push(`/programs/${data?.data.program_id}/participants`)
+                }
+                className="font-semibold"
+              >
+                Lihat Partisipan
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-4">

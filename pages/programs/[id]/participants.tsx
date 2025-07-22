@@ -284,6 +284,7 @@ export default function ParticipantsPage({
   //     toast.error("Uh oh! terjadi kesalahan, silakan ulangi 😵");
   //   }
   // }
+
   if (error) {
     return (
       <Layout title={`${data?.data.title}`}>
@@ -302,12 +303,12 @@ export default function ParticipantsPage({
 
   return (
     <Layout title={`${data?.data.title}`}>
-      <Container>
+      <Container className="gap-8">
         <ButtonBack />
 
         <div className="grid" ref={divRef}>
-          <h4 className="text-xl font-bold -tracking-wide text-black">
-            Daftar Partisipan {data?.data.title}🧑🏻‍🤝‍🧑🏻
+          <h4 className="mb-2 text-2xl font-bold -tracking-wide text-black">
+            Daftar Partisipan: {data?.data.title}🧑🏻‍🤝‍🧑🏻
           </h4>
 
           <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white py-4">
@@ -319,7 +320,6 @@ export default function ParticipantsPage({
             />
 
             <Select
-              className="w-40 min-w-[120px] max-w-xs"
               variant="flat"
               startContent={
                 <Funnel weight="duotone" size={18} className="text-gray" />
@@ -328,6 +328,10 @@ export default function ParticipantsPage({
               placeholder="Sort"
               selectedKeys={[sort]}
               onChange={(e) => setSort(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
             >
               <SelectItem key="joined_at.desc">Terbaru</SelectItem>
               <SelectItem key="joined_at.asc">Terlama</SelectItem>
