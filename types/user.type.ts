@@ -34,3 +34,13 @@ export type DetailsUserResponse = {
   created_at: string;
   is_verified: boolean;
 };
+
+export type ParticipantsResponse = {
+  program_id: string;
+  title: string;
+  type: "free" | "paid";
+  participants: Participant[];
+  page: number;
+  total_participants: number;
+  total_pages: number;
+};

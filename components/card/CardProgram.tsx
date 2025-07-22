@@ -21,6 +21,7 @@ import {
   Power,
   Prohibit,
   Tag,
+  Users,
   XCircle,
 } from "@phosphor-icons/react";
 import Link from "next/link";
@@ -176,6 +177,20 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
         >
           <CustomTooltip content="Detail Program">
             <Eye weight="duotone" size={18} />
+          </CustomTooltip>
+        </Button>
+
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          color="secondary"
+          onClick={() =>
+            router.push(`/programs/${program.program_id}/participants`)
+          }
+        >
+          <CustomTooltip content="Partisipan">
+            <Users weight="duotone" size={18} />
           </CustomTooltip>
         </Button>
 
