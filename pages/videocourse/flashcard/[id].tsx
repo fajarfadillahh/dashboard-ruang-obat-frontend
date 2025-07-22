@@ -68,7 +68,7 @@ export default function DetailSubCategoryFlashcardPage({
   const session = useSession();
   const { isOpen, onOpenChange, onClose, onOpen } = useDisclosure();
   const { data, isLoading, mutate } = useSWR<SuccessResponse<CardsResponse>>({
-    url: `/cards/${encodeURIComponent(params?.slug as string)}/videocourse`,
+    url: `/cards/${encodeURIComponent(params?.id as string)}/videocourse`,
     method: "GET",
     token,
   });
