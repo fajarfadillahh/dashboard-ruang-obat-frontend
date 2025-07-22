@@ -76,7 +76,7 @@ export default function SectionSubCategory({
         <div
           key={subcategory.sub_category_id}
           className="group grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
-          onClick={() => router.push(`${path}/${subcategory.slug}`)}
+          onClick={() => router.push(`${path}/${subcategory.sub_category_id}`)}
         >
           <img
             src={subcategory.img_url}
