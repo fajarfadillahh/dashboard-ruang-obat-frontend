@@ -3,7 +3,7 @@ import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingTitleImage from "@/components/loading/LoadingTitleImage";
-import TitleText from "@/components/TitleText";
+import TitleTextImage from "@/components/title/TitleTextImage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
@@ -120,9 +120,10 @@ export default function SubCategoriesPage({
         {isLoading ? (
           <LoadingTitleImage />
         ) : (
-          <TitleText
-            title={`${data?.data.name} 📚`}
-            text={`Daftar sub Kategori yang tersedia dari ${data?.data.name}`}
+          <TitleTextImage
+            src={data?.data.img_url as string}
+            name={data?.data.name as string}
+            description="Daftar sub Kategori dari"
           />
         )}
 
