@@ -120,8 +120,8 @@ export default function DetailSubCategoryQuizPage({
                 value: "font-semibold text-gray",
               }}
             >
-              <SelectItem key="name.asc">Nama A-Z</SelectItem>
-              <SelectItem key="name.desc">Nama Z-A</SelectItem>
+              <SelectItem key="title.asc">Nama A-Z</SelectItem>
+              <SelectItem key="title.desc">Nama Z-A</SelectItem>
               <SelectItem key="created_at.desc">Terbaru</SelectItem>
               <SelectItem key="created_at.asc">Terlama</SelectItem>
             </Select>
