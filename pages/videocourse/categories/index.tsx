@@ -118,45 +118,49 @@ export default function CategoriesPage({
           text="Kategori yang tersedia pada kelas video pembelajaran."
         />
 
-        <div className="grid gap-4">
+        <div className="grid">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
-            <div className="flex w-[300px] gap-4">
-              <Select
-                className="max-w-xs"
-                variant="flat"
-                startContent={
-                  <SlidersHorizontal
-                    weight="duotone"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
-                size="md"
-                placeholder="Filter"
-                selectedKeys={[filter]}
-                onChange={(e) => setFilter(e.target.value)}
-              >
-                <SelectItem key="active">Aktif</SelectItem>
-                <SelectItem key="inactive">Nonaktif</SelectItem>
-              </Select>
+            <Select
+              variant="flat"
+              startContent={
+                <SlidersHorizontal
+                  weight="bold"
+                  size={18}
+                  className="text-gray"
+                />
+              }
+              size="md"
+              placeholder="Filter"
+              selectedKeys={[filter]}
+              onChange={(e) => setFilter(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="active">Aktif</SelectItem>
+              <SelectItem key="inactive">Nonaktif</SelectItem>
+            </Select>
 
-              <Select
-                className="max-w-xs"
-                variant="flat"
-                startContent={
-                  <Funnel weight="duotone" size={18} className="text-gray" />
-                }
-                size="md"
-                placeholder="Sort"
-                selectedKeys={[sort]}
-                onChange={(e) => setSort(e.target.value)}
-              >
-                <SelectItem key="name.asc">Nama A-Z</SelectItem>
-                <SelectItem key="name.desc">Nama Z-A</SelectItem>
-                <SelectItem key="created_at.desc">Terbaru</SelectItem>
-                <SelectItem key="created_at.asc">Terlama</SelectItem>
-              </Select>
-            </div>
+            <Select
+              variant="flat"
+              startContent={
+                <Funnel weight="duotone" size={18} className="text-gray" />
+              }
+              size="md"
+              placeholder="Sort"
+              selectedKeys={[sort]}
+              onChange={(e) => setSort(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="name.asc">Nama A-Z</SelectItem>
+              <SelectItem key="name.desc">Nama Z-A</SelectItem>
+              <SelectItem key="created_at.desc">Terbaru</SelectItem>
+              <SelectItem key="created_at.asc">Terlama</SelectItem>
+            </Select>
 
             <Button
               color="secondary"
@@ -291,7 +295,7 @@ export default function CategoriesPage({
                 </div>
               ))
             ) : (
-              <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
+              <div className="col-span-5 flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
                 <EmptyData text="Data kategori belum tersedia." />
               </div>
             )}

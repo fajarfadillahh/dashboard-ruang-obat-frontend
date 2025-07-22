@@ -120,45 +120,49 @@ export default function SubCategoriesPage({
           text={`Daftar sub Kategori yang tersedia dari ${data?.data.name}`}
         />
 
-        <div className="grid gap-4">
+        <div className="grid">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
-            <div className="flex w-[300px] gap-4">
-              <Select
-                className="max-w-xs"
-                variant="flat"
-                startContent={
-                  <SlidersHorizontal
-                    weight="duotone"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
-                size="md"
-                placeholder="Filter"
-                selectedKeys={[filter]}
-                onChange={(e) => setFilter(e.target.value)}
-              >
-                <SelectItem key="active">Aktif</SelectItem>
-                <SelectItem key="inactive">Nonaktif</SelectItem>
-              </Select>
+            <Select
+              variant="flat"
+              startContent={
+                <SlidersHorizontal
+                  weight="bold"
+                  size={18}
+                  className="text-gray"
+                />
+              }
+              size="md"
+              placeholder="Filter"
+              selectedKeys={[filter]}
+              onChange={(e) => setFilter(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="active">Aktif</SelectItem>
+              <SelectItem key="inactive">Nonaktif</SelectItem>
+            </Select>
 
-              <Select
-                className="max-w-xs"
-                variant="flat"
-                startContent={
-                  <Funnel weight="duotone" size={18} className="text-gray" />
-                }
-                size="md"
-                placeholder="Sort"
-                selectedKeys={[sort]}
-                onChange={(e) => setSort(e.target.value)}
-              >
-                <SelectItem key="name.asc">Nama A-Z</SelectItem>
-                <SelectItem key="name.desc">Nama Z-A</SelectItem>
-                <SelectItem key="created_at.desc">Terbaru</SelectItem>
-                <SelectItem key="created_at.asc">Terlama</SelectItem>
-              </Select>
-            </div>
+            <Select
+              variant="flat"
+              startContent={
+                <Funnel weight="duotone" size={18} className="text-gray" />
+              }
+              size="md"
+              placeholder="Sort"
+              selectedKeys={[sort]}
+              onChange={(e) => setSort(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="name.asc">Nama A-Z</SelectItem>
+              <SelectItem key="name.desc">Nama Z-A</SelectItem>
+              <SelectItem key="created_at.desc">Terbaru</SelectItem>
+              <SelectItem key="created_at.asc">Terlama</SelectItem>
+            </Select>
 
             <Button
               color="secondary"
@@ -253,17 +257,15 @@ export default function SubCategoriesPage({
             </Modal>
           </div>
 
-          {isLoading ? (
-            <div className="grid grid-cols-5 gap-4">
-              {Array.from({
+          <div className="grid grid-cols-5 gap-4">
+            {isLoading ? (
+              Array.from({
                 length: data?.data.sub_categories.length || 10,
               }).map((_, index) => (
                 <Skeleton key={index} className="h-40 w-full rounded-xl" />
-              ))}
-            </div>
-          ) : data?.data.sub_categories.length ? (
-            <div className="grid grid-cols-5 gap-4">
-              {data?.data.sub_categories.map((subcategory) => (
+              ))
+            ) : data?.data.sub_categories.length ? (
+              data?.data.sub_categories.map((subcategory) => (
                 <div
                   key={subcategory.sub_category_id}
                   className="group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
@@ -290,13 +292,13 @@ export default function SubCategoriesPage({
                     {subcategory.name}
                   </h4>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
-              <EmptyData text="Data sub kategori belum tersedia." />
-            </div>
-          )}
+              ))
+            ) : (
+              <div className="col-span-5 flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
+                <EmptyData text="Data sub kategori belum tersedia." />
+              </div>
+            )}
+          </div>
         </div>
       </Container>
     </Layout>
