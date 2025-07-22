@@ -2,6 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
+import LoadingTitleImage from "@/components/loading/LoadingTitleImage";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
@@ -32,6 +33,7 @@ import {
 } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -115,10 +117,14 @@ export default function SubCategoriesPage({
       <Container className="gap-8">
         <ButtonBack />
 
-        <TitleText
-          title={`${data?.data.name} 📚`}
-          text={`Daftar sub Kategori yang tersedia dari ${data?.data.name}`}
-        />
+        {isLoading ? (
+          <LoadingTitleImage />
+        ) : (
+          <TitleText
+            title={`${data?.data.name} 📚`}
+            text={`Daftar sub Kategori yang tersedia dari ${data?.data.name}`}
+          />
+        )}
 
         <div className="grid">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
@@ -282,10 +288,12 @@ export default function SubCategoriesPage({
                     </CustomTooltip>
                   </Button>
 
-                  <img
+                  <Image
                     src={subcategory.img_url}
                     alt={subcategory.name}
-                    className="size-20 rounded-full object-cover"
+                    width={1000}
+                    height={1000}
+                    className="size-20 object-fill"
                   />
 
                   <h4 className="line-clamp-2 text-center font-extrabold text-black group-hover:line-clamp-none">

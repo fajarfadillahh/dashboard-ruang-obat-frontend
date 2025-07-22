@@ -3,6 +3,7 @@ import { Category } from "@/types/categories/category.type";
 import { SuccessResponse } from "@/types/global.type";
 import { Select, SelectItem, Skeleton } from "@nextui-org/react";
 import { SlidersHorizontal } from "@phosphor-icons/react";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
@@ -78,11 +79,14 @@ export default function SectionSubCategory({
           className="group grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
           onClick={() => router.push(`${path}/${subcategory.sub_category_id}`)}
         >
-          <img
+          <Image
             src={subcategory.img_url}
             alt={subcategory.name}
-            className="size-20 rounded-full object-cover"
+            width={1000}
+            height={1000}
+            className="size-20 object-fill"
           />
+
           <h4 className="line-clamp-2 text-center font-extrabold text-black group-hover:line-clamp-none">
             {subcategory.name}
           </h4>

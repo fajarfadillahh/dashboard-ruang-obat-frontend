@@ -31,6 +31,7 @@ import {
 } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
@@ -283,10 +284,12 @@ export default function CategoriesPage({
                     </CustomTooltip>
                   </Button>
 
-                  <img
+                  <Image
                     src={category.img_url}
                     alt={category.name}
-                    className="size-20 rounded-full object-cover"
+                    width={1000}
+                    height={1000}
+                    className="size-20 object-fill"
                   />
 
                   <h4 className="line-clamp-2 text-center font-extrabold text-black group-hover:line-clamp-none">
