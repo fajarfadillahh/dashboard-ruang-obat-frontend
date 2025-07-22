@@ -7,6 +7,7 @@ import TitleTextImage from "@/components/title/TitleTextImage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
+import { getUrl } from "@/lib/getUrl";
 import { SubCategory } from "@/types/categories/subcategory.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleInput } from "@/utils/customStyleInput";
@@ -51,10 +52,10 @@ export default function SubCategoriesPage({
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<SubCategory>
   >({
-    url:
-      `/categories/${encodeURIComponent(slug)}/videocourse` +
-      (filter ? `?filter=${filter}` : "") +
-      (sort ? (filter ? `&sort=${sort}` : `?sort=${sort}`) : ""),
+    url: getUrl(`/categories/${encodeURIComponent(slug)}/videocourse`, {
+      filter,
+      sort,
+    }),
     method: "GET",
     token,
   });

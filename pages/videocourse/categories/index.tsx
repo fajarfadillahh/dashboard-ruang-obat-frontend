@@ -5,6 +5,7 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
+import { getUrl } from "@/lib/getUrl";
 import { Category } from "@/types/categories/category.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleInput } from "@/utils/customStyleInput";
@@ -50,10 +51,10 @@ export default function CategoriesPage({
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<Category[]>
   >({
-    url:
-      `/categories?type=videocourse` +
-      (filter ? `&filter=${filter}` : "") +
-      (sort ? `&sort=${sort}` : ""),
+    url: getUrl(`/categories?type=videocourse`, {
+      filter,
+      sort,
+    }),
     method: "GET",
     token,
   });
