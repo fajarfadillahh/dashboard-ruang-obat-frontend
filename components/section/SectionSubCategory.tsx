@@ -106,39 +106,36 @@ export default function SectionSubCategory({
           onClear={() => setSearch("")}
         />
 
-        <div className="flex w-[300px] gap-4">
-          <Select
-            className="max-w-xs"
-            variant="flat"
-            startContent={
-              <SlidersHorizontal
-                weight="duotone"
-                size={18}
-                className="text-gray"
-              />
-            }
-            size="md"
-            placeholder="Filter"
-            selectedKeys={[filter]}
-            onChange={(e) => setFilter(e.target.value)}
-            items={[
-              { key: "name.asc", label: "Nama A-Z" },
-              { key: "name.desc", label: "Nama Z-A" },
-              ...(dataCategory?.data.length
-                ? dataCategory?.data.map((category) => ({
-                    key: category.slug,
-                    label: category.name,
-                  }))
-                : []),
-            ]}
-          >
-            {(item) => (
-              <SelectItem key={item.key} value={item.key}>
-                {item.label}
-              </SelectItem>
-            )}
-          </Select>
-        </div>
+        <Select
+          variant="flat"
+          startContent={
+            <SlidersHorizontal weight="bold" size={18} className="text-gray" />
+          }
+          size="md"
+          placeholder="Filter"
+          selectedKeys={[filter]}
+          onChange={(e) => setFilter(e.target.value)}
+          items={[
+            { key: "name.asc", label: "Nama A-Z" },
+            { key: "name.desc", label: "Nama Z-A" },
+            ...(dataCategory?.data.length
+              ? dataCategory?.data.map((category) => ({
+                  key: category.slug,
+                  label: category.name,
+                }))
+              : []),
+          ]}
+          className="max-w-[180px] text-gray"
+          classNames={{
+            value: "font-semibold text-gray",
+          }}
+        >
+          {(item) => (
+            <SelectItem key={item.key} value={item.key}>
+              {item.label}
+            </SelectItem>
+          )}
+        </Select>
       </div>
 
       <div className="grid grid-cols-5 gap-4">{renderContentSubCategory()}</div>
