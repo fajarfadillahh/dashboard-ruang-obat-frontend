@@ -1,6 +1,7 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import EmptyData from "@/components/EmptyData";
-import TitleText from "@/components/TitleText";
+import LoadingTitleImage from "@/components/loading/LoadingTitleImage";
+import TitleTextImage from "@/components/title/TitleTextImage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
@@ -17,6 +18,11 @@ import useSWR from "swr";
 
 export interface QuizResponse {
   quizzes: Quiz[];
+  sub_category_id: string;
+  name: string;
+  slug: string;
+  img_url: string;
+  type: string;
   page: number;
   total_quizzes: number;
   total_pages: number;
@@ -54,10 +60,15 @@ export default function DetailSubCategoryQuizPage({
 
         <div className="grid gap-4">
           <div className="flex items-center justify-between gap-4">
-            <TitleText
-              title="Daftar Kuis ✏️"
-              text="Kuis-kuis pada sub kategori"
-            />
+            {isLoading ? (
+              <LoadingTitleImage />
+            ) : (
+              <TitleTextImage
+                src={data?.data.img_url as string}
+                name={data?.data.name as string}
+                description="Kuis yang tersedia pada"
+              />
+            )}
 
             <Button
               color="secondary"
