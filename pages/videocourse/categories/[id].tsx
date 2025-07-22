@@ -36,13 +36,14 @@ import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useQueryState } from "nuqs";
+import { ParsedUrlQuery } from "querystring";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 
 export default function SubCategoriesPage({
   token,
-  slug,
+  params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
   const { isOpen, onOpenChange, onClose, onOpen } = useDisclosure();
@@ -52,10 +53,13 @@ export default function SubCategoriesPage({
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<SubCategory>
   >({
-    url: getUrl(`/categories/${encodeURIComponent(slug)}/videocourse`, {
-      filter,
-      sort,
-    }),
+    url: getUrl(
+      `/categories/${encodeURIComponent(params?.id as string)}/videocourse`,
+      {
+        filter,
+        sort,
+      },
+    ),
     method: "GET",
     token,
   });
@@ -316,11 +320,11 @@ export default function SubCategoriesPage({
 }
 
 export const getServerSideProps = withToken(async (ctx) => {
-  const slug = ctx.params?.slug as string;
+  const { params } = ctx;
 
   return {
     props: {
-      slug,
+      params: params as ParsedUrlQuery,
     },
   };
 });
