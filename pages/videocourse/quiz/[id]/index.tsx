@@ -7,8 +7,20 @@ import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
-import { Button, Pagination, Skeleton } from "@nextui-org/react";
-import { BookBookmark, ClipboardText, Plus } from "@phosphor-icons/react";
+import {
+  Button,
+  Pagination,
+  Select,
+  SelectItem,
+  Skeleton,
+} from "@nextui-org/react";
+import {
+  BookBookmark,
+  ClipboardText,
+  Funnel,
+  Plus,
+  SlidersHorizontal,
+} from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
@@ -42,12 +54,14 @@ export default function DetailSubCategoryQuizPage({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [filter, setFilter] = useQueryState("filter", { defaultValue: "" });
+  const [sort, setSort] = useQueryState("sort", { defaultValue: "" });
 
   const divRef = useRef<HTMLDivElement | null>(null);
   const { data, isLoading } = useSWR<SuccessResponse<QuizResponse>>({
     url: getUrl(
       `/quizzes/${encodeURIComponent(params?.id as string)}/videocourse/quiz`,
-      { page },
+      { page, filter, sort },
     ),
     method: "GET",
     token,
@@ -58,17 +72,59 @@ export default function DetailSubCategoryQuizPage({
       <Container className="gap-8">
         <ButtonBack />
 
-        <div className="grid gap-4">
-          <div className="flex items-center justify-between gap-4">
-            {isLoading ? (
-              <LoadingTitleImage />
-            ) : (
-              <TitleTextImage
-                src={data?.data.img_url as string}
-                name={data?.data.name as string}
-                description="Kuis yang tersedia pada"
-              />
-            )}
+        {isLoading ? (
+          <LoadingTitleImage />
+        ) : (
+          <TitleTextImage
+            src={data?.data.img_url as string}
+            name={data?.data.name as string}
+            description="Kuis yang tersedia pada"
+          />
+        )}
+
+        <div className="grid">
+          <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
+            <Select
+              variant="flat"
+              startContent={
+                <SlidersHorizontal
+                  weight="bold"
+                  size={18}
+                  className="text-gray"
+                />
+              }
+              size="md"
+              placeholder="Filter"
+              selectedKeys={[filter]}
+              onChange={(e) => setFilter(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="active">Aktif</SelectItem>
+              <SelectItem key="inactive">Nonaktif</SelectItem>
+            </Select>
+
+            <Select
+              variant="flat"
+              startContent={
+                <Funnel weight="duotone" size={18} className="text-gray" />
+              }
+              size="md"
+              placeholder="Sort"
+              selectedKeys={[sort]}
+              onChange={(e) => setSort(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="name.asc">Nama A-Z</SelectItem>
+              <SelectItem key="name.desc">Nama Z-A</SelectItem>
+              <SelectItem key="created_at.desc">Terbaru</SelectItem>
+              <SelectItem key="created_at.asc">Terlama</SelectItem>
+            </Select>
 
             <Button
               color="secondary"
