@@ -88,46 +88,50 @@ export default function TestsPage({
               onClear={() => setSearch("")}
             />
 
-            <div className="flex w-[310px] gap-4">
-              <Select
-                className="max-w-xs"
-                variant="flat"
-                startContent={
-                  <SlidersHorizontal
-                    weight="duotone"
-                    size={18}
-                    className="text-gray"
-                  />
-                }
-                size="md"
-                placeholder="Filter"
-                selectedKeys={[filter]}
-                onChange={(e) => setFilter(e.target.value)}
-              >
-                <SelectItem key="upcoming">Belum Dimulai</SelectItem>
-                <SelectItem key="ongoing">Berlangsung</SelectItem>
-                <SelectItem key="ended">Berakhir</SelectItem>
-                <SelectItem key="active">Aktif</SelectItem>
-                <SelectItem key="inactive">Nonaktif</SelectItem>
-              </Select>
+            <Select
+              variant="flat"
+              startContent={
+                <SlidersHorizontal
+                  weight="duotone"
+                  size={18}
+                  className="text-gray"
+                />
+              }
+              size="md"
+              placeholder="Filter"
+              selectedKeys={[filter]}
+              onChange={(e) => setFilter(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="upcoming">Belum Dimulai</SelectItem>
+              <SelectItem key="ongoing">Berlangsung</SelectItem>
+              <SelectItem key="ended">Berakhir</SelectItem>
+              <SelectItem key="active">Aktif</SelectItem>
+              <SelectItem key="inactive">Nonaktif</SelectItem>
+            </Select>
 
-              <Select
-                className="max-w-xs"
-                variant="flat"
-                startContent={
-                  <Funnel weight="duotone" size={18} className="text-gray" />
-                }
-                size="md"
-                placeholder="Sort"
-                selectedKeys={[sort]}
-                onChange={(e) => setSort(e.target.value)}
-              >
-                <SelectItem key="name.asc">Nama A-Z</SelectItem>
-                <SelectItem key="name.desc">Nama Z-A</SelectItem>
-                <SelectItem key="created_at.desc">Terbaru</SelectItem>
-                <SelectItem key="created_at.asc">Terlama</SelectItem>
-              </Select>
-            </div>
+            <Select
+              variant="flat"
+              startContent={
+                <Funnel weight="duotone" size={18} className="text-gray" />
+              }
+              size="md"
+              placeholder="Sort"
+              selectedKeys={[sort]}
+              onChange={(e) => setSort(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="name.asc">Nama A-Z</SelectItem>
+              <SelectItem key="name.desc">Nama Z-A</SelectItem>
+              <SelectItem key="created_at.desc">Terbaru</SelectItem>
+              <SelectItem key="created_at.asc">Terlama</SelectItem>
+            </Select>
 
             <Button
               color="secondary"
