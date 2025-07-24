@@ -9,5 +9,6 @@ export type SubCategory = {
     name: string;
     slug: string;
     img_url: string;
+    is_active?: boolean;
   }[];
 };
