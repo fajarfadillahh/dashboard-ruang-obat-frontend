@@ -19,6 +19,7 @@ export default function TitleTextImage({
         width={1000}
         height={1000}
         className="size-20 object-fill"
+        priority
       />
 
       <div className="grid gap-1">
