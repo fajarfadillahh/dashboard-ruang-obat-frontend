@@ -23,6 +23,7 @@ import {
   Select,
   SelectItem,
   Skeleton,
+  Switch,
   useDisclosure,
 } from "@nextui-org/react";
 import {
@@ -63,9 +64,13 @@ export default function SubCategoriesPage({
     method: "GET",
     token,
   });
-  const [name, setName] = useState("");
+  const [name, setName] = useState<string>("");
   const [image, setImage] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
+
+  const [typeModal, setTypeModal] = useState<"create" | "edit">("create");
+  const [subCategoryId, setSubCategoryId] = useState<string>("");
+  const [isSelected, setIsSelected] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   async function handleAddSubCategory() {
     setLoading(true);
@@ -95,7 +100,44 @@ export default function SubCategoriesPage({
     } catch (error: any) {
       console.error(error);
 
-      toast.error("Gagal menambahkan sub kategori");
+      toast.error("Gagal menambahkan sub kategori!");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleEditSubCategory() {
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("category_id", data?.data.category_id as string);
+      formData.append("sub_category_id", subCategoryId);
+      formData.append("name", name);
+      formData.append("image", image as Blob);
+      formData.append("by", session.data?.user.fullname as string);
+      formData.append("is_active", String(!isSelected));
+
+      await fetcher({
+        url: "/subcategories",
+        method: "PATCH",
+        data: formData,
+        file: true,
+        token,
+      });
+
+      onClose();
+      mutate();
+
+      setImage(null);
+      setName("");
+      setIsSelected(false);
+
+      toast.success("Sub Kategori berhasil diubah!");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error("Gagal mengubah sub kategori!");
     } finally {
       setLoading(false);
     }
@@ -135,6 +177,9 @@ export default function SubCategoriesPage({
         <div className="grid">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
             <Select
+              aria-label="filter"
+              size="md"
+              placeholder="Filter"
               variant="flat"
               startContent={
                 <SlidersHorizontal
@@ -143,8 +188,6 @@ export default function SubCategoriesPage({
                   className="text-gray"
                 />
               }
-              size="md"
-              placeholder="Filter"
               selectedKeys={[filter]}
               onChange={(e) => setFilter(e.target.value)}
               className="max-w-[180px] text-gray"
@@ -157,12 +200,13 @@ export default function SubCategoriesPage({
             </Select>
 
             <Select
+              aria-label="sort"
+              size="md"
+              placeholder="Sort"
               variant="flat"
               startContent={
                 <Funnel weight="duotone" size={18} className="text-gray" />
               }
-              size="md"
-              placeholder="Sort"
               selectedKeys={[sort]}
               onChange={(e) => setSort(e.target.value)}
               className="max-w-[180px] text-gray"
@@ -179,7 +223,10 @@ export default function SubCategoriesPage({
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
-              onClick={onOpen}
+              onClick={() => {
+                onOpen();
+                setTypeModal("create");
+              }}
               className="font-semibold"
             >
               Tambah Sub Kategori
@@ -200,10 +247,10 @@ export default function SubCategoriesPage({
                 {(onClose) => (
                   <>
                     <ModalHeader className="font-bold text-black">
-                      Tambah Sub Kategori
+                      {typeModal == "create" ? "Tambah" : "Edit"} Sub Kategori
                     </ModalHeader>
 
-                    <ModalBody className="scrollbar-hide">
+                    <ModalBody className="gap-8 scrollbar-hide">
                       <div className="grid w-full gap-4 rounded-xl border border-dashed border-gray/30 bg-gray/5 py-8">
                         <FileText
                           weight="duotone"
@@ -235,8 +282,21 @@ export default function SubCategoriesPage({
                         labelPlacement="outside"
                         placeholder="Contoh: Sub Farmakoterapi"
                         classNames={customStyleInput}
+                        value={name}
                         onChange={(e) => setName(e.target.value)}
                       />
+
+                      {typeModal == "edit" && (
+                        <Switch
+                          size="sm"
+                          color="secondary"
+                          isSelected={isSelected}
+                          onValueChange={setIsSelected}
+                          className="-mt-4 text-sm font-semibold text-black"
+                        >
+                          Nonaktifkan Sub Kategori
+                        </Switch>
+                      )}
                     </ModalBody>
 
                     <ModalFooter>
@@ -255,12 +315,19 @@ export default function SubCategoriesPage({
 
                       <Button
                         color="secondary"
-                        onClick={handleAddSubCategory}
-                        className="font-semibold"
-                        isDisabled={!name || !image}
                         isLoading={loading}
+                        onClick={() => {
+                          if (typeModal == "create") {
+                            handleAddSubCategory();
+                          } else {
+                            handleEditSubCategory();
+                          }
+                        }}
+                        className="font-semibold"
                       >
-                        Tambah Sub Kategori
+                        {typeModal == "create"
+                          ? "Tambah Sub Kategori"
+                          : "Simpan Perubahan"}
                       </Button>
                     </ModalFooter>
                   </>
@@ -287,6 +354,14 @@ export default function SubCategoriesPage({
                     variant="flat"
                     size="sm"
                     color="secondary"
+                    onClick={() => {
+                      onOpen();
+                      setTypeModal("edit");
+
+                      setName(subcategory.name);
+                      setSubCategoryId(subcategory.sub_category_id);
+                      setIsSelected(!subcategory.is_active as boolean);
+                    }}
                     className="absolute right-4 top-4"
                   >
                     <CustomTooltip content="Edit Sub Kategori">
@@ -300,6 +375,7 @@ export default function SubCategoriesPage({
                     width={1000}
                     height={1000}
                     className="size-20 object-fill"
+                    priority
                   />
 
                   <h4 className="line-clamp-2 text-center font-extrabold text-black group-hover:line-clamp-none">

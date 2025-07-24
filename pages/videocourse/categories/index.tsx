@@ -123,6 +123,9 @@ export default function CategoriesPage({
         <div className="grid">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
             <Select
+              aria-label="filter"
+              size="md"
+              placeholder="Filter"
               variant="flat"
               startContent={
                 <SlidersHorizontal
@@ -131,8 +134,6 @@ export default function CategoriesPage({
                   className="text-gray"
                 />
               }
-              size="md"
-              placeholder="Filter"
               selectedKeys={[filter]}
               onChange={(e) => setFilter(e.target.value)}
               className="max-w-[180px] text-gray"
@@ -145,12 +146,13 @@ export default function CategoriesPage({
             </Select>
 
             <Select
+              aria-label="sort"
+              size="md"
+              placeholder="Sort"
               variant="flat"
               startContent={
                 <Funnel weight="duotone" size={18} className="text-gray" />
               }
-              size="md"
-              placeholder="Sort"
               selectedKeys={[sort]}
               onChange={(e) => setSort(e.target.value)}
               className="max-w-[180px] text-gray"
@@ -257,7 +259,7 @@ export default function CategoriesPage({
             </Modal>
           </div>
 
-          <div className="grid grid-cols-5 items-start gap-4">
+          <div className="grid grid-cols-5 gap-4">
             {isLoading ? (
               Array.from({ length: data?.data.length || 10 }).map(
                 (_, index) => (
