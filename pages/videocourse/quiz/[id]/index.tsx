@@ -1,4 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import LoadingTitleImage from "@/components/loading/LoadingTitleImage";
 import TitleTextImage from "@/components/title/TitleTextImage";
@@ -18,6 +19,7 @@ import {
   BookBookmark,
   ClipboardText,
   Funnel,
+  Gear,
   Plus,
   SlidersHorizontal,
 } from "@phosphor-icons/react";
@@ -149,8 +151,23 @@ export default function DetailSubCategoryQuizPage({
               data?.data.quizzes.map((quizz) => (
                 <div
                   key={quizz.ass_id}
-                  className="flex items-center gap-4 rounded-xl border-2 border-gray/10 p-4 hover:cursor-pointer hover:bg-purple/10"
+                  className="group relative isolate flex items-center gap-4 rounded-xl border-2 border-gray/10 p-4 hover:cursor-pointer hover:bg-purple/10"
                 >
+                  <Button
+                    isIconOnly
+                    variant="light"
+                    size="sm"
+                    color="secondary"
+                    onClick={() =>
+                      router.push(`/videocourse/quiz/${router.query.id}/edit`)
+                    }
+                    className="absolute right-4 top-4 z-50 hidden group-hover:flex"
+                  >
+                    <CustomTooltip content="Edit Kuis">
+                      <Gear weight="bold" size={18} />
+                    </CustomTooltip>
+                  </Button>
+
                   <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-xl bg-purple/10">
                     <BookBookmark
                       weight="duotone"

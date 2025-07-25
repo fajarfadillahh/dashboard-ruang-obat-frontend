@@ -143,7 +143,7 @@ export default function DetailSubCategoryContentPage({
                 >
                   <Button
                     isIconOnly
-                    variant="flat"
+                    variant="light"
                     size="sm"
                     color="secondary"
                     onClick={() =>
