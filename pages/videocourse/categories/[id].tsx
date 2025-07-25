@@ -347,11 +347,15 @@ export default function SubCategoriesPage({
               data?.data.sub_categories.map((subcategory) => (
                 <div
                   key={subcategory.sub_category_id}
-                  className="group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
+                  className={`group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 p-8 text-sm hover:cursor-pointer ${
+                    subcategory.is_active
+                      ? "border-purple/10 hover:border-purple hover:bg-purple/10"
+                      : "border-danger bg-danger/5 hover:bg-danger/10"
+                  }`}
                 >
                   <Button
                     isIconOnly
-                    variant="flat"
+                    variant="light"
                     size="sm"
                     color="secondary"
                     onClick={() => {
@@ -374,7 +378,7 @@ export default function SubCategoriesPage({
                     alt={subcategory.name}
                     width={1000}
                     height={1000}
-                    className="size-20 object-fill"
+                    className={`size-20 object-fill ${subcategory.is_active ? "grayscale-0" : "grayscale"}`}
                     priority
                   />
 
