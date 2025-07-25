@@ -7,4 +7,5 @@ export type Category = {
   created_at: string;
   created_by: string;
   total_sub_category?: number;
+  is_active?: boolean;
 };
