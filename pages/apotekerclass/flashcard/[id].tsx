@@ -28,10 +28,10 @@ import {
   FileText,
   IconContext,
   ImageSquare,
+  PencilLine,
   Plus,
   Trash,
 } from "@phosphor-icons/react";
-import { PencilLine } from "@phosphor-icons/react/dist/ssr";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
@@ -45,14 +45,14 @@ const CKEditor = dynamic(() => import("@/components/editor/CKEditor"), {
   ssr: false,
 });
 
-export default function DetailSubCategoryFlashcardPage({
+export default function DetailCategoryFlashcardPage({
   token,
   params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
   const { isOpen, onOpenChange, onClose, onOpen } = useDisclosure();
   const { data, isLoading, mutate } = useSWR<SuccessResponse<CardsResponse>>({
-    url: `/cards/${encodeURIComponent(params?.id as string)}/videocourse`,
+    url: `/cards/${encodeURIComponent(params?.id as string)}/apotekerclass`,
     method: "GET",
     token,
   });
@@ -70,11 +70,10 @@ export default function DetailSubCategoryFlashcardPage({
 
     try {
       const formData = new FormData();
-      const by = session.data?.user.fullname;
 
       formData.append("type", typeCard);
-      formData.append("by", by as string);
-      formData.append("sub_category_id", data?.data.sub_category_id as string);
+      formData.append("by", session.data?.user.fullname as string);
+      formData.append("category_id", data?.data.category_id as string);
 
       if (typeCard === "text") {
         formData.append("text", text);
@@ -117,12 +116,11 @@ export default function DetailSubCategoryFlashcardPage({
 
     try {
       const formData = new FormData();
-      const by = session.data?.user.fullname;
 
       formData.append("card_id", cardId);
       formData.append("type", typeCard);
-      formData.append("by", by as string);
-      formData.append("sub_category_id", data?.data.sub_category_id as string);
+      formData.append("by", session.data?.user.fullname as string);
+      formData.append("category_id", data?.data.category_id as string);
 
       if (typeCard === "text") {
         formData.append("text", text);
