@@ -1,10 +1,11 @@
 import CustomTooltip from "@/components/CustomTooltip";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
+import { getUrl } from "@/lib/getUrl";
 import { Category } from "@/types/categories/category.type";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleInput } from "@/utils/customStyleInput";
@@ -17,11 +18,23 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Select,
+  SelectItem,
+  Skeleton,
+  Switch,
   useDisclosure,
 } from "@nextui-org/react";
-import { FileText, Gear, Plus } from "@phosphor-icons/react";
+import {
+  FileText,
+  Funnel,
+  Gear,
+  Plus,
+  SlidersHorizontal,
+} from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { useQueryState } from "nuqs";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
@@ -30,17 +43,22 @@ export default function CategoriesPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
+  const [filter, setFilter] = useQueryState("filter", { defaultValue: "" });
+  const [sort, setSort] = useQueryState("sort", { defaultValue: "" });
 
+  const { isOpen, onOpenChange, onClose, onOpen } = useDisclosure();
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<Category[]>
   >({
-    url: "/categories?type=apotekerclass",
+    url: getUrl("/categories?type=apotekerclass", { filter, sort }),
     method: "GET",
     token,
   });
-  const { isOpen, onOpenChange, onClose, onOpen } = useDisclosure();
   const [name, setName] = useState("");
   const [image, setImage] = useState<File | null>(null);
+  const [typeModal, setTypeModal] = useState<"create" | "edit">("create");
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [isSelected, setIsSelected] = useState<boolean>(false);
   const [loading, setLoading] = useState(false);
 
   if (error) {
@@ -59,12 +77,12 @@ export default function CategoriesPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   async function handleAddCategory() {
     setLoading(true);
+
     try {
       const formData = new FormData();
+
       formData.append("name", name);
       formData.append("image", image as Blob);
       formData.append("type", "apotekerclass");
@@ -90,16 +108,98 @@ export default function CategoriesPage({
     }
   }
 
+  async function handleEditCategory() {
+    setLoading(true);
+
+    try {
+      const formData = new FormData();
+
+      formData.append("category_id", categoryId);
+      formData.append("name", name);
+      formData.append("image", image as Blob);
+      formData.append("type", "apotekerclass");
+      formData.append("by", session.data?.user.fullname as string);
+      formData.append("is_active", String(!isSelected));
+
+      await fetcher({
+        url: "/categories",
+        method: "PATCH",
+        data: formData,
+        token,
+        file: true,
+      });
+
+      onClose();
+      mutate();
+
+      setImage(null);
+      setName("");
+      setIsSelected(false);
+
+      toast.success("Kategori berhasil diubah!");
+    } catch (error: any) {
+      console.error(error);
+
+      toast.error("Gagal mengubah kategori!");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <Layout title="Kategori" className="scrollbar-hide">
       <Container className="gap-8">
         <TitleText
-          title="Daftar Kategori 📚"
+          title="Daftar Kategori - Masuk Apoteker 📚"
           text="Kategori yang tersedia pada kelas masuk apoteker."
         />
 
-        <div className="grid gap-4">
+        <div className="grid">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
+            <Select
+              aria-label="filter"
+              size="md"
+              placeholder="Filter"
+              variant="flat"
+              startContent={
+                <SlidersHorizontal
+                  weight="bold"
+                  size={18}
+                  className="text-gray"
+                />
+              }
+              selectedKeys={[filter]}
+              onChange={(e) => setFilter(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="active">Aktif</SelectItem>
+              <SelectItem key="inactive">Nonaktif</SelectItem>
+            </Select>
+
+            <Select
+              aria-label="sort"
+              size="md"
+              placeholder="Sort"
+              variant="flat"
+              startContent={
+                <Funnel weight="duotone" size={18} className="text-gray" />
+              }
+              selectedKeys={[sort]}
+              onChange={(e) => setSort(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="name.asc">Nama A-Z</SelectItem>
+              <SelectItem key="name.desc">Nama Z-A</SelectItem>
+              <SelectItem key="created_at.desc">Terbaru</SelectItem>
+              <SelectItem key="created_at.asc">Terlama</SelectItem>
+            </Select>
+
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
@@ -124,10 +224,10 @@ export default function CategoriesPage({
                 {(onClose) => (
                   <>
                     <ModalHeader className="font-bold text-black">
-                      Tambah Kategori
+                      {typeModal == "create" ? "Tambah" : "Edit"} Kategori
                     </ModalHeader>
 
-                    <ModalBody className="scrollbar-hide">
+                    <ModalBody className="gap-8 scrollbar-hide">
                       <div className="grid w-full gap-4 rounded-xl border border-dashed border-gray/30 bg-gray/5 py-8">
                         <FileText
                           weight="duotone"
@@ -159,8 +259,21 @@ export default function CategoriesPage({
                         labelPlacement="outside"
                         placeholder="Contoh: Farmakoterapi"
                         classNames={customStyleInput}
+                        value={name}
                         onChange={(e) => setName(e.target.value)}
                       />
+
+                      {typeModal == "edit" && (
+                        <Switch
+                          size="sm"
+                          color="secondary"
+                          isSelected={isSelected}
+                          onValueChange={setIsSelected}
+                          className="-mt-4 text-sm font-semibold text-black"
+                        >
+                          Nonaktifkan Kategori
+                        </Switch>
+                      )}
                     </ModalBody>
 
                     <ModalFooter>
@@ -178,13 +291,21 @@ export default function CategoriesPage({
                       </Button>
 
                       <Button
-                        color="secondary"
-                        onClick={handleAddCategory}
-                        className="font-semibold"
-                        isDisabled={!name || !image}
                         isLoading={loading}
+                        isDisabled={loading}
+                        color="secondary"
+                        onClick={() => {
+                          if (typeModal == "create") {
+                            handleAddCategory();
+                          } else {
+                            handleEditCategory();
+                          }
+                        }}
+                        className="font-semibold"
                       >
-                        Tambah Kategori
+                        {typeModal == "create"
+                          ? "Tambah Kategori"
+                          : "Simpan Perubahan"}
                       </Button>
                     </ModalFooter>
                   </>
@@ -193,35 +314,61 @@ export default function CategoriesPage({
             </Modal>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
-            {data?.data.map((category) => (
-              <div
-                key={category.category_id}
-                className="group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 border-gray/10 p-8 text-sm hover:cursor-pointer hover:bg-purple/10"
-              >
-                <Button
-                  isIconOnly
-                  variant="flat"
-                  size="sm"
-                  color="secondary"
-                  className="absolute right-4 top-4"
+          <div className="grid grid-cols-5 gap-4">
+            {isLoading ? (
+              Array.from({ length: data?.data.length || 10 }).map(
+                (_, index) => (
+                  <Skeleton key={index} className="h-40 w-full rounded-xl" />
+                ),
+              )
+            ) : data?.data.length ? (
+              data?.data.map((category) => (
+                <div
+                  key={category.category_id}
+                  className={`group relative grid justify-items-center gap-4 overflow-hidden rounded-xl border-2 p-8 text-sm hover:cursor-pointer ${
+                    category.is_active
+                      ? "border-purple/10 hover:border-purple hover:bg-purple/10"
+                      : "border-danger bg-danger/5 hover:bg-danger/10"
+                  }`}
                 >
-                  <CustomTooltip content="Edit Kategori">
-                    <Gear weight="bold" size={18} />
-                  </CustomTooltip>
-                </Button>
+                  <Button
+                    isIconOnly
+                    variant="light"
+                    size="sm"
+                    color="secondary"
+                    onClick={() => {
+                      onOpen();
+                      setTypeModal("edit");
 
-                <img
-                  src={category.img_url}
-                  alt={category.name}
-                  className="size-20 rounded-full object-cover"
-                />
+                      setName(category.name);
+                      setCategoryId(category.category_id);
+                      setIsSelected(!category.is_active as boolean);
+                    }}
+                    className="absolute right-4 top-4"
+                  >
+                    <CustomTooltip content="Edit Kategori">
+                      <Gear weight="bold" size={18} />
+                    </CustomTooltip>
+                  </Button>
 
-                <h4 className="line-clamp-2 text-center font-extrabold text-black group-hover:line-clamp-none">
-                  {category.name}
-                </h4>
+                  <Image
+                    src={category.img_url}
+                    alt={category.name}
+                    width={1000}
+                    height={1000}
+                    className={`size-20 object-fill ${category.is_active ? "grayscale-0" : "grayscale"}`}
+                  />
+
+                  <h4 className="line-clamp-2 text-center font-extrabold text-black group-hover:line-clamp-none">
+                    {category.name}
+                  </h4>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-5 flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
+                <EmptyData text="Data kategori belum tersedia." />
               </div>
-            ))}
+            )}
           </div>
         </div>
       </Container>
