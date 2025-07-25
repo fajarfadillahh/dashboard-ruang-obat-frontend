@@ -8,6 +8,7 @@ import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
+import { QuizResponse } from "@/types/quiz/quiz.type";
 import {
   Button,
   Pagination,
@@ -29,26 +30,6 @@ import { useQueryState } from "nuqs";
 import { ParsedUrlQuery } from "querystring";
 import { useRef } from "react";
 import useSWR from "swr";
-
-export interface QuizResponse {
-  quizzes: Quiz[];
-  sub_category_id: string;
-  name: string;
-  slug: string;
-  img_url: string;
-  type: string;
-  page: number;
-  total_quizzes: number;
-  total_pages: number;
-}
-
-export interface Quiz {
-  ass_id: string;
-  description: string;
-  title: string;
-  variant: string;
-  total_questions: number;
-}
 
 export default function DetailSubCategoryQuizPage({
   token,
@@ -87,7 +68,10 @@ export default function DetailSubCategoryQuizPage({
         <div className="grid">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
             <Select
+              aria-label="filter"
+              size="md"
               variant="flat"
+              placeholder="Filter"
               startContent={
                 <SlidersHorizontal
                   weight="bold"
@@ -95,8 +79,6 @@ export default function DetailSubCategoryQuizPage({
                   className="text-gray"
                 />
               }
-              size="md"
-              placeholder="Filter"
               selectedKeys={[filter]}
               onChange={(e) => setFilter(e.target.value)}
               className="max-w-[180px] text-gray"
@@ -109,12 +91,13 @@ export default function DetailSubCategoryQuizPage({
             </Select>
 
             <Select
+              aria-label="sort"
+              size="md"
               variant="flat"
+              placeholder="Sort"
               startContent={
                 <Funnel weight="duotone" size={18} className="text-gray" />
               }
-              size="md"
-              placeholder="Sort"
               selectedKeys={[sort]}
               onChange={(e) => setSort(e.target.value)}
               className="max-w-[180px] text-gray"
