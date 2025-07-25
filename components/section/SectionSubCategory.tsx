@@ -111,12 +111,13 @@ export default function SectionSubCategory({
         />
 
         <Select
+          aria-label="filter"
+          size="md"
           variant="flat"
+          placeholder="Filter"
           startContent={
             <SlidersHorizontal weight="bold" size={18} className="text-gray" />
           }
-          size="md"
-          placeholder="Filter"
           selectedKeys={[filter]}
           onChange={(e) => setFilter(e.target.value)}
           items={[
