@@ -28,10 +28,10 @@ import {
   FileText,
   IconContext,
   ImageSquare,
+  PencilLine,
   Plus,
   Trash,
 } from "@phosphor-icons/react";
-import { PencilLine } from "@phosphor-icons/react/dist/ssr";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
