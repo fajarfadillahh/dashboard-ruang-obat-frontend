@@ -81,7 +81,6 @@ export default function CreateQuizPage({
           type: question.type,
         })),
         type: "videocourse",
-        variant: "quiz",
         sub_category_id: router.query.id,
         by: session.data?.user.fullname,
       };

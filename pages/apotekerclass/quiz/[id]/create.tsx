@@ -81,7 +81,6 @@ export default function CreateQuizPage({
           type: question.type,
         })),
         type: "apotekerclass",
-        variant: "quiz",
         category_id: router.query.id,
         by: session.data?.user.fullname,
       };
