@@ -3,6 +3,7 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
+import { VideoContent } from "@/types/content/video.type";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
@@ -13,15 +14,6 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-
-type VideoContent = {
-  title: string;
-  video_url: string;
-  video_note: string;
-  video_note_url: string;
-  content_type: string;
-  by: string;
-};
 
 export default function CreateVideoCoursePage({
   token,

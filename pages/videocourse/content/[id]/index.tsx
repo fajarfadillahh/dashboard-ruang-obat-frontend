@@ -7,6 +7,7 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
+import { CourseResponse } from "@/types/course/course.type";
 import { SuccessResponse } from "@/types/global.type";
 import { Button, Select, SelectItem, Skeleton } from "@nextui-org/react";
 import {
@@ -25,22 +26,6 @@ import { useQueryState } from "nuqs";
 import { ParsedUrlQuery } from "querystring";
 import useSWR from "swr";
 
-interface CourseResponse {
-  name: string;
-  slug: string;
-  img_url: string;
-  type: string;
-  courses: {
-    course_id: string;
-    title: string;
-    slug: string;
-    thumbnail_url: string;
-    is_active: boolean;
-    total_videos: number;
-    total_tests: number;
-  }[];
-}
-
 export default function DetailSubCategoryContentPage({
   token,
   params,
@@ -50,7 +35,7 @@ export default function DetailSubCategoryContentPage({
   const [sort, setSort] = useQueryState("sort", { defaultValue: "" });
   const { data, isLoading } = useSWR<SuccessResponse<CourseResponse>>({
     url: getUrl(
-      `/courses/${encodeURIComponent(params?.id as string)}/videocourse/`,
+      `/courses/${encodeURIComponent(params?.id as string)}/videocourse`,
       { filter, sort },
     ),
     method: "GET",
@@ -75,7 +60,10 @@ export default function DetailSubCategoryContentPage({
         <div className="grid">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
             <Select
+              aria-label="filter"
+              size="md"
               variant="flat"
+              placeholder="Filter"
               startContent={
                 <SlidersHorizontal
                   weight="bold"
@@ -83,8 +71,6 @@ export default function DetailSubCategoryContentPage({
                   className="text-gray"
                 />
               }
-              size="md"
-              placeholder="Filter"
               selectedKeys={[filter]}
               onChange={(e) => setFilter(e.target.value)}
               className="max-w-[180px] text-gray"
@@ -97,12 +83,13 @@ export default function DetailSubCategoryContentPage({
             </Select>
 
             <Select
+              aria-label="sort"
+              size="md"
               variant="flat"
+              placeholder="Sort"
               startContent={
                 <Funnel weight="duotone" size={18} className="text-gray" />
               }
-              size="md"
-              placeholder="Sort"
               selectedKeys={[sort]}
               onChange={(e) => setSort(e.target.value)}
               className="max-w-[180px] text-gray"
