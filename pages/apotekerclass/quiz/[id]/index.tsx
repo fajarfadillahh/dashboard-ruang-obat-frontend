@@ -43,7 +43,7 @@ export default function DetailCategoryQuizPage({
   const divRef = useRef<HTMLDivElement | null>(null);
   const { data, isLoading } = useSWR<SuccessResponse<QuizResponse>>({
     url: getUrl(
-      `/quizzes/${encodeURIComponent(params?.id as string)}/apotekerclass/quiz`,
+      `/quizzes/${encodeURIComponent(params?.id as string)}/apotekerclass`,
       { page, filter, sort },
     ),
     method: "GET",
