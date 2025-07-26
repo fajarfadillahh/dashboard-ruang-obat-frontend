@@ -8,6 +8,7 @@ import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
+import { TryoutResponse } from "@/types/tryout.type";
 import {
   Button,
   Pagination,
@@ -28,20 +29,6 @@ import { useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
-
-export interface TryoutResponse {
-  page: number;
-  total_tryouts: number;
-  total_pages: number;
-  tryouts: {
-    ass_id: string;
-    title: string;
-    description: string;
-    variant: string;
-    ass_type: string;
-    total_questions: number;
-  }[];
-}
 
 export default function index({
   token,
@@ -65,8 +52,6 @@ export default function index({
     method: "GET",
     token,
   });
-
-  console.log(data?.data.tryouts);
 
   useEffect(() => {
     if (searchValue) {
@@ -173,6 +158,9 @@ export default function index({
                 <div
                   key={tryout.ass_id}
                   className="group relative isolate flex items-center gap-4 rounded-xl border-2 border-gray/10 p-4 hover:cursor-pointer hover:bg-purple/10"
+                  onClick={() =>
+                    router.push(`/apotekerclass/tryout/${tryout.ass_id}`)
+                  }
                 >
                   <Button
                     isIconOnly
