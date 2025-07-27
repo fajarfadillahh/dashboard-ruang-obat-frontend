@@ -59,7 +59,7 @@ export function SidebarMenuClass(): SidebarMenuClassType[] {
         { label: "Flashcard", path: "/videocourse/flashcard" },
         { label: "Konten", path: "/videocourse/content" },
         { label: "Paket Berlangganan", path: "/videocourse/subscriptions" },
-        { label: "Daftar Akses", path: "/videocourse/accesses" },
+        { label: "Access List", path: "/videocourse/accesses" },
       ],
     },
     {
@@ -105,7 +105,7 @@ export function SidebarMenuClass(): SidebarMenuClassType[] {
         { label: "Tryout", path: "/apotekerclass/tryout" },
         { label: "Universitas", path: "/apotekerclass/university" },
         { label: "Paket Berlangganan", path: "/apotekerclass/subscriptions" },
-        { label: "Daftar Akses", path: "/apotekerclass/accesses" },
+        { label: "Access List", path: "/apotekerclass/accesses" },
       ],
     },
     {
