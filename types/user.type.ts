@@ -4,7 +4,8 @@ export type User = {
   university: string;
   email: string;
   phone_number: string;
-  grade?: number;
+  is_verified: boolean;
+  created_at: string;
 };
 
 export type Participant = {
@@ -31,4 +32,15 @@ export type DetailsUserResponse = {
   gender: string;
   university: string;
   created_at: string;
+  is_verified: boolean;
+};
+
+export type ParticipantsResponse = {
+  program_id: string;
+  title: string;
+  type: "free" | "paid";
+  participants: Participant[];
+  page: number;
+  total_participants: number;
+  total_pages: number;
 };

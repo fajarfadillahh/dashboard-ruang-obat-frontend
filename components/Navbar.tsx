@@ -79,7 +79,7 @@ export default function Navbar() {
               <DropdownItem
                 key="logout"
                 color="danger"
-                startContent={<SignOut weight="bold" size={18} />}
+                startContent={<SignOut weight="duotone" size={18} />}
                 onClick={onOpen}
                 className="text-danger-600"
               >

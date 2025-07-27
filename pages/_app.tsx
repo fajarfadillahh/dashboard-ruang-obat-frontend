@@ -6,6 +6,7 @@ import { NextUIProvider } from "@nextui-org/react";
 import { SessionProvider } from "next-auth/react";
 import type { AppProps } from "next/app";
 import NextNProgress from "nextjs-progressbar";
+import { NuqsAdapter } from "nuqs/adapters/next/pages";
 import { Toaster } from "react-hot-toast";
 import { SWRConfig } from "swr";
 
@@ -24,7 +25,11 @@ export default function App({
           },
         }}
       />
-      <NextNProgress color="#6238C3" options={{ showSpinner: false }} />
+      <NextNProgress
+        color="#6238C3"
+        options={{ showSpinner: false }}
+        showOnShallow={false}
+      />
       <SessionProvider session={session} refetchOnWindowFocus={false}>
         <SessionWatcher />
         <SWRConfig
@@ -33,7 +38,9 @@ export default function App({
             revalidateOnFocus: true,
           }}
         >
-          <Component {...pageProps} />
+          <NuqsAdapter>
+            <Component {...pageProps} />
+          </NuqsAdapter>
         </SWRConfig>
       </SessionProvider>
     </NextUIProvider>

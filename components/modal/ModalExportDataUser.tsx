@@ -97,9 +97,9 @@ export default function ModalExportDataUser({ token }: { token: string }) {
     <>
       <Button
         color="secondary"
-        startContent={<Export weight="bold" size={18} />}
+        startContent={<Export weight="duotone" size={18} />}
         onClick={onOpen}
-        className="font-bold"
+        className="font-semibold"
       >
         Export Data
       </Button>
@@ -111,13 +111,12 @@ export default function ModalExportDataUser({ token }: { token: string }) {
         onClose={() => {
           setSelected([]);
         }}
-        size="sm"
       >
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 font-bold text-black">
-                Export Data
+              <ModalHeader className="font-bold text-black">
+                Export Data Pengguna
               </ModalHeader>
 
               <ModalBody className="scrollbar-hide">
@@ -125,7 +124,7 @@ export default function ModalExportDataUser({ token }: { token: string }) {
                   <LoadingData />
                 ) : (
                   <div className="grid gap-6">
-                    <p className="text-sm font-medium leading-[170%] text-gray">
+                    <p className="leading-[170%] text-gray">
                       Pilih data kolom pengguna yang ingin anda export
                     </p>
 
@@ -136,7 +135,7 @@ export default function ModalExportDataUser({ token }: { token: string }) {
                     >
                       {columns.map((item) => (
                         <Checkbox key={item.field} value={item.field}>
-                          <span className="text-sm font-medium leading-[170%] text-gray">
+                          <span className="leading-[170%] text-gray">
                             {item.translate}
                           </span>
                         </Checkbox>
@@ -154,7 +153,7 @@ export default function ModalExportDataUser({ token }: { token: string }) {
                     onClose();
                     setSelected([]);
                   }}
-                  className="font-bold"
+                  className="font-semibold"
                 >
                   Tutup
                 </Button>
@@ -163,7 +162,7 @@ export default function ModalExportDataUser({ token }: { token: string }) {
                   isDisabled={selected.length === 0}
                   color="secondary"
                   onClick={handleExportDataUser}
-                  className="font-bold"
+                  className="font-semibold"
                 >
                   Export
                 </Button>

@@ -7,7 +7,7 @@
 }
 
 ::-webkit-scrollbar {
-  @apply rounded-full bg-gray/10;
+  @apply w-3 rounded-full bg-purple/5;
 }
 ::-webkit-scrollbar-thumb {
   @apply w-1 rounded-full bg-purple/20 hover:bg-purple/40;

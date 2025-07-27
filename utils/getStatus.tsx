@@ -18,11 +18,11 @@ export const getStatusColor = (status: string) => {
 
 export const getStatusIcon = (status: string) => {
   const statusIcons: any = {
-    "Belum dimulai": <Clock weight="fill" size={16} />,
-    Berlangsung: <HourglassLow weight="fill" size={16} />,
-    "Tidak aktif": <XCircle weight="fill" size={16} />,
-    Aktif: <CheckCircle weight="fill" size={16} />,
+    "Belum dimulai": <Clock weight="duotone" size={16} />,
+    Berlangsung: <HourglassLow weight="duotone" size={16} />,
+    "Tidak aktif": <XCircle weight="duotone" size={16} />,
+    Aktif: <CheckCircle weight="duotone" size={16} />,
   };
 
-  return statusIcons[status] || <CheckCircle weight="fill" size={16} />;
+  return statusIcons[status] || <CheckCircle weight="duotone" size={16} />;
 };

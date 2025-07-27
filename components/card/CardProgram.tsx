@@ -16,16 +16,19 @@ import {
 import {
   BookBookmark,
   CheckCircle,
+  Eye,
   PencilLine,
   Power,
   Prohibit,
   Tag,
+  Users,
   XCircle,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import { KeyedMutator } from "swr";
+import CustomTooltip from "../CustomTooltip";
 
 interface ProgramProps {
   program: Program;
@@ -74,14 +77,14 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
     >
       <div className="flex items-start gap-6">
         {program.is_active ? (
-          <BookBookmark weight="bold" size={28} className="text-purple" />
+          <BookBookmark weight="duotone" size={28} className="text-purple" />
         ) : (
-          <Prohibit weight="bold" size={28} className="text-danger" />
+          <Prohibit weight="duotone" size={28} className="text-danger" />
         )}
 
         <div className="grid gap-4">
           <Link
-            href={`/programs/details/${encodeURIComponent(program.program_id)}`}
+            href={`/programs/${encodeURIComponent(program.program_id)}`}
             className={`line-clamp-1 text-xl font-bold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
           >
             {program.title}
@@ -92,12 +95,13 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
               <span className="text-xs font-medium text-gray">
                 Harga Program:
               </span>
+
               {program.type == "free" ? (
                 <Chip
                   variant="flat"
                   size="sm"
                   startContent={
-                    <Tag weight="fill" size={16} className="text-black" />
+                    <Tag weight="duotone" size={16} className="text-black" />
                   }
                   classNames={{
                     base: "px-2 gap-1",
@@ -119,6 +123,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
               <span className="text-xs font-medium text-gray">
                 Jumlah Ujian:
               </span>
+
               <h5 className="text-sm font-semibold text-black">
                 {program.total_tests} Modul Ujian
               </h5>
@@ -128,15 +133,16 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
               <span className="text-xs font-medium text-gray">
                 Status Program:
               </span>
+
               <Chip
                 variant="flat"
                 color={program.is_active ? "success" : "danger"}
                 size="sm"
                 startContent={
                   program.is_active ? (
-                    <CheckCircle weight="fill" size={16} />
+                    <CheckCircle weight="duotone" size={16} />
                   ) : (
-                    <XCircle weight="fill" size={16} />
+                    <XCircle weight="duotone" size={16} />
                   )
                 }
                 classNames={{
@@ -152,6 +158,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
               <span className="text-xs font-medium text-gray">
                 Dibuat Pada:
               </span>
+
               <h5 className="text-sm font-semibold text-black">
                 {formatDate(program.created_at)}
               </h5>
@@ -166,15 +173,45 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
           variant="light"
           size="sm"
           color="secondary"
-          onClick={() => router.push(`/programs/edit/${program.program_id}`)}
+          onClick={() => router.push(`/programs/${program.program_id}`)}
         >
-          <PencilLine weight="bold" size={18} />
+          <CustomTooltip content="Detail Program">
+            <Eye weight="duotone" size={18} />
+          </CustomTooltip>
+        </Button>
+
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          color="secondary"
+          onClick={() =>
+            router.push(`/programs/${program.program_id}/participants`)
+          }
+        >
+          <CustomTooltip content="Partisipan">
+            <Users weight="duotone" size={18} />
+          </CustomTooltip>
+        </Button>
+
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          color="secondary"
+          onClick={() => router.push(`/programs/${program.program_id}/edit`)}
+        >
+          <CustomTooltip content="Edit Program">
+            <PencilLine weight="duotone" size={18} />
+          </CustomTooltip>
         </Button>
 
         <Dropdown>
           <DropdownTrigger>
             <Button isIconOnly variant="light" size="sm">
-              <Power weight="bold" size={18} className="text-danger" />
+              <CustomTooltip content="Aktif/Nonaktif Program">
+                <Power weight="duotone" size={18} className="text-danger" />
+              </CustomTooltip>
             </Button>
           </DropdownTrigger>
 

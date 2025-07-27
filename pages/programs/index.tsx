@@ -1,49 +1,57 @@
 import CardProgram from "@/components/card/CardProgram";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
+import { withToken } from "@/lib/getToken";
+import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
 import { Program, ProgramsResponse } from "@/types/program.type";
-import { Button, Pagination } from "@nextui-org/react";
-import { Plus } from "@phosphor-icons/react";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import {
+  Button,
+  Pagination,
+  Select,
+  SelectItem,
+  Spinner,
+} from "@nextui-org/react";
+import { Funnel, Plus, SlidersHorizontal } from "@phosphor-icons/react";
+import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
+import { useQueryState } from "nuqs";
 import { ParsedUrlQuery } from "querystring";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useSWR from "swr";
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/programs?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/programs?page=${query.page ? query.page : 1}`;
-}
+import { useDebounce } from "use-debounce";
 
 export default function ProgramsPage({
   token,
-  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { setSearch, searchValue } = useSearch(800);
+  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [filter, setFilter] = useQueryState("filter", { defaultValue: "" });
+  const [sort, setSort] = useQueryState("sort", { defaultValue: "" });
+
+  const [searchValue] = useDebounce(search, 800);
+  const divRef = useRef<HTMLDivElement | null>(null);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<ProgramsResponse>
   >({
-    url: getUrl(query) as string,
+    url: getUrl("/admin/programs", {
+      q: searchValue,
+      page,
+      filter,
+      sort,
+    }),
     method: "GET",
     token,
   });
 
   useEffect(() => {
     if (searchValue) {
-      router.push({ query: { q: searchValue } });
-    } else {
-      router.push("/programs");
+      divRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [searchValue]);
 
@@ -63,86 +71,126 @@ export default function ProgramsPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Program" className="scrollbar-hide">
-      <Container>
-        <section className="grid gap-8">
-          <TitleText
-            title="Daftar Program 📋"
-            text="Program yang sudah dibuat oleh ruangobat.id"
-          />
+      <Container className="gap-8">
+        <TitleText
+          title="Daftar Program 📋"
+          text="Program yang sudah dibuat oleh ruangobat.id"
+        />
 
-          <div className="grid">
-            <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
-              <SearchInput
-                placeholder="Cari Program ID atau Nama Program"
-                defaultValue={query.q as string}
-                onChange={(e) => setSearch(e.target.value)}
-                onClear={() => setSearch("")}
-              />
+        <div className="grid" ref={divRef}>
+          <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+            <SearchInput
+              placeholder="Cari Nama Program atau ID Program..."
+              defaultValue={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
+            />
 
-              <Button
-                color="secondary"
-                startContent={<Plus weight="bold" size={18} />}
-                onClick={() => router.push("/programs/create")}
-                className="font-bold"
-              >
-                Tambah Program
-              </Button>
-            </div>
+            <Select
+              variant="flat"
+              startContent={
+                <SlidersHorizontal
+                  weight="bold"
+                  size={18}
+                  className="text-gray"
+                />
+              }
+              size="md"
+              placeholder="Filter"
+              selectedKeys={[filter]}
+              onChange={(e) => setFilter(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="free">Gratis</SelectItem>
+              <SelectItem key="paid">Berbayar</SelectItem>
+              <SelectItem key="active">Aktif</SelectItem>
+              <SelectItem key="inactive">Nonaktif</SelectItem>
+            </Select>
 
-            {searchValue && data?.data.programs.length === 0 ? (
-              <EmptyData text="Program tidak ditemukan!" />
-            ) : (
-              <div className="grid gap-2">
-                {data?.data.programs.map((program: Program) => (
-                  <CardProgram
-                    key={program.program_id}
-                    program={program}
-                    token={token as string}
-                    mutate={mutate}
-                  />
-                ))}
-              </div>
-            )}
+            <Select
+              variant="flat"
+              startContent={
+                <Funnel weight="duotone" size={18} className="text-gray" />
+              }
+              size="md"
+              placeholder="Sort"
+              selectedKeys={[sort]}
+              onChange={(e) => setSort(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="name.asc">Nama A-Z</SelectItem>
+              <SelectItem key="name.desc">Nama Z-A</SelectItem>
+              <SelectItem key="created_at.desc">Terbaru</SelectItem>
+              <SelectItem key="created_at.asc">Terlama</SelectItem>
+            </Select>
+
+            <Button
+              color="secondary"
+              startContent={<Plus weight="bold" size={18} />}
+              onClick={() => router.push("/programs/create")}
+              className="font-semibold"
+            >
+              Tambah Program
+            </Button>
           </div>
 
-          {data?.data.programs.length ? (
-            <Pagination
-              isCompact
-              showControls
-              page={data.data.page as number}
-              total={data.data.total_pages as number}
-              onChange={(e) => {
-                router.push({
-                  query: {
-                    ...router.query,
-                    page: e,
-                  },
-                });
-              }}
-              className="justify-self-center"
-              classNames={{
-                cursor: "bg-purple text-white",
-              }}
-            />
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2 py-16">
+              <Spinner label="Loading..." color="secondary" />
+            </div>
           ) : null}
-        </section>
+
+          {!isLoading && !data?.data.programs.length ? (
+            <EmptyData text="Program tidak ditemukan!" />
+          ) : (
+            <div className="grid gap-2">
+              {data?.data.programs.map((program: Program) => (
+                <CardProgram
+                  key={program.program_id}
+                  program={program}
+                  token={token as string}
+                  mutate={mutate}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {!isLoading && data?.data.programs.length ? (
+          <Pagination
+            isCompact
+            showControls
+            page={data.data.page as number}
+            total={data.data.total_pages as number}
+            onChange={(e) => {
+              setPage(`${e}`);
+              divRef.current?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="justify-self-center"
+            classNames={{
+              cursor: "bg-purple text-white",
+            }}
+          />
+        ) : null}
       </Container>
     </Layout>
   );
 }
 
-export const getServerSideProps: GetServerSideProps<{
-  token: string;
-  query: ParsedUrlQuery;
-}> = async ({ req, query }) => {
+export const getServerSideProps = withToken(async (ctx) => {
+  const { query } = ctx;
+
   return {
     props: {
-      token: req.headers["access_token"] as string,
-      query,
+      query: query as ParsedUrlQuery,
     },
   };
-};
+});

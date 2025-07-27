@@ -1,18 +1,20 @@
+import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalExportDataUser from "@/components/modal/ModalExportDataUser";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
+import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
 import { User, UsersResponse } from "@/types/user.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import {
   Button,
+  Chip,
   Pagination,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -20,40 +22,31 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Eye } from "@phosphor-icons/react";
+import { CheckCircle, Eye, XCircle } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import { ParsedUrlQuery } from "querystring";
-import { useEffect } from "react";
+import { useQueryState } from "nuqs";
+import { useRef } from "react";
 import useSWR from "swr";
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/users?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/users?page=${query.page ? query.page : 1}`;
-}
+import { useDebounce } from "use-debounce";
 
 export default function UsersPage({
   token,
-  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { setSearch, searchValue } = useSearch(800);
+  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [searchValue] = useDebounce(search, 800);
+  const divRef = useRef<HTMLDivElement | null>(null);
+
   const { data, error, isLoading } = useSWR<SuccessResponse<UsersResponse>>({
-    url: getUrl(query),
+    url: getUrl("/admin/users", {
+      q: searchValue,
+      page,
+    }),
     method: "GET",
     token,
   });
-
-  useEffect(() => {
-    if (searchValue) {
-      router.push({ query: { q: searchValue } });
-    } else {
-      router.push("/users");
-    }
-  }, [searchValue]);
 
   const columnsUser = [
     { name: "ID Pengguna", uid: "user_id" },
@@ -61,6 +54,7 @@ export default function UsersPage({
     { name: "Asal Kampus", uid: "university" },
     { name: "Email", uid: "email" },
     { name: "No. Telpon", uid: "phone_number" },
+    { name: "Status", uid: "is_verified" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -82,6 +76,29 @@ export default function UsersPage({
         return (
           <div className="font-medium text-black">{user.phone_number}</div>
         );
+      case "is_verified":
+        return (
+          <div className="w-max">
+            <Chip
+              variant="flat"
+              size="sm"
+              color={user.is_verified ? "success" : "danger"}
+              startContent={
+                user.is_verified ? (
+                  <CheckCircle weight="duotone" size={18} />
+                ) : (
+                  <XCircle weight="duotone" size={18} />
+                )
+              }
+              classNames={{
+                base: "px-2 gap-1",
+                content: "font-bold capitalize",
+              }}
+            >
+              {user.is_verified ? "Terverifikasi" : "Belum Terverifikasi"}
+            </Chip>
+          </div>
+        );
       case "action":
         return (
           <Button
@@ -90,10 +107,12 @@ export default function UsersPage({
             size="sm"
             color="secondary"
             onClick={() =>
-              router.push(`/users/details/${encodeURIComponent(user.user_id)}`)
+              router.push(`/users/${encodeURIComponent(user.user_id)}`)
             }
           >
-            <Eye weight="bold" size={18} />
+            <CustomTooltip content="Detail Pengguna">
+              <Eye weight="duotone" size={18} />
+            </CustomTooltip>
           </Button>
         );
 
@@ -118,83 +137,77 @@ export default function UsersPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Pengguna" className="scrollbar-hide">
-      <Container>
-        <section className="grid gap-8">
-          <TitleText
-            title="Daftar Pengguna 🧑🏽‍💻"
-            text="Tabel pengguna yang sudah terdaftar di ruangobat.id"
-          />
+      <Container className="gap-8">
+        <TitleText
+          title="Daftar Pengguna 🧑🏽‍💻"
+          text="Tabel pengguna yang sudah terdaftar di ruangobat.id"
+        />
 
-          <div className="grid">
-            <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
-              <SearchInput
-                placeholder="Cari User ID atau Nama User"
-                defaultValue={query.q as string}
-                onChange={(e) => setSearch(e.target.value)}
-                onClear={() => setSearch("")}
-              />
+        <div className="grid" ref={divRef}>
+          <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
+            <SearchInput
+              placeholder="Cari Nama Pengguna atau ID Pengguna..."
+              defaultValue={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
+            />
 
-              <ModalExportDataUser {...{ token }} />
-            </div>
-
-            <div className="overflow-x-scroll scrollbar-hide">
-              <Table
-                isHeaderSticky
-                aria-label="users table"
-                color="secondary"
-                selectionMode="none"
-                classNames={customStyleTable}
-                className="scrollbar-hide"
-              >
-                <TableHeader columns={columnsUser}>
-                  {(column) => (
-                    <TableColumn key={column.uid}>{column.name}</TableColumn>
-                  )}
-                </TableHeader>
-
-                <TableBody
-                  items={data?.data.users}
-                  emptyContent={<EmptyData text="Pengguna tidak ditemukan!" />}
-                >
-                  {(user: User) => (
-                    <TableRow key={user.user_id}>
-                      {(columnKey) => (
-                        <TableCell>
-                          {renderCellUsers(user, columnKey)}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <ModalExportDataUser {...{ token }} />
           </div>
 
-          {data?.data.users.length ? (
-            <Pagination
-              isCompact
-              showControls
-              page={data?.data.page as number}
-              total={data?.data.total_pages as number}
-              onChange={(e) => {
-                router.push({
-                  query: {
-                    ...router.query,
-                    page: e,
-                  },
-                });
-              }}
-              className="justify-self-center"
-              classNames={{
-                cursor: "bg-purple text-white",
-              }}
-            />
-          ) : null}
-        </section>
+          <div className="overflow-x-scroll scrollbar-hide">
+            <Table
+              isStriped
+              aria-label="users table"
+              color="secondary"
+              selectionMode="none"
+              classNames={customStyleTable}
+              className="scrollbar-hide"
+            >
+              <TableHeader columns={columnsUser}>
+                {(column) => (
+                  <TableColumn key={column.uid}>{column.name}</TableColumn>
+                )}
+              </TableHeader>
+
+              <TableBody
+                isLoading={isLoading}
+                items={data?.data.users || []}
+                emptyContent={<EmptyData text="Pengguna tidak ditemukan!" />}
+                loadingContent={
+                  <Spinner label="Loading..." color="secondary" />
+                }
+              >
+                {(user: User) => (
+                  <TableRow key={user.user_id}>
+                    {(columnKey) => (
+                      <TableCell>{renderCellUsers(user, columnKey)}</TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {!isLoading && data?.data.users.length ? (
+          <Pagination
+            isCompact
+            showControls
+            page={data?.data.page as number}
+            total={data?.data.total_pages as number}
+            onChange={(e) => {
+              divRef.current?.scrollIntoView({ behavior: "smooth" });
+              setPage(`${e}`);
+            }}
+            className="justify-self-center"
+            classNames={{
+              cursor: "bg-purple text-white",
+            }}
+          />
+        ) : null}
       </Container>
     </Layout>
   );
@@ -202,12 +215,10 @@ export default function UsersPage({
 
 export const getServerSideProps: GetServerSideProps<{
   token: string;
-  query: ParsedUrlQuery;
-}> = async ({ req, query }) => {
+}> = async ({ req }) => {
   return {
     props: {
       token: req.headers["access_token"] as string,
-      query,
     },
   };
 };

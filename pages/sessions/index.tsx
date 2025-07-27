@@ -1,3 +1,4 @@
+import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/loading/LoadingScreen";
@@ -7,6 +8,8 @@ import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import useSearch from "@/hooks/useSearch";
+import { withToken } from "@/lib/getToken";
+import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
 import { Session, SessionResponse } from "@/types/session.type";
 import { customStyleTable } from "@/utils/customStyleTable";
@@ -24,20 +27,12 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import { Trash } from "@phosphor-icons/react";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-
-function getUrl(query: ParsedUrlQuery) {
-  if (query.q) {
-    return `/admin/sessions?q=${query.q}&page=${query.page ? query.page : 1}`;
-  }
-
-  return `/admin/sessions?page=${query.page ? query.page : 1}`;
-}
 
 export default function SessionPage({
   token,
@@ -48,7 +43,7 @@ export default function SessionPage({
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<SessionResponse>
   >({
-    url: getUrl(query) as string,
+    url: getUrl("/admin/sessions", query) as string,
     method: "GET",
     token,
   });
@@ -118,35 +113,20 @@ export default function SessionPage({
           <ModalConfirm
             trigger={
               <Button isIconOnly variant="light" color="danger" size="sm">
-                <Trash weight="bold" size={18} className="text-danger" />
+                <CustomTooltip content="Hapus Session">
+                  <Trash weight="duotone" size={18} className="text-danger" />
+                </CustomTooltip>
               </Button>
             }
             header={<h1 className="font-bold text-black">Hapus Session</h1>}
             body={
               <div className="grid gap-3 text-sm font-medium">
                 <p className="leading-[170%] text-gray">
-                  Apakah anda ingin menghapus session berikut secara permanen?
-                </p>
-
-                <div className="grid gap-1">
-                  {[
-                    ["ID Pengguna", `${session.user_id}`],
-                    ["Nama Lengkap", `${session.fullname}`],
-                  ].map(([label, value], index) => (
-                    <div
-                      key={index}
-                      className="grid gap-4 [grid-template-columns:110px_2px_1fr;]"
-                    >
-                      <h1 className="text-gray">{label}</h1>
-                      <span>:</span>
-                      <h1 className="font-extrabold text-purple">{value}</h1>
-                    </div>
-                  ))}
-                </div>
-
-                <p className="leading-[170%] text-gray">
-                  Tindakan ini tidak dapat dibatalkan, dan data yang sudah
-                  dihapus tidak dapat dipulihkan.
+                  Apakah anda ingin menghapus session{" "}
+                  <strong className="font-extrabold text-purple">
+                    {session.fullname}
+                  </strong>
+                  ?
                 </p>
               </div>
             }
@@ -156,7 +136,7 @@ export default function SessionPage({
                   color="danger"
                   variant="light"
                   onPress={onClose}
-                  className="font-bold"
+                  className="font-semibold"
                 >
                   Tutup
                 </Button>
@@ -164,7 +144,7 @@ export default function SessionPage({
                 <Button
                   color="danger"
                   onClick={() => handleDeleteSession(session.user_id)}
-                  className="font-bold"
+                  className="font-semibold"
                 >
                   Ya, Hapus Session
                 </Button>
@@ -215,92 +195,88 @@ export default function SessionPage({
 
   return (
     <Layout title="Session" className="scrollbar-hide">
-      <Container>
-        <section className="grid gap-8">
-          <TitleText
-            title="Aktifitas Login 🕚"
-            text="Pantau aktifitas login pengguna ruangobat.id"
-          />
+      <Container className="gap-8">
+        <TitleText
+          title="Aktifitas Login 🕚"
+          text="Pantau aktifitas login pengguna ruangobat.id"
+        />
 
-          <div className="grid">
-            <div className="sticky left-0 top-0 z-50 bg-white pb-4">
-              <SearchInput
-                placeholder="Cari User ID atau Nama Pengguna"
-                defaultValue={query.q as string}
-                onChange={(e) => setSearch(e.target.value)}
-                onClear={() => setSearch("")}
-              />
-            </div>
-
-            <div className="overflow-x-scroll scrollbar-hide">
-              <Table
-                isHeaderSticky
-                aria-label="sessions table"
-                color="secondary"
-                selectionMode="none"
-                classNames={customStyleTable}
-                className="scrollbar-hide"
-              >
-                <TableHeader columns={columnsSession}>
-                  {(column) => (
-                    <TableColumn key={column.uid}>{column.name}</TableColumn>
-                  )}
-                </TableHeader>
-
-                <TableBody
-                  items={data?.data.sessions}
-                  emptyContent={
-                    <EmptyData text="Aktifitas pengguna tidak ditemukan!" />
-                  }
-                >
-                  {(session: Session) => (
-                    <TableRow key={session.user_id}>
-                      {(columnKey) => (
-                        <TableCell>
-                          {renderCellSessions(session, columnKey)}
-                        </TableCell>
-                      )}
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+        <div className="grid">
+          <div className="sticky left-0 top-0 z-50 bg-white pb-4">
+            <SearchInput
+              placeholder="Cari Nama Pengguna atau ID Pengguna..."
+              defaultValue={query.q as string}
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
+            />
           </div>
 
-          {data?.data.sessions.length ? (
-            <Pagination
-              isCompact
-              showControls
-              page={data?.data.page as number}
-              total={data?.data.total_pages as number}
-              onChange={(e) => {
-                router.push({
-                  query: {
-                    ...router.query,
-                    page: e,
-                  },
-                });
-              }}
-              className="justify-self-center"
-              classNames={{
-                cursor: "bg-purple text-white",
-              }}
-            />
-          ) : null}
-        </section>
+          <div className="overflow-x-scroll scrollbar-hide">
+            <Table
+              isStriped
+              aria-label="sessions table"
+              color="secondary"
+              selectionMode="none"
+              classNames={customStyleTable}
+              className="scrollbar-hide"
+            >
+              <TableHeader columns={columnsSession}>
+                {(column) => (
+                  <TableColumn key={column.uid}>{column.name}</TableColumn>
+                )}
+              </TableHeader>
+
+              <TableBody
+                items={data?.data.sessions}
+                emptyContent={
+                  <EmptyData text="Aktifitas pengguna tidak ditemukan!" />
+                }
+              >
+                {(session: Session) => (
+                  <TableRow key={session.user_id}>
+                    {(columnKey) => (
+                      <TableCell>
+                        {renderCellSessions(session, columnKey)}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        {data?.data.sessions.length ? (
+          <Pagination
+            isCompact
+            showControls
+            page={data?.data.page as number}
+            total={data?.data.total_pages as number}
+            onChange={(e) => {
+              router.push({
+                query: {
+                  ...router.query,
+                  page: e,
+                },
+              });
+            }}
+            className="justify-self-center"
+            classNames={{
+              cursor: "bg-purple text-white",
+            }}
+          />
+        ) : null}
       </Container>
     </Layout>
   );
 }
 
-export const getServerSideProps: GetServerSideProps<{
-  token: string;
-  query: ParsedUrlQuery;
-}> = async ({ req, query }) => {
+export const getServerSideProps = withToken(async (ctx) => {
+  const { query } = ctx;
+
   return {
     props: {
-      token: req.headers["access_token"] as string,
-      query,
+      query: query as ParsedUrlQuery,
     },
   };
-};
+});

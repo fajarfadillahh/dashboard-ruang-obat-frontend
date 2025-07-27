@@ -13,7 +13,7 @@ import {
   ModalHeader,
   useDisclosure,
 } from "@nextui-org/react";
-import { CheckCircle, Eye } from "@phosphor-icons/react";
+import { Eye } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -83,11 +83,12 @@ export default function ModalJoiningRequirement({
         variant="light"
         color="secondary"
         size="sm"
-        startContent={<Eye weight="bold" size={16} />}
+        startContent={<Eye weight="duotone" size={18} />}
         onPress={() => {
-          onOpen(), handleGetImagesApproval(program_id, participant.user_id);
+          onOpen();
+          handleGetImagesApproval(program_id, participant.user_id);
         }}
-        className="font-bold"
+        className="font-semibold"
       >
         Lihat Persyaratan
       </Button>
@@ -101,13 +102,13 @@ export default function ModalJoiningRequirement({
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1 font-bold text-black">
+              <ModalHeader className="font-bold text-black">
                 Permintaan Bergabung
               </ModalHeader>
 
               <ModalBody>
-                <div className="grid gap-6">
-                  <div className="grid gap-2">
+                <div className="grid gap-8">
+                  <div className="grid gap-1">
                     {[
                       ["ID Partisipan", `${participant.user_id}`],
                       ["Nama Lengkap", `${participant.fullname}`],
@@ -155,34 +156,24 @@ export default function ModalJoiningRequirement({
                   color="danger"
                   variant="light"
                   onPress={onClose}
-                  className="font-bold"
+                  className="font-semibold"
                 >
                   Tutup
                 </Button>
 
-                {!participant.is_approved ? (
-                  <Button
-                    isLoading={loading}
-                    color="secondary"
-                    onClick={() =>
-                      handleApprovalParticipant(program_id, participant.user_id)
-                    }
-                    className="font-bold"
-                  >
-                    {loading ? "Tunggu Sebentar..." : "Permintaan Diterima"}
-                  </Button>
-                ) : (
-                  <div className="inline-flex items-center gap-1">
-                    <CheckCircle
-                      weight="fill"
-                      size={20}
-                      className="text-success"
-                    />
-                    <p className="text-sm font-bold text-black">
-                      Telah Diterima
-                    </p>
-                  </div>
-                )}
+                <Button
+                  isLoading={loading}
+                  color="secondary"
+                  onClick={() => {
+                    handleApprovalParticipant(program_id, participant.user_id);
+                    setTimeout(() => {
+                      onClose();
+                    }, 500);
+                  }}
+                  className="font-semibold"
+                >
+                  {loading ? "Tunggu Sebentar..." : "Permintaan Diterima"}
+                </Button>
               </ModalFooter>
             </>
           )}

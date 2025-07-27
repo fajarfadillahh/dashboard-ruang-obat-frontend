@@ -16,6 +16,7 @@ import {
 } from "@nextui-org/react";
 import {
   ClipboardText,
+  Eye,
   PencilLine,
   Power,
   Prohibit,
@@ -25,6 +26,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import { KeyedMutator } from "swr";
+import CustomTooltip from "../CustomTooltip";
 
 interface TestProps {
   test: Test;
@@ -75,14 +77,14 @@ export default function CardTest({ test, token, mutate }: TestProps) {
     >
       <div className="inline-flex flex-1 items-start gap-3">
         {test.is_active ? (
-          <ClipboardText weight="bold" size={28} className="text-purple" />
+          <ClipboardText weight="duotone" size={28} className="text-purple" />
         ) : (
-          <Prohibit weight="bold" size={28} className="text-danger" />
+          <Prohibit weight="duotone" size={28} className="text-danger" />
         )}
 
         <div className="grid gap-6">
           <Link
-            href={`/tests/details/${test.test_id}`}
+            href={`/tests/${test.test_id}`}
             className={`line-clamp-1 text-xl font-bold leading-[120%] text-black ${test.is_active ? "hover:text-purple" : "hover:text-danger"}`}
           >
             {test.title}
@@ -93,6 +95,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
               <span className="text-xs font-medium text-gray">
                 Tanggal Mulai:
               </span>
+
               <h1 className="text-sm font-semibold text-black">
                 {formatDateWithoutTime(test.start)}
               </h1>
@@ -102,6 +105,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
               <span className="text-xs font-medium text-gray">
                 Tanggal Selesai:
               </span>
+
               <h1 className="text-sm font-semibold text-black">
                 {formatDateWithoutTime(test.end)}
               </h1>
@@ -111,6 +115,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
               <span className="text-xs font-medium text-gray">
                 Durasi Pengerjaan:
               </span>
+
               <h1 className="text-sm font-semibold text-black">
                 {test.duration} Menit
               </h1>
@@ -140,7 +145,7 @@ export default function CardTest({ test, token, mutate }: TestProps) {
                     variant="flat"
                     color="danger"
                     size="sm"
-                    startContent={<XCircle weight="fill" size={16} />}
+                    startContent={<XCircle weight="duotone" size={16} />}
                     classNames={{
                       base: "px-2 gap-1",
                       content: "font-bold capitalize",
@@ -161,15 +166,31 @@ export default function CardTest({ test, token, mutate }: TestProps) {
           variant="light"
           size="sm"
           color="secondary"
-          onClick={() => router.push(`/tests/edit/${test.test_id}`)}
+          onClick={() => router.push(`/tests/${test.test_id}`)}
         >
-          <PencilLine weight="bold" size={18} />
+          <CustomTooltip content="Detail Ujian">
+            <Eye weight="duotone" size={18} />
+          </CustomTooltip>
+        </Button>
+
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          color="secondary"
+          onClick={() => router.push(`/tests/${test.test_id}/edit`)}
+        >
+          <CustomTooltip content="Edit Ujian">
+            <PencilLine weight="duotone" size={18} />
+          </CustomTooltip>
         </Button>
 
         <Dropdown>
           <DropdownTrigger>
             <Button isIconOnly variant="light" size="sm">
-              <Power weight="bold" size={18} className="text-danger" />
+              <CustomTooltip content="Aktif/Nonaktif Ujian">
+                <Power weight="duotone" size={18} className="text-danger" />
+              </CustomTooltip>
             </Button>
           </DropdownTrigger>
 
@@ -193,8 +214,8 @@ export default function CardTest({ test, token, mutate }: TestProps) {
           <Button
             size="sm"
             color="secondary"
-            onClick={() => router.push(`/tests/grades/${test.test_id}`)}
-            className="px-6 font-bold"
+            onClick={() => router.push(`/tests/${test.test_id}/grades`)}
+            className="px-6 font-semibold"
           >
             Lihat Nilai
           </Button>

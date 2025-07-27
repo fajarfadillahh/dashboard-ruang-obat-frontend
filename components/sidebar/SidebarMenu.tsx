@@ -1,29 +1,38 @@
 import {
   BookBookmark,
+  Books,
+  ChartLine,
+  ChatCircleDots,
   ChatCircleText,
   ClipboardText,
   Clock,
-  House,
   Icon,
+  Microscope,
+  Robot,
   User,
   Users,
+  Video,
 } from "@phosphor-icons/react";
 
-type SidebarMenuType = {
+type BaseMenuItem = {
   label: string;
   path: string;
+};
+
+type SidebarMenuType = BaseMenuItem & {
   icon: Icon;
 };
 
-export function SidebarMainMenu(adminId: string): SidebarMenuType[] {
-  const isSuperAdmin = adminId.startsWith("ROSA");
+type SidebarMenuClassType = {
+  key: string;
+  title: string;
+  icon: Icon;
+  path: string;
+  items: BaseMenuItem[];
+};
 
+export function SidebarMenuTryout(): SidebarMenuType[] {
   return [
-    {
-      label: "Dashboard",
-      path: "/dashboard",
-      icon: House,
-    },
     {
       label: "Program",
       path: "/programs",
@@ -34,6 +43,87 @@ export function SidebarMainMenu(adminId: string): SidebarMenuType[] {
       path: "/tests",
       icon: ClipboardText,
     },
+  ];
+}
+
+export function SidebarMenuClass(): SidebarMenuClassType[] {
+  return [
+    {
+      key: "videocourse",
+      title: "Video Pembelajaran",
+      icon: Video,
+      path: "/videocourse",
+      items: [
+        { label: "Kategori", path: "/videocourse/categories" },
+        { label: "Kuis", path: "/videocourse/quiz" },
+        { label: "Flashcard", path: "/videocourse/flashcard" },
+        { label: "Konten", path: "/videocourse/content" },
+        { label: "Paket Berlangganan", path: "/videocourse/subscriptions" },
+        { label: "Access List", path: "/videocourse/accesses" },
+      ],
+    },
+    {
+      key: "private",
+      title: "Private 1 on 1",
+      icon: ChatCircleDots,
+      path: "/private",
+      items: [
+        { label: "Konten", path: "/private/content" },
+        { label: "Mentor", path: "/private/mentor" },
+      ],
+    },
+    {
+      key: "theses",
+      title: "Skripsi Farmasi",
+      icon: Books,
+      path: "/theses",
+      items: [
+        { label: "Konten", path: "/theses/content" },
+        { label: "Mentor", path: "/theses/mentor" },
+      ],
+    },
+    {
+      key: "research",
+      title: "Riset Farmasi",
+      icon: Microscope,
+      path: "/research",
+      items: [
+        { label: "Konten", path: "/research/content" },
+        { label: "Mentor", path: "/research/mentor" },
+      ],
+    },
+    {
+      key: "apotekerclass",
+      title: "Masuk Apoteker",
+      icon: BookBookmark,
+      path: "/apotekerclass",
+      items: [
+        { label: "Kategori", path: "/apotekerclass/categories" },
+        { label: "Kuis", path: "/apotekerclass/quiz" },
+        { label: "Flashcard", path: "/apotekerclass/flashcard" },
+        { label: "Konten", path: "/apotekerclass/content" },
+        { label: "Tryout", path: "/apotekerclass/tryout" },
+        { label: "Universitas", path: "/apotekerclass/university" },
+        { label: "Paket Berlangganan", path: "/apotekerclass/subscriptions" },
+        { label: "Access List", path: "/apotekerclass/accesses" },
+      ],
+    },
+    {
+      key: "statistics",
+      title: "Statistik",
+      icon: ChartLine,
+      path: "/statistics",
+      items: [
+        { label: "Aktivitas Login", path: "/statistics/login" },
+        { label: "Pendaftar", path: "/statistics/registered" },
+        { label: "ROSA (AI)", path: "/statistics/ai" },
+      ],
+    },
+  ];
+}
+
+export function SidebarMenuUser(): SidebarMenuType[] {
+  return [
     {
       label: "Pengguna",
       path: "/users",
@@ -44,11 +134,13 @@ export function SidebarMainMenu(adminId: string): SidebarMenuType[] {
       path: "/sessions",
       icon: Clock,
     },
-    {
-      label: "Feedback",
-      path: "/feedback",
-      icon: ChatCircleText,
-    },
+  ];
+}
+
+export function SidebarOtherMenu(adminId?: string): SidebarMenuType[] {
+  const isSuperAdmin = adminId?.startsWith("ROSA");
+
+  return [
     ...(isSuperAdmin
       ? [
           {
@@ -58,15 +150,20 @@ export function SidebarMainMenu(adminId: string): SidebarMenuType[] {
           },
         ]
       : []),
-  ];
-}
-
-export function SidebarOtherMenu(): SidebarMenuType[] {
-  return [
+    {
+      label: "Rosa (AI)",
+      path: "/ai",
+      icon: Robot,
+    },
     {
       label: "Mentor",
       path: "/mentors",
       icon: Users,
+    },
+    {
+      label: "Feedback",
+      path: "/feedback",
+      icon: ChatCircleText,
     },
   ];
 }

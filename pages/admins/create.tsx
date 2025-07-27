@@ -2,16 +2,16 @@ import ButtonBack from "@/components/button/ButtonBack";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
+import { withToken } from "@/lib/getToken";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
-import { validateFullname, validatePassword } from "@/utils/formValidator";
 import { getError } from "@/utils/getError";
 import { handleKeyDown } from "@/utils/handleKeyDown";
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { FloppyDisk, Lock, User, UserGear } from "@phosphor-icons/react";
-import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import { ChangeEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 type InputState = {
@@ -19,11 +19,6 @@ type InputState = {
   role: string;
   password: string;
   access_key: string;
-};
-
-type ErrorState = {
-  fullname?: string;
-  password?: string;
 };
 
 export default function CreateAdminPage({
@@ -37,21 +32,7 @@ export default function CreateAdminPage({
     access_key: "",
   });
   const [loading, setLoading] = useState<boolean>(false);
-  const [errors, setErrors] = useState<ErrorState>({});
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-
-  function handleInputChange(
-    e: ChangeEvent<HTMLInputElement>,
-    customValidator?: (value: string) => string | null,
-  ) {
-    const { name, value } = e.target;
-    setInput((prev) => ({ ...prev, [name]: value }));
-
-    if (customValidator) {
-      const error = customValidator(value);
-      setErrors((prev) => ({ ...prev, [name]: error }));
-    }
-  }
 
   async function handleCreateAdmin() {
     setLoading(true);
@@ -87,130 +68,114 @@ export default function CreateAdminPage({
   return (
     <Layout title="Buat Admin" className="scrollbar-hide">
       <Container>
-        <section className="grid">
-          <ButtonBack />
+        <ButtonBack />
 
-          <TitleText
-            title="Buat Admin 🧑🏽"
-            text="Tambahkan admin untuk dapat membantu yang lain"
-            className="border-b-2 border-dashed border-gray/20 py-8"
-          />
+        <TitleText
+          title="Buat Admin 🧑🏽"
+          text="Tambahkan admin untuk dapat membantu yang lain"
+          className="border-b-2 border-dashed border-gray/20 py-8"
+        />
 
-          <div className="grid max-w-[700px] gap-8 pt-8">
-            <div className="grid gap-6">
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  isRequired
-                  type="text"
-                  variant="flat"
-                  label="Nama Lengkap"
-                  labelPlacement="outside"
-                  placeholder="Masukan Nama Lengkap"
-                  name="fullname"
-                  onChange={(e) => handleInputChange(e, validateFullname)}
-                  startContent={
-                    <User
-                      weight="bold"
-                      size={18}
-                      className="text-default-600"
-                    />
-                  }
-                  classNames={customStyleInput}
-                  isInvalid={!!errors.fullname}
-                  errorMessage={errors.fullname}
-                />
-
-                <Select
-                  isRequired
-                  aria-label="select role"
-                  variant="flat"
-                  label="Role"
-                  labelPlacement="outside"
-                  placeholder="Pilih Role"
-                  name="role"
-                  selectedKeys={[input.role]}
-                  onChange={(e) =>
-                    setInput({
-                      ...input,
-                      [e.target.name]: e.target.value,
-                    })
-                  }
-                  startContent={
-                    <UserGear weight="bold" size={18} className="text-gray" />
-                  }
-                  classNames={{
-                    value: "font-semibold text-gray",
-                  }}
-                >
-                  <SelectItem key="admin">Admin</SelectItem>
-                  <SelectItem key="superadmin">Superadmin</SelectItem>
-                </Select>
-              </div>
-
+        <div className="grid max-w-[700px] gap-8 pt-8">
+          <div className="grid gap-6">
+            <div className="grid grid-cols-2 gap-4">
               <Input
                 isRequired
                 type="text"
                 variant="flat"
-                label="Kata Sandi"
+                label="Nama Lengkap"
                 labelPlacement="outside"
-                placeholder="Masukan Kata Sandi"
-                name="password"
-                onChange={(e) => handleInputChange(e, validatePassword)}
+                placeholder="Masukan Nama Lengkap"
+                name="fullname"
+                onChange={(e) =>
+                  setInput({ ...input, fullname: e.target.value })
+                }
                 startContent={
-                  <Lock weight="bold" size={18} className="text-default-600" />
+                  <User weight="duotone" size={18} className="text-gray" />
                 }
                 classNames={customStyleInput}
-                isInvalid={!!errors.password}
-                errorMessage={errors.password}
               />
 
-              <Input
+              <Select
                 isRequired
-                type="password"
+                aria-label="select role"
                 variant="flat"
-                label="Kunci Akses"
+                label="Role"
                 labelPlacement="outside"
-                placeholder="Masukan Kunci Akses"
-                name="access_key"
+                placeholder="Pilih Role"
+                name="role"
+                selectedKeys={[input.role]}
                 onChange={(e) =>
                   setInput({
                     ...input,
-                    [e.target.name]: e.target.value,
+                    role: e.target.value,
                   })
                 }
-                onKeyDown={(e) => handleKeyDown(e, handleCreateAdmin)}
                 startContent={
-                  <Lock weight="bold" size={18} className="text-default-600" />
+                  <UserGear weight="duotone" size={18} className="text-gray" />
                 }
-                classNames={customStyleInput}
-              />
+                classNames={{
+                  value: "font-semibold text-gray",
+                }}
+              >
+                <SelectItem key="admin">Admin</SelectItem>
+                <SelectItem key="superadmin">Superadmin</SelectItem>
+              </Select>
             </div>
 
-            <Button
-              isLoading={loading}
-              isDisabled={isButtonDisabled || loading}
-              color="secondary"
+            <Input
+              isRequired
+              type="text"
+              variant="flat"
+              label="Kata Sandi"
+              labelPlacement="outside"
+              placeholder="Masukan Kata Sandi"
+              name="password"
+              onChange={(e) => setInput({ ...input, password: e.target.value })}
               startContent={
-                loading ? null : <FloppyDisk weight="bold" size={18} />
+                <Lock weight="duotone" size={18} className="text-default-600" />
               }
-              onClick={handleCreateAdmin}
-              className="w-max justify-self-end font-bold"
-            >
-              {loading ? "Tunggu Sebentar..." : "Buat Admin"}
-            </Button>
+              classNames={customStyleInput}
+            />
+
+            <Input
+              isRequired
+              type="password"
+              variant="flat"
+              label="Kunci Akses"
+              labelPlacement="outside"
+              placeholder="Masukan Kunci Akses"
+              name="access_key"
+              onChange={(e) =>
+                setInput({
+                  ...input,
+                  access_key: e.target.value,
+                })
+              }
+              onKeyDown={(e) => handleKeyDown(e, handleCreateAdmin)}
+              startContent={
+                <Lock weight="duotone" size={18} className="text-default-600" />
+              }
+              classNames={customStyleInput}
+            />
           </div>
-        </section>
+
+          <Button
+            isLoading={loading}
+            isDisabled={isButtonDisabled || loading}
+            color="secondary"
+            startContent={
+              loading ? null : <FloppyDisk weight="duotone" size={18} />
+            }
+            onClick={handleCreateAdmin}
+            className="w-max justify-self-end font-semibold"
+          >
+            {loading ? "Tunggu Sebentar..." : "Buat Admin"}
+          </Button>
+        </div>
       </Container>
     </Layout>
   );
 }
 
-export const getServerSideProps: GetServerSideProps<{
-  token: string;
-}> = async ({ req }) => {
-  return {
-    props: {
-      token: req.headers["access_token"] as string,
-    },
-  };
-};
+export const getServerSideProps = withToken();

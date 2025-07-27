@@ -32,6 +32,7 @@ export default function CKEditor({ value, onChange, token }: CKEditorProps) {
     <CKEditorComponent
       editor={ClassicEditor}
       config={{
+        licenseKey: "GPL",
         toolbar: {
           items: [
             "undo",
