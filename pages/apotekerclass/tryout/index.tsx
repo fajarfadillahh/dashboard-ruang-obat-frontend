@@ -30,7 +30,7 @@ import { useEffect, useRef } from "react";
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
-export default function index({
+export default function TryoutPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
