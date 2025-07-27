@@ -114,6 +114,9 @@ export default function UniversityPage({
                       ? "border-purple/10 hover:border-purple hover:bg-purple/10"
                       : "border-danger bg-danger/5 hover:bg-danger/10"
                   }`}
+                  onClick={() =>
+                    router.push(`/apotekerclass/university/${univ.univ_id}`)
+                  }
                 >
                   <Button
                     isIconOnly
