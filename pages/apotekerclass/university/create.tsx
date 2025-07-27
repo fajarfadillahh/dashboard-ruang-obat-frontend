@@ -120,7 +120,7 @@ export default function CreateUniversityPage({
       });
 
       toast.success("Universitas berhasil dibuat!");
-      router.push("/apotekerclass/university");
+      router.back();
     } catch (error: any) {
       console.error(error);
       toast.error(getError(error));

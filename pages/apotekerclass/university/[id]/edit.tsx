@@ -133,7 +133,7 @@ export default function EditUniversityPage({
       });
 
       toast.success("Universitas berhasil diubah!");
-      router.push("/apotekerclass/university");
+      router.back();
     } catch (error: any) {
       console.error(error);
       toast.error(getError(error));
