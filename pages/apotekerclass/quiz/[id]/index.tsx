@@ -142,7 +142,7 @@ export default function DetailCategoryQuizPage({
                     size="sm"
                     color="secondary"
                     onClick={() =>
-                      router.push(`/apotekerclass/quiz/${router.query.id}/edit`)
+                      router.push(`/apotekerclass/quiz/${quizz.ass_id}/edit`)
                     }
                     className="absolute right-4 top-4 z-50 hidden group-hover:flex"
                   >
