@@ -34,7 +34,7 @@ export type TryoutQuestion = {
   text: string;
   explanation: string;
   type: string;
-  option: TryoutOptions[];
+  options: TryoutOptions[];
   can_delete: boolean;
 };
 

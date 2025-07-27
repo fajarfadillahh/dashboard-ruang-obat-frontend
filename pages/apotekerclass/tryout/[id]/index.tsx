@@ -124,7 +124,7 @@ export default function DetailsTryoutPage({
                   )}
 
                   <div className="grid gap-1">
-                    {question.option.map((item, index) => {
+                    {question.options.map((item, index) => {
                       return (
                         <div
                           key={index}
