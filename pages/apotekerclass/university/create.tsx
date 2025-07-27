@@ -28,6 +28,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  Textarea,
 } from "@nextui-org/react";
 import { FloppyDisk } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
@@ -40,13 +41,21 @@ import toast from "react-hot-toast";
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
+type InputType = {
+  title: string;
+  description: string;
+};
+
 export default function CreateUniversityPage({
   token,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const session = useSession();
 
-  const [title, setTitle] = useState<string>("");
+  const [input, setInput] = useState<InputType>({
+    title: "",
+    description: "",
+  });
   const [search, setSearch] = useQueryState("q", { defaultValue: "" });
   const [page, setPage] = useQueryState("page", { defaultValue: "" });
   const [searchValue] = useDebounce(search, 800);
@@ -71,10 +80,10 @@ export default function CreateUniversityPage({
 
   useEffect(() => {
     const isSelectedTest = Array.from(dataTryout);
-    const isInputValid = [title, isSelectedTest.length > 0].every(Boolean);
+    const isInputValid = [input, isSelectedTest.length > 0].every(Boolean);
 
     setIsButtonDisabled(!isInputValid);
-  }, [title, file, dataTryout]);
+  }, [input, file, dataTryout]);
 
   const columnsTryout = [
     { name: "ID Tryout", uid: "ass_id" },
@@ -94,7 +103,8 @@ export default function CreateUniversityPage({
         type,
       });
       formData.append("thumbnail", fileConvert);
-      formData.append("title", title);
+      formData.append("title", input.title);
+      formData.append("description", input.description);
       formData.append("by", session.data?.user.fullname as string);
 
       Array.from(dataTryout).forEach((value: any) =>
@@ -237,8 +247,32 @@ export default function CreateUniversityPage({
                   labelPlacement="outside"
                   placeholder="Contoh: Belajar Farmakoterapi Dasar"
                   name="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  value={input.title}
+                  onChange={(e) => {
+                    setInput({
+                      ...input,
+                      title: e.target.value,
+                    });
+                  }}
+                  classNames={customStyleInput}
+                />
+
+                <Textarea
+                  isRequired
+                  minRows={4}
+                  type="text"
+                  variant="flat"
+                  label="Deskripsi"
+                  labelPlacement="outside"
+                  placeholder="Contoh: Universitas Pancasila adalah..."
+                  name="description"
+                  value={input.description}
+                  onChange={(e) => {
+                    setInput({
+                      ...input,
+                      description: e.target.value,
+                    });
+                  }}
                   classNames={customStyleInput}
                 />
 
