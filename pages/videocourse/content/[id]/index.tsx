@@ -53,7 +53,7 @@ export default function DetailSubCategoryContentPage({
           <TitleTextImage
             src={data?.data.img_url as string}
             name={data?.data.name as string}
-            description="Konten yang tersedia pada"
+            description="Konten yang tersedia pada sub kategori ini"
           />
         )}
 

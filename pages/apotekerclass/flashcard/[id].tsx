@@ -158,22 +158,22 @@ export default function DetailCategoryFlashcardPage({
     }
   }
 
-  // async function handleDeleteFlashcard(card_id: string) {
-  //   try {
-  //     await fetcher({
-  //       url: `/cards/${card_id}`,
-  //       method: "DELETE",
-  //       file: true,
-  //       token,
-  //     });
+  async function handleDeleteFlashcard(card_id: string) {
+    try {
+      await fetcher({
+        url: `/cards/${card_id}`,
+        method: "DELETE",
+        file: true,
+        token,
+      });
 
-  //     mutate();
-  //     toast.success("Flashcard berhasil di hapus!");
-  //   } catch (error: any) {
-  //     console.error(error);
-  //     toast.error(getError(error));
-  //   }
-  // }
+      mutate();
+      toast.success("Flashcard berhasil di hapus!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
+    }
+  }
 
   return (
     <Layout title={data?.data.name} className="scrollbar-hide">
@@ -183,13 +183,15 @@ export default function DetailCategoryFlashcardPage({
         {isLoading ? (
           <LoadingTitleImage />
         ) : (
-          <div className="flex items-end justify-between gap-4">
-            <TitleTextImage
-              src={data?.data.img_url as string}
-              name={data?.data.name as string}
-              description="Flashcard yang tersedia pada"
-            />
+          <TitleTextImage
+            src={data?.data.img_url as string}
+            name={data?.data.name as string}
+            description="Flashcard yang tersedia pada kategori ini"
+          />
+        )}
 
+        <div className="grid">
+          <div className="sticky left-0 top-0 z-50 flex items-center justify-end gap-4 bg-white pb-4">
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
@@ -337,156 +339,156 @@ export default function DetailCategoryFlashcardPage({
               </ModalContent>
             </Modal>
           </div>
-        )}
 
-        <div className="grid grid-cols-3 gap-4">
-          {isLoading ? (
-            Array.from({ length: data?.data.cards.length || 9 }).map(
-              (_, index) => (
-                <Skeleton key={index} className="h-40 w-full rounded-xl" />
-              ),
-            )
-          ) : data?.data.cards.length ? (
-            data?.data.cards.map((card) => {
-              const isText = card.type === "text";
-              const isDoc = card.type === "document";
+          <div className="grid grid-cols-3 gap-4">
+            {isLoading ? (
+              Array.from({ length: data?.data.cards.length || 9 }).map(
+                (_, index) => (
+                  <Skeleton key={index} className="h-40 w-full rounded-xl" />
+                ),
+              )
+            ) : data?.data.cards.length ? (
+              data?.data.cards.map((card) => {
+                const isText = card.type === "text";
+                const isDoc = card.type === "document";
 
-              const Icon = isText ? PencilLine : isDoc ? FileText : null;
+                const Icon = isText ? PencilLine : isDoc ? FileText : null;
 
-              return (
-                <div
-                  key={card.card_id}
-                  className="flex items-center gap-4 rounded-xl border-2 border-gray/10 p-4 hover:cursor-pointer hover:bg-purple/10"
-                >
-                  <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-xl bg-purple/10">
-                    {Icon ? (
-                      <Icon weight="fill" size={40} className="text-purple" />
-                    ) : (
-                      <Image
-                        src={card.url as string}
-                        alt="flashcard image"
-                        width={500}
-                        height={500}
-                        className="size-full object-cover object-center"
-                        priority
-                      />
-                    )}
-                  </div>
-
-                  <div className="flex flex-1 items-center justify-between gap-4">
-                    <div className="grid gap-2">
-                      <Chip
-                        variant="flat"
-                        size="sm"
-                        classNames={{
-                          base: "px-2 gap-1",
-                          content: "font-bold capitalize",
-                        }}
-                      >
-                        {card.type}
-                      </Chip>
-
-                      {isText ? (
-                        <p
-                          dangerouslySetInnerHTML={{
-                            __html: card.text as string,
-                          }}
-                          className="line-clamp-1 text-sm font-medium text-gray"
-                        />
+                return (
+                  <div
+                    key={card.card_id}
+                    className="flex items-center gap-4 rounded-xl border-2 border-gray/10 p-4 hover:cursor-pointer hover:bg-purple/10"
+                  >
+                    <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-xl bg-purple/10">
+                      {Icon ? (
+                        <Icon weight="fill" size={40} className="text-purple" />
                       ) : (
-                        <Link
-                          href={card.url as string}
-                          target="_blank"
-                          className="line-clamp-1 text-sm font-medium text-gray hover:text-purple hover:underline"
-                        >
-                          {card.url}
-                        </Link>
+                        <Image
+                          src={card.url as string}
+                          alt="flashcard image"
+                          width={500}
+                          height={500}
+                          className="size-full object-cover object-center"
+                          priority
+                        />
                       )}
                     </div>
 
-                    <div className="inline-flex items-center gap-2">
-                      <Button
-                        isIconOnly
-                        variant="light"
-                        size="sm"
-                        color="secondary"
-                        onClick={() => {
-                          onOpen();
-                          setTypeModal("edit");
+                    <div className="flex flex-1 items-center justify-between gap-4">
+                      <div className="grid gap-2">
+                        <Chip
+                          variant="flat"
+                          size="sm"
+                          classNames={{
+                            base: "px-2 gap-1",
+                            content: "font-bold capitalize",
+                          }}
+                        >
+                          {card.type}
+                        </Chip>
 
-                          setTypeCard(card.type);
-                          setCardId(card.card_id);
-
-                          if (card.type == "text") {
-                            setText(card.text as string);
-                          }
-                        }}
-                      >
-                        <CustomTooltip content="Edit Flashcard">
-                          <PencilLine weight="duotone" size={18} />
-                        </CustomTooltip>
-                      </Button>
-
-                      <ModalConfirm
-                        trigger={
-                          <Button
-                            isIconOnly
-                            variant="light"
-                            color="danger"
-                            size="sm"
+                        {isText ? (
+                          <p
+                            dangerouslySetInnerHTML={{
+                              __html: card.text as string,
+                            }}
+                            className="line-clamp-1 text-sm font-medium text-gray"
+                          />
+                        ) : (
+                          <Link
+                            href={card.url as string}
+                            target="_blank"
+                            className="line-clamp-1 text-sm font-medium text-gray hover:text-purple hover:underline"
                           >
-                            <CustomTooltip content="Hapus Flashcard">
-                              <Trash
-                                weight="duotone"
-                                size={18}
-                                className="text-danger"
-                              />
-                            </CustomTooltip>
-                          </Button>
-                        }
-                        header={
-                          <h1 className="font-bold text-black">
-                            Hapus Flashcard
-                          </h1>
-                        }
-                        body={
-                          <p className="leading-[170%] text-gray">
-                            Apakah anda ingin menghapus flashcard ini?
-                          </p>
-                        }
-                        footer={(onClose: any) => (
-                          <>
-                            <Button
-                              color="danger"
-                              variant="light"
-                              onPress={onClose}
-                              className="font-semibold"
-                            >
-                              Tutup
-                            </Button>
-
-                            <Button
-                              color="danger"
-                              className="font-semibold"
-                              // onClick={() =>
-                              //   handleDeleteFlashcard(card.card_id)
-                              // }
-                            >
-                              Ya, Hapus
-                            </Button>
-                          </>
+                            {card.url}
+                          </Link>
                         )}
-                      />
+                      </div>
+
+                      <div className="inline-flex items-center gap-2">
+                        <Button
+                          isIconOnly
+                          variant="light"
+                          size="sm"
+                          color="secondary"
+                          onClick={() => {
+                            onOpen();
+                            setTypeModal("edit");
+
+                            setTypeCard(card.type);
+                            setCardId(card.card_id);
+
+                            if (card.type == "text") {
+                              setText(card.text as string);
+                            }
+                          }}
+                        >
+                          <CustomTooltip content="Edit Flashcard">
+                            <PencilLine weight="duotone" size={18} />
+                          </CustomTooltip>
+                        </Button>
+
+                        <ModalConfirm
+                          trigger={
+                            <Button
+                              isIconOnly
+                              variant="light"
+                              color="danger"
+                              size="sm"
+                            >
+                              <CustomTooltip content="Hapus Flashcard">
+                                <Trash
+                                  weight="duotone"
+                                  size={18}
+                                  className="text-danger"
+                                />
+                              </CustomTooltip>
+                            </Button>
+                          }
+                          header={
+                            <h1 className="font-bold text-black">
+                              Hapus Flashcard
+                            </h1>
+                          }
+                          body={
+                            <p className="leading-[170%] text-gray">
+                              Apakah anda ingin menghapus flashcard ini?
+                            </p>
+                          }
+                          footer={(onClose: any) => (
+                            <>
+                              <Button
+                                color="danger"
+                                variant="light"
+                                onPress={onClose}
+                                className="font-semibold"
+                              >
+                                Tutup
+                              </Button>
+
+                              <Button
+                                color="danger"
+                                className="font-semibold"
+                                onClick={() =>
+                                  handleDeleteFlashcard(card.card_id)
+                                }
+                              >
+                                Ya, Hapus
+                              </Button>
+                            </>
+                          )}
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="col-span-3 flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20">
-              <EmptyData text="Flashcard Belum Tersedia!" />
-            </div>
-          )}
+                );
+              })
+            ) : (
+              <div className="col-span-3 flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20">
+                <EmptyData text="Flashcard Belum Tersedia!" />
+              </div>
+            )}
+          </div>
         </div>
       </Container>
     </Layout>

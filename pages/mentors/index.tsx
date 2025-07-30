@@ -262,6 +262,7 @@ export default function MentorsPage({
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
+              isStriped
               isHeaderSticky
               aria-label="mentors table"
               color="secondary"

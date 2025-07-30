@@ -11,7 +11,7 @@ import { Clock, FloppyDisk, Plus, Trash } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 
 type InputState = {
@@ -20,7 +20,6 @@ type InputState = {
   duration: number;
   type: "videocourse";
   link_order: string;
-  benefits: string[];
 };
 
 export default function CreatePackagePage({
@@ -34,47 +33,32 @@ export default function CreatePackagePage({
     duration: 0,
     type: "videocourse",
     link_order: "",
-    benefits: [""],
   });
+  const [benefits, setBenefits] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isDisableButton, setIsDisableButton] = useState<boolean>(true);
 
-  const handleChange = (key: keyof InputState, value: any) => {
-    setInput((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
+  function addBenefit() {
+    setBenefits([...benefits, ""]);
+  }
 
-  const addBenefit = () => {
-    setInput((prev) => ({
-      ...prev,
-      benefits: [...prev.benefits, ""],
-    }));
-  };
+  function removeBenefit(index: number) {
+    setBenefits(benefits.filter((_, i) => i !== index));
+  }
 
-  const removeBenefit = (index: number) => {
-    setInput((prev) => ({
-      ...prev,
-      benefits: prev.benefits.filter((_, i) => i !== index),
-    }));
-  };
-
-  const updateBenefit = (index: number, value: string) => {
-    const updated = [...input.benefits];
-    updated[index] = value;
-    setInput((prev) => ({ ...prev, benefits: updated }));
-  };
+  function updateBenefit(index: number, value: string) {
+    setBenefits(benefits.map((benefit, i) => (i === index ? value : benefit)));
+  }
 
   async function handleAddPackage() {
-    const payload = {
-      ...input,
-      by: session.data?.user.fullname,
-      token,
-    };
+    setIsLoading(true);
 
     try {
-      setIsLoading(true);
+      const payload = {
+        ...input,
+        benefits,
+        by: session.data?.user.fullname,
+        token,
+      };
 
       await fetcher({
         url: "/subscriptions/packages",
@@ -94,19 +78,6 @@ export default function CreatePackagePage({
       setIsLoading(false);
     }
   }
-
-  useEffect(() => {
-    const isInputValid =
-      input.name.trim() !== "" &&
-      input.duration > 0 &&
-      input.price > 0 &&
-      input.link_order.trim() !== "" &&
-      input.type === "videocourse" &&
-      input.benefits.length > 0 &&
-      input.benefits.every((b) => b.trim() !== "");
-
-    setIsDisableButton(!isInputValid);
-  }, [input]);
 
   return (
     <Layout title="Tambah Paket" className="scrollbar-hide">
@@ -130,7 +101,12 @@ export default function CreatePackagePage({
               placeholder="Contoh: Paket Video Pembelajaran Keren"
               name="name"
               value={input.name}
-              onChange={(e) => handleChange("name", e.target.value)}
+              onChange={(e) =>
+                setInput({
+                  ...input,
+                  name: e.target.value,
+                })
+              }
               classNames={customStyleInput}
             />
 
@@ -144,7 +120,12 @@ export default function CreatePackagePage({
                 placeholder="Contoh: 500.000"
                 name="price"
                 value={input.price.toString()}
-                onChange={(e) => handleChange("price", Number(e.target.value))}
+                onChange={(e) =>
+                  setInput({
+                    ...input,
+                    price: Number(e.target.value),
+                  })
+                }
                 startContent={
                   <span className="text-sm font-semibold text-gray">Rp</span>
                 }
@@ -161,7 +142,10 @@ export default function CreatePackagePage({
                 name="duration"
                 value={input.duration.toString()}
                 onChange={(e) =>
-                  handleChange("duration", Number(e.target.value))
+                  setInput({
+                    ...input,
+                    duration: Number(e.target.value),
+                  })
                 }
                 startContent={
                   <Clock weight="duotone" size={18} className="text-gray" />
@@ -179,7 +163,12 @@ export default function CreatePackagePage({
               placeholder="Contoh: https://www.lynk.id/xxxxx"
               name="link_order"
               value={input.link_order}
-              onChange={(e) => handleChange("link_order", e.target.value)}
+              onChange={(e) =>
+                setInput({
+                  ...input,
+                  link_order: e.target.value,
+                })
+              }
               classNames={customStyleInput}
             />
 
@@ -187,7 +176,7 @@ export default function CreatePackagePage({
               <h6 className="font-bold text-black">Benefit Paket</h6>
 
               <div className="grid gap-2">
-                {input.benefits.map((benefit, index) => (
+                {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-center gap-4">
                     <Input
                       isRequired
@@ -220,7 +209,7 @@ export default function CreatePackagePage({
                 color="secondary"
                 variant="flat"
                 startContent={<Plus weight="bold" size={18} />}
-                onClick={() => addBenefit()}
+                onClick={addBenefit}
                 className="font-bold"
               >
                 Tambahkan Benefit
@@ -230,7 +219,7 @@ export default function CreatePackagePage({
 
           <Button
             isLoading={isLoading}
-            isDisabled={isDisableButton || isLoading}
+            isDisabled={isLoading}
             color="secondary"
             startContent={
               isLoading ? null : <FloppyDisk weight="duotone" size={18} />

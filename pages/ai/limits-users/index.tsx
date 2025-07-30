@@ -200,6 +200,7 @@ export default function AILimitsCustomPage({
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
+              isStriped
               isHeaderSticky
               aria-label="limits user table"
               color="secondary"

@@ -297,7 +297,7 @@ export default function ApotekerClassAccessesPage({
     <Layout title="Access List Kelas Masuk Apoteker" className="scrollbar-hide">
       <Container className="gap-8">
         <TitleText
-          title="Access List Kelas Masuk Apoteker"
+          title="Access List - Masuk Apoteker 🔒"
           text="Berisi pengguna yang bisa mengakses Kelas Masuk Apoteker."
         />
 
@@ -375,6 +375,7 @@ export default function ApotekerClassAccessesPage({
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
+              isStriped
               isHeaderSticky
               aria-label="subscriptions table"
               color="secondary"
