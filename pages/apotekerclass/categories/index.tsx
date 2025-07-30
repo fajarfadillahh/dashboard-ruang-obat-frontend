@@ -54,7 +54,7 @@ export default function CategoriesPage({
     method: "GET",
     token,
   });
-  const [name, setName] = useState("");
+  const [name, setName] = useState<string>("");
   const [image, setImage] = useState<File | null>(null);
   const [typeModal, setTypeModal] = useState<"create" | "edit">("create");
   const [categoryId, setCategoryId] = useState<string>("");
@@ -96,13 +96,17 @@ export default function CategoriesPage({
         file: true,
       });
 
-      onClose();
-      mutate();
-      toast.success("Kategori berhasil ditambahkan");
-      setImage(null);
       setName("");
-    } catch (error) {
-      toast.error("Gagal menambahkan kategori");
+      setImage(null);
+
+      mutate();
+      onClose();
+      toast.success("Kategori berhasil ditambahkan!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Gagal menambahkan kategori!");
+
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -129,13 +133,12 @@ export default function CategoriesPage({
         file: true,
       });
 
-      onClose();
-      mutate();
-
-      setImage(null);
       setName("");
+      setImage(null);
       setIsSelected(false);
 
+      onClose();
+      mutate();
       toast.success("Kategori berhasil diubah!");
     } catch (error: any) {
       console.error(error);
@@ -203,7 +206,10 @@ export default function CategoriesPage({
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
-              onClick={onOpen}
+              onClick={() => {
+                onOpen();
+                setTypeModal("create");
+              }}
               className="font-semibold"
             >
               Tambah Kategori
