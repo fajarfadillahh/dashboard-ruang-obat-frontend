@@ -99,8 +99,9 @@ export default function SubCategoriesPage({
       toast.success("Sub Kategori berhasil ditambahkan");
     } catch (error: any) {
       console.error(error);
-
       toast.error("Gagal menambahkan sub kategori!");
+
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -136,8 +137,9 @@ export default function SubCategoriesPage({
       toast.success("Sub Kategori berhasil diubah!");
     } catch (error: any) {
       console.error(error);
-
       toast.error("Gagal mengubah sub kategori!");
+
+      setLoading(false);
     } finally {
       setLoading(false);
     }

@@ -59,7 +59,7 @@ export default function CategoriesPage({
     method: "GET",
     token,
   });
-  const [name, setName] = useState("");
+  const [name, setName] = useState<string>("");
   const [image, setImage] = useState<File | null>(null);
   const [typeModal, setTypeModal] = useState<"create" | "edit">("create");
   const [categoryId, setCategoryId] = useState<string>("");
@@ -93,8 +93,9 @@ export default function CategoriesPage({
       toast.success("Kategori berhasil ditambahkan");
     } catch (error: any) {
       console.error(error);
-
       toast.error("Gagal menambahkan kategori");
+
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -131,8 +132,9 @@ export default function CategoriesPage({
       toast.success("Kategori berhasil diubah!");
     } catch (error: any) {
       console.error(error);
-
       toast.error("Gagal mengubah kategori!");
+
+      setLoading(false);
     } finally {
       setLoading(false);
     }
