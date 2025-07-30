@@ -289,6 +289,7 @@ export default function AIProvidersPage({
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
+              isStriped
               isHeaderSticky
               aria-label="providers table"
               color="secondary"

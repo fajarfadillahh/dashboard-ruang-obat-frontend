@@ -252,6 +252,7 @@ export default function AIContextsPage({
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
+              isStriped
               isHeaderSticky
               aria-label="contexts table"
               color="secondary"

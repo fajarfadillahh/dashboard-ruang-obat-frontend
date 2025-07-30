@@ -179,6 +179,7 @@ export default function AILogsPage({
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
+              isStriped
               isHeaderSticky
               aria-label="logs table"
               color="secondary"

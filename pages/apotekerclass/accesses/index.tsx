@@ -375,6 +375,7 @@ export default function ApotekerClassAccessesPage({
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
+              isStriped
               isHeaderSticky
               aria-label="subscriptions table"
               color="secondary"
