@@ -244,6 +244,7 @@ export default function SubscriptionsPage({
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
+              isStriped
               isHeaderSticky
               aria-label="subscriptions table"
               color="secondary"
