@@ -297,7 +297,7 @@ export default function ApotekerClassAccessesPage({
     <Layout title="Access List Kelas Masuk Apoteker" className="scrollbar-hide">
       <Container className="gap-8">
         <TitleText
-          title="Access List Kelas Masuk Apoteker"
+          title="Access List - Masuk Apoteker 🔒"
           text="Berisi pengguna yang bisa mengakses Kelas Masuk Apoteker."
         />
 

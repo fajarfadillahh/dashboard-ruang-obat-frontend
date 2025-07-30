@@ -225,7 +225,7 @@ export default function SubscriptionsPage({
     <Layout title="Paket Langganan" className="scrollbar-hide">
       <Container className="gap-8">
         <TitleText
-          title="Daftar Paket Langganan 📚"
+          title="Daftar Paket Langganan - Masuk Apoteker 📚"
           text="Paket langganan yang tersedia pada kelas masuk apoteker."
         />
 

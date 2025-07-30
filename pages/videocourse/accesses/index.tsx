@@ -278,7 +278,7 @@ export default function AccessesPage({
     <Layout title="Access List Ruang Sarjana" className="scrollbar-hide">
       <Container className="gap-8">
         <TitleText
-          title="Access List Ruang Sarjana"
+          title="Access List - Video Pembelajaran 🔒"
           text="Berisi pengguna yang bisa mengakses Ruang Sarjana."
         />
 

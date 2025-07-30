@@ -79,7 +79,7 @@ export default function TryoutPage({
     <Layout title="Tryout Universitas" className="scrollbar-hide">
       <Container className="gap-8">
         <TitleText
-          title="Daftar Tryout Universitas ✏️"
+          title="Daftar Tryout Universitas - Masuk Apoteker ✏️"
           text="Tryout universitas yang tersedia pada kelas masuk apoteker"
         />
 

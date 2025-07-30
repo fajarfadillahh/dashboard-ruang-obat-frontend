@@ -40,7 +40,7 @@ export default function UniversityPage({
     <Layout title="Universitas" className="scrollbar-hide">
       <Container className="gap-8">
         <TitleText
-          title="Daftar Universitas 🏛️"
+          title="Daftar Universitas - Masuk Apoteker 🏛️"
           text="Universitas yang tersedia pada kelas masuk apoteker"
         />
 
