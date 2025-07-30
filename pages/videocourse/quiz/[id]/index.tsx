@@ -61,7 +61,7 @@ export default function DetailSubCategoryQuizPage({
           <TitleTextImage
             src={data?.data.img_url as string}
             name={data?.data.name as string}
-            description="Kuis yang tersedia pada"
+            description="Kuis yang tersedia pada sub kategori ini"
           />
         )}
 

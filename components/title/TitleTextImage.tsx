@@ -25,10 +25,7 @@ export default function TitleTextImage({
       <div className="grid gap-1">
         <h1 className="flex-1 text-2xl font-black text-black">{name}</h1>
 
-        <p className="font-medium text-gray">
-          {description}{" "}
-          <strong className="font-extrabold text-purple">{name}</strong>
-        </p>
+        <p className="font-medium text-gray">{description}</p>
       </div>
     </div>
   );

@@ -172,7 +172,7 @@ export default function SubCategoriesPage({
           <TitleTextImage
             src={data?.data.img_url as string}
             name={data?.data.name as string}
-            description="Daftar sub Kategori dari"
+            description="Daftar sub kategori yang tersedia sekarang"
           />
         )}
 
