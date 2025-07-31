@@ -12,11 +12,14 @@ import { Database, Plus, Trash } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CreateVideoCoursePage({
   token,
+  params,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const session = useSession();
@@ -75,27 +78,55 @@ export default function CreateVideoCoursePage({
     setContents(updatedContents);
   }
 
-  async function handleSumbitContent() {
+  async function handleSubmitContent() {
     setLoading(true);
 
     try {
       const payload = {
-        segment_id: router.query.segment_id,
-        contents: contents,
+        segment_id: query.segment_id,
+        contents: contents.map((content) => {
+          const data: {
+            title: string;
+            video_url: string;
+            video_note_url?: string;
+            video_note?: string;
+            content_type: string;
+            by: string;
+          } = {
+            title: content.title,
+            video_url: content.video_url,
+            content_type: content.content_type,
+            by: content.by,
+          };
+
+          if (content.video_note_url) {
+            data.video_note_url = content.video_note_url;
+          }
+
+          if (content.video_note) {
+            data.video_note = content.video_note;
+          }
+
+          return data;
+        }),
         by: session.data?.user.fullname,
       };
 
       await fetcher({
-        url: "/courses/contents",
+        url: "/courses/videos",
         method: "POST",
         data: payload,
         token,
       });
 
-      router.push(
-        `/videocourse/content/${router.query.id}/posttest?segment_id=${router.query.segment_id}`,
-      );
+      delete query.id;
+
+      router.push({
+        pathname: `/videocourse/content/${params.id}/posttest`,
+        query: { ...query },
+      });
       toast.success("Konten video berhasil ditambahkan!");
+      localStorage.removeItem("content_video_videocourse");
     } catch (error: any) {
       console.error(error);
       toast.error(getError(error));
@@ -123,8 +154,8 @@ export default function CreateVideoCoursePage({
     <Layout title="Buat Konten Video" className="scrollbar-hide">
       <Container className="gap-4">
         <TitleText
-          title="Buat Konten Video 🎞"
-          text="Saatnya buat konten video sekarang"
+          title={`Buat Konten Video ${query.segment_title} 🎞`}
+          text={`Saatnya buat konten video ${query.segment_title} sekarang`}
         />
 
         <div className="grid max-w-[900px]">
@@ -177,7 +208,7 @@ export default function CreateVideoCoursePage({
                       isLoading={loading}
                       isDisabled={loading}
                       color="secondary"
-                      onClick={handleSumbitContent}
+                      onClick={handleSubmitContent}
                       className="font-semibold"
                     >
                       Ya, Simpan
@@ -296,4 +327,13 @@ export default function CreateVideoCoursePage({
   );
 }
 
-export const getServerSideProps = withToken();
+export const getServerSideProps = withToken(async (ctx) => {
+  const { query, params } = ctx;
+
+  return {
+    props: {
+      query: query as ParsedUrlQuery,
+      params: params as ParsedUrlQuery,
+    },
+  };
+});

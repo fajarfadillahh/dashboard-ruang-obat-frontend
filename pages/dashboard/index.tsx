@@ -16,7 +16,6 @@ import {
   IconContext,
   Robot,
   UserCircle,
-  UserCircleCheck,
 } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
@@ -54,13 +53,13 @@ export default function DashboardPage({
       total: data?.data.total_users,
       icon: UserCircle,
     },
-    {
-      id: 2,
-      title: "Pengguna Aktif",
-      path: "/sessions",
-      total: data?.data.total_online_users,
-      icon: UserCircleCheck,
-    },
+    // {
+    //   id: 2,
+    //   title: "Pengguna Aktif",
+    //   path: "/sessions",
+    //   total: data?.data.total_online_users,
+    //   icon: UserCircleCheck,
+    // },
     {
       id: 3,
       title: "Total Program",

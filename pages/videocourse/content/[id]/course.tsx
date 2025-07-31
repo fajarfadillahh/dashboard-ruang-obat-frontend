@@ -14,12 +14,14 @@ import { FloppyDisk } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
 import { useState } from "react";
 import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 
 export default function CreateCoursePage({
   token,
+  params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
   const router = useRouter();
@@ -54,7 +56,7 @@ export default function CreateCoursePage({
       });
       formData.append("thumbnail", fileConvert);
 
-      formData.append("sub_category_id", router.query.id as string);
+      formData.append("sub_category_id", params.id as string);
       formData.append("title", input.title);
       formData.append("preview_url", input.preview_url as string);
       formData.append("description", input.description);
@@ -71,9 +73,13 @@ export default function CreateCoursePage({
         });
 
       toast.success("Kursus/Playlist berhasil ditambahkan!");
-      router.push(
-        `/videocourse/content/${router.query.id}/segment?course_id=${responseCourse.data.course_id}`,
-      );
+      router.push({
+        pathname: `/videocourse/content/${params.id}/segment`,
+        query: {
+          course_id: responseCourse.data.course_id,
+          course_title: input.title,
+        },
+      });
     } catch (error: any) {
       console.error(error);
       toast.error(getError(error));
@@ -248,4 +254,12 @@ export default function CreateCoursePage({
   );
 }
 
-export const getServerSideProps = withToken();
+export const getServerSideProps = withToken(async (ctx) => {
+  const { params } = ctx;
+
+  return {
+    props: {
+      params: params as ParsedUrlQuery,
+    },
+  };
+});

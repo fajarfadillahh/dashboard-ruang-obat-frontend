@@ -20,10 +20,12 @@ export function validatePhoneNumber(value: string): string | null {
     ? "Nomor telepon tidak valid"
     : null;
 }
-function setInput(arg0: (prev: any) => any) {
-  throw new Error("Function not implemented.");
-}
 
-function setErrors(arg0: (prev: any) => any) {
-  throw new Error("Function not implemented.");
+export function validateUniversity(value: string): string | null {
+  const regexOnlyWordAndSpacing = /^[A-Za-z0-9\s]+$/;
+  const regexMin2Word = /\b\w+\b.*\b\w+\b/;
+  return value &&
+    !(regexOnlyWordAndSpacing.test(value) && regexMin2Word.test(value))
+    ? "Minimal 2 kata dan tanpa simbol"
+    : null;
 }

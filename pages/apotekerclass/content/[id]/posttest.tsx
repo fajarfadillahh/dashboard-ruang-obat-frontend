@@ -10,16 +10,27 @@ import { CreateQuestion } from "@/types/question.type";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
-import { Button, Chip, Input } from "@nextui-org/react";
-import { ArrowRight, Circle, Database, Trash } from "@phosphor-icons/react";
+import {
+  Button,
+  Chip,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Input,
+} from "@nextui-org/react";
+import { Circle, Database, Trash } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CreatePostTestCoursePage({
   token,
+  params,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const session = useSession();
@@ -66,7 +77,7 @@ export default function CreatePostTestCoursePage({
 
     try {
       const payload = {
-        segment_id: router.query.segment_id,
+        segment_id: query.segment_id,
         title: titlePostTest,
         test_type: "post",
         by: session.data?.user.fullname,
@@ -84,8 +95,7 @@ export default function CreatePostTestCoursePage({
         token,
       });
 
-      router.push(`/apotekerclass/content/${router.query.id}`);
-      toast.success("Pasca-Tes berhasil ditambahkan!");
+      toast.success("Post-Test berhasil ditambahkan!");
 
       localStorage.removeItem("input_posttest_apotekerclass");
       localStorage.removeItem("questions_posttest_apotekerclass");
@@ -117,7 +127,7 @@ export default function CreatePostTestCoursePage({
   }, [titlePostTest, questions]);
 
   return (
-    <Layout title="Buat Pasca-Tes" className="scrollbar-hide">
+    <Layout title="Buat Post-Test" className="scrollbar-hide">
       <Container className="gap-8">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div className="grid gap-4">
@@ -132,25 +142,60 @@ export default function CreatePostTestCoursePage({
                 content: "font-bold text-warning",
               }}
             >
-              Pasca-Tes Opsional
+              Post-Test Opsional
             </Chip>
 
             <TitleText
-              title="Buat Pasca-Tes ✏️"
-              text="Saatnya buat pasca-tes sekarang"
+              title={`Buat Post-Test ${query.segment_title} ✏️`}
+              text={`Saatnya buat post-test ${query.segment_title} sekarang`}
             />
           </div>
 
-          <Button
-            color="secondary"
-            endContent={<ArrowRight weight="bold" size={18} />}
-            onClick={() =>
-              router.push(`/apotekerclass/content/${router.query.id}`)
-            }
-            className="font-semibold"
-          >
-            Lewati Pasca-Tes
-          </Button>
+          <Dropdown>
+            <DropdownTrigger>
+              <Button variant="solid" color="secondary">
+                Menu
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Static Actions">
+              <DropdownItem
+                key="create_new_video"
+                onClick={() => {
+                  delete query.id;
+
+                  router.push({
+                    pathname: `/apotekerclass/content/${params.id}/video`,
+                    query: { ...query },
+                  });
+                }}
+              >
+                Buat Video untuk &quot;{query.segment_title}&quot; Lagi
+              </DropdownItem>
+              <DropdownItem
+                key="create_new_segment"
+                onClick={() => {
+                  router.push({
+                    pathname: `/apotekerclass/content/${params.id}/segment`,
+                    query: { course_id: query.course_id },
+                  });
+                }}
+              >
+                Buat Segment untuk &quot;{query.course_title}&quot; Lagi
+              </DropdownItem>
+              <DropdownItem
+                key="finish"
+                className="text-danger"
+                color="danger"
+                onClick={() => {
+                  router.push(
+                    `/apotekerclass/content/${query.course_id}/detail`,
+                  );
+                }}
+              >
+                Lewati Ini dan Selesai
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
 
         <div className="grid gap-8">
@@ -158,9 +203,9 @@ export default function CreatePostTestCoursePage({
             isRequired
             type="text"
             variant="flat"
-            label="Judul Pasca-Tes"
+            label="Judul Post-Test"
             labelPlacement="outside"
-            placeholder="Contoh: Pasca-Tes Pendahuluan"
+            placeholder="Contoh: Post-Test Pendahuluan"
             value={titlePostTest}
             onChange={(e) => setTitlePostTest(e.target.value)}
             classNames={customStyleInput}
@@ -191,7 +236,7 @@ export default function CreatePostTestCoursePage({
                   header={<h1 className="font-bold text-black">Perhatian!</h1>}
                   body={
                     <p className="leading-[170%] text-gray">
-                      Apakah anda ingin menyimpan pasca-tes ini ke dalam
+                      Apakah anda ingin menyimpan post-test ini ke dalam
                       database?
                     </p>
                   }
@@ -268,4 +313,13 @@ export default function CreatePostTestCoursePage({
   );
 }
 
-export const getServerSideProps = withToken();
+export const getServerSideProps = withToken(async (ctx) => {
+  const { query, params } = ctx;
+
+  return {
+    props: {
+      query: query as ParsedUrlQuery,
+      params: params as ParsedUrlQuery,
+    },
+  };
+});

@@ -15,11 +15,14 @@ import { ArrowRight, Circle, Database, Trash } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CreatePreTestCoursePage({
   token,
+  params,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const session = useSession();
@@ -66,7 +69,7 @@ export default function CreatePreTestCoursePage({
 
     try {
       const payload = {
-        segment_id: router.query.segment_id,
+        segment_id: query.segment_id,
         title: titlePreTest,
         test_type: "pre",
         by: session.data?.user.fullname,
@@ -84,10 +87,13 @@ export default function CreatePreTestCoursePage({
         token,
       });
 
-      router.push(
-        `/videocourse/content/${router.query.id}/video?segment_id=${router.query.segment_id}`,
-      );
-      toast.success("Pra-Tes berhasil ditambahkan!");
+      delete query.id;
+
+      router.push({
+        pathname: `/videocourse/content/${params.id}/video`,
+        query: { ...query },
+      });
+      toast.success("Pre-Test berhasil ditambahkan!");
 
       localStorage.removeItem("input_pretest_videocourse");
       localStorage.removeItem("questions_pretest_videocourse");
@@ -119,7 +125,7 @@ export default function CreatePreTestCoursePage({
   }, [titlePreTest, questions]);
 
   return (
-    <Layout title="Buat Pra-Tes" className="scrollbar-hide">
+    <Layout title="Buat Pre-Test" className="scrollbar-hide">
       <Container className="gap-8">
         <div className="mb-8 flex items-end justify-between gap-4">
           <div className="grid gap-4">
@@ -134,26 +140,29 @@ export default function CreatePreTestCoursePage({
                 content: "font-bold text-warning",
               }}
             >
-              Pra-Tes Opsional
+              Pre-Test Opsional
             </Chip>
 
             <TitleText
-              title="Buat Pra-Tes ✏️"
-              text="Saatnya buat pra-tes sekarang"
+              title={`Buat Pre-Test ${query.segment_title} ✏️`}
+              text={`Saatnya buat pre-test ${query.segment_title} sekarang`}
             />
           </div>
 
           <Button
             color="secondary"
             endContent={<ArrowRight weight="bold" size={18} />}
-            onClick={() =>
-              router.push(
-                `/videocourse/content/${router.query.id}/video?segment_id=${router.query.segment_id}`,
-              )
-            }
+            onClick={() => {
+              delete query.id;
+
+              router.push({
+                pathname: `/videocourse/content/${params.id}/video`,
+                query: { ...query },
+              });
+            }}
             className="font-semibold"
           >
-            Lewati Pra-Tes
+            Lewati Pre-Test
           </Button>
         </div>
 
@@ -162,9 +171,9 @@ export default function CreatePreTestCoursePage({
             isRequired
             type="text"
             variant="flat"
-            label="Judul Pra-Tes"
+            label="Judul Pre-Test"
             labelPlacement="outside"
-            placeholder="Contoh: Pra-Tes Pendahuluan"
+            placeholder="Contoh: Pre-Test Pendahuluan"
             value={titlePreTest}
             onChange={(e) => setTitlePreTest(e.target.value)}
             classNames={customStyleInput}
@@ -195,7 +204,8 @@ export default function CreatePreTestCoursePage({
                   header={<h1 className="font-bold text-black">Perhatian!</h1>}
                   body={
                     <p className="leading-[170%] text-gray">
-                      Apakah anda ingin menyimpan pra-tes ini ke dalam database?
+                      Apakah anda ingin menyimpan pre-test ini ke dalam
+                      database?
                     </p>
                   }
                   footer={(onClose: any) => (
@@ -271,4 +281,13 @@ export default function CreatePreTestCoursePage({
   );
 }
 
-export const getServerSideProps = withToken();
+export const getServerSideProps = withToken(async (ctx) => {
+  const { query, params } = ctx;
+
+  return {
+    props: {
+      query: query as ParsedUrlQuery,
+      params: params as ParsedUrlQuery,
+    },
+  };
+});

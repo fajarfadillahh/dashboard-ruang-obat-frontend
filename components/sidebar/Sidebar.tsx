@@ -2,7 +2,6 @@ import ButtonSidebar from "@/components/button/ButtonSidebar";
 import {
   SidebarMenuClass,
   SidebarMenuTryout,
-  SidebarMenuUser,
   SidebarOtherMenu,
 } from "@/components/sidebar/SidebarMenu";
 import { LogoRuangobat } from "@/public/img/LogoRuangobat";
@@ -29,7 +28,6 @@ export default function Sidebar() {
 
   const tryoutMenu = SidebarMenuTryout();
   const classMenu = SidebarMenuClass();
-  const userMenu = SidebarMenuUser();
   const otherMenu = SidebarOtherMenu(session.data?.user.admin_id || "");
 
   const defaultStyle = {
@@ -116,12 +114,14 @@ export default function Sidebar() {
                 {tryoutMenu.map((item, index) => (
                   <ButtonSidebar
                     key={index}
-                    label={item.label}
-                    path={item.path}
+                    label={item.label as string}
+                    path={item.path as string}
                     icon={
                       <item.icon
                         weight={
-                          router.asPath.includes(item.path) ? "fill" : "duotone"
+                          router.asPath.includes(item.path as string)
+                            ? "fill"
+                            : "duotone"
                         }
                       />
                     }
@@ -143,8 +143,11 @@ export default function Sidebar() {
                     className="p-0"
                     itemClasses={{
                       trigger:
-                        activeMenu[key]?.trigger || defaultItemClasses.trigger,
-                      title: activeMenu[key]?.title || defaultItemClasses.title,
+                        activeMenu[key as string]?.trigger ||
+                        defaultItemClasses.trigger,
+                      title:
+                        activeMenu[key as string]?.title ||
+                        defaultItemClasses.title,
                     }}
                   >
                     <AccordionItem
@@ -154,23 +157,29 @@ export default function Sidebar() {
                         <CaretRight
                           size={14}
                           className={
-                            activeMenu[key].trigger ? "text-white" : "text-gray"
+                            activeMenu[key as string].trigger
+                              ? "text-white"
+                              : "text-gray"
                           }
                         />
                       }
                       startContent={
                         <Icon
                           className={
-                            activeMenu[key].trigger ? "text-white" : "text-gray"
+                            activeMenu[key as string].trigger
+                              ? "text-white"
+                              : "text-gray"
                           }
                           weight={
-                            router.asPath.includes(path) ? "fill" : "duotone"
+                            router.asPath.includes(path as string)
+                              ? "fill"
+                              : "duotone"
                           }
                         />
                       }
                       className="grid gap-1"
                     >
-                      {items.map(({ label, path }) => (
+                      {items?.map(({ label, path }) => (
                         <ButtonSidebar
                           key={path}
                           label={label}
@@ -187,47 +196,86 @@ export default function Sidebar() {
 
             <div className="grid gap-2">
               <span className="text-[10px] font-extrabold uppercase tracking-[2px] text-gray">
-                Menu Pengguna
-              </span>
-
-              <div className="grid gap-0.5">
-                {userMenu.map((item, index) => (
-                  <ButtonSidebar
-                    key={index}
-                    label={item.label}
-                    path={item.path}
-                    icon={
-                      <item.icon
-                        weight={
-                          router.asPath.includes(item.path) ? "fill" : "duotone"
-                        }
-                      />
-                    }
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="grid gap-2">
-              <span className="text-[10px] font-extrabold uppercase tracking-[2px] text-gray">
                 Menu Lainnya
               </span>
 
               <div className="grid gap-0.5">
-                {otherMenu.map((item, index) => (
-                  <ButtonSidebar
-                    key={index}
-                    label={item.label}
-                    path={item.path}
-                    icon={
-                      <item.icon
-                        weight={
-                          router.asPath.includes(item.path) ? "fill" : "duotone"
+                {otherMenu.map((item, index) => {
+                  if (item.items?.length) {
+                    return (
+                      <Accordion
+                        key={item.key}
+                        isCompact
+                        className="p-0"
+                        itemClasses={{
+                          trigger:
+                            activeMenu[item.key as string]?.trigger ||
+                            defaultItemClasses.trigger,
+                          title:
+                            activeMenu[item.key as string]?.title ||
+                            defaultItemClasses.title,
+                        }}
+                      >
+                        <AccordionItem
+                          aria-label="button"
+                          title={item.title}
+                          indicator={
+                            <CaretRight
+                              size={14}
+                              className={
+                                activeMenu[item.key as string].trigger
+                                  ? "text-white"
+                                  : "text-gray"
+                              }
+                            />
+                          }
+                          startContent={
+                            <item.icon
+                              className={
+                                activeMenu[item.key as string].trigger
+                                  ? "text-white"
+                                  : "text-gray"
+                              }
+                              weight={
+                                router.asPath.includes(item.path as string)
+                                  ? "fill"
+                                  : "duotone"
+                              }
+                            />
+                          }
+                          className="grid gap-1"
+                        >
+                          {item.items?.map(({ label, path }) => (
+                            <ButtonSidebar
+                              key={path}
+                              label={label}
+                              path={path}
+                              icon={<Circle weight="fill" size={6} />}
+                              className="ml-4"
+                            />
+                          ))}
+                        </AccordionItem>
+                      </Accordion>
+                    );
+                  } else {
+                    return (
+                      <ButtonSidebar
+                        key={index}
+                        label={item?.label as string}
+                        path={item?.path as string}
+                        icon={
+                          <item.icon
+                            weight={
+                              router.asPath.includes(item.path as string)
+                                ? "fill"
+                                : "duotone"
+                            }
+                          />
                         }
                       />
-                    }
-                  />
-                ))}
+                    );
+                  }
+                })}
               </div>
             </div>
           </IconContext.Provider>

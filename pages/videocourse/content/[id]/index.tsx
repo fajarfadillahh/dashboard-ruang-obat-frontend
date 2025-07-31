@@ -12,15 +12,15 @@ import { SuccessResponse } from "@/types/global.type";
 import { Button, Select, SelectItem, Skeleton } from "@nextui-org/react";
 import {
   ClipboardText,
+  Eye,
   Funnel,
-  Gear,
   IconContext,
   Play,
   Plus,
   SlidersHorizontal,
-  Video,
 } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
+import Image from "next/image";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
 import { ParsedUrlQuery } from "querystring";
@@ -127,6 +127,11 @@ export default function DetailSubCategoryContentPage({
                 <div
                   key={course.course_id}
                   className="group relative isolate flex items-center gap-4 rounded-xl border-2 border-gray/10 p-4 hover:cursor-pointer hover:bg-purple/10"
+                  onClick={() =>
+                    router.push(
+                      `/videocourse/content/${course.course_id}/detail`,
+                    )
+                  }
                 >
                   <Button
                     isIconOnly
@@ -135,18 +140,23 @@ export default function DetailSubCategoryContentPage({
                     color="secondary"
                     onClick={() =>
                       router.push(
-                        `/videocourse/content/${router.query.id}/edit`,
+                        `/videocourse/content/${course.course_id}/detail`,
                       )
                     }
                     className="absolute right-4 top-4 z-50 hidden group-hover:flex"
                   >
-                    <CustomTooltip content="Edit Konten">
-                      <Gear weight="bold" size={18} />
+                    <CustomTooltip content="Detail Playlist">
+                      <Eye weight="bold" size={18} />
                     </CustomTooltip>
                   </Button>
 
                   <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-xl bg-purple/10">
-                    <Video weight="duotone" size={40} className="text-purple" />
+                    <Image
+                      src={course.thumbnail_url as string}
+                      alt={course.title}
+                      layout="fill"
+                      objectFit="cover"
+                    />
                   </div>
 
                   <div className="grid flex-1 items-center gap-2">
@@ -156,8 +166,16 @@ export default function DetailSubCategoryContentPage({
 
                     <div className="flex items-start gap-4">
                       {[
-                        ["Jumlah Video", <Play />, course.total_videos],
-                        ["Jumlah Tes", <ClipboardText />, course.total_tests],
+                        [
+                          "Jumlah Video",
+                          <Play key={course.total_videos} />,
+                          course.total_videos,
+                        ],
+                        [
+                          "Jumlah Tes",
+                          <ClipboardText key={course.total_tests} />,
+                          course.total_tests,
+                        ],
                       ].map(([label, icon, data], index) => (
                         <div key={index} className="grid gap-1">
                           <span className="text-xs font-medium text-gray">
