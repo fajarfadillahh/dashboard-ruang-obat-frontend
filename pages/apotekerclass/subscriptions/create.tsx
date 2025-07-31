@@ -20,6 +20,7 @@ type InputState = {
   duration: number;
   type: "apotekerclass";
   link_order: string;
+  discount_amount?: number;
 };
 
 export default function CreatePackagePage({
@@ -33,6 +34,7 @@ export default function CreatePackagePage({
     duration: 0,
     type: "apotekerclass",
     link_order: "",
+    discount_amount: undefined,
   });
   const [benefits, setBenefits] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -153,6 +155,27 @@ export default function CreatePackagePage({
                 classNames={customStyleInput}
               />
             </div>
+
+            <Input
+              type="number"
+              variant="flat"
+              label="Diskon (Optional)"
+              labelPlacement="outside"
+              placeholder="Contoh: 50000"
+              name="discount_amount"
+              value={input.discount_amount?.toString() ?? ""}
+              onChange={(e) =>
+                setInput({
+                  ...input,
+                  discount_amount:
+                    e.target.value === "" ? undefined : Number(e.target.value),
+                })
+              }
+              startContent={
+                <span className="text-sm font-semibold text-gray">Rp</span>
+              }
+              classNames={customStyleInput}
+            />
 
             <Input
               isRequired

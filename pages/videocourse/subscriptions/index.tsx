@@ -79,9 +79,23 @@ export default function SubscriptionsPage({
           </div>
         );
       case "price":
+        const hasDiscount =
+          !!packageSubscription.discount_amount &&
+          packageSubscription.discount_amount > 0;
         return (
           <div className="line-clamp-2 w-full max-w-[300px] font-medium text-black">
-            {formatRupiah(packageSubscription.price)}
+            {hasDiscount ? (
+              <div>
+                <span className="mr-2 text-gray/60 line-through">
+                  {formatRupiah(packageSubscription.price)}
+                </span>
+                <span className="font-bold text-black">
+                  {formatRupiah(packageSubscription.discount_amount || 0)}
+                </span>
+              </div>
+            ) : (
+              formatRupiah(packageSubscription.price)
+            )}
           </div>
         );
       case "duration":

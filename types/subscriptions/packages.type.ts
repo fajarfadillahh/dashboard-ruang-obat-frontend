@@ -11,6 +11,7 @@ export type PackageSubscription = {
   price: number;
   duration: number;
   type: string;
+  discount_amount?: number;
   link_order: string;
   is_active: boolean;
   created_at: string;
@@ -27,6 +28,7 @@ export type DetailsPackageSubscription = {
   link_order: string;
   is_active: boolean;
   created_at: string;
+  discount_amount?: number;
   benefits: {
     benefit_id: string;
     description: string;
