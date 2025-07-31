@@ -1,5 +1,6 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
+import LoadingTitleImage from "@/components/loading/LoadingTitleImage";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
@@ -11,6 +12,7 @@ import {
   Accordion,
   AccordionItem,
   Button,
+  Chip,
   Dropdown,
   DropdownItem,
   DropdownMenu,
@@ -26,12 +28,14 @@ import {
   useDisclosure,
 } from "@nextui-org/react";
 import {
+  CheckCircle,
   Eye,
   FileText,
   Gear,
   PencilLine,
   Plus,
   Video,
+  XCircle,
 } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
@@ -251,8 +255,11 @@ export default function DetailVideoCourse({
           }}
         >
           <ModalContent>
-            <ModalHeader>Edit Playlist</ModalHeader>
-            <ModalBody>
+            <ModalHeader className="font-semibold text-black">
+              Edit Playlist
+            </ModalHeader>
+
+            <ModalBody className="grid gap-4">
               <Input
                 isRequired
                 type="text"
@@ -304,6 +311,7 @@ export default function DetailVideoCourse({
                 classNames={customStyleInput}
               />
             </ModalBody>
+
             <ModalFooter>
               <Button
                 variant="light"
@@ -335,7 +343,10 @@ export default function DetailVideoCourse({
           }}
         >
           <ModalContent>
-            <ModalHeader>Edit Segmen</ModalHeader>
+            <ModalHeader className="font-semibold text-black">
+              Edit Segmen
+            </ModalHeader>
+
             <ModalBody>
               <Input
                 isRequired
@@ -357,6 +368,7 @@ export default function DetailVideoCourse({
                 classNames={customStyleInput}
               />
             </ModalBody>
+
             <ModalFooter>
               <Button
                 variant="light"
@@ -388,71 +400,82 @@ export default function DetailVideoCourse({
           }}
         >
           <ModalContent>
-            <ModalHeader>Edit Konten Video</ModalHeader>
-            <ModalBody>
-              <Input
-                isRequired
-                type="text"
-                variant="flat"
-                label="Judul Video"
-                labelPlacement="outside"
-                placeholder="Contoh: Apa itu Farmakoterapi?"
-                name="title"
-                value={selectedVideo?.title ?? ""}
-                onChange={(e) =>
-                  setSelectedVideo((prev) =>
-                    prev ? { ...prev, title: e.target.value } : prev,
-                  )
-                }
-                classNames={customStyleInput}
-              />
-              <Input
-                isRequired
-                type="text"
-                variant="flat"
-                label="Link Video"
-                labelPlacement="outside"
-                placeholder="Contoh: https://youtube.com/watch?v=xxxxxx"
-                name="video_url"
-                value={selectedVideo?.video_url ?? ""}
-                onChange={(e) =>
-                  setSelectedVideo((prev) =>
-                    prev ? { ...prev, video_url: e.target.value } : prev,
-                  )
-                }
-                classNames={customStyleInput}
-              />
-              <Input
-                type="text"
-                variant="flat"
-                label="Nama Catatan"
-                labelPlacement="outside"
-                placeholder="Contoh: Penjelasan Farmakoterapi"
-                name="video_note"
-                value={selectedVideo?.video_note ?? ""}
-                onChange={(e) =>
-                  setSelectedVideo((prev) =>
-                    prev ? { ...prev, video_note: e.target.value } : prev,
-                  )
-                }
-                classNames={customStyleInput}
-              />
-              <Input
-                type="text"
-                variant="flat"
-                label="Link Catatan"
-                labelPlacement="outside"
-                placeholder="Contoh: https://medium.com/xxxxxx"
-                name="video_note_url"
-                value={selectedVideo?.video_note_url ?? ""}
-                onChange={(e) =>
-                  setSelectedVideo((prev) =>
-                    prev ? { ...prev, video_note_url: e.target.value } : prev,
-                  )
-                }
-                classNames={customStyleInput}
-              />
+            <ModalHeader className="font-semibold text-black">
+              Edit Konten Video
+            </ModalHeader>
+
+            <ModalBody className="grid gap-10">
+              <div className="grid gap-4">
+                <Input
+                  isRequired
+                  type="text"
+                  variant="flat"
+                  label="Judul Video"
+                  labelPlacement="outside"
+                  placeholder="Contoh: Apa itu Farmakoterapi?"
+                  name="title"
+                  value={selectedVideo?.title ?? ""}
+                  onChange={(e) =>
+                    setSelectedVideo((prev) =>
+                      prev ? { ...prev, title: e.target.value } : prev,
+                    )
+                  }
+                  classNames={customStyleInput}
+                />
+
+                <Input
+                  isRequired
+                  type="text"
+                  variant="flat"
+                  label="Link Video"
+                  labelPlacement="outside"
+                  placeholder="Contoh: https://youtube.com/watch?v=xxxxxx"
+                  name="video_url"
+                  value={selectedVideo?.video_url ?? ""}
+                  onChange={(e) =>
+                    setSelectedVideo((prev) =>
+                      prev ? { ...prev, video_url: e.target.value } : prev,
+                    )
+                  }
+                  classNames={customStyleInput}
+                />
+              </div>
+
+              <div className="grid gap-4">
+                <Input
+                  type="text"
+                  variant="flat"
+                  label="Nama Catatan"
+                  labelPlacement="outside"
+                  placeholder="Contoh: Penjelasan Farmakoterapi"
+                  name="video_note"
+                  value={selectedVideo?.video_note ?? ""}
+                  onChange={(e) =>
+                    setSelectedVideo((prev) =>
+                      prev ? { ...prev, video_note: e.target.value } : prev,
+                    )
+                  }
+                  classNames={customStyleInput}
+                />
+
+                <Input
+                  type="text"
+                  variant="flat"
+                  label="Link Catatan"
+                  labelPlacement="outside"
+                  placeholder="Contoh: https://medium.com/xxxxxx"
+                  name="video_note_url"
+                  value={selectedVideo?.video_note_url ?? ""}
+                  onChange={(e) =>
+                    setSelectedVideo((prev) =>
+                      prev ? { ...prev, video_note_url: e.target.value } : prev,
+                    )
+                  }
+                  classNames={customStyleInput}
+                />
+              </div>
             </ModalBody>
+
             <ModalFooter>
               <Button
                 variant="light"
@@ -475,190 +498,241 @@ export default function DetailVideoCourse({
           </ModalContent>
         </Modal>
 
-        <div className="grid grid-cols-[180px_1fr]">
-          <div className="relative h-[150px] w-[150px] rounded-xl">
-            {isLoading ? (
-              <Skeleton className="h-full w-full rounded-xl" />
-            ) : (
-              <Image
-                src={data?.data.thumbnail_url as string}
-                alt={data?.data.title as string}
-                layout="fill"
-                objectFit="cover"
-                className="rounded-xl object-cover object-center"
-              />
-            )}
-          </div>
+        {isLoading ? (
+          <LoadingTitleImage />
+        ) : (
+          <div className="grid grid-cols-[max-content_1fr_max-content] items-center gap-8">
+            <Image
+              src={data?.data.thumbnail_url as string}
+              alt={data?.data.title as string}
+              width={1000}
+              height={1000}
+              className="size-[180px] rounded-xl object-cover object-center"
+            />
 
-          <div className="grid w-full gap-2">
-            {isLoading ? (
-              <Skeleton className="h-12 w-full rounded-xl" />
-            ) : (
-              <h1 className="text-4xl font-black capitalize -tracking-wide text-black xl:text-5xl">
+            <div className="grid gap-1">
+              <Chip
+                size="sm"
+                variant="flat"
+                color={data?.data.is_active ? "success" : "danger"}
+                startContent={
+                  data?.data.is_active ? (
+                    <CheckCircle weight="duotone" size={18} />
+                  ) : (
+                    <XCircle weight="duotone" size={18} />
+                  )
+                }
+                classNames={{
+                  base: "px-2 gap-1 mb-2",
+                  content: "font-bold",
+                }}
+              >
+                {data?.data.is_active
+                  ? "Kursus/Playlist Aktif"
+                  : "Kursus/Playlist Tidak Aktif"}
+              </Chip>
+
+              <h1 className="text-3xl font-bold -tracking-wide text-black">
                 {data?.data.title}
               </h1>
-            )}
 
-            {isLoading ? (
-              <Skeleton className="h-12 w-full rounded-xl" />
-            ) : (
               <p className="font-medium leading-[170%] text-gray">
                 {data?.data.description}
               </p>
-            )}
+            </div>
+
+            <Button
+              variant="light"
+              color="secondary"
+              startContent={<PencilLine weight="duotone" size={18} />}
+              onClick={() => {
+                onOpenCourse();
+                setEditCourse(data?.data ?? null);
+              }}
+              className="font-semibold"
+            >
+              Edit Playlist
+            </Button>
+          </div>
+        )}
+
+        <div className="mt-4 grid">
+          <div className="sticky left-0 top-0 z-50 flex items-end justify-between gap-4 bg-white pb-4">
+            <h4 className="text-xl font-bold -tracking-wide text-black">
+              Daftar Segmen 🎬
+            </h4>
+
+            <Button
+              variant="solid"
+              color="secondary"
+              startContent={<Plus weight="bold" size={18} />}
+              onClick={() => {
+                router.push({
+                  pathname: `/videocourse/content/${params.id}/segment`,
+                  query: {
+                    course_id: data?.data.course_id,
+                    course_title: data?.data.title,
+                  },
+                });
+              }}
+              className="font-semibold"
+            >
+              Tambah Segmen Baru
+            </Button>
           </div>
 
-          {!isLoading ? (
-            <div className="absolute right-16">
-              <Button
-                variant="light"
-                color="secondary"
-                startContent={<PencilLine weight="duotone" size={18} />}
-                onClick={() => {
-                  onOpenCourse();
-                  setEditCourse(data?.data ?? null);
-                }}
-                className="font-semibold"
-              >
-                Edit Playlist
-              </Button>
+          {isLoading ? (
+            <div className="grid gap-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton key={index} className="h-14 w-full rounded-xl" />
+              ))}
             </div>
-          ) : null}
-        </div>
-
-        <div className="flex justify-end">
-          <Button
-            variant="solid"
-            color="secondary"
-            startContent={<Plus weight="bold" size={18} />}
-            onClick={() => {
-              router.push({
-                pathname: `/videocourse/content/${params.id}/segment`,
-                query: {
-                  course_id: data?.data.course_id,
-                  course_title: data?.data.title,
-                },
-              });
-            }}
-            className="font-semibold"
-          >
-            Tambah Segmen Baru
-          </Button>
-        </div>
-        <div className="w-full">
-          <Accordion variant="splitted">
-            {isLoading ? (
-              <AccordionItem>
-                <Skeleton className="h-8 w-full rounded-xl" />
-              </AccordionItem>
-            ) : (
-              (data?.data.segments ?? []).map((segment) => (
+          ) : (
+            <Accordion selectionMode="multiple">
+              {(data?.data.segments ?? []).map((segment) => (
                 <AccordionItem
                   key={segment.segment_id}
                   title={`${segment.number}. ${segment.title}`}
-                  className="!border-b-0"
                   startContent={
-                    <>
-                      <Dropdown
-                        isOpen={selectedSegment === segment.segment_id}
-                        onOpenChange={(open) => {
-                          setSelectedSegment(open ? segment.segment_id : null);
+                    <Dropdown
+                      isOpen={selectedSegment === segment.segment_id}
+                      onOpenChange={(open) => {
+                        setSelectedSegment(open ? segment.segment_id : null);
+                      }}
+                    >
+                      <DropdownTrigger
+                        onClick={() => setSelectedSegment(segment.segment_id)}
+                      >
+                        <Button
+                          isIconOnly
+                          variant="light"
+                          size="sm"
+                          color="secondary"
+                        >
+                          <CustomTooltip content="Aksi">
+                            <Gear weight="bold" size={18} />
+                          </CustomTooltip>
+                        </Button>
+                      </DropdownTrigger>
+
+                      <DropdownMenu
+                        aria-label="Static Actions"
+                        itemClasses={{
+                          title: "font-semibold",
                         }}
                       >
-                        <DropdownTrigger
-                          onClick={() => setSelectedSegment(segment.segment_id)}
+                        <DropdownItem
+                          key="edit_segment"
+                          onClick={() => {
+                            if (selectedSegment === segment.segment_id) {
+                              setEditSegment(segment);
+                              onOpenEdit();
+                            }
+                          }}
                         >
-                          <Button
-                            isIconOnly
-                            variant="light"
-                            size="sm"
-                            color="secondary"
-                          >
-                            <CustomTooltip content="Aksi">
-                              <Gear weight="bold" size={18} />
-                            </CustomTooltip>
-                          </Button>
-                        </DropdownTrigger>
-                        <DropdownMenu aria-label="Static Actions">
-                          <DropdownItem
-                            key="edit_segment"
-                            onClick={() => {
-                              if (selectedSegment === segment.segment_id) {
-                                setEditSegment(segment);
-                                onOpenEdit();
-                              }
-                            }}
-                          >
-                            Edit Segmen
-                          </DropdownItem>
-                          <DropdownItem
-                            key="new_pre_test"
-                            onClick={() => {
-                              router.push({
-                                pathname: `/videocourse/content/${params.id}/pretest`,
-                                query: {
-                                  course_id: data?.data.course_id,
-                                  course_title: data?.data.title,
-                                  segment_id: segment.segment_id,
-                                  segment_title: segment.title,
-                                },
-                              });
-                            }}
-                          >
-                            Tambah Pre-Test Baru
-                          </DropdownItem>
-                          <DropdownItem
-                            key="new_video"
-                            onClick={() => {
-                              router.push({
-                                pathname: `/videocourse/content/${params.id}/video`,
-                                query: {
-                                  course_id: data?.data.course_id,
-                                  course_title: data?.data.title,
-                                  segment_id: segment.segment_id,
-                                  segment_title: segment.title,
-                                },
-                              });
-                            }}
-                          >
-                            Tambah Video Baru
-                          </DropdownItem>
-                          <DropdownItem
-                            key="new_post_test"
-                            onClick={() => {
-                              router.push({
-                                pathname: `/videocourse/content/${params.id}posttest`,
-                                query: {
-                                  course_id: data?.data.course_id,
-                                  course_title: data?.data.title,
-                                  segment_id: segment.segment_id,
-                                  segment_title: segment.title,
-                                },
-                              });
-                            }}
-                          >
-                            Tambah Post-Test Baru
-                          </DropdownItem>
-                        </DropdownMenu>
-                      </Dropdown>
-                    </>
+                          Edit Segmen
+                        </DropdownItem>
+
+                        <DropdownItem
+                          key="new_pre_test"
+                          onClick={() => {
+                            router.push({
+                              pathname: `/videocourse/content/${params.id}/pretest`,
+                              query: {
+                                course_id: data?.data.course_id,
+                                course_title: data?.data.title,
+                                segment_id: segment.segment_id,
+                                segment_title: segment.title,
+                              },
+                            });
+                          }}
+                        >
+                          Tambah Pre-Test Baru
+                        </DropdownItem>
+
+                        <DropdownItem
+                          key="new_video"
+                          onClick={() => {
+                            router.push({
+                              pathname: `/videocourse/content/${params.id}/video`,
+                              query: {
+                                course_id: data?.data.course_id,
+                                course_title: data?.data.title,
+                                segment_id: segment.segment_id,
+                                segment_title: segment.title,
+                              },
+                            });
+                          }}
+                        >
+                          Tambah Video Baru
+                        </DropdownItem>
+
+                        <DropdownItem
+                          key="new_post_test"
+                          onClick={() => {
+                            router.push({
+                              pathname: `/videocourse/content/${params.id}/posttest`,
+                              query: {
+                                course_id: data?.data.course_id,
+                                course_title: data?.data.title,
+                                segment_id: segment.segment_id,
+                                segment_title: segment.title,
+                              },
+                            });
+                          }}
+                        >
+                          Tambah Post-Test Baru
+                        </DropdownItem>
+                      </DropdownMenu>
+                    </Dropdown>
                   }
+                  classNames={{
+                    title: "text-black font-bold",
+                    indicator: "text-black",
+                    content: "grid gap-1 left-8",
+                  }}
                 >
                   {segment.contents?.map((content) => (
                     <div
                       key={content.content_id}
-                      className="flex items-center justify-between py-2"
+                      className="ml-10 flex items-center justify-between rounded-xl [padding:0.5rem_1rem] hover:bg-purple/10"
                     >
-                      <span className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         {content.content_type === "video" && (
-                          <Video size={18} className="text-purple-500" />
+                          <Video
+                            weight="duotone"
+                            size={18}
+                            className="text-purple"
+                          />
                         )}
+
                         {content.content_type === "test" && (
-                          <FileText size={18} className="text-purple-500" />
+                          <FileText
+                            weight="duotone"
+                            size={18}
+                            className="text-purple"
+                          />
                         )}
-                        {content.title}
-                      </span>
-                      <div>
+
+                        <h4 className="font-bold text-black">
+                          {content.title}{" "}
+                          {content.content_type == "test" && (
+                            <Chip
+                              size="sm"
+                              variant="flat"
+                              color="success"
+                              classNames={{
+                                base: "px-2 gap-1 ml-2",
+                                content: "font-bold",
+                              }}
+                            >
+                              Kuis Segmen
+                            </Chip>
+                          )}
+                        </h4>
+                      </div>
+
+                      <div className="inline-flex items-center gap-2">
                         <Button
                           isIconOnly
                           variant="light"
@@ -681,6 +755,7 @@ export default function DetailVideoCourse({
                             <Eye weight="duotone" size={18} />
                           </CustomTooltip>
                         </Button>
+
                         <Button
                           isIconOnly
                           variant="light"
@@ -708,9 +783,9 @@ export default function DetailVideoCourse({
                     </div>
                   ))}
                 </AccordionItem>
-              ))
-            )}
-          </Accordion>
+              ))}
+            </Accordion>
+          )}
         </div>
       </Container>
     </Layout>
