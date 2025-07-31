@@ -21,7 +21,7 @@ export default function ButtonSidebar({
     <Link
       href={path}
       className={`flex h-10 items-center justify-between rounded-xl [padding:0.5rem_1rem] ${className} ${
-        router.asPath.includes(path)
+        router.asPath === path || router.asPath.startsWith(path + "/")
           ? "bg-purple text-white hover:bg-purple/90"
           : "bg-transparent text-gray hover:bg-gray/10"
       }`}

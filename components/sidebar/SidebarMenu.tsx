@@ -5,7 +5,6 @@ import {
   ChatCircleDots,
   ChatCircleText,
   ClipboardText,
-  Clock,
   Icon,
   Microscope,
   Robot,
@@ -14,21 +13,16 @@ import {
   Video,
 } from "@phosphor-icons/react";
 
-type BaseMenuItem = {
-  label: string;
-  path: string;
-};
-
-type SidebarMenuType = BaseMenuItem & {
+type SidebarMenuType = {
+  label?: string;
+  key?: string;
+  title?: string;
+  path?: string;
   icon: Icon;
-};
-
-type SidebarMenuClassType = {
-  key: string;
-  title: string;
-  icon: Icon;
-  path: string;
-  items: BaseMenuItem[];
+  items?: {
+    label: string;
+    path: string;
+  }[];
 };
 
 export function SidebarMenuTryout(): SidebarMenuType[] {
@@ -46,7 +40,7 @@ export function SidebarMenuTryout(): SidebarMenuType[] {
   ];
 }
 
-export function SidebarMenuClass(): SidebarMenuClassType[] {
+export function SidebarMenuClass(): SidebarMenuType[] {
   return [
     {
       key: "videocourse",
@@ -108,6 +102,13 @@ export function SidebarMenuClass(): SidebarMenuClassType[] {
         { label: "Access List", path: "/apotekerclass/accesses" },
       ],
     },
+  ];
+}
+
+export function SidebarOtherMenu(adminId?: string): SidebarMenuType[] {
+  const isSuperAdmin = adminId?.startsWith("ROSA");
+
+  return [
     {
       key: "statistics",
       title: "Statistik",
@@ -119,28 +120,11 @@ export function SidebarMenuClass(): SidebarMenuClassType[] {
         { label: "ROSA (AI)", path: "/statistics/ai" },
       ],
     },
-  ];
-}
-
-export function SidebarMenuUser(): SidebarMenuType[] {
-  return [
     {
-      label: "Pengguna",
-      path: "/users",
-      icon: User,
+      label: "Rosa (AI)",
+      path: "/ai",
+      icon: Robot,
     },
-    {
-      label: "Session",
-      path: "/sessions",
-      icon: Clock,
-    },
-  ];
-}
-
-export function SidebarOtherMenu(adminId?: string): SidebarMenuType[] {
-  const isSuperAdmin = adminId?.startsWith("ROSA");
-
-  return [
     ...(isSuperAdmin
       ? [
           {
@@ -151,9 +135,9 @@ export function SidebarOtherMenu(adminId?: string): SidebarMenuType[] {
         ]
       : []),
     {
-      label: "Rosa (AI)",
-      path: "/ai",
-      icon: Robot,
+      label: "Pengguna",
+      path: "/users",
+      icon: User,
     },
     {
       label: "Mentor",
