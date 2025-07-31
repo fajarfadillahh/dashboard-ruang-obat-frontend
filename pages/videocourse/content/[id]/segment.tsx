@@ -11,11 +11,14 @@ import { FloppyDisk } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { ParsedUrlQuery } from "querystring";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CreateSegmentCoursePage({
   token,
+  query,
+  params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const session = useSession();
@@ -26,24 +29,30 @@ export default function CreateSegmentCoursePage({
     setLoading(true);
 
     try {
-      const payload = {
-        course_id: router.query.course_id,
-        title: titleSegment,
-        by: session.data?.user.fullname,
-      };
-
       const responseSegment: SuccessResponse<{ segment_id: string }> =
         await fetcher({
           url: "/courses/segments",
           method: "POST",
-          data: payload,
+          data: {
+            course_id: query.course_id,
+            title: titleSegment,
+            by: session.data?.user.fullname,
+          },
           token,
         });
 
       toast.success("Segmen berhasil ditambahkan!");
-      router.push(
-        `/videocourse/content/${router.query.id}/pretest?segment_id=${responseSegment.data.segment_id}`,
-      );
+
+      delete query.id;
+
+      router.push({
+        pathname: `/videocourse/content/${params.id}/pretest`,
+        query: {
+          ...query,
+          segment_id: responseSegment.data.segment_id,
+          segment_title: titleSegment,
+        },
+      });
     } catch (error: any) {
       console.error(error);
       toast.error(getError(error));
@@ -57,7 +66,10 @@ export default function CreateSegmentCoursePage({
   return (
     <Layout title="Buat Segmen" className="scrollbar-hide">
       <Container className="gap-8">
-        <TitleText title="Buat Segmen 🎬" text="Saatnya buat segmen sekarang" />
+        <TitleText
+          title={`Buat Segmen ${query.course_title} 🎬`}
+          text={`Saatnya buat segmen ${query.course_title} sekarang`}
+        />
 
         <div className="grid max-w-[500px] gap-4">
           <Input
@@ -91,4 +103,13 @@ export default function CreateSegmentCoursePage({
   );
 }
 
-export const getServerSideProps = withToken();
+export const getServerSideProps = withToken(async (ctx) => {
+  const { query, params } = ctx;
+
+  return {
+    props: {
+      query: query as ParsedUrlQuery,
+      params: params as ParsedUrlQuery,
+    },
+  };
+});
