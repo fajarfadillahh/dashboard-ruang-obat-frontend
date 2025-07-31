@@ -127,6 +127,11 @@ export default function DetailCategoryContentPage({
                 <div
                   key={course.course_id}
                   className="group relative isolate flex items-center gap-4 rounded-xl border-2 border-gray/10 p-4 hover:cursor-pointer hover:bg-purple/10"
+                  onClick={() =>
+                    router.push(
+                      `/apotekerclass/content/${course.course_id}/detail`,
+                    )
+                  }
                 >
                   <Button
                     isIconOnly
