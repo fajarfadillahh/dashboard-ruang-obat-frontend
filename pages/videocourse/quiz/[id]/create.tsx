@@ -2,6 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
+import ModalGenerateDataFromAi from "@/components/modal/ModalGenerateDataFromAi";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -38,6 +39,7 @@ export default function CreateQuizPage({
 
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
+  const [questionsFromAi, setQuestionsFromAi] = useState(initialQuestions);
 
   function handleAddQuestion(question: CreateQuestion) {
     setQuestions((prev) => [...prev, question]);
@@ -122,6 +124,18 @@ export default function CreateQuizPage({
     setIsButtonDisabled(!isFormValid);
   }, [input, questions]);
 
+  useEffect(() => {
+    if (questionsFromAi.length > 0) {
+      setQuestions((prev) => [...prev, ...questionsFromAi]);
+      localStorage.setItem(
+        "questions_quiz_videocourse",
+        JSON.stringify([...questions, ...questionsFromAi]),
+      );
+      toast.success("Soal dari AI berhasil ditambahkan ke draft");
+      setQuestionsFromAi(initialQuestions);
+    }
+  }, [questionsFromAi]);
+
   return (
     <Layout title="Buat Kuis" className="scrollbar-hide">
       <Container className="gap-8">
@@ -179,6 +193,7 @@ export default function CreateQuizPage({
                 <ModalInputQuestion
                   {...{ handleAddQuestion, page: "create", token: token }}
                 />
+                <ModalGenerateDataFromAi setQuestions={setQuestionsFromAi} />
 
                 <ModalConfirm
                   trigger={

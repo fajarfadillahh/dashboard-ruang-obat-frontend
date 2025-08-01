@@ -2,6 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
+import ModalGenerateDataFromAi from "@/components/modal/ModalGenerateDataFromAi";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -35,6 +36,7 @@ export default function CreateTryoutPage({
   });
   const initialQuestions: CreateQuestion[] = [];
   const [questions, setQuestions] = useState(initialQuestions);
+  const [questionsFromAi, setQuestionsFromAi] = useState(initialQuestions);
 
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
@@ -122,6 +124,18 @@ export default function CreateTryoutPage({
     setIsButtonDisabled(!isFormValid);
   }, [input, questions]);
 
+  useEffect(() => {
+    if (questionsFromAi.length > 0) {
+      setQuestions((prev) => [...prev, ...questionsFromAi]);
+      localStorage.setItem(
+        "questions_tryout_apotekerclass",
+        JSON.stringify([...questions, ...questionsFromAi]),
+      );
+      toast.success("Soal dari AI berhasil ditambahkan ke draft");
+      setQuestionsFromAi(initialQuestions);
+    }
+  }, [questionsFromAi]);
+
   return (
     <Layout title="Buat Tryout" className="scrollbar-hide">
       <Container className="gap-8">
@@ -179,6 +193,7 @@ export default function CreateTryoutPage({
                 <ModalInputQuestion
                   {...{ handleAddQuestion, page: "create", token: token }}
                 />
+                <ModalGenerateDataFromAi setQuestions={setQuestionsFromAi} />
 
                 <ModalConfirm
                   trigger={
