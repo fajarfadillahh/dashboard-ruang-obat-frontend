@@ -34,6 +34,7 @@ import {
   Gear,
   PencilLine,
   Plus,
+  Trash,
   Video,
   XCircle,
 } from "@phosphor-icons/react";
@@ -239,6 +240,38 @@ export default function DetailApotekerClassCourse({
       window.open(response.data.url, "_blank");
     } catch (error) {
       console.error(error);
+    }
+  }
+
+  async function handleDeleteSegment(segment_id: string) {
+    try {
+      await fetcher({
+        url: `/courses/segments/${segment_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      toast.success("Segmen berhasil dihapus!");
+      mutate();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
+    }
+  }
+
+  async function handleDeleteContent(content_id: string) {
+    try {
+      await fetcher({
+        url: `/courses/contents/${content_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      toast.success("Konten berhasil dihapus!");
+      mutate();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
     }
   }
 
@@ -634,6 +667,23 @@ export default function DetailApotekerClassCourse({
                         </DropdownItem>
 
                         <DropdownItem
+                          key="delete_segment"
+                          onClick={() => {
+                            if (selectedSegment === segment.segment_id) {
+                              if (
+                                confirm(
+                                  "Apakah anda yakin menghapus segmen ini?",
+                                )
+                              ) {
+                                handleDeleteSegment(segment.segment_id);
+                              }
+                            }
+                          }}
+                        >
+                          Hapus Segmen
+                        </DropdownItem>
+
+                        <DropdownItem
                           key="new_pre_test"
                           onClick={() => {
                             router.push({
@@ -777,6 +827,26 @@ export default function DetailApotekerClassCourse({
                             content={`Edit ${content.content_type === "test" ? "Test" : "Video"}`}
                           >
                             <PencilLine weight="duotone" size={18} />
+                          </CustomTooltip>
+                        </Button>
+
+                        <Button
+                          isIconOnly
+                          variant="light"
+                          size="sm"
+                          color="secondary"
+                          onClick={() => {
+                            if (
+                              confirm("Apakah anda yakin menghapus konten ini?")
+                            ) {
+                              handleDeleteContent(content.content_id);
+                            }
+                          }}
+                        >
+                          <CustomTooltip
+                            content={`Hapus ${content.content_type === "test" ? "Test" : "Video"}`}
+                          >
+                            <Trash weight="duotone" size={18} />
                           </CustomTooltip>
                         </Button>
                       </div>
