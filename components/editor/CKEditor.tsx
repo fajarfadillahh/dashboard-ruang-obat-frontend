@@ -72,7 +72,7 @@ export default function CKEditor({ value, onChange, token }: CKEditorProps) {
           ImageResizeHandles,
         ],
         simpleUpload: {
-          uploadUrl: `https://${process.env.NEXT_PUBLIC_MODE === "prod" ? "api" : "dev"}.ruangobat.id/api/general/questions/image`,
+          uploadUrl: `https://${process.env.NEXT_PUBLIC_MODE === "prod" ? "api" : "dev"}.ruangobat.id/api/questions/image`,
           headers: {
             Authorization: `Bearer ${token}`,
           },
