@@ -105,7 +105,7 @@ export default function DetailsProgramPage({
 
                 {/* data program */}
                 <div className="grid gap-4">
-                  <h1 className="text-xl font-bold -tracking-wide text-black">
+                  <h1 className="text-2xl font-bold -tracking-wide text-black">
                     {data?.data.title}
                   </h1>
 
@@ -129,20 +129,20 @@ export default function DetailsProgramPage({
                           formatRupiah(data?.data.price as number)
                         ),
                       ],
-                      ["jumlah ujian", data?.data.total_tests],
+                      ["jumlah ujian", `${data?.data.total_tests} Ujian`],
                     ].map(([label, value], index) => (
                       <div key={index} className="grid gap-1">
                         <span className="text-xs font-medium capitalize text-gray">
                           {label}:
                         </span>
 
-                        <h2 className="font-extrabold text-black">{value}</h2>
+                        <h2 className="font-bold text-black">{value}</h2>
                       </div>
                     ))}
 
                     <div className="grid gap-1">
                       <span className="text-xs font-medium capitalize text-gray">
-                        Status Prohram:
+                        Status Program:
                       </span>
 
                       <Chip
@@ -204,7 +204,7 @@ export default function DetailsProgramPage({
               Daftar Ujian 📋
             </h4>
 
-            <div className="grid gap-2">
+            <div className="grid grid-cols-3 gap-4">
               {isLoading ? (
                 Array.from({ length: data?.data.tests.length || 6 }).map(
                   (_, index) => (
@@ -221,7 +221,7 @@ export default function DetailsProgramPage({
                   />
                 ))
               ) : (
-                <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
+                <div className="col-span-3 flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
                   <EmptyData text="Ujian belum tersedia." />
                 </div>
               )}
