@@ -43,8 +43,6 @@ export default function CreateSegmentCoursePage({
 
       toast.success("Segmen berhasil ditambahkan!");
 
-      delete query.id;
-
       router.push({
         pathname: `/apotekerclass/content/${params.id}/pretest`,
         query: {
