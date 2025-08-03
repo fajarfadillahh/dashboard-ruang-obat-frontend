@@ -107,7 +107,13 @@ export default function DetailSubCategoryContentPage({
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
               onClick={() =>
-                router.push(`/videocourse/content/${router.query.id}/course`)
+                router.push({
+                  pathname: `/videocourse/content/${router.query.id}/course`,
+                  query: {
+                    sub_category_id: router.query.id,
+                    from: "create",
+                  },
+                })
               }
               className="font-semibold"
             >
@@ -126,11 +132,18 @@ export default function DetailSubCategoryContentPage({
               data?.data.courses.map((course) => (
                 <div
                   key={course.course_id}
-                  className="group relative isolate flex items-center gap-4 rounded-xl border-2 border-gray/10 p-4 hover:cursor-pointer hover:bg-purple/10"
+                  className={`group relative isolate flex items-center gap-4 rounded-xl border-2 p-4 hover:cursor-pointer ${
+                    course.is_active
+                      ? "border-purple/10 hover:border-purple hover:bg-purple/10"
+                      : "border-danger bg-danger/5 hover:bg-danger/10"
+                  }`}
                   onClick={() =>
-                    router.push(
-                      `/videocourse/content/${course.course_id}/detail`,
-                    )
+                    router.push({
+                      pathname: `/videocourse/content/${course.course_id}/detail`,
+                      query: {
+                        sub_category_id: router.query.id,
+                      },
+                    })
                   }
                 >
                   <Button
@@ -139,9 +152,12 @@ export default function DetailSubCategoryContentPage({
                     size="sm"
                     color="secondary"
                     onClick={() =>
-                      router.push(
-                        `/videocourse/content/${course.course_id}/detail`,
-                      )
+                      router.push({
+                        pathname: `/videocourse/content/${course.course_id}/detail`,
+                        query: {
+                          sub_category_id: router.query.id,
+                        },
+                      })
                     }
                     className="absolute right-4 top-4 z-50 hidden group-hover:flex"
                   >
@@ -154,8 +170,9 @@ export default function DetailSubCategoryContentPage({
                     <Image
                       src={course.thumbnail_url as string}
                       alt={course.title}
-                      layout="fill"
-                      objectFit="cover"
+                      width={1000}
+                      height={1000}
+                      className={`size-20 object-fill ${course.is_active ? "grayscale-0" : "grayscale"}`}
                     />
                   </div>
 
