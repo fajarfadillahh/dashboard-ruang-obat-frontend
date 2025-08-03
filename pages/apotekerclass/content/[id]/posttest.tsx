@@ -19,7 +19,15 @@ import {
   DropdownTrigger,
   Input,
 } from "@nextui-org/react";
-import { Circle, Database, Trash } from "@phosphor-icons/react";
+import {
+  CheckCircle,
+  Circle,
+  Database,
+  DotsThreeOutlineVertical,
+  FilmSlate,
+  PlayCircle,
+  Trash,
+} from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -128,8 +136,8 @@ export default function CreatePostTestCoursePage({
 
   return (
     <Layout title="Buat Post-Test" className="scrollbar-hide">
-      <Container className="gap-8">
-        <div className="mb-8 flex items-end justify-between gap-4">
+      <Container className="divide-y-2 divide-dashed divide-gray/10">
+        <div className="flex items-end justify-between gap-4 pb-8">
           <div className="grid gap-4">
             <Chip
               variant="flat"
@@ -153,52 +161,77 @@ export default function CreatePostTestCoursePage({
 
           <Dropdown>
             <DropdownTrigger>
-              <Button variant="solid" color="secondary">
-                Menu
+              <Button
+                variant="light"
+                color="secondary"
+                endContent={
+                  <DotsThreeOutlineVertical weight="fill" size={18} />
+                }
+                className="font-semibold"
+              >
+                Menu Lainnya
               </Button>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Static Actions">
+
+            <DropdownMenu
+              aria-label="Static Actions"
+              itemClasses={{
+                title: "font-semibold",
+              }}
+            >
               <DropdownItem
                 key="create_new_video"
+                startContent={<PlayCircle weight="duotone" size={18} />}
                 onClick={() => {
-                  delete query.id;
-
                   router.push({
                     pathname: `/apotekerclass/content/${params.id}/video`,
                     query: { ...query },
                   });
                 }}
               >
-                Buat Video untuk &quot;{query.segment_title}&quot; Lagi
+                Buat Video untuk{" "}
+                <strong>&quot;{query.segment_title}&quot;</strong> Lagi
               </DropdownItem>
+
               <DropdownItem
                 key="create_new_segment"
+                startContent={<FilmSlate weight="duotone" size={18} />}
                 onClick={() => {
                   router.push({
                     pathname: `/apotekerclass/content/${params.id}/segment`,
-                    query: { course_id: query.course_id },
+                    query: {
+                      category_id: router.query.category_id,
+                      course_id: query.course_id,
+                      course_title: query.course_title,
+                    },
                   });
                 }}
               >
-                Buat Segment untuk &quot;{query.course_title}&quot; Lagi
+                Buat Segment untuk{" "}
+                <strong>&quot;{query.course_title}&quot;</strong> Lagi
               </DropdownItem>
+
               <DropdownItem
                 key="finish"
-                className="text-danger"
-                color="danger"
+                color="secondary"
+                startContent={<CheckCircle weight="duotone" size={18} />}
                 onClick={() => {
-                  router.push(
-                    `/apotekerclass/content/${query.course_id}/detail`,
-                  );
+                  router.push({
+                    pathname: `/apotekerclass/content/${query.course_id}/detail`,
+                    query: {
+                      category_id: router.query.category_id,
+                    },
+                  });
                 }}
+                className="bg-purple/10 text-purple"
               >
-                Lewati Ini dan Selesai
+                Lewati Post-Test dan Selesaikan
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </div>
 
-        <div className="grid gap-8">
+        <div className="grid gap-8 pt-8">
           <Input
             isRequired
             type="text"
