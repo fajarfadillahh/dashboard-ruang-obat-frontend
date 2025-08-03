@@ -87,8 +87,6 @@ export default function CreatePreTestCoursePage({
         token,
       });
 
-      delete query.id;
-
       router.push({
         pathname: `/videocourse/content/${params.id}/video`,
         query: { ...query },
@@ -126,8 +124,8 @@ export default function CreatePreTestCoursePage({
 
   return (
     <Layout title="Buat Pre-Test" className="scrollbar-hide">
-      <Container className="gap-8">
-        <div className="mb-8 flex items-end justify-between gap-4">
+      <Container className="divide-y-2 divide-dashed divide-gray/10">
+        <div className="flex items-end justify-between gap-4 pb-8">
           <div className="grid gap-4">
             <Chip
               variant="flat"
@@ -150,11 +148,10 @@ export default function CreatePreTestCoursePage({
           </div>
 
           <Button
+            variant="light"
             color="secondary"
             endContent={<ArrowRight weight="bold" size={18} />}
             onClick={() => {
-              delete query.id;
-
               router.push({
                 pathname: `/videocourse/content/${params.id}/video`,
                 query: { ...query },
@@ -166,7 +163,7 @@ export default function CreatePreTestCoursePage({
           </Button>
         </div>
 
-        <div className="grid gap-8">
+        <div className="grid gap-8 pt-8">
           <Input
             isRequired
             type="text"
