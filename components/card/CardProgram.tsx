@@ -66,7 +66,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
 
   return (
     <div
-      className={`relative isolate grid grid-cols-[1fr_max-content] items-center gap-12 overflow-hidden rounded-xl border-2 p-6 hover:cursor-pointer ${
+      className={`relative isolate grid grid-cols-[1fr_max-content] items-center overflow-hidden rounded-xl border-2 p-6 hover:cursor-pointer ${
         program.is_active
           ? "border-purple/10 hover:border-purple hover:bg-purple/10"
           : "border-danger bg-danger/5 hover:bg-danger/10"
@@ -89,7 +89,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
         <div className="grid flex-1 gap-4">
           <CustomTooltip content={program.title}>
             <h1
-              className={`line-clamp-1 text-lg font-semibold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
+              className={`line-clamp-1 text-lg font-bold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
             >
               {program.title}
             </h1>
@@ -172,7 +172,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
         </div>
       </div>
 
-      <Dropdown className="">
+      <Dropdown>
         <DropdownTrigger>
           <Button
             isIconOnly
