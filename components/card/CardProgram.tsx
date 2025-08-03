@@ -1,7 +1,6 @@
 import { SuccessResponse } from "@/types/global.type";
 import { Program, ProgramsResponse } from "@/types/program.type";
 import { fetcher } from "@/utils/fetcher";
-import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import { getError } from "@/utils/getError";
 import {
@@ -10,21 +9,19 @@ import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
-  DropdownSection,
   DropdownTrigger,
 } from "@nextui-org/react";
 import {
   BookBookmark,
-  CheckCircle,
   Eye,
+  Gear,
+  IconContext,
   PencilLine,
   Power,
   Prohibit,
   Tag,
   Users,
-  XCircle,
 } from "@phosphor-icons/react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import { KeyedMutator } from "swr";
@@ -69,28 +66,36 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
 
   return (
     <div
-      className={`grid grid-cols-[1fr_max-content] items-center gap-12 rounded-xl border-2 p-6 ${
+      className={`relative isolate grid grid-cols-[1fr_max-content] items-center gap-12 overflow-hidden rounded-xl border-2 p-6 hover:cursor-pointer ${
         program.is_active
           ? "border-purple/10 hover:border-purple hover:bg-purple/10"
           : "border-danger bg-danger/5 hover:bg-danger/10"
       }`}
+      onClick={() =>
+        router.push(`/programs/${encodeURIComponent(program.program_id)}`)
+      }
     >
-      <div className="flex items-start gap-6">
-        {program.is_active ? (
-          <BookBookmark weight="duotone" size={28} className="text-purple" />
-        ) : (
-          <Prohibit weight="duotone" size={28} className="text-danger" />
-        )}
+      <div className="flex items-start gap-4">
+        <IconContext.Provider
+          value={{
+            weight: "duotone",
+            size: 32,
+            className: program.is_active ? "text-purple" : "text-danger",
+          }}
+        >
+          {program.is_active ? <BookBookmark /> : <Prohibit />}
+        </IconContext.Provider>
 
-        <div className="grid gap-4">
-          <Link
-            href={`/programs/${encodeURIComponent(program.program_id)}`}
-            className={`line-clamp-1 text-xl font-bold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
-          >
-            {program.title}
-          </Link>
+        <div className="grid flex-1 gap-4">
+          <CustomTooltip content={program.title}>
+            <h1
+              className={`line-clamp-1 text-lg font-semibold leading-[120%] text-black ${program.is_active ? "hover:text-purple" : "hover:text-danger"}`}
+            >
+              {program.title}
+            </h1>
+          </CustomTooltip>
 
-          <div className="grid grid-cols-[repeat(3,120px),max-content] items-start gap-2">
+          <div className="flex items-start justify-between gap-2">
             <div className="grid gap-1">
               <span className="text-xs font-medium text-gray">
                 Harga Program:
@@ -129,7 +134,7 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
               </h5>
             </div>
 
-            <div className="grid gap-1">
+            {/* <div className="grid gap-1">
               <span className="text-xs font-medium text-gray">
                 Status Program:
               </span>
@@ -162,77 +167,75 @@ export default function CardProgram({ program, token, mutate }: ProgramProps) {
               <h5 className="text-sm font-semibold text-black">
                 {formatDate(program.created_at)}
               </h5>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
 
-      <div className="inline-flex items-center gap-1">
-        <Button
-          isIconOnly
-          variant="light"
-          size="sm"
-          color="secondary"
-          onClick={() => router.push(`/programs/${program.program_id}`)}
-        >
-          <CustomTooltip content="Detail Program">
-            <Eye weight="duotone" size={18} />
-          </CustomTooltip>
-        </Button>
-
-        <Button
-          isIconOnly
-          variant="light"
-          size="sm"
-          color="secondary"
-          onClick={() =>
-            router.push(`/programs/${program.program_id}/participants`)
-          }
-        >
-          <CustomTooltip content="Partisipan">
-            <Users weight="duotone" size={18} />
-          </CustomTooltip>
-        </Button>
-
-        <Button
-          isIconOnly
-          variant="light"
-          size="sm"
-          color="secondary"
-          onClick={() => router.push(`/programs/${program.program_id}/edit`)}
-        >
-          <CustomTooltip content="Edit Program">
-            <PencilLine weight="duotone" size={18} />
-          </CustomTooltip>
-        </Button>
-
-        <Dropdown>
-          <DropdownTrigger>
-            <Button isIconOnly variant="light" size="sm">
-              <CustomTooltip content="Aktif/Nonaktif Program">
-                <Power weight="duotone" size={18} className="text-danger" />
-              </CustomTooltip>
-            </Button>
-          </DropdownTrigger>
-
-          <DropdownMenu
-            aria-label="actions"
-            itemClasses={{
-              title: "font-semibold text-black",
-            }}
+      <Dropdown className="">
+        <DropdownTrigger>
+          <Button
+            isIconOnly
+            variant="light"
+            size="sm"
+            color="secondary"
+            className="absolute right-4 top-4 z-10"
           >
-            <DropdownSection aria-label="action zone" title="Anda Yakin?">
-              <DropdownItem
-                onClick={() =>
-                  handleUpdateStatus(program.program_id, program.is_active)
-                }
-              >
-                {program.is_active ? "Nonaktifkan program" : "Aktifkan program"}
-              </DropdownItem>
-            </DropdownSection>
-          </DropdownMenu>
-        </Dropdown>
-      </div>
+            <CustomTooltip content="Aksi Lainnya">
+              <Gear weight="duotone" size={18} />
+            </CustomTooltip>
+          </Button>
+        </DropdownTrigger>
+
+        <DropdownMenu
+          aria-label="Static Actions"
+          itemClasses={{
+            title: "font-semibold",
+          }}
+        >
+          <DropdownItem
+            key="detail_program"
+            startContent={<Eye weight="duotone" size={18} />}
+            onClick={() => router.push(`/programs/${program.program_id}`)}
+          >
+            Detail Program
+          </DropdownItem>
+
+          <DropdownItem
+            key="detail_participant"
+            startContent={<Users weight="duotone" size={18} />}
+            onClick={() =>
+              router.push(`/programs/${program.program_id}/participants`)
+            }
+          >
+            Partisipan
+          </DropdownItem>
+
+          <DropdownItem
+            key="edit_program"
+            startContent={<PencilLine weight="duotone" size={18} />}
+            onClick={() => router.push(`/programs/${program.program_id}/edit`)}
+          >
+            Edit Program
+          </DropdownItem>
+
+          <DropdownItem
+            key="active_inactive"
+            color={program.is_active ? "danger" : "secondary"}
+            startContent={<Power weight="duotone" size={18} />}
+            onClick={() =>
+              handleUpdateStatus(program.program_id, program.is_active)
+            }
+            className={
+              program.is_active
+                ? "bg-danger/10 text-danger"
+                : "bg-purple/10 text-purple"
+            }
+          >
+            {program.is_active ? "Nonaktifkan program" : "Aktifkan program"}
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
     </div>
   );
 }
