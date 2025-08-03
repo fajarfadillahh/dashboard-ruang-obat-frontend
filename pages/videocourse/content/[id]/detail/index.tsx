@@ -1,6 +1,8 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
+import EmptyData from "@/components/EmptyData";
 import LoadingTitleImage from "@/components/loading/LoadingTitleImage";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
@@ -24,6 +26,7 @@ import {
   ModalFooter,
   ModalHeader,
   Skeleton,
+  Switch,
   Textarea,
   useDisclosure,
 } from "@nextui-org/react";
@@ -89,12 +92,16 @@ export default function DetailVideoCourse({
   });
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
   const {
-    isOpen: isOpenEdit,
-    onOpen: onOpenEdit,
-    onClose: onCloseEdit,
+    isOpen: isOpenSegment,
+    onOpen: onOpenSegment,
+    onClose: onCloseSegment,
   } = useDisclosure();
-  const [editSegment, setEditSegment] = useState<Segment | null>(null);
-  const [loadingEdit, setLoadingEdit] = useState<boolean>(false);
+  const [segment, setSegment] = useState<Segment | null>(null);
+  const [segmentTitle, setSegmentTitle] = useState<string>("");
+  const [loadingSegment, setLoadingSegment] = useState<boolean>(false);
+  const [typeSegmentModal, setTypeSegmentModal] = useState<"create" | "edit">(
+    "create",
+  );
 
   const {
     isOpen: isOpenVideo,
@@ -111,18 +118,48 @@ export default function DetailVideoCourse({
   } = useDisclosure();
   const [editCourse, setEditCourse] = useState<DetailCourse | null>(null);
   const [loadingCourse, setLoadingCourse] = useState<boolean>(false);
+  const [isSelected, setIsSelected] = useState<boolean>(false);
+
+  async function handleCreateSegment() {
+    setLoadingSegment(true);
+
+    try {
+      await fetcher({
+        url: "/courses/segments",
+        method: "POST",
+        data: {
+          course_id: data?.data.course_id,
+          title: segmentTitle,
+          by: session.data?.user.fullname,
+        },
+        token,
+      });
+
+      mutate();
+      onCloseSegment();
+      setSegmentTitle("");
+      toast.success("Segmen berhasil ditambahkan!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
+
+      setLoadingSegment(false);
+    } finally {
+      setLoadingSegment(false);
+    }
+  }
 
   async function handleUpdateSegment() {
-    if (!editSegment) return;
-    setLoadingEdit(true);
+    if (!segment) return;
+    setLoadingSegment(true);
 
     try {
       await fetcher({
         url: `/courses/segments`,
         method: "PATCH",
         data: {
-          title: editSegment.title,
-          segment_id: editSegment.segment_id,
+          title: segmentTitle,
+          segment_id: segment?.segment_id,
           by: session.data?.user.fullname,
         },
         token,
@@ -130,14 +167,15 @@ export default function DetailVideoCourse({
 
       toast.success("Segmen berhasil diperbarui!");
       setSelectedSegment(null);
-      setEditSegment(null);
-      onCloseEdit();
+      setSegmentTitle("");
+      setSegment(null);
+      onCloseSegment();
       mutate();
     } catch (error: any) {
       console.error(error);
       toast.error(getError(error));
     } finally {
-      setLoadingEdit(false);
+      setLoadingSegment(false);
     }
   }
 
@@ -193,6 +231,7 @@ export default function DetailVideoCourse({
       description: editCourse.description,
       type: "videocourse",
       by: session.data?.user.fullname,
+      is_active: !isSelected,
     };
 
     if (editCourse.preview_url) {
@@ -210,6 +249,7 @@ export default function DetailVideoCourse({
       toast.success("Playlist berhasil diperbarui!");
       setEditCourse(null);
       onCloseCourse();
+      setIsSelected(false);
       mutate();
     } catch (error: any) {
       console.error(error);
@@ -278,7 +318,9 @@ export default function DetailVideoCourse({
   return (
     <Layout title="Detail" className="scrollbar-hide">
       <Container className="gap-8">
-        <ButtonBack />
+        <ButtonBack
+          href={`/videocourse/content/${router.query.sub_category_id}`}
+        />
 
         <Modal
           isOpen={isOpenCourse}
@@ -343,41 +385,56 @@ export default function DetailVideoCourse({
                 }
                 classNames={customStyleInput}
               />
+
+              <Switch
+                size="sm"
+                color="secondary"
+                isSelected={isSelected}
+                onValueChange={setIsSelected}
+                className="text-sm font-semibold text-black"
+              >
+                Nonaktifkan Kursus/Playlist
+              </Switch>
             </ModalBody>
 
             <ModalFooter>
               <Button
                 variant="light"
+                color="danger"
                 onClick={() => {
                   setEditCourse(null);
                   onCloseCourse();
                 }}
+                className="font-semibold"
               >
                 Batal
               </Button>
+
               <Button
                 color="secondary"
                 isLoading={loadingCourse}
-                onClick={handleUpdateCourse}
                 isDisabled={!editCourse || loadingCourse}
+                onClick={handleUpdateCourse}
+                className="font-semibold"
               >
-                Update
+                Update Sekarang
               </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
 
         <Modal
-          isOpen={isOpenEdit}
+          isOpen={isOpenSegment}
           onClose={() => {
             setSelectedSegment(null);
-            setEditSegment(null);
-            onCloseEdit();
+            setSegment(null);
+            onCloseSegment();
+            setSegmentTitle("");
           }}
         >
           <ModalContent>
             <ModalHeader className="font-semibold text-black">
-              Edit Segmen
+              {typeSegmentModal == "create" ? "Tambah" : "Update"} Segmen
             </ModalHeader>
 
             <ModalBody>
@@ -389,15 +446,8 @@ export default function DetailVideoCourse({
                 labelPlacement="outside"
                 placeholder="Contoh: Pemahaman Dasar"
                 name="title"
-                defaultValue={editSegment?.title}
-                onChange={(e) => {
-                  if (editSegment) {
-                    setEditSegment({
-                      ...editSegment,
-                      title: e.target.value,
-                    });
-                  }
-                }}
+                defaultValue={segmentTitle}
+                onChange={(e) => setSegmentTitle(e.target.value)}
                 classNames={customStyleInput}
               />
             </ModalBody>
@@ -407,19 +457,29 @@ export default function DetailVideoCourse({
                 variant="light"
                 onClick={() => {
                   setSelectedSegment(null);
-                  setEditSegment(null);
-                  onCloseEdit();
+                  setSegment(null);
+                  onCloseSegment();
+                  setSegmentTitle("");
                 }}
+                className="font-semibold"
               >
                 Batal
               </Button>
+
               <Button
+                isLoading={loadingSegment}
+                isDisabled={loadingSegment}
                 color="secondary"
-                onClick={handleUpdateSegment}
-                isLoading={loadingEdit}
-                isDisabled={!editSegment?.title || loadingEdit}
+                onClick={() => {
+                  if (typeSegmentModal == "create") {
+                    handleCreateSegment();
+                  } else {
+                    handleUpdateSegment();
+                  }
+                }}
+                className="font-semibold"
               >
-                Update
+                {typeSegmentModal == "create" ? "Tambah" : "Update"} Segmen
               </Button>
             </ModalFooter>
           </ModalContent>
@@ -516,16 +576,19 @@ export default function DetailVideoCourse({
                   setSelectedVideo(null);
                   onCloseVideo();
                 }}
+                className="font-semibold"
               >
                 Batal
               </Button>
+
               <Button
-                color="secondary"
-                onClick={handleUpdateVideo}
                 isLoading={loadingVideo}
                 isDisabled={!selectedVideo || loadingVideo}
+                color="secondary"
+                onClick={handleUpdateVideo}
+                className="font-semibold"
               >
-                Update
+                Update Sekarang
               </Button>
             </ModalFooter>
           </ModalContent>
@@ -581,6 +644,7 @@ export default function DetailVideoCourse({
               onClick={() => {
                 onOpenCourse();
                 setEditCourse(data?.data ?? null);
+                setIsSelected(!data?.data.is_active);
               }}
               className="font-semibold"
             >
@@ -600,13 +664,16 @@ export default function DetailVideoCourse({
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
               onClick={() => {
-                router.push({
-                  pathname: `/videocourse/content/${params.id}/segment`,
-                  query: {
-                    course_id: data?.data.course_id,
-                    course_title: data?.data.title,
-                  },
-                });
+                // router.push({
+                //   pathname: `/videocourse/content/${router.query.sub_category_id}/segment`,
+                //   query: {
+                //     sub_category_id: router.query.sub_category_id,
+                //     course_id: data?.data.course_id,
+                //     course_title: data?.data.title,
+                //   },
+                // });
+                onOpenSegment();
+                setTypeSegmentModal("create");
               }}
               className="font-semibold"
             >
@@ -620,7 +687,7 @@ export default function DetailVideoCourse({
                 <Skeleton key={index} className="h-14 w-full rounded-xl" />
               ))}
             </div>
-          ) : (
+          ) : data?.data.segments.length ? (
             <Accordion selectionMode="multiple">
               {(data?.data.segments ?? []).map((segment) => (
                 <AccordionItem
@@ -643,7 +710,7 @@ export default function DetailVideoCourse({
                           color="secondary"
                         >
                           <CustomTooltip content="Aksi">
-                            <Gear weight="bold" size={18} />
+                            <Gear weight="duotone" size={18} />
                           </CustomTooltip>
                         </Button>
                       </DropdownTrigger>
@@ -656,10 +723,15 @@ export default function DetailVideoCourse({
                       >
                         <DropdownItem
                           key="edit_segment"
+                          startContent={
+                            <PencilLine weight="duotone" size={18} />
+                          }
                           onClick={() => {
                             if (selectedSegment === segment.segment_id) {
-                              setEditSegment(segment);
-                              onOpenEdit();
+                              onOpenSegment();
+                              setSegment(segment);
+                              setTypeSegmentModal("edit");
+                              setSegmentTitle(segment.title);
                             }
                           }}
                         >
@@ -667,7 +739,69 @@ export default function DetailVideoCourse({
                         </DropdownItem>
 
                         <DropdownItem
+                          key="new_pre_test"
+                          startContent={<Plus weight="bold" size={18} />}
+                          onClick={() => {
+                            router.push({
+                              pathname: `/videocourse/content/${params.id}/pretest`,
+                              query: {
+                                sub_category_id: router.query.sub_category_id,
+                                course_id: data?.data.course_id,
+                                course_title: data?.data.title,
+                                segment_id: segment.segment_id,
+                                segment_title: segment.title,
+                                from: "edit",
+                              },
+                            });
+                          }}
+                        >
+                          Tambah Pre-Test Baru
+                        </DropdownItem>
+
+                        <DropdownItem
+                          key="new_video"
+                          startContent={<Plus weight="bold" size={18} />}
+                          onClick={() => {
+                            router.push({
+                              pathname: `/videocourse/content/${params.id}/video`,
+                              query: {
+                                sub_category_id: router.query.sub_category_id,
+                                course_id: data?.data.course_id,
+                                course_title: data?.data.title,
+                                segment_id: segment.segment_id,
+                                segment_title: segment.title,
+                                from: "edit",
+                              },
+                            });
+                          }}
+                        >
+                          Tambah Video Baru
+                        </DropdownItem>
+
+                        <DropdownItem
+                          key="new_post_test"
+                          startContent={<Plus weight="bold" size={18} />}
+                          onClick={() => {
+                            router.push({
+                              pathname: `/videocourse/content/${params.id}/posttest`,
+                              query: {
+                                sub_category_id: router.query.sub_category_id,
+                                course_id: data?.data.course_id,
+                                course_title: data?.data.title,
+                                segment_id: segment.segment_id,
+                                segment_title: segment.title,
+                                from: "edit",
+                              },
+                            });
+                          }}
+                        >
+                          Tambah Post-Test Baru
+                        </DropdownItem>
+
+                        <DropdownItem
                           key="delete_segment"
+                          color="danger"
+                          startContent={<Trash weight="bold" size={18} />}
                           onClick={() => {
                             if (selectedSegment === segment.segment_id) {
                               if (
@@ -679,59 +813,9 @@ export default function DetailVideoCourse({
                               }
                             }
                           }}
+                          className="text-danger"
                         >
                           Hapus Segmen
-                        </DropdownItem>
-
-                        <DropdownItem
-                          key="new_pre_test"
-                          onClick={() => {
-                            router.push({
-                              pathname: `/videocourse/content/${params.id}/pretest`,
-                              query: {
-                                course_id: data?.data.course_id,
-                                course_title: data?.data.title,
-                                segment_id: segment.segment_id,
-                                segment_title: segment.title,
-                              },
-                            });
-                          }}
-                        >
-                          Tambah Pre-Test Baru
-                        </DropdownItem>
-
-                        <DropdownItem
-                          key="new_video"
-                          onClick={() => {
-                            router.push({
-                              pathname: `/videocourse/content/${params.id}/video`,
-                              query: {
-                                course_id: data?.data.course_id,
-                                course_title: data?.data.title,
-                                segment_id: segment.segment_id,
-                                segment_title: segment.title,
-                              },
-                            });
-                          }}
-                        >
-                          Tambah Video Baru
-                        </DropdownItem>
-
-                        <DropdownItem
-                          key="new_post_test"
-                          onClick={() => {
-                            router.push({
-                              pathname: `/videocourse/content/${params.id}/posttest`,
-                              query: {
-                                course_id: data?.data.course_id,
-                                course_title: data?.data.title,
-                                segment_id: segment.segment_id,
-                                segment_title: segment.title,
-                              },
-                            });
-                          }}
-                        >
-                          Tambah Post-Test Baru
                         </DropdownItem>
                       </DropdownMenu>
                     </Dropdown>
@@ -792,10 +876,13 @@ export default function DetailVideoCourse({
                             if (content.content_type === "video") {
                               handleGetVideoUrl(content.video_url);
                             } else {
-                              window.open(
-                                `/videocourse/content/${content.content_id}/detail/test`,
-                                "_blank",
-                              );
+                              router.push({
+                                pathname: `/videocourse/content/${content.content_id}/detail/test`,
+                                query: {
+                                  sub_category_id: router.query.sub_category_id,
+                                  course_id: data?.data.course_id,
+                                },
+                              });
                             }
                           }}
                         >
@@ -816,10 +903,13 @@ export default function DetailVideoCourse({
                               setSelectedVideo(content);
                               onOpenVideo();
                             } else {
-                              window.open(
-                                `/videocourse/content/${content.content_id}/detail/test`,
-                                "_blank",
-                              );
+                              router.push({
+                                pathname: `/videocourse/content/${content.content_id}/detail/test`,
+                                query: {
+                                  sub_category_id: router.query.sub_category_id,
+                                  course_id: data?.data.course_id,
+                                },
+                              });
                             }
                           }}
                         >
@@ -830,31 +920,68 @@ export default function DetailVideoCourse({
                           </CustomTooltip>
                         </Button>
 
-                        <Button
-                          isIconOnly
-                          variant="light"
-                          size="sm"
-                          color="secondary"
-                          onClick={() => {
-                            if (
-                              confirm("Apakah anda yakin menghapus konten ini?")
-                            ) {
-                              handleDeleteContent(content.content_id);
-                            }
-                          }}
-                        >
-                          <CustomTooltip
-                            content={`Hapus ${content.content_type === "test" ? "Test" : "Video"}`}
-                          >
-                            <Trash weight="duotone" size={18} />
-                          </CustomTooltip>
-                        </Button>
+                        <ModalConfirm
+                          trigger={
+                            <Button
+                              isIconOnly
+                              variant="light"
+                              color="danger"
+                              size="sm"
+                            >
+                              <CustomTooltip content="Hapus Admin">
+                                <Trash
+                                  weight="duotone"
+                                  size={18}
+                                  className="text-danger"
+                                />
+                              </CustomTooltip>
+                            </Button>
+                          }
+                          header={
+                            <h1 className="font-bold text-black">
+                              Hapus Admin
+                            </h1>
+                          }
+                          body={
+                            <div className="grid gap-3 text-sm font-medium">
+                              <p className="leading-[170%] text-gray">
+                                Apakah anda yakin menghapus konten ini?
+                              </p>
+                            </div>
+                          }
+                          footer={(onClose: any) => (
+                            <>
+                              <Button
+                                color="danger"
+                                variant="light"
+                                onPress={onClose}
+                                className="font-semibold"
+                              >
+                                Tutup
+                              </Button>
+
+                              <Button
+                                color="danger"
+                                onClick={() =>
+                                  handleDeleteContent(content.content_id)
+                                }
+                                className="font-semibold"
+                              >
+                                Ya, Hapus Konten
+                              </Button>
+                            </>
+                          )}
+                        />
                       </div>
                     </div>
                   ))}
                 </AccordionItem>
               ))}
             </Accordion>
+          ) : (
+            <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
+              <EmptyData text="Segmen belum tersedia." />
+            </div>
           )}
         </div>
       </Container>
