@@ -2,6 +2,7 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
+import ModalGenerateDataFromAi from "@/components/modal/ModalGenerateDataFromAi";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -42,6 +43,7 @@ export default function CreateTestPage({
   });
   const initialQuestions: CreateQuestion[] = [];
   const [questions, setQuestions] = useState(initialQuestions);
+  const [questionsFromAi, setQuestionsFromAi] = useState(initialQuestions);
 
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
@@ -53,6 +55,18 @@ export default function CreateTestPage({
     if (storedInput) setInput(JSON.parse(storedInput));
     if (storedQuestions) setQuestions(JSON.parse(storedQuestions));
   }, []);
+
+  useEffect(() => {
+    if (questionsFromAi.length > 0) {
+      setQuestions((prev) => [...prev, ...questionsFromAi]);
+      localStorage.setItem(
+        "questions",
+        JSON.stringify([...questions, ...questionsFromAi]),
+      );
+      toast.success("Soal dari AI berhasil ditambahkan ke draft");
+      setQuestionsFromAi(initialQuestions);
+    }
+  }, [questionsFromAi]);
 
   useEffect(() => {
     const isFormValid =
@@ -234,6 +248,8 @@ export default function CreateTestPage({
                 <ModalInputQuestion
                   {...{ handleAddQuestion, page: "create", token: token }}
                 />
+
+                <ModalGenerateDataFromAi setQuestions={setQuestionsFromAi} />
 
                 <ModalConfirm
                   trigger={
