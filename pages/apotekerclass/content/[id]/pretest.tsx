@@ -1,6 +1,7 @@
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
+import ModalGenerateDataFromAi from "@/components/modal/ModalGenerateDataFromAi";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -30,6 +31,7 @@ export default function CreatePreTestCoursePage({
   const initialQuestions: CreateQuestion[] = [];
   const [questions, setQuestions] = useState(initialQuestions);
   const [titlePreTest, setTitlePreTest] = useState<string>("");
+  const [questionsFromAi, setQuestionsFromAi] = useState(initialQuestions);
 
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
@@ -37,7 +39,7 @@ export default function CreatePreTestCoursePage({
   function handleAddQuestion(question: CreateQuestion) {
     setQuestions((prev) => [...prev, question]);
     localStorage.setItem(
-      "questions_pretest_apotekerclass",
+      "questions_segmenquiz_apotekerclass",
       JSON.stringify([...questions, question]),
     );
     toast.success("Soal berhasil ditambahkan ke draft");
@@ -48,7 +50,7 @@ export default function CreatePreTestCoursePage({
     updatedQuestions[index] = question;
     setQuestions(updatedQuestions);
     localStorage.setItem(
-      "questions_pretest_apotekerclass",
+      "questions_segmenquiz_apotekerclass",
       JSON.stringify(updatedQuestions),
     );
     toast.success("Soal berhasil diedit");
@@ -58,7 +60,7 @@ export default function CreatePreTestCoursePage({
     const updatedQuestions = questions.filter((_, i) => i !== index);
     setQuestions(updatedQuestions);
     localStorage.setItem(
-      "questions_pretest_apotekerclass",
+      "questions_segmenquiz_apotekerclass",
       JSON.stringify(updatedQuestions),
     );
     toast.success("Soal berhasil dihapus");
@@ -91,10 +93,8 @@ export default function CreatePreTestCoursePage({
         pathname: `/apotekerclass/content/${params.id}/video`,
         query: { ...query },
       });
-      toast.success("Pre-Test berhasil ditambahkan!");
 
-      localStorage.removeItem("input_pretest_apotekerclass");
-      localStorage.removeItem("questions_pretest_apotekerclass");
+      toast.success("Pre-Test berhasil ditambahkan!");
     } catch (error: any) {
       console.error(error);
       toast.error(getError(error));
@@ -108,7 +108,7 @@ export default function CreatePreTestCoursePage({
   useEffect(() => {
     const storedInput = localStorage.getItem("input_pretest_apotekerclass");
     const storedQuestions = localStorage.getItem(
-      "questions_pretest_apotekerclass",
+      "questions_segmenquiz_apotekerclass",
     );
 
     if (storedInput) setTitlePreTest(JSON.parse(storedInput));
@@ -116,9 +116,19 @@ export default function CreatePreTestCoursePage({
   }, []);
 
   useEffect(() => {
-    const isFormValid =
-      Object.values(titlePreTest).every((value) => value !== "") &&
-      questions.length > 0;
+    if (questionsFromAi.length > 0) {
+      setQuestions((prev) => [...prev, ...questionsFromAi]);
+      localStorage.setItem(
+        "questions_segmenquiz_apotekerclass",
+        JSON.stringify([...questions, ...questionsFromAi]),
+      );
+      toast.success("Soal dari AI berhasil ditambahkan ke draft");
+      setQuestionsFromAi(initialQuestions);
+    }
+  }, [questionsFromAi]);
+
+  useEffect(() => {
+    const isFormValid = titlePreTest !== "" && questions.length > 0;
     setIsButtonDisabled(!isFormValid);
   }, [titlePreTest, questions]);
 
@@ -184,6 +194,8 @@ export default function CreatePreTestCoursePage({
                 <ModalInputQuestion
                   {...{ handleAddQuestion, page: "create", token: token }}
                 />
+
+                <ModalGenerateDataFromAi setQuestions={setQuestionsFromAi} />
 
                 <ModalConfirm
                   trigger={
