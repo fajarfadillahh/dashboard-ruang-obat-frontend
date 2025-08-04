@@ -1,6 +1,7 @@
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
+import ModalGenerateDataFromAi from "@/components/modal/ModalGenerateDataFromAi";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -46,6 +47,7 @@ export default function CreatePostTestCoursePage({
   const initialQuestions: CreateQuestion[] = [];
   const [questions, setQuestions] = useState(initialQuestions);
   const [titlePostTest, setTitlePostTest] = useState<string>("");
+  const [questionsFromAi, setQuestionsFromAi] = useState(initialQuestions);
 
   const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
@@ -53,7 +55,7 @@ export default function CreatePostTestCoursePage({
   function handleAddQuestion(question: CreateQuestion) {
     setQuestions((prev) => [...prev, question]);
     localStorage.setItem(
-      "questions_posttest_videocourse",
+      "questions_segmenquiz_videocourse",
       JSON.stringify([...questions, question]),
     );
     toast.success("Soal berhasil ditambahkan ke draft");
@@ -64,7 +66,7 @@ export default function CreatePostTestCoursePage({
     updatedQuestions[index] = question;
     setQuestions(updatedQuestions);
     localStorage.setItem(
-      "questions_posttest_videocourse",
+      "questions_segmenquiz_videocourse",
       JSON.stringify(updatedQuestions),
     );
     toast.success("Soal berhasil diedit");
@@ -74,10 +76,15 @@ export default function CreatePostTestCoursePage({
     const updatedQuestions = questions.filter((_, i) => i !== index);
     setQuestions(updatedQuestions);
     localStorage.setItem(
-      "questions_posttest_videocourse",
+      "questions_segmenquiz_videocourse",
       JSON.stringify(updatedQuestions),
     );
     toast.success("Soal berhasil dihapus");
+  }
+
+  function handleRemoveQuestionsLocalStorage() {
+    localStorage.removeItem("input_segmenquiz_videocourse");
+    localStorage.removeItem("questions_segmenquiz_videocourse");
   }
 
   async function handleSavePostTestCourse() {
@@ -105,8 +112,8 @@ export default function CreatePostTestCoursePage({
 
       toast.success("Post-Test berhasil ditambahkan!");
 
-      localStorage.removeItem("input_posttest_videocourse");
-      localStorage.removeItem("questions_posttest_videocourse");
+      handleRemoveQuestionsLocalStorage();
+      window.location.reload();
     } catch (error: any) {
       console.error(error);
       toast.error(getError(error));
@@ -118,9 +125,9 @@ export default function CreatePostTestCoursePage({
   }
 
   useEffect(() => {
-    const storedInput = localStorage.getItem("input_posttest_videocourse");
+    const storedInput = localStorage.getItem("input_segmenquiz_videocourse");
     const storedQuestions = localStorage.getItem(
-      "questions_posttest_videocourse",
+      "questions_segmenquiz_videocourse",
     );
 
     if (storedInput) setTitlePostTest(JSON.parse(storedInput));
@@ -128,9 +135,19 @@ export default function CreatePostTestCoursePage({
   }, []);
 
   useEffect(() => {
-    const isFormValid =
-      Object.values(titlePostTest).every((value) => value !== "") &&
-      questions.length > 0;
+    if (questionsFromAi.length > 0) {
+      setQuestions((prev) => [...prev, ...questionsFromAi]);
+      localStorage.setItem(
+        "questions_segmenquiz_videocourse",
+        JSON.stringify([...questions, ...questionsFromAi]),
+      );
+      toast.success("Soal dari AI berhasil ditambahkan ke draft");
+      setQuestionsFromAi(initialQuestions);
+    }
+  }, [questionsFromAi]);
+
+  useEffect(() => {
+    const isFormValid = titlePostTest !== "" && questions.length > 0;
     setIsButtonDisabled(!isFormValid);
   }, [titlePostTest, questions]);
 
@@ -222,6 +239,7 @@ export default function CreatePostTestCoursePage({
                       sub_category_id: router.query.sub_category_id,
                     },
                   });
+                  handleRemoveQuestionsLocalStorage();
                 }}
                 className="bg-purple/10 text-purple"
               >
@@ -252,6 +270,8 @@ export default function CreatePostTestCoursePage({
                 <ModalInputQuestion
                   {...{ handleAddQuestion, page: "create", token: token }}
                 />
+
+                <ModalGenerateDataFromAi setQuestions={setQuestionsFromAi} />
 
                 <ModalConfirm
                   trigger={
@@ -288,7 +308,12 @@ export default function CreatePostTestCoursePage({
                         isLoading={loading}
                         isDisabled={loading}
                         color="secondary"
-                        onClick={handleSavePostTestCourse}
+                        onClick={() => {
+                          handleSavePostTestCourse();
+                          setTimeout(() => {
+                            onClose();
+                          }, 800);
+                        }}
                         className="font-semibold"
                       >
                         Ya, Simpan
