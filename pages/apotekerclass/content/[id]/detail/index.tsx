@@ -1,13 +1,17 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
+import EmptyData from "@/components/EmptyData";
 import LoadingTitleImage from "@/components/loading/LoadingTitleImage";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { SuccessResponse } from "@/types/global.type";
+import getCroppedImg from "@/utils/cropImage";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
+import { onCropComplete } from "@/utils/onCropComplete";
 import {
   Accordion,
   AccordionItem,
@@ -24,6 +28,7 @@ import {
   ModalFooter,
   ModalHeader,
   Skeleton,
+  Switch,
   Textarea,
   useDisclosure,
 } from "@nextui-org/react";
@@ -44,6 +49,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useState } from "react";
+import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 
@@ -89,12 +95,16 @@ export default function DetailApotekerClassCourse({
   });
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
   const {
-    isOpen: isOpenEdit,
-    onOpen: onOpenEdit,
-    onClose: onCloseEdit,
+    isOpen: isOpenSegment,
+    onOpen: onOpenSegment,
+    onClose: onCloseSegment,
   } = useDisclosure();
-  const [editSegment, setEditSegment] = useState<Segment | null>(null);
-  const [loadingEdit, setLoadingEdit] = useState<boolean>(false);
+  const [segment, setSegment] = useState<Segment | null>(null);
+  const [segmentTitle, setSegmentTitle] = useState<string>("");
+  const [loadingSegment, setLoadingSegment] = useState<boolean>(false);
+  const [typeSegmentModal, setTypeSegmentModal] = useState<"create" | "edit">(
+    "create",
+  );
 
   const {
     isOpen: isOpenVideo,
@@ -111,18 +121,57 @@ export default function DetailApotekerClassCourse({
   } = useDisclosure();
   const [editCourse, setEditCourse] = useState<DetailCourse | null>(null);
   const [loadingCourse, setLoadingCourse] = useState<boolean>(false);
+  const [isSelected, setIsSelected] = useState<boolean>(false);
+  const [file, setFile] = useState<string | ArrayBuffer | null>(
+    data?.data.thumbnail_url as string,
+  );
+  const [filename, setFilename] = useState<string>("");
+  const [type, setType] = useState<string>("");
+  const [zoomImage, setZoomImage] = useState<number>(1);
+  const [cropImage, setCropImage] = useState({ x: 0, y: 0 });
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [changeThumbnail, setChangeThumbnail] = useState<boolean>(false);
+
+  async function handleCreateSegment() {
+    setLoadingSegment(true);
+
+    try {
+      await fetcher({
+        url: "/courses/segments",
+        method: "POST",
+        data: {
+          course_id: data?.data.course_id,
+          title: segmentTitle,
+          by: session.data?.user.fullname,
+        },
+        token,
+      });
+
+      mutate();
+      onCloseSegment();
+      setSegmentTitle("");
+      toast.success("Segmen berhasil ditambahkan!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
+
+      setLoadingSegment(false);
+    } finally {
+      setLoadingSegment(false);
+    }
+  }
 
   async function handleUpdateSegment() {
-    if (!editSegment) return;
-    setLoadingEdit(true);
+    if (!segment) return;
+    setLoadingSegment(true);
 
     try {
       await fetcher({
         url: `/courses/segments`,
         method: "PATCH",
         data: {
-          title: editSegment.title,
-          segment_id: editSegment.segment_id,
+          title: segmentTitle,
+          segment_id: segment?.segment_id,
           by: session.data?.user.fullname,
         },
         token,
@@ -130,14 +179,15 @@ export default function DetailApotekerClassCourse({
 
       toast.success("Segmen berhasil diperbarui!");
       setSelectedSegment(null);
-      setEditSegment(null);
-      onCloseEdit();
+      setSegmentTitle("");
+      setSegment(null);
+      onCloseSegment();
       mutate();
     } catch (error: any) {
       console.error(error);
       toast.error(getError(error));
     } finally {
-      setLoadingEdit(false);
+      setLoadingSegment(false);
     }
   }
 
@@ -187,29 +237,43 @@ export default function DetailApotekerClassCourse({
     if (!editCourse) return;
     setLoadingCourse(true);
 
-    const data: any = {
-      course_id: editCourse.course_id,
-      title: editCourse.title,
-      description: editCourse.description,
-      type: "apotekerclass",
-      by: session.data?.user.fullname,
-    };
-
-    if (editCourse.preview_url) {
-      data.preview_url = editCourse.preview_url;
-    }
-
     try {
+      const formData = new FormData();
+
+      formData.append("course_id", editCourse?.course_id);
+      formData.append("title", editCourse?.title);
+      formData.append("description", editCourse?.description);
+      formData.append("type", "apotekerclass");
+      formData.append("by", session.data?.user.fullname as string);
+      formData.append("is_active", !isSelected as any);
+
+      if (editCourse?.preview_url) {
+        formData.append("preview_url", editCourse?.preview_url);
+      }
+
+      if (changeThumbnail && filename) {
+        const croppedImage = await getCroppedImg(file, croppedAreaPixels);
+        const response = await fetch(croppedImage as string);
+        const blob = await response.blob();
+        const fileConvert = new File([blob], `${filename}`, {
+          type,
+        });
+        formData.append("thumbnail", fileConvert);
+      }
+
       await fetcher({
         url: `/courses`,
         method: "PATCH",
-        data,
+        data: formData,
         token,
       });
 
       toast.success("Playlist berhasil diperbarui!");
       setEditCourse(null);
       onCloseCourse();
+      setIsSelected(false);
+      setChangeThumbnail(false);
+      setFile(null);
       mutate();
     } catch (error: any) {
       console.error(error);
@@ -278,13 +342,18 @@ export default function DetailApotekerClassCourse({
   return (
     <Layout title="Detail" className="scrollbar-hide">
       <Container className="gap-8">
-        <ButtonBack />
+        <ButtonBack
+          href={`/apotekerclass/content/${router.query.category_id}`}
+        />
 
         <Modal
+          size={changeThumbnail ? "3xl" : "lg"}
           isOpen={isOpenCourse}
           onClose={() => {
             setEditCourse(null);
             onCloseCourse();
+            setChangeThumbnail(false);
+            setFile(null);
           }}
         >
           <ModalContent>
@@ -292,92 +361,204 @@ export default function DetailApotekerClassCourse({
               Edit Playlist
             </ModalHeader>
 
-            <ModalBody className="grid gap-4">
-              <Input
-                isRequired
-                type="text"
-                variant="flat"
-                label="Judul Playlist"
-                labelPlacement="outside"
-                placeholder="Contoh: Farmakoterapi Dasar"
-                name="title"
-                value={editCourse?.title ?? ""}
-                onChange={(e) =>
-                  setEditCourse((prev) =>
-                    prev ? { ...prev, title: e.target.value } : prev,
-                  )
-                }
-                classNames={customStyleInput}
-              />
+            <ModalBody
+              className={`grid items-start ${changeThumbnail ? "grid-cols-[max-content_1fr] gap-12" : "grid-cols-none"}`}
+            >
+              {changeThumbnail && (
+                <div className="grid gap-6">
+                  {/* thumbnail */}
+                  <div className="grid gap-1">
+                    <div className="aspect-video size-[304px] rounded-xl border-2 border-dashed border-gray/20 p-1">
+                      <div className="relative flex h-full items-center justify-center overflow-hidden rounded-xl bg-gray/20">
+                        <Cropper
+                          image={file as string}
+                          crop={cropImage}
+                          zoom={zoomImage}
+                          aspect={1 / 1}
+                          onCropChange={setCropImage}
+                          onCropComplete={onCropComplete({
+                            setCroppedAreaPixels,
+                          })}
+                          onZoomChange={setZoomImage}
+                        />
+                      </div>
+                    </div>
 
-              <Textarea
-                isRequired
-                minRows={4}
-                type="text"
-                variant="flat"
-                label="Deskripsi Kursus/Playlist"
-                labelPlacement="outside"
-                placeholder="Contoh: Farmakoterapi Dasar adalah disiplin ilmu di dunia farmasi..."
-                name="description"
-                value={editCourse?.description ?? ""}
-                onChange={(e) =>
-                  setEditCourse((prev) =>
-                    prev ? { ...prev, description: e.target.value } : prev,
-                  )
-                }
-                classNames={customStyleInput}
-              />
+                    <p className="text-center text-sm font-medium text-gray">
+                      <strong className="mr-1 text-danger">*</strong>ratio
+                      gambar 1:1
+                    </p>
+                  </div>
 
-              <Input
-                type="text"
-                variant="flat"
-                label="Preview URL"
-                labelPlacement="outside"
-                placeholder="Contoh: https://youtube.com/watch?v=xxxxxx"
-                name="preview_url"
-                value={editCourse?.preview_url ?? ""}
-                onChange={(e) =>
-                  setEditCourse((prev) =>
-                    prev ? { ...prev, preview_url: e.target.value } : prev,
-                  )
-                }
-                classNames={customStyleInput}
-              />
+                  <Input
+                    isRequired
+                    type="file"
+                    accept="image/jpg, image/jpeg, image/png"
+                    variant="flat"
+                    labelPlacement="outside"
+                    className="max-w-[304px]"
+                    classNames={{
+                      input:
+                        "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
+                    }}
+                    onChange={(e) => {
+                      if (!e.target.files?.length) {
+                        setFile(null);
+                        setFilename("");
+                        setType("");
+                        return;
+                      }
+
+                      const validTypes = [
+                        "image/png",
+                        "image/jpg",
+                        "image/jpeg",
+                      ];
+
+                      if (!validTypes.includes(e.target.files[0].type)) {
+                        toast.error("Ekstensi file harus png, jpg, atau jpeg");
+                        setFile(null);
+                        setFilename("");
+                        setType("");
+                        return;
+                      }
+
+                      setType(e.target.files[0].type);
+                      setFilename(e.target.files[0].name);
+                      const reader = new FileReader();
+                      reader.readAsDataURL(e.target.files[0]);
+
+                      reader.onload = function () {
+                        setFile(reader.result);
+                      };
+
+                      reader.onerror = function (error) {
+                        setFile(null);
+                        setFilename("");
+                        setType("");
+
+                        toast.error("Terjadi kesalahan saat meload gambar");
+
+                        console.log(error);
+                      };
+                    }}
+                  />
+                </div>
+              )}
+
+              <div className="grid gap-4">
+                <Input
+                  isRequired
+                  type="text"
+                  variant="flat"
+                  label="Judul Playlist"
+                  labelPlacement="outside"
+                  placeholder="Contoh: Farmakoterapi Dasar"
+                  name="title"
+                  value={editCourse?.title ?? ""}
+                  onChange={(e) =>
+                    setEditCourse((prev) =>
+                      prev ? { ...prev, title: e.target.value } : prev,
+                    )
+                  }
+                  classNames={customStyleInput}
+                />
+
+                <Textarea
+                  isRequired
+                  minRows={4}
+                  type="text"
+                  variant="flat"
+                  label="Deskripsi Kursus/Playlist"
+                  labelPlacement="outside"
+                  placeholder="Contoh: Farmakoterapi Dasar adalah disiplin ilmu di dunia farmasi..."
+                  name="description"
+                  value={editCourse?.description ?? ""}
+                  onChange={(e) =>
+                    setEditCourse((prev) =>
+                      prev ? { ...prev, description: e.target.value } : prev,
+                    )
+                  }
+                  classNames={customStyleInput}
+                />
+
+                <Input
+                  type="text"
+                  variant="flat"
+                  label="Preview URL"
+                  labelPlacement="outside"
+                  placeholder="Contoh: https://youtube.com/watch?v=xxxxxx"
+                  name="preview_url"
+                  value={editCourse?.preview_url ?? ""}
+                  onChange={(e) =>
+                    setEditCourse((prev) =>
+                      prev ? { ...prev, preview_url: e.target.value } : prev,
+                    )
+                  }
+                  classNames={customStyleInput}
+                />
+
+                <Switch
+                  size="sm"
+                  color="secondary"
+                  isSelected={isSelected}
+                  onValueChange={setIsSelected}
+                  className="text-sm font-semibold text-black"
+                >
+                  Nonaktifkan Kursus/Playlist
+                </Switch>
+
+                <Switch
+                  size="sm"
+                  color="secondary"
+                  isSelected={changeThumbnail}
+                  onValueChange={setChangeThumbnail}
+                  className="text-sm font-semibold text-black"
+                >
+                  Ubah Thumbnail Kursus/Playlist
+                </Switch>
+              </div>
             </ModalBody>
 
             <ModalFooter>
               <Button
                 variant="light"
+                color="danger"
                 onClick={() => {
                   setEditCourse(null);
                   onCloseCourse();
+                  setChangeThumbnail(false);
+                  setFile(null);
                 }}
+                className="font-semibold"
               >
                 Batal
               </Button>
+
               <Button
                 color="secondary"
                 isLoading={loadingCourse}
-                onClick={handleUpdateCourse}
                 isDisabled={!editCourse || loadingCourse}
+                onClick={handleUpdateCourse}
+                className="font-semibold"
               >
-                Update
+                Update Sekarang
               </Button>
             </ModalFooter>
           </ModalContent>
         </Modal>
 
         <Modal
-          isOpen={isOpenEdit}
+          isOpen={isOpenSegment}
           onClose={() => {
             setSelectedSegment(null);
-            setEditSegment(null);
-            onCloseEdit();
+            setSegment(null);
+            onCloseSegment();
           }}
         >
           <ModalContent>
             <ModalHeader className="font-semibold text-black">
-              Edit Segmen
+              {typeSegmentModal == "create" ? "Tambah" : "Update"} Segmen
             </ModalHeader>
 
             <ModalBody>
@@ -389,15 +570,8 @@ export default function DetailApotekerClassCourse({
                 labelPlacement="outside"
                 placeholder="Contoh: Pemahaman Dasar"
                 name="title"
-                defaultValue={editSegment?.title}
-                onChange={(e) => {
-                  if (editSegment) {
-                    setEditSegment({
-                      ...editSegment,
-                      title: e.target.value,
-                    });
-                  }
-                }}
+                defaultValue={segmentTitle}
+                onChange={(e) => setSegmentTitle(e.target.value)}
                 classNames={customStyleInput}
               />
             </ModalBody>
@@ -407,19 +581,28 @@ export default function DetailApotekerClassCourse({
                 variant="light"
                 onClick={() => {
                   setSelectedSegment(null);
-                  setEditSegment(null);
-                  onCloseEdit();
+                  onCloseSegment();
+                  setSegmentTitle("");
                 }}
+                className="font-semibold"
               >
                 Batal
               </Button>
+
               <Button
+                isLoading={loadingSegment}
+                isDisabled={loadingSegment}
                 color="secondary"
-                onClick={handleUpdateSegment}
-                isLoading={loadingEdit}
-                isDisabled={!editSegment?.title || loadingEdit}
+                onClick={() => {
+                  if (typeSegmentModal == "create") {
+                    handleCreateSegment();
+                  } else {
+                    handleUpdateSegment();
+                  }
+                }}
+                className="font-semibold"
               >
-                Update
+                {typeSegmentModal == "create" ? "Tambah" : "Update"} Segmen
               </Button>
             </ModalFooter>
           </ModalContent>
@@ -516,16 +699,19 @@ export default function DetailApotekerClassCourse({
                   setSelectedVideo(null);
                   onCloseVideo();
                 }}
+                className="font-semibold"
               >
                 Batal
               </Button>
+
               <Button
-                color="secondary"
-                onClick={handleUpdateVideo}
                 isLoading={loadingVideo}
                 isDisabled={!selectedVideo || loadingVideo}
+                color="secondary"
+                onClick={handleUpdateVideo}
+                className="font-semibold"
               >
-                Update
+                Update Sekarang
               </Button>
             </ModalFooter>
           </ModalContent>
@@ -581,6 +767,7 @@ export default function DetailApotekerClassCourse({
               onClick={() => {
                 onOpenCourse();
                 setEditCourse(data?.data ?? null);
+                setIsSelected(!data?.data.is_active);
               }}
               className="font-semibold"
             >
@@ -600,13 +787,16 @@ export default function DetailApotekerClassCourse({
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
               onClick={() => {
-                router.push({
-                  pathname: `/apotekerclass/content/${params.id}/segment`,
-                  query: {
-                    course_id: data?.data.course_id,
-                    course_title: data?.data.title,
-                  },
-                });
+                // router.push({
+                //   pathname: `/apotekerclass/content/${router.query.category_id}/segment`,
+                //   query: {
+                //     category_id: router.query.category_id,
+                //     course_id: data?.data.course_id,
+                //     course_title: data?.data.title,
+                //   },
+                // });
+                onOpenSegment();
+                setTypeSegmentModal("create");
               }}
               className="font-semibold"
             >
@@ -620,7 +810,7 @@ export default function DetailApotekerClassCourse({
                 <Skeleton key={index} className="h-14 w-full rounded-xl" />
               ))}
             </div>
-          ) : (
+          ) : data?.data.segments.length ? (
             <Accordion selectionMode="multiple">
               {(data?.data.segments ?? []).map((segment) => (
                 <AccordionItem
@@ -643,7 +833,7 @@ export default function DetailApotekerClassCourse({
                           color="secondary"
                         >
                           <CustomTooltip content="Aksi">
-                            <Gear weight="bold" size={18} />
+                            <Gear weight="duotone" size={18} />
                           </CustomTooltip>
                         </Button>
                       </DropdownTrigger>
@@ -656,10 +846,15 @@ export default function DetailApotekerClassCourse({
                       >
                         <DropdownItem
                           key="edit_segment"
+                          startContent={
+                            <PencilLine weight="duotone" size={18} />
+                          }
                           onClick={() => {
                             if (selectedSegment === segment.segment_id) {
-                              setEditSegment(segment);
-                              onOpenEdit();
+                              onOpenSegment();
+                              setSegment(segment);
+                              setTypeSegmentModal("edit");
+                              setSegmentTitle(segment.title);
                             }
                           }}
                         >
@@ -667,7 +862,69 @@ export default function DetailApotekerClassCourse({
                         </DropdownItem>
 
                         <DropdownItem
+                          key="new_pre_test"
+                          startContent={<Plus weight="bold" size={18} />}
+                          onClick={() => {
+                            router.push({
+                              pathname: `/apotekerclass/content/${params.id}/pretest`,
+                              query: {
+                                category_id: router.query.category_id,
+                                course_id: data?.data.course_id,
+                                course_title: data?.data.title,
+                                segment_id: segment.segment_id,
+                                segment_title: segment.title,
+                                from: "edit",
+                              },
+                            });
+                          }}
+                        >
+                          Tambah Pre-Test Baru
+                        </DropdownItem>
+
+                        <DropdownItem
+                          key="new_video"
+                          startContent={<Plus weight="bold" size={18} />}
+                          onClick={() => {
+                            router.push({
+                              pathname: `/apotekerclass/content/${params.id}/video`,
+                              query: {
+                                category_id: router.query.category_id,
+                                course_id: data?.data.course_id,
+                                course_title: data?.data.title,
+                                segment_id: segment.segment_id,
+                                segment_title: segment.title,
+                                from: "edit",
+                              },
+                            });
+                          }}
+                        >
+                          Tambah Video Baru
+                        </DropdownItem>
+
+                        <DropdownItem
+                          key="new_post_test"
+                          startContent={<Plus weight="bold" size={18} />}
+                          onClick={() => {
+                            router.push({
+                              pathname: `/apotekerclass/content/${params.id}/posttest`,
+                              query: {
+                                category_id: router.query.category_id,
+                                course_id: data?.data.course_id,
+                                course_title: data?.data.title,
+                                segment_id: segment.segment_id,
+                                segment_title: segment.title,
+                                from: "edit",
+                              },
+                            });
+                          }}
+                        >
+                          Tambah Post-Test Baru
+                        </DropdownItem>
+
+                        <DropdownItem
                           key="delete_segment"
+                          color="danger"
+                          startContent={<Trash weight="bold" size={18} />}
                           onClick={() => {
                             if (selectedSegment === segment.segment_id) {
                               if (
@@ -679,59 +936,9 @@ export default function DetailApotekerClassCourse({
                               }
                             }
                           }}
+                          className="text-danger"
                         >
                           Hapus Segmen
-                        </DropdownItem>
-
-                        <DropdownItem
-                          key="new_pre_test"
-                          onClick={() => {
-                            router.push({
-                              pathname: `/apotekerclass/content/${params.id}/pretest`,
-                              query: {
-                                course_id: data?.data.course_id,
-                                course_title: data?.data.title,
-                                segment_id: segment.segment_id,
-                                segment_title: segment.title,
-                              },
-                            });
-                          }}
-                        >
-                          Tambah Pre-Test Baru
-                        </DropdownItem>
-
-                        <DropdownItem
-                          key="new_video"
-                          onClick={() => {
-                            router.push({
-                              pathname: `/apotekerclass/content/${params.id}/video`,
-                              query: {
-                                course_id: data?.data.course_id,
-                                course_title: data?.data.title,
-                                segment_id: segment.segment_id,
-                                segment_title: segment.title,
-                              },
-                            });
-                          }}
-                        >
-                          Tambah Video Baru
-                        </DropdownItem>
-
-                        <DropdownItem
-                          key="new_post_test"
-                          onClick={() => {
-                            router.push({
-                              pathname: `/apotekerclass/content/${params.id}/posttest`,
-                              query: {
-                                course_id: data?.data.course_id,
-                                course_title: data?.data.title,
-                                segment_id: segment.segment_id,
-                                segment_title: segment.title,
-                              },
-                            });
-                          }}
-                        >
-                          Tambah Post-Test Baru
                         </DropdownItem>
                       </DropdownMenu>
                     </Dropdown>
@@ -792,10 +999,13 @@ export default function DetailApotekerClassCourse({
                             if (content.content_type === "video") {
                               handleGetVideoUrl(content.video_url);
                             } else {
-                              window.open(
-                                `/apotekerclass/content/${content.content_id}/detail/test`,
-                                "_blank",
-                              );
+                              router.push({
+                                pathname: `/apotekerclass/content/${content.content_id}/detail/test`,
+                                query: {
+                                  category_id: router.query.category_id,
+                                  course_id: data?.data.course_id,
+                                },
+                              });
                             }
                           }}
                         >
@@ -816,10 +1026,13 @@ export default function DetailApotekerClassCourse({
                               setSelectedVideo(content);
                               onOpenVideo();
                             } else {
-                              window.open(
-                                `/apotekerclass/content/${content.content_id}/detail/test`,
-                                "_blank",
-                              );
+                              router.push({
+                                pathname: `/apotekerclass/content/${content.content_id}/detail/test`,
+                                query: {
+                                  category_id: router.query.category_id,
+                                  course_id: data?.data.course_id,
+                                },
+                              });
                             }
                           }}
                         >
@@ -830,31 +1043,68 @@ export default function DetailApotekerClassCourse({
                           </CustomTooltip>
                         </Button>
 
-                        <Button
-                          isIconOnly
-                          variant="light"
-                          size="sm"
-                          color="secondary"
-                          onClick={() => {
-                            if (
-                              confirm("Apakah anda yakin menghapus konten ini?")
-                            ) {
-                              handleDeleteContent(content.content_id);
-                            }
-                          }}
-                        >
-                          <CustomTooltip
-                            content={`Hapus ${content.content_type === "test" ? "Test" : "Video"}`}
-                          >
-                            <Trash weight="duotone" size={18} />
-                          </CustomTooltip>
-                        </Button>
+                        <ModalConfirm
+                          trigger={
+                            <Button
+                              isIconOnly
+                              variant="light"
+                              color="danger"
+                              size="sm"
+                            >
+                              <CustomTooltip content="Hapus Admin">
+                                <Trash
+                                  weight="duotone"
+                                  size={18}
+                                  className="text-danger"
+                                />
+                              </CustomTooltip>
+                            </Button>
+                          }
+                          header={
+                            <h1 className="font-bold text-black">
+                              Hapus Admin
+                            </h1>
+                          }
+                          body={
+                            <div className="grid gap-3 text-sm font-medium">
+                              <p className="leading-[170%] text-gray">
+                                Apakah anda yakin menghapus konten ini?
+                              </p>
+                            </div>
+                          }
+                          footer={(onClose: any) => (
+                            <>
+                              <Button
+                                color="danger"
+                                variant="light"
+                                onPress={onClose}
+                                className="font-semibold"
+                              >
+                                Tutup
+                              </Button>
+
+                              <Button
+                                color="danger"
+                                onClick={() =>
+                                  handleDeleteContent(content.content_id)
+                                }
+                                className="font-semibold"
+                              >
+                                Ya, Hapus Konten
+                              </Button>
+                            </>
+                          )}
+                        />
                       </div>
                     </div>
                   ))}
                 </AccordionItem>
               ))}
             </Accordion>
+          ) : (
+            <div className="flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
+              <EmptyData text="Segmen belum tersedia." />
+            </div>
           )}
         </div>
       </Container>

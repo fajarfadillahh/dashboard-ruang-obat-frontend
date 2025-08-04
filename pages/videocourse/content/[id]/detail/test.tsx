@@ -26,6 +26,7 @@ import {
 import { CheckCircle, Database, Trash, XCircle } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
 import { ParsedUrlQuery } from "querystring";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -40,6 +41,7 @@ export default function EditTestVideoCourse({
   token,
   params,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const router = useRouter();
   const session = useSession();
   const [page, setPage] = useQueryState("page", { defaultValue: "" });
   const { data, error, mutate } = useSWR<
@@ -187,7 +189,9 @@ export default function EditTestVideoCourse({
   return (
     <Layout title="Edit Test" className="scrollbar-hide">
       <Container className="gap-8">
-        <ButtonBack />
+        <ButtonBack
+          href={`/videocourse/content/${router.query.course_id}/detail?sub_category_id=${router.query.sub_category_id}`}
+        />
 
         <div className="divide-y-2 divide-dashed divide-gray/20">
           <TitleText

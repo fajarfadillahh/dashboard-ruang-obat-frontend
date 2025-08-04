@@ -8,7 +8,7 @@ import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
 import { Button, Input } from "@nextui-org/react";
-import { Database, Plus, Trash } from "@phosphor-icons/react";
+import { ArrowRight, Database, Plus, Trash } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -119,12 +119,11 @@ export default function CreateVideoCoursePage({
         token,
       });
 
-      delete query.id;
-
       router.push({
         pathname: `/videocourse/content/${params.id}/posttest`,
         query: { ...query },
       });
+
       toast.success("Konten video berhasil ditambahkan!");
       localStorage.removeItem("content_video_videocourse");
     } catch (error: any) {
@@ -152,13 +151,32 @@ export default function CreateVideoCoursePage({
 
   return (
     <Layout title="Buat Konten Video" className="scrollbar-hide">
-      <Container className="gap-4">
-        <TitleText
-          title={`Buat Konten Video ${query.segment_title} 🎞`}
-          text={`Saatnya buat konten video ${query.segment_title} sekarang`}
-        />
+      <Container className="divide-gray/10gap-8 divide-y-2 divide-dashed">
+        <div className="flex items-end justify-between gap-4 pb-8">
+          <TitleText
+            title={`Buat Konten Video ${query.segment_title} ▶️`}
+            text={`Saatnya buat konten video ${query.segment_title} sekarang`}
+          />
 
-        <div className="grid max-w-[900px]">
+          {query.from === "edit" ? (
+            <Button
+              variant="light"
+              color="secondary"
+              endContent={<ArrowRight weight="bold" size={18} />}
+              onClick={() => {
+                router.push({
+                  pathname: `/videocourse/content/${params.id}/posttest`,
+                  query: { ...query },
+                });
+              }}
+              className="font-semibold"
+            >
+              Lewati Konten Video
+            </Button>
+          ) : null}
+        </div>
+
+        <div className="grid pt-8">
           <div className="sticky left-0 top-0 z-50 flex items-end justify-between gap-4 bg-white py-4">
             <h5 className="text-xl font-bold text-black">Daftar Video</h5>
 

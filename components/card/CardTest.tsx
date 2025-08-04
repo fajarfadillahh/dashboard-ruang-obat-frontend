@@ -11,18 +11,17 @@ import {
   Dropdown,
   DropdownItem,
   DropdownMenu,
-  DropdownSection,
   DropdownTrigger,
 } from "@nextui-org/react";
 import {
   ClipboardText,
   Eye,
+  Gear,
+  IconContext,
   PencilLine,
   Power,
   Prohibit,
-  XCircle,
 } from "@phosphor-icons/react";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import { KeyedMutator } from "swr";
@@ -67,30 +66,48 @@ export default function CardTest({ test, token, mutate }: TestProps) {
     }
   }
 
+  const from =
+    router.pathname === "/tests"
+      ? "tests_page"
+      : /^\/programs\/.+$/.test(router.pathname)
+        ? "programs_detail"
+        : "";
+
   return (
     <div
-      className={`flex items-center justify-between gap-12 rounded-xl border-2 p-6 ${
+      className={`relative isolate grid grid-cols-[1fr_max-content] items-center overflow-hidden rounded-xl border-2 p-6 hover:cursor-pointer ${
         test.is_active
           ? "border-purple/10 hover:border-purple hover:bg-purple/10"
           : "border-danger bg-danger/5 hover:bg-danger/10"
       }`}
+      onClick={() =>
+        router.push({
+          pathname: `/tests/${test.test_id}`,
+          query: { from },
+        })
+      }
     >
-      <div className="inline-flex flex-1 items-start gap-3">
-        {test.is_active ? (
-          <ClipboardText weight="duotone" size={28} className="text-purple" />
-        ) : (
-          <Prohibit weight="duotone" size={28} className="text-danger" />
-        )}
+      <div className="flex items-start gap-4">
+        <IconContext.Provider
+          value={{
+            weight: "duotone",
+            size: 32,
+            className: test.is_active ? "text-purple" : "text-danger",
+          }}
+        >
+          {test.is_active ? <ClipboardText /> : <Prohibit />}
+        </IconContext.Provider>
 
-        <div className="grid gap-6">
-          <Link
-            href={`/tests/${test.test_id}`}
-            className={`line-clamp-1 text-xl font-bold leading-[120%] text-black ${test.is_active ? "hover:text-purple" : "hover:text-danger"}`}
-          >
-            {test.title}
-          </Link>
+        <div className="grid flex-1 gap-4">
+          <CustomTooltip content={test.title}>
+            <h1
+              className={`line-clamp-1 text-lg font-bold leading-[120%] text-black ${test.is_active ? "hover:text-purple" : "hover:text-danger"}`}
+            >
+              {test.title}
+            </h1>
+          </CustomTooltip>
 
-          <div className="inline-flex items-start gap-6">
+          <div className="flex items-start justify-between gap-2">
             <div className="grid gap-1">
               <span className="text-xs font-medium text-gray">
                 Tanggal Mulai:
@@ -103,124 +120,91 @@ export default function CardTest({ test, token, mutate }: TestProps) {
 
             <div className="grid gap-1">
               <span className="text-xs font-medium text-gray">
-                Tanggal Selesai:
-              </span>
-
-              <h1 className="text-sm font-semibold text-black">
-                {formatDateWithoutTime(test.end)}
-              </h1>
-            </div>
-
-            <div className="grid gap-1">
-              <span className="text-xs font-medium text-gray">
-                Durasi Pengerjaan:
-              </span>
-
-              <h1 className="text-sm font-semibold text-black">
-                {test.duration} Menit
-              </h1>
-            </div>
-
-            <div className="grid gap-1">
-              <span className="text-xs font-medium text-gray">
                 Status Ujian:
               </span>
 
-              <div className="inline-flex items-center gap-2">
-                <Chip
-                  variant="flat"
-                  size="sm"
-                  color={getStatusColor(test.status)}
-                  startContent={getStatusIcon(test.status)}
-                  classNames={{
-                    base: "px-2 gap-1",
-                    content: "font-bold capitalize",
-                  }}
-                >
-                  {test.status}
-                </Chip>
-
-                {test.is_active ? null : (
-                  <Chip
-                    variant="flat"
-                    color="danger"
-                    size="sm"
-                    startContent={<XCircle weight="duotone" size={16} />}
-                    classNames={{
-                      base: "px-2 gap-1",
-                      content: "font-bold capitalize",
-                    }}
-                  >
-                    Tidak Aktif
-                  </Chip>
-                )}
-              </div>
+              <Chip
+                variant="flat"
+                size="sm"
+                color={getStatusColor(test.status)}
+                startContent={getStatusIcon(test.status)}
+                classNames={{
+                  base: "px-2 gap-1",
+                  content: "font-bold capitalize",
+                }}
+              >
+                {test.status}
+              </Chip>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="inline-flex items-center gap-2">
-        <Button
-          isIconOnly
-          variant="light"
-          size="sm"
-          color="secondary"
-          onClick={() => router.push(`/tests/${test.test_id}`)}
-        >
-          <CustomTooltip content="Detail Ujian">
-            <Eye weight="duotone" size={18} />
-          </CustomTooltip>
-        </Button>
-
-        <Button
-          isIconOnly
-          variant="light"
-          size="sm"
-          color="secondary"
-          onClick={() => router.push(`/tests/${test.test_id}/edit`)}
-        >
-          <CustomTooltip content="Edit Ujian">
-            <PencilLine weight="duotone" size={18} />
-          </CustomTooltip>
-        </Button>
-
-        <Dropdown>
-          <DropdownTrigger>
-            <Button isIconOnly variant="light" size="sm">
-              <CustomTooltip content="Aktif/Nonaktif Ujian">
-                <Power weight="duotone" size={18} className="text-danger" />
-              </CustomTooltip>
-            </Button>
-          </DropdownTrigger>
-
-          <DropdownMenu
-            aria-label="actions"
-            itemClasses={{
-              title: "font-semibold text-black",
-            }}
-          >
-            <DropdownSection aria-label="action zone" title="Anda Yakin?">
-              <DropdownItem
-                onClick={() => handleUpdateStatus(test.test_id, test.is_active)}
-              >
-                {test.is_active ? "Nonaktifkan ujian" : "Aktifkan ujian"}
-              </DropdownItem>
-            </DropdownSection>
-          </DropdownMenu>
-        </Dropdown>
-
-        {router.pathname !== "/tests" && (
+      <Dropdown>
+        <DropdownTrigger>
           <Button
+            isIconOnly
+            variant="light"
             size="sm"
             color="secondary"
-            onClick={() => router.push(`/tests/${test.test_id}/grades`)}
-            className="px-6 font-semibold"
+            className="absolute right-4 top-4 z-10"
           >
-            Lihat Nilai
+            <CustomTooltip content="Aksi Lainnya">
+              <Gear weight="duotone" size={18} />
+            </CustomTooltip>
           </Button>
-        )}
-      </div>
+        </DropdownTrigger>
+
+        <DropdownMenu
+          aria-label="Static Actions"
+          itemClasses={{
+            title: "font-semibold",
+          }}
+        >
+          <DropdownItem
+            key="detail_test"
+            startContent={<Eye weight="duotone" size={18} />}
+            onClick={() =>
+              router.push({
+                pathname: `/tests/${test.test_id}`,
+                query: { from },
+              })
+            }
+          >
+            Detail Ujian
+          </DropdownItem>
+
+          <DropdownItem
+            key="edit_test"
+            startContent={<PencilLine weight="duotone" size={18} />}
+            onClick={() => router.push(`/tests/${test.test_id}/edit`)}
+          >
+            Edit Ujian
+          </DropdownItem>
+
+          {/* <DropdownItem
+            key="grades_test"
+            startContent={<Eye weight="duotone" size={18} />}
+            onClick={() => router.push(`/tests/${test.test_id}/grades`)}
+          >
+            Lihat Nilai Ujian
+          </DropdownItem> */}
+
+          <DropdownItem
+            key="active_inactive"
+            color={test.is_active ? "danger" : "secondary"}
+            startContent={<Power weight="duotone" size={18} />}
+            onClick={() => handleUpdateStatus(test.test_id, test.is_active)}
+            className={
+              test.is_active
+                ? "bg-danger/10 text-danger"
+                : "bg-purple/10 text-purple"
+            }
+          >
+            {test.is_active ? "Nonaktifkan Ujian" : "Aktifkan Ujian"}
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
     </div>
   );
 }

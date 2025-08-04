@@ -22,6 +22,7 @@ import toast from "react-hot-toast";
 export default function CreateCoursePage({
   token,
   params,
+  query,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const session = useSession();
   const router = useRouter();
@@ -75,6 +76,7 @@ export default function CreateCoursePage({
       router.push({
         pathname: `/apotekerclass/content/${params.id}/segment`,
         query: {
+          ...query,
           course_id: responseCourse.data.course_id,
           course_title: input.title,
         },
@@ -254,11 +256,12 @@ export default function CreateCoursePage({
 }
 
 export const getServerSideProps = withToken(async (ctx) => {
-  const { params } = ctx;
+  const { query, params } = ctx;
 
   return {
     props: {
       params: params as ParsedUrlQuery,
+      query: query as ParsedUrlQuery,
     },
   };
 });

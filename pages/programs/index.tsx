@@ -14,7 +14,7 @@ import {
   Pagination,
   Select,
   SelectItem,
-  Spinner,
+  Skeleton,
 } from "@nextui-org/react";
 import { Funnel, Plus, SlidersHorizontal } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
@@ -79,7 +79,7 @@ export default function ProgramsPage({
           text="Program yang sudah dibuat oleh ruangobat.id"
         />
 
-        <div className="grid" ref={divRef}>
+        <div className="grid">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
             <SearchInput
               placeholder="Cari Nama Program atau ID Program..."
@@ -142,26 +142,28 @@ export default function ProgramsPage({
             </Button>
           </div>
 
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2 py-16">
-              <Spinner label="Loading..." color="secondary" />
-            </div>
-          ) : null}
-
-          {!isLoading && !data?.data.programs.length ? (
-            <EmptyData text="Program tidak ditemukan!" />
-          ) : (
-            <div className="grid gap-2">
-              {data?.data.programs.map((program: Program) => (
+          <div className="grid grid-cols-3 gap-4">
+            {isLoading ? (
+              Array.from({ length: data?.data.programs.length || 9 }).map(
+                (_, index) => (
+                  <Skeleton key={index} className="h-40 w-full rounded-xl" />
+                ),
+              )
+            ) : data?.data.programs.length ? (
+              data?.data.programs.map((program: Program) => (
                 <CardProgram
                   key={program.program_id}
                   program={program}
                   token={token as string}
                   mutate={mutate}
                 />
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              <div className="col-span-3 flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
+                <EmptyData text="Program belum tersedia." />
+              </div>
+            )}
+          </div>
         </div>
 
         {!isLoading && data?.data.programs.length ? (

@@ -14,7 +14,7 @@ import {
   Pagination,
   Select,
   SelectItem,
-  Spinner,
+  Skeleton,
 } from "@nextui-org/react";
 import { Funnel, Plus, SlidersHorizontal } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
@@ -79,7 +79,7 @@ export default function TestsPage({
           text="Ujian yang disesuaikan dengan kebutuhan"
         />
 
-        <div className="grid" ref={divRef}>
+        <div className="grid">
           <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
             <SearchInput
               placeholder="Cari Nama Ujian atau ID Ujian..."
@@ -143,17 +143,15 @@ export default function TestsPage({
             </Button>
           </div>
 
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2 py-16">
-              <Spinner label="Loading..." color="secondary" />
-            </div>
-          ) : null}
-
-          {!isLoading && !data?.data.tests.length ? (
-            <EmptyData text="Ujian tidak ditemukan!" />
-          ) : (
-            <div className="grid gap-2">
-              {data?.data.tests.map((test: Test) => (
+          <div className="grid grid-cols-3 gap-4">
+            {isLoading ? (
+              Array.from({ length: data?.data.tests.length || 9 }).map(
+                (_, index) => (
+                  <Skeleton key={index} className="h-40 w-full rounded-xl" />
+                ),
+              )
+            ) : data?.data.tests.length ? (
+              data?.data.tests.map((test: Test) => (
                 <CardTest
                   key={test.test_id}
                   {...{
@@ -162,9 +160,13 @@ export default function TestsPage({
                     mutate,
                   }}
                 />
-              ))}
-            </div>
-          )}
+              ))
+            ) : (
+              <div className="col-span-3 flex items-center justify-center rounded-xl border-2 border-dashed border-gray/20 p-8">
+                <EmptyData text="Ujian belum tersedia." />
+              </div>
+            )}
+          </div>
         </div>
 
         {!isLoading && data?.data.tests.length ? (

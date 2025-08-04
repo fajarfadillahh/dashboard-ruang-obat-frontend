@@ -13,7 +13,7 @@ import {
   Textarea,
   useDisclosure,
 } from "@nextui-org/react";
-import { Robot } from "@phosphor-icons/react";
+import { Robot, Sparkle } from "@phosphor-icons/react";
 import { useSession } from "next-auth/react";
 import { Dispatch, SetStateAction, useState } from "react";
 import toast from "react-hot-toast";
@@ -88,10 +88,12 @@ export default function ModalGenerateDataFromAi({
       <Button
         color="secondary"
         onClick={onOpen}
-        startContent={<Robot size={16} weight="fill" />}
+        startContent={<Robot weight="duotone" size={18} />}
+        className="font-semibold"
       >
         Baca File dari AI
       </Button>
+
       <Modal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
@@ -105,40 +107,54 @@ export default function ModalGenerateDataFromAi({
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader>Baca File dari AI</ModalHeader>
-              <ModalBody>
+              <ModalHeader className="font-bold text-black">
+                Baca File dari AI
+              </ModalHeader>
+
+              <ModalBody className="grid gap-4">
                 <Textarea
-                  label="Prompt tambahan (optional)"
-                  placeholder="contoh: ambil 5 soal"
+                  label="Prompt Tambahan (optional)"
+                  labelPlacement="outside"
+                  placeholder="contoh: Ambil 5 soal"
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
-                  className="mb-4"
                   classNames={customStyleInput}
                 />
+
                 <Input
                   type="file"
                   onChange={(e) => {
                     setFiles(e.target.files);
                   }}
-                  className="mb-2"
-                  classNames={customStyleInput}
+                  classNames={{
+                    input:
+                      "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
+                  }}
                 />
               </ModalBody>
+
               <ModalFooter>
                 <Button
+                  color="danger"
                   variant="light"
                   onClick={() => {
                     onClose();
                     setFiles(null);
                   }}
+                  className="font-semibold"
                 >
                   Batal
                 </Button>
+
                 <Button
-                  color="secondary"
-                  isDisabled={!files || loading}
-                  onClick={handleSubmit}
                   isLoading={loading}
+                  isDisabled={!files || loading}
+                  color="secondary"
+                  startContent={
+                    loading ? null : <Sparkle weight="duotone" size={18} />
+                  }
+                  onClick={handleSubmit}
+                  className="font-semibold"
                 >
                   Generate
                 </Button>

@@ -2,8 +2,6 @@ import ButtonBack from "@/components/button/ButtonBack";
 import CardQuestionPreview from "@/components/card/CardQuestionPreview";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
-import LoadingData from "@/components/loading/LoadingData";
-import LoadingScreen from "@/components/loading/LoadingScreen";
 import ModalConfirm from "@/components/modal/ModalConfirm";
 import ModalEditQuestion from "@/components/modal/ModalEditQuestion";
 import ModalInputQuestion from "@/components/modal/ModalInputQuestion";
@@ -24,6 +22,7 @@ import {
   DatePicker,
   Input,
   Pagination,
+  Spinner,
   Textarea,
 } from "@nextui-org/react";
 import {
@@ -217,8 +216,6 @@ export default function EditTestPage({
     );
   }
 
-  if (isLoading) return <LoadingScreen />;
-
   return (
     <Layout title="Edit Ujian">
       <Container className="gap-8">
@@ -232,7 +229,9 @@ export default function EditTestPage({
           />
 
           {!isInputReady ? (
-            <LoadingData />
+            <div className="mt-8 flex w-full justify-center">
+              <Spinner color="secondary" />
+            </div>
           ) : (
             <>
               <div className="grid gap-6 [padding:2rem_0_3rem]">
