@@ -7,9 +7,11 @@ import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { SuccessResponse } from "@/types/global.type";
+import getCroppedImg from "@/utils/cropImage";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
+import { onCropComplete } from "@/utils/onCropComplete";
 import {
   Accordion,
   AccordionItem,
@@ -47,6 +49,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { ParsedUrlQuery } from "querystring";
 import { useState } from "react";
+import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 
@@ -119,6 +122,15 @@ export default function DetailApotekerClassCourse({
   const [editCourse, setEditCourse] = useState<DetailCourse | null>(null);
   const [loadingCourse, setLoadingCourse] = useState<boolean>(false);
   const [isSelected, setIsSelected] = useState<boolean>(false);
+  const [file, setFile] = useState<string | ArrayBuffer | null>(
+    data?.data.thumbnail_url as string,
+  );
+  const [filename, setFilename] = useState<string>("");
+  const [type, setType] = useState<string>("");
+  const [zoomImage, setZoomImage] = useState<number>(1);
+  const [cropImage, setCropImage] = useState({ x: 0, y: 0 });
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [changeThumbnail, setChangeThumbnail] = useState<boolean>(false);
 
   async function handleCreateSegment() {
     setLoadingSegment(true);
@@ -225,24 +237,34 @@ export default function DetailApotekerClassCourse({
     if (!editCourse) return;
     setLoadingCourse(true);
 
-    const data: any = {
-      course_id: editCourse.course_id,
-      title: editCourse.title,
-      description: editCourse.description,
-      type: "apotekerclass",
-      by: session.data?.user.fullname,
-      is_active: !isSelected,
-    };
-
-    if (editCourse.preview_url) {
-      data.preview_url = editCourse.preview_url;
-    }
-
     try {
+      const formData = new FormData();
+
+      formData.append("course_id", editCourse?.course_id);
+      formData.append("title", editCourse?.title);
+      formData.append("description", editCourse?.description);
+      formData.append("type", "apotekerclass");
+      formData.append("by", session.data?.user.fullname as string);
+      formData.append("is_active", !isSelected as any);
+
+      if (editCourse?.preview_url) {
+        formData.append("preview_url", editCourse?.preview_url);
+      }
+
+      if (changeThumbnail && filename) {
+        const croppedImage = await getCroppedImg(file, croppedAreaPixels);
+        const response = await fetch(croppedImage as string);
+        const blob = await response.blob();
+        const fileConvert = new File([blob], `${filename}`, {
+          type,
+        });
+        formData.append("thumbnail", fileConvert);
+      }
+
       await fetcher({
         url: `/courses`,
         method: "PATCH",
-        data,
+        data: formData,
         token,
       });
 
@@ -250,6 +272,8 @@ export default function DetailApotekerClassCourse({
       setEditCourse(null);
       onCloseCourse();
       setIsSelected(false);
+      setChangeThumbnail(false);
+      setFile(null);
       mutate();
     } catch (error: any) {
       console.error(error);
@@ -318,16 +342,18 @@ export default function DetailApotekerClassCourse({
   return (
     <Layout title="Detail" className="scrollbar-hide">
       <Container className="gap-8">
-        {/* <ButtonBack /> */}
         <ButtonBack
           href={`/apotekerclass/content/${router.query.category_id}`}
         />
 
         <Modal
+          size={changeThumbnail ? "3xl" : "lg"}
           isOpen={isOpenCourse}
           onClose={() => {
             setEditCourse(null);
             onCloseCourse();
+            setChangeThumbnail(false);
+            setFile(null);
           }}
         >
           <ModalContent>
@@ -335,67 +361,163 @@ export default function DetailApotekerClassCourse({
               Edit Playlist
             </ModalHeader>
 
-            <ModalBody className="grid gap-4">
-              <Input
-                isRequired
-                type="text"
-                variant="flat"
-                label="Judul Playlist"
-                labelPlacement="outside"
-                placeholder="Contoh: Farmakoterapi Dasar"
-                name="title"
-                value={editCourse?.title ?? ""}
-                onChange={(e) =>
-                  setEditCourse((prev) =>
-                    prev ? { ...prev, title: e.target.value } : prev,
-                  )
-                }
-                classNames={customStyleInput}
-              />
+            <ModalBody
+              className={`grid items-start ${changeThumbnail ? "grid-cols-[max-content_1fr] gap-12" : "grid-cols-none"}`}
+            >
+              {changeThumbnail && (
+                <div className="grid gap-6">
+                  {/* thumbnail */}
+                  <div className="grid gap-1">
+                    <div className="aspect-video size-[304px] rounded-xl border-2 border-dashed border-gray/20 p-1">
+                      <div className="relative flex h-full items-center justify-center overflow-hidden rounded-xl bg-gray/20">
+                        <Cropper
+                          image={file as string}
+                          crop={cropImage}
+                          zoom={zoomImage}
+                          aspect={1 / 1}
+                          onCropChange={setCropImage}
+                          onCropComplete={onCropComplete({
+                            setCroppedAreaPixels,
+                          })}
+                          onZoomChange={setZoomImage}
+                        />
+                      </div>
+                    </div>
 
-              <Textarea
-                isRequired
-                minRows={4}
-                type="text"
-                variant="flat"
-                label="Deskripsi Kursus/Playlist"
-                labelPlacement="outside"
-                placeholder="Contoh: Farmakoterapi Dasar adalah disiplin ilmu di dunia farmasi..."
-                name="description"
-                value={editCourse?.description ?? ""}
-                onChange={(e) =>
-                  setEditCourse((prev) =>
-                    prev ? { ...prev, description: e.target.value } : prev,
-                  )
-                }
-                classNames={customStyleInput}
-              />
+                    <p className="text-center text-sm font-medium text-gray">
+                      <strong className="mr-1 text-danger">*</strong>ratio
+                      gambar 1:1
+                    </p>
+                  </div>
 
-              <Input
-                type="text"
-                variant="flat"
-                label="Preview URL"
-                labelPlacement="outside"
-                placeholder="Contoh: https://youtube.com/watch?v=xxxxxx"
-                name="preview_url"
-                value={editCourse?.preview_url ?? ""}
-                onChange={(e) =>
-                  setEditCourse((prev) =>
-                    prev ? { ...prev, preview_url: e.target.value } : prev,
-                  )
-                }
-                classNames={customStyleInput}
-              />
+                  <Input
+                    isRequired
+                    type="file"
+                    accept="image/jpg, image/jpeg, image/png"
+                    variant="flat"
+                    labelPlacement="outside"
+                    className="max-w-[304px]"
+                    classNames={{
+                      input:
+                        "block w-full flex-1 text-sm text-gray file:mr-4 file:py-1 file:px-3 file:border-0 file:rounded-lg file:bg-purple file:text-sm file:font-sans file:font-semibold file:text-white hover:file:bg-purple/80",
+                    }}
+                    onChange={(e) => {
+                      if (!e.target.files?.length) {
+                        setFile(null);
+                        setFilename("");
+                        setType("");
+                        return;
+                      }
 
-              <Switch
-                size="sm"
-                color="secondary"
-                isSelected={isSelected}
-                onValueChange={setIsSelected}
-                className="text-sm font-semibold text-black"
-              >
-                Nonaktifkan Kursus/Playlist
-              </Switch>
+                      const validTypes = [
+                        "image/png",
+                        "image/jpg",
+                        "image/jpeg",
+                      ];
+
+                      if (!validTypes.includes(e.target.files[0].type)) {
+                        toast.error("Ekstensi file harus png, jpg, atau jpeg");
+                        setFile(null);
+                        setFilename("");
+                        setType("");
+                        return;
+                      }
+
+                      setType(e.target.files[0].type);
+                      setFilename(e.target.files[0].name);
+                      const reader = new FileReader();
+                      reader.readAsDataURL(e.target.files[0]);
+
+                      reader.onload = function () {
+                        setFile(reader.result);
+                      };
+
+                      reader.onerror = function (error) {
+                        setFile(null);
+                        setFilename("");
+                        setType("");
+
+                        toast.error("Terjadi kesalahan saat meload gambar");
+
+                        console.log(error);
+                      };
+                    }}
+                  />
+                </div>
+              )}
+
+              <div className="grid gap-4">
+                <Input
+                  isRequired
+                  type="text"
+                  variant="flat"
+                  label="Judul Playlist"
+                  labelPlacement="outside"
+                  placeholder="Contoh: Farmakoterapi Dasar"
+                  name="title"
+                  value={editCourse?.title ?? ""}
+                  onChange={(e) =>
+                    setEditCourse((prev) =>
+                      prev ? { ...prev, title: e.target.value } : prev,
+                    )
+                  }
+                  classNames={customStyleInput}
+                />
+
+                <Textarea
+                  isRequired
+                  minRows={4}
+                  type="text"
+                  variant="flat"
+                  label="Deskripsi Kursus/Playlist"
+                  labelPlacement="outside"
+                  placeholder="Contoh: Farmakoterapi Dasar adalah disiplin ilmu di dunia farmasi..."
+                  name="description"
+                  value={editCourse?.description ?? ""}
+                  onChange={(e) =>
+                    setEditCourse((prev) =>
+                      prev ? { ...prev, description: e.target.value } : prev,
+                    )
+                  }
+                  classNames={customStyleInput}
+                />
+
+                <Input
+                  type="text"
+                  variant="flat"
+                  label="Preview URL"
+                  labelPlacement="outside"
+                  placeholder="Contoh: https://youtube.com/watch?v=xxxxxx"
+                  name="preview_url"
+                  value={editCourse?.preview_url ?? ""}
+                  onChange={(e) =>
+                    setEditCourse((prev) =>
+                      prev ? { ...prev, preview_url: e.target.value } : prev,
+                    )
+                  }
+                  classNames={customStyleInput}
+                />
+
+                <Switch
+                  size="sm"
+                  color="secondary"
+                  isSelected={isSelected}
+                  onValueChange={setIsSelected}
+                  className="text-sm font-semibold text-black"
+                >
+                  Nonaktifkan Kursus/Playlist
+                </Switch>
+
+                <Switch
+                  size="sm"
+                  color="secondary"
+                  isSelected={changeThumbnail}
+                  onValueChange={setChangeThumbnail}
+                  className="text-sm font-semibold text-black"
+                >
+                  Ubah Thumbnail Kursus/Playlist
+                </Switch>
+              </div>
             </ModalBody>
 
             <ModalFooter>
@@ -405,6 +527,8 @@ export default function DetailApotekerClassCourse({
                 onClick={() => {
                   setEditCourse(null);
                   onCloseCourse();
+                  setChangeThumbnail(false);
+                  setFile(null);
                 }}
                 className="font-semibold"
               >
