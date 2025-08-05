@@ -72,6 +72,10 @@ export default function ModalAddParticipant({
   }
 
   useEffect(() => {
+    setPage(1);
+  }, [searchValue]);
+
+  useEffect(() => {
     if (searchValue || page) {
       fetchUsers(`/admin/users?q=${searchValue}&page=${page}`);
     }
@@ -113,6 +117,8 @@ export default function ModalAddParticipant({
   const columnsUser = [
     { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
+    { name: "Email", uid: "email" },
+    { name: "No. Telpon", uid: "phone_number" },
   ];
 
   return (
@@ -137,7 +143,7 @@ export default function ModalAddParticipant({
           setSearch("");
           setLoading(false);
         }}
-        size="2xl"
+        size="4xl"
       >
         <ModalContent>
           {(onClose) => (
@@ -158,6 +164,7 @@ export default function ModalAddParticipant({
                       placeholder="Cari Nama Pengguna atau ID Pengguna..."
                       onChange={(e) => setSearch(e.target.value)}
                       onClear={() => setSearch("")}
+                      className="max-w-[500px]"
                     />
 
                     <div className="max-h-[300px] overflow-x-scroll scrollbar-hide">
