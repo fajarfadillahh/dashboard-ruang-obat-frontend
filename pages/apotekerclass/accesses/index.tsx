@@ -291,8 +291,6 @@ export default function ApotekerClassAccessesPage({
     );
   }
 
-  console.log(selectedAccess);
-
   return (
     <Layout title="Access List Kelas Masuk Apoteker" className="scrollbar-hide">
       <Container className="gap-8">

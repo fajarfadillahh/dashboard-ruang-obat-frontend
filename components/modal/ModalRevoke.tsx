@@ -41,44 +41,66 @@ export default function ModalRevoke({
       <ModalContent>
         {() => (
           <>
-            <ModalHeader className="flex items-center gap-2 text-danger">
-              <WarningCircle size={24} className="text-danger" />
-              <p>Konfirmasi Menangguhkan Akses</p>
+            <ModalHeader className="inline-flex items-center gap-2 font-bold text-black">
+              <WarningCircle
+                weight="duotone"
+                size={24}
+                className="text-danger"
+              />
+              Konfirmasi Menangguhkan Akses
             </ModalHeader>
-            <ModalBody>
-              <p className="mb-2">
+
+            <ModalBody className="grid gap-8">
+              <p className="text-sm font-medium leading-[170%] text-gray">
                 Apakah Anda yakin ingin menangguhkan akses{" "}
-                <span className="font-bold text-danger">{access.fullname}</span>{" "}
+                <strong className="font-bold text-danger">
+                  {access.fullname}
+                </strong>{" "}
                 dengan ID{" "}
-                <span className="font-bold text-danger">{access.user_id}</span>{" "}
+                <strong className="font-bold text-danger">
+                  {access.user_id}
+                </strong>{" "}
                 yang berdurasi{" "}
-                <span className="font-bold text-danger">
-                  {access.duration} bulan
-                </span>
-                ? Tindakan ini tidak dapat dibatalkan.
+                <strong className="font-bold text-danger">
+                  {access.duration}
+                </strong>{" "}
+                bulan? Tindakan ini tidak dapat dibatalkan.
               </p>
+
               <Input
+                isRequired
+                type="text"
+                variant="flat"
                 label="Alasan Penangguhan"
+                labelPlacement="outside"
+                placeholder="Contoh: Melakukan tindakan tidak pastas"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                isRequired
               />
             </ModalBody>
+
             <ModalFooter>
-              <Button variant="light" onClick={onClose}>
+              <Button
+                variant="light"
+                color="danger"
+                onClick={onClose}
+                className="font-semibold text-danger"
+              >
                 Batal
               </Button>
+
               <Button
-                color="danger"
                 isLoading={loading}
+                isDisabled={!reason.trim()}
+                color="danger"
                 onClick={() => {
                   onConfirm(reason);
                   onClose();
                   setReason("");
                 }}
-                isDisabled={!reason.trim()}
+                className="font-semibold"
               >
-                Tangguhkan
+                Tangguhkan Akses
               </Button>
             </ModalFooter>
           </>

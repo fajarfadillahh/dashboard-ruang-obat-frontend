@@ -278,8 +278,8 @@ export default function AILimitsPage({
         />
 
         <div className="grid">
-          {!isLoading && data?.data.length && data.data.length < 2 ? (
-            <div className="sticky left-0 top-0 z-50 flex justify-end bg-white pb-4">
+          <div className="sticky left-0 top-0 z-50 flex justify-end bg-white pb-4">
+            {(data?.data?.length ?? 0) !== 2 && (
               <Button
                 color="secondary"
                 startContent={<Plus weight="bold" size={18} />}
@@ -291,102 +291,102 @@ export default function AILimitsPage({
               >
                 Tambah Limitasi
               </Button>
+            )}
 
-              <Modal
-                isDismissable={false}
-                isOpen={isOpen}
-                onOpenChange={onOpenChange}
-                onClose={() => {
-                  onClose(),
-                    setInput({
-                      total: 0,
-                      type: "",
-                    });
-                }}
-              >
-                <ModalContent>
-                  {(onClose) => (
-                    <>
-                      <ModalHeader className="font-bold text-black">
-                        {typeModal == "create" ? "Tambah" : "Edit"} Limitasi
-                      </ModalHeader>
+            <Modal
+              isDismissable={false}
+              isOpen={isOpen}
+              onOpenChange={onOpenChange}
+              onClose={() => {
+                onClose(),
+                  setInput({
+                    total: 0,
+                    type: "",
+                  });
+              }}
+            >
+              <ModalContent>
+                {(onClose) => (
+                  <>
+                    <ModalHeader className="font-bold text-black">
+                      {typeModal == "create" ? "Tambah" : "Edit"} Limitasi
+                    </ModalHeader>
 
-                      <ModalBody>
-                        <div className="grid gap-6">
-                          <Input
-                            isRequired
-                            type="number"
-                            variant="flat"
-                            label="Jumlah Limitasi"
-                            labelPlacement="outside"
-                            name="total"
-                            value={input.total.toString()}
-                            onChange={(e) =>
-                              setInput({
-                                ...input,
-                                total: Number(e.target.value),
-                              })
-                            }
-                            classNames={customStyleInput}
-                          />
+                    <ModalBody>
+                      <div className="grid gap-6">
+                        <Input
+                          isRequired
+                          type="number"
+                          variant="flat"
+                          label="Jumlah Limitasi"
+                          labelPlacement="outside"
+                          name="total"
+                          value={input.total.toString()}
+                          onChange={(e) =>
+                            setInput({
+                              ...input,
+                              total: Number(e.target.value),
+                            })
+                          }
+                          classNames={customStyleInput}
+                        />
 
-                          <RadioGroup
-                            isRequired
-                            aria-label="select limit type"
-                            label="Tipe Limitasi"
-                            color="secondary"
-                            value={input.type}
-                            onValueChange={(value) =>
-                              setInput((prev) => ({ ...prev, type: value }))
-                            }
-                            classNames={{
-                              base: "font-semibold text-black",
-                              label: "text-sm font-normal text-foreground",
-                            }}
-                          >
-                            <Radio value="free">Gratis</Radio>
-                            <Radio value="paid">Berbayar</Radio>
-                          </RadioGroup>
-                        </div>
-                      </ModalBody>
-
-                      <ModalFooter>
-                        <Button
-                          color="danger"
-                          variant="light"
-                          className="font-semibold"
-                          onClick={() => {
-                            onClose(),
-                              setInput({
-                                total: 0,
-                                type: "",
-                              });
-                          }}
-                        >
-                          Tutup
-                        </Button>
-
-                        <Button
-                          isDisabled={isDisableButton}
+                        <RadioGroup
+                          isRequired
+                          aria-label="select limit type"
+                          label="Tipe Limitasi"
                           color="secondary"
-                          onClick={() => {
-                            typeModal == "create"
-                              ? handleAddLimit()
-                              : handleEditLimit();
-
-                            onClose();
+                          value={input.type}
+                          onValueChange={(value) =>
+                            setInput((prev) => ({ ...prev, type: value }))
+                          }
+                          classNames={{
+                            base: "font-semibold text-black",
+                            label: "text-sm font-normal text-foreground",
                           }}
-                          className="font-semibold"
                         >
-                          Ya, {typeModal == "create" ? "Tambahan" : "Simpan"}
-                        </Button>
-                      </ModalFooter>
-                    </>
-                  )}
-                </ModalContent>
-              </Modal>
-            </div>
-          ) : null}
+                          <Radio value="free">Gratis</Radio>
+                          <Radio value="paid">Berbayar</Radio>
+                        </RadioGroup>
+                      </div>
+                    </ModalBody>
+
+                    <ModalFooter>
+                      <Button
+                        color="danger"
+                        variant="light"
+                        className="font-semibold"
+                        onClick={() => {
+                          onClose(),
+                            setInput({
+                              total: 0,
+                              type: "",
+                            });
+                        }}
+                      >
+                        Tutup
+                      </Button>
+
+                      <Button
+                        isDisabled={isDisableButton}
+                        color="secondary"
+                        onClick={() => {
+                          typeModal == "create"
+                            ? handleAddLimit()
+                            : handleEditLimit();
+
+                          onClose();
+                        }}
+                        className="font-semibold"
+                      >
+                        Ya, {typeModal == "create" ? "Tambahan" : "Simpan"}
+                      </Button>
+                    </ModalFooter>
+                  </>
+                )}
+              </ModalContent>
+            </Modal>
+          </div>
 
           <div className="overflow-x-scroll scrollbar-hide">
             <Table

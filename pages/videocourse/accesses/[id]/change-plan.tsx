@@ -9,6 +9,7 @@ import { SuccessResponse } from "@/types/global.type";
 import { SubscriptionsResponse } from "@/types/subscriptions/packages.type";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
+import { formatDate } from "@/utils/formatDate";
 import { formatRupiah } from "@/utils/formatRupiah";
 import { getError } from "@/utils/getError";
 import {
@@ -17,6 +18,7 @@ import {
   Select,
   Selection,
   SelectItem,
+  Skeleton,
 } from "@nextui-org/react";
 import { FloppyDisk, Tag } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
@@ -48,7 +50,7 @@ export default function ChangePlanVideoCourseAccess({
     token,
   });
 
-  const { data } = useSWR<SuccessResponse<DetailAccess>>({
+  const { data, isLoading } = useSWR<SuccessResponse<DetailAccess>>({
     url: `/accesses/${id}/detail`,
     method: "GET",
     token,
@@ -62,7 +64,7 @@ export default function ChangePlanVideoCourseAccess({
     discount_amount: 0,
     user_timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (key: keyof InputState, value: any) => {
     setInput((prev) => ({
@@ -78,7 +80,7 @@ export default function ChangePlanVideoCourseAccess({
     };
 
     try {
-      setIsLoading(true);
+      setLoading(true);
 
       await fetcher({
         url: "/accesses/plan",
@@ -90,15 +92,17 @@ export default function ChangePlanVideoCourseAccess({
         token,
       });
 
-      toast.success("Paket berhasil diubah");
+      toast.success("Paket berhasil diubah!");
       localStorage.removeItem("idempotency_key");
+
       return router.back();
     } catch (error) {
-      setIsLoading(false);
+      setLoading(false);
       console.error(error);
+
       toast.error(getError(error));
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   }
 
@@ -175,82 +179,104 @@ export default function ChangePlanVideoCourseAccess({
 
   return (
     <Layout title="Ubah Paket" className="scrollbar-hide">
-      <Container>
+      <Container className="gap-8">
         <ButtonBack />
 
-        <TitleText title={`Ubah Paket ${data?.data.fullname} 📋`} text="" />
-
-        <div className="grid max-w-[600px] gap-8 pt-8">
-          <div className="grid gap-6">
-            <div className="grid grid-cols-2 gap-4">
-              <Select
-                items={packages}
-                label="Pilih paket"
-                labelPlacement="outside"
-                placeholder="Pilih paket berlangganan"
-                selectedKeys={packageId}
-                onSelectionChange={setPackageId}
-              >
-                {(pkg) => (
-                  <SelectItem key={pkg.package_id} textValue={pkg.name}>
-                    <div className="flex items-center gap-2">
-                      <div className="flex flex-col">
-                        <span className="text-small">{pkg.name}</span>
-                        <span className="text-md">
-                          {formatRupiah(pkg.price)}
-                        </span>
-                      </div>
-                    </div>
-                  </SelectItem>
-                )}
-              </Select>
-
-              <Input
-                type="number"
-                variant="flat"
-                label="Diskon (optional)"
-                labelPlacement="outside"
-                placeholder="Contoh: 10000"
-                name="discount_amount"
-                value={input.discount_amount.toString()}
-                onChange={(e) =>
-                  handleChange("discount_amount", Number(e.target.value))
-                }
-                startContent={
-                  <Tag weight="duotone" size={18} className="text-gray" />
-                }
-                classNames={customStyleInput}
-              />
-            </div>
+        {isLoading ? (
+          <div className="grid gap-1">
+            <Skeleton className="h-8 w-96 rounded-xl" />
+            <Skeleton className="h-8 w-48 rounded-xl" />
           </div>
+        ) : (
+          <TitleText
+            title={`Ubah Paket ${data?.data.fullname} 📋`}
+            text={`Bergabung Pada: ${formatDate(data?.data.created_at as string)}`}
+          />
+        )}
 
-          <div className="flex flex-col gap-2">
-            <h1 className="text-lg font-semibold">Detail Paket User</h1>
-            <div className="grid flex-1 gap-1.5">
-              {preview.map(([label, value], index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-[150px_2px_1fr] gap-4 text-sm font-medium text-black"
+        <div className="mt-8 grid max-w-[700px] gap-8">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-24 max-w-[700px] rounded-xl" />
+              <Skeleton className="h-24 max-w-[250px] rounded-xl" />
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <Select
+                  isRequired
+                  aria-label="select package"
+                  items={packages}
+                  label="Pilih Paket"
+                  labelPlacement="outside"
+                  placeholder="Pilih Paket Berlangganan"
+                  selectedKeys={packageId}
+                  onSelectionChange={setPackageId}
                 >
-                  <p>{label}</p>
-                  <span>:</span>
-                  <p className="font-bold">{value}</p>
+                  {(pkg) => (
+                    <SelectItem key={pkg.package_id} textValue={pkg.name}>
+                      <div className="flex items-center gap-2">
+                        <div className="flex flex-col">
+                          <span className="text-small">{pkg.name}</span>
+                          <span className="text-md">
+                            {formatRupiah(pkg.price)}
+                          </span>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  )}
+                </Select>
+
+                <Input
+                  type="number"
+                  variant="flat"
+                  label="Diskon (optional)"
+                  labelPlacement="outside"
+                  placeholder="Contoh: 10000"
+                  name="discount_amount"
+                  value={input.discount_amount.toString()}
+                  onChange={(e) =>
+                    handleChange("discount_amount", Number(e.target.value))
+                  }
+                  startContent={
+                    <Tag weight="duotone" size={18} className="text-gray" />
+                  }
+                  classNames={customStyleInput}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <h1 className="text-lg font-bold text-black">
+                  Detail Paket User
+                </h1>
+
+                <div className="grid flex-1 gap-2">
+                  {preview.map(([label, value], index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-[150px_2px_1fr] gap-4 text-sm font-medium text-black"
+                    >
+                      <p>{label}</p>
+                      <span>:</span>
+                      <p className="font-bold">{value}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
+            </>
+          )}
 
           <Button
-            isLoading={isLoading}
-            isDisabled={isLoading || !Array.from(packageId).length}
+            isLoading={loading}
+            isDisabled={loading || !Array.from(packageId).length}
             color="secondary"
             startContent={
-              isLoading ? null : <FloppyDisk weight="duotone" size={18} />
+              loading ? null : <FloppyDisk weight="duotone" size={18} />
             }
             onClick={handleUpdatePlan}
             className="w-max justify-self-end font-semibold"
           >
-            {isLoading ? "Tunggu Sebentar..." : "Ubah Paket"}
+            {loading ? "Tunggu Sebentar..." : "Ubah Paket"}
           </Button>
         </div>
       </Container>
