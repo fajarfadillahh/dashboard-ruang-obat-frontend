@@ -1,6 +1,8 @@
 import ButtonBack from "@/components/button/ButtonBack";
 import CustomTooltip from "@/components/CustomTooltip";
+import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
@@ -10,7 +12,9 @@ import { LogoRuangobat } from "@/public/img/LogoRuangobat";
 import { Accesses, DetailAccess } from "@/types/accesses/accesses.type";
 import { SuccessResponse } from "@/types/global.type";
 import { UniversityResponse } from "@/types/university.type";
+import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
+import { formatDate } from "@/utils/formatDate";
 import {
   Button,
   Chip,
@@ -29,6 +33,7 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  useDisclosure,
 } from "@nextui-org/react";
 import { Plus, Trash } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
@@ -41,6 +46,8 @@ export default function DetailApotekerClassAccess({
   token,
   id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  const { onOpen, onOpenChange, isOpen, onClose } = useDisclosure();
+  const [loading, setLoading] = useState<boolean>(false);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<DetailAccess>
   >({
@@ -56,8 +63,6 @@ export default function DetailApotekerClassAccess({
     method: "GET",
     token,
   });
-
-  const [openModal, setOpenModal] = useState(false);
   const [selectedUniversity, setSelectedUniversity] = useState<string>("");
 
   const availableUniversities = useMemo(() => {
@@ -90,7 +95,7 @@ export default function DetailApotekerClassAccess({
         token,
       });
 
-      toast.success("Berhasil menghapus aksees universitas.");
+      toast.success("Berhasil menghapus aksees universitas!");
       mutate();
     } catch (error) {
       console.error("Failed to delete access test:", error);
@@ -100,6 +105,7 @@ export default function DetailApotekerClassAccess({
 
   async function handleUpsertUniversities() {
     if (!selectedUniversity) return;
+    setLoading(true);
 
     try {
       await fetcher({
@@ -118,18 +124,24 @@ export default function DetailApotekerClassAccess({
         },
       });
 
-      toast.success("Berhasil menambahkan universitas.");
-      setOpenModal(false);
+      toast.success("Berhasil menambahkan universitas!");
       setSelectedUniversity("");
+
+      onClose();
       mutate();
     } catch (error) {
       console.error("Failed to upsert universities:", error);
+      setLoading(false);
+
       toast.error("Gagal menambahkan universitas.");
+    } finally {
+      setLoading(false);
     }
   }
 
   const columnsUniversities = [
     { name: "Nama Universitas", uid: "title" },
+    { name: "Ditambahkan Pada", uid: "granted_at" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -143,25 +155,51 @@ export default function DetailApotekerClassAccess({
     switch (columnKey) {
       case "title":
         return <div className="font-medium text-black">{university.title}</div>;
+      case "granted_at":
+        return (
+          <div className="font-medium text-black">
+            {formatDate(university.granted_at)}
+          </div>
+        );
       case "action":
         return (
-          <div className="inline-flex items-center gap-2">
-            <Button
-              isIconOnly
-              variant="light"
-              size="sm"
-              color="danger"
-              onClick={() => {
-                if (confirm("apakah anda yakin?")) {
-                  handleDeleteTest(university.access_test_id);
-                }
-              }}
-            >
-              <CustomTooltip content="Hapus Akses">
-                <Trash weight="duotone" size={18} />
-              </CustomTooltip>
-            </Button>
-          </div>
+          <ModalConfirm
+            trigger={
+              <Button isIconOnly variant="light" color="danger" size="sm">
+                <CustomTooltip content="Hapus Universitas">
+                  <Trash weight="duotone" size={18} className="text-danger" />
+                </CustomTooltip>
+              </Button>
+            }
+            header={<h1 className="font-bold text-black">Hapus Universitas</h1>}
+            body={
+              <div className="grid gap-3 text-sm font-medium">
+                <p className="leading-[170%] text-gray">
+                  Apakah anda ingin menghapus universitas ini?
+                </p>
+              </div>
+            }
+            footer={(onClose: any) => (
+              <>
+                <Button
+                  color="danger"
+                  variant="light"
+                  onPress={onClose}
+                  className="font-semibold"
+                >
+                  Tutup
+                </Button>
+
+                <Button
+                  color="danger"
+                  className="font-semibold"
+                  onClick={() => handleDeleteTest(university.access_test_id)}
+                >
+                  Ya, Hapus
+                </Button>
+              </>
+            )}
+          />
         );
 
       default:
@@ -203,13 +241,20 @@ export default function DetailApotekerClassAccess({
 
   return (
     <Layout title="Detail Akses Universitas" className="scrollbar-hide">
-      <Container className="gap-2">
+      <Container className="gap-8">
         <ButtonBack />
 
-        <TitleText
-          title={`Detail Akses Universitas ${data?.data.fullname}`}
-          text=""
-        />
+        {isLoading ? (
+          <div className="grid gap-1">
+            <Skeleton className="h-8 w-96 rounded-xl" />
+            <Skeleton className="h-8 w-48 rounded-xl" />
+          </div>
+        ) : (
+          <TitleText
+            title={`Detail Akses Universitas ${data?.data.fullname}`}
+            text={`Ditambahkan pada: ${formatDate(data?.data.created_at as string)}`}
+          />
+        )}
 
         <div className="mb-8 grid grid-cols-[650px_auto] items-center gap-16">
           {isLoading ? (
@@ -234,21 +279,19 @@ export default function DetailApotekerClassAccess({
           <LogoRuangobat className="h-[200px] w-auto justify-self-center text-gray/20 grayscale" />
         </div>
 
-        <div className="grid w-[500px] gap-4">
+        <div className="grid w-[650px] gap-2">
           <Button
             color="secondary"
             startContent={<Plus weight="bold" size={16} />}
-            onClick={() => {
-              setOpenModal(true);
-            }}
+            onClick={onOpen}
             className="w-max justify-self-end font-semibold"
           >
             Tambah Universitas
           </Button>
 
           <Modal
-            isOpen={openModal}
-            onOpenChange={setOpenModal}
+            isOpen={isOpen}
+            onOpenChange={onOpenChange}
             size="md"
             placement="center"
             onClose={() => {
@@ -258,19 +301,27 @@ export default function DetailApotekerClassAccess({
             <ModalContent>
               {(onClose) => (
                 <>
-                  <ModalHeader>Tambah Universitas</ModalHeader>
+                  <ModalHeader className="font-bold text-black">
+                    Tambah Universitas
+                  </ModalHeader>
+
                   <ModalBody>
                     <Select
+                      isRequired
+                      isDisabled={availableUniversities.length === 0}
+                      aria-label="select univ"
                       label="Pilih Universitas"
-                      placeholder="Pilih universitas"
+                      labelPlacement="outside"
+                      placeholder="Contoh: Universitas Pancasila"
                       selectedKeys={
                         selectedUniversity ? [selectedUniversity] : []
                       }
                       onChange={(e) => {
                         setSelectedUniversity(e.target.value);
                       }}
-                      className="w-full"
-                      isDisabled={availableUniversities.length === 0}
+                      classNames={{
+                        value: "font-semibold text-gray",
+                      }}
                     >
                       {availableUniversities.length === 0 ? (
                         <SelectItem key="none" value="">
@@ -285,30 +336,41 @@ export default function DetailApotekerClassAccess({
                       )}
                     </Select>
                   </ModalBody>
+
                   <ModalFooter>
-                    <Button variant="light" onClick={onClose}>
+                    <Button
+                      color="danger"
+                      variant="light"
+                      onClick={onClose}
+                      className="font-semibold text-danger"
+                    >
                       Batal
                     </Button>
+
                     <Button
-                      color="secondary"
+                      isLoading={loading}
                       isDisabled={
                         !selectedUniversity ||
                         availableUniversities.length === 0
                       }
+                      color="secondary"
                       onClick={handleUpsertUniversities}
+                      className="font-semibold"
                     >
-                      Tambah
+                      Tambah Universitas
                     </Button>
                   </ModalFooter>
                 </>
               )}
             </ModalContent>
           </Modal>
+
           <div className="overflow-x-scroll scrollbar-hide">
             <Table
               isStriped
               aria-label="university table"
               color="secondary"
+              classNames={customStyleTable}
               className="scrollbar-hide"
             >
               <TableHeader columns={columnsUniversities}>
@@ -319,11 +381,7 @@ export default function DetailApotekerClassAccess({
 
               <TableBody
                 items={data?.data.universities ?? []}
-                emptyContent={
-                  <span className="text-sm font-semibold italic text-gray">
-                    Universitas tidak ditemukan!
-                  </span>
-                }
+                emptyContent={<EmptyData text="Universitas tidak ditemukan!" />}
                 isLoading={isLoadingUniversities}
                 loadingContent={
                   <Spinner size="md" color="secondary" label="Loading..." />
