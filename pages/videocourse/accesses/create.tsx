@@ -137,6 +137,8 @@ export default function CreateVideoCourseAccess({
   const columnsUser = [
     { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
+    { name: "Email", uid: "email" },
+    { name: "No. Telpon", uid: "phone_number" },
   ];
 
   const user = Array.from(userId).length
@@ -174,129 +176,132 @@ export default function CreateVideoCourseAccess({
 
   return (
     <Layout title="Tambah Akses" className="scrollbar-hide">
-      <Container>
+      <Container className="gap-8">
         <ButtonBack />
 
-        <TitleText title="Tambah Akses 📋" text="" />
+        <TitleText
+          title="Tambah Akses 📋"
+          text="Tambahkan akses pada program Video Pembelajaran"
+        />
 
-        <div className="grid max-w-[600px] gap-8 pt-8">
-          <div className="grid gap-6">
-            <div className="grid gap-4">
-              <SearchInput
-                placeholder="Cari Nama Pengguna atau ID Pengguna..."
-                onChange={(e) => setSearch(e.target.value)}
-                onClear={() => setSearch("")}
-                defaultValue={search}
-              />
+        <div className="grid max-w-[900px] gap-12">
+          <div className="grid gap-4">
+            <SearchInput
+              placeholder="Cari Pengguna..."
+              onChange={(e) => setSearch(e.target.value)}
+              onClear={() => setSearch("")}
+              defaultValue={search}
+              className="max-w-[500px]"
+            />
 
-              <div className="overflow-x-scroll scrollbar-hide">
-                <Table
-                  isStriped
-                  aria-label="users table"
-                  color="secondary"
-                  selectionMode="single"
-                  selectedKeys={userId}
-                  onSelectionChange={setUserId}
-                  classNames={customStyleTable}
-                  className="scrollbar-hide"
-                >
-                  <TableHeader columns={columnsUser}>
-                    {(column) => (
-                      <TableColumn key={column.uid}>{column.name}</TableColumn>
-                    )}
-                  </TableHeader>
-
-                  <TableBody
-                    items={dataUser?.data?.users || []}
-                    emptyContent={
-                      <span className="text-sm font-semibold italic text-gray">
-                        Pengguna tidak ditemukan!
-                      </span>
-                    }
-                    loadingContent={
-                      <Spinner size="md" color="secondary" label="Loading..." />
-                    }
-                    isLoading={isLoadingUsers}
-                  >
-                    {(item: User) => (
-                      <TableRow key={item.user_id}>
-                        {(columnKey) => (
-                          <TableCell>{getKeyValue(item, columnKey)}</TableCell>
-                        )}
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {!isLoadingUsers && dataUser?.data?.users.length ? (
-                <Pagination
-                  isCompact
-                  showControls
-                  page={dataUser?.data?.page as number}
-                  total={dataUser?.data?.total_pages as number}
-                  onChange={(e) => {
-                    setPage(`${e}`);
-                    setPackageId(new Set([]));
-                    setUserId(new Set([]));
-                    setInput((prev) => ({
-                      ...prev,
-                      discount_amount: 0,
-                    }));
-                  }}
-                  className="justify-self-center"
-                  classNames={{
-                    cursor: "bg-purple text-white",
-                  }}
-                />
-              ) : null}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <Select
-                items={dataSubscriptions?.data?.packages || []}
-                label="Pilih paket"
-                labelPlacement="outside"
-                placeholder="Pilih paket berlangganan"
-                selectedKeys={packageId}
-                onSelectionChange={setPackageId}
+            <div className="overflow-x-scroll scrollbar-hide">
+              <Table
+                isStriped
+                aria-label="users table"
+                color="secondary"
+                selectionMode="single"
+                selectedKeys={userId}
+                onSelectionChange={setUserId}
+                classNames={customStyleTable}
+                className="scrollbar-hide"
               >
-                {(pkg) => (
-                  <SelectItem key={pkg.package_id} textValue={pkg.name}>
-                    <div className="flex items-center gap-2">
-                      <div className="flex flex-col">
-                        <span className="text-small">{pkg.name}</span>
-                        <span className="text-md">
-                          {formatRupiah(pkg.price)}
-                        </span>
-                      </div>
-                    </div>
-                  </SelectItem>
-                )}
-              </Select>
+                <TableHeader columns={columnsUser}>
+                  {(column) => (
+                    <TableColumn key={column.uid}>{column.name}</TableColumn>
+                  )}
+                </TableHeader>
 
-              <Input
-                type="number"
-                variant="flat"
-                label="Diskon (optional)"
-                labelPlacement="outside"
-                placeholder="Contoh: 10000"
-                name="discount_amount"
-                value={input.discount_amount.toString()}
-                onChange={(e) =>
-                  handleChange("discount_amount", Number(e.target.value))
-                }
-                startContent={
-                  <Tag weight="duotone" size={18} className="text-gray" />
-                }
-                classNames={customStyleInput}
-              />
+                <TableBody
+                  items={dataUser?.data?.users || []}
+                  emptyContent={
+                    <span className="text-sm font-semibold italic text-gray">
+                      Pengguna tidak ditemukan!
+                    </span>
+                  }
+                  loadingContent={
+                    <Spinner size="md" color="secondary" label="Loading..." />
+                  }
+                  isLoading={isLoadingUsers}
+                >
+                  {(item: User) => (
+                    <TableRow key={item.user_id}>
+                      {(columnKey) => (
+                        <TableCell>{getKeyValue(item, columnKey)}</TableCell>
+                      )}
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
+
+            {!isLoadingUsers && dataUser?.data?.users.length ? (
+              <Pagination
+                isCompact
+                showControls
+                page={dataUser?.data?.page as number}
+                total={dataUser?.data?.total_pages as number}
+                onChange={(e) => {
+                  setPage(`${e}`);
+                  setPackageId(new Set([]));
+                  setUserId(new Set([]));
+                  setInput((prev) => ({
+                    ...prev,
+                    discount_amount: 0,
+                  }));
+                }}
+                className="justify-self-center"
+                classNames={{
+                  cursor: "bg-purple text-white",
+                }}
+              />
+            ) : null}
           </div>
 
-          <div className="flex flex-col gap-2">
-            <h1 className="text-lg font-semibold">Preview</h1>
-            <div className="grid flex-1 gap-1.5">
+          <div className="grid grid-cols-2 gap-4">
+            <Select
+              isRequired
+              aria-label="select package"
+              items={dataSubscriptions?.data?.packages || []}
+              label="Pilih Paket"
+              labelPlacement="outside"
+              placeholder="Pilih Paket Perlangganan"
+              selectedKeys={packageId}
+              onSelectionChange={setPackageId}
+            >
+              {(pkg) => (
+                <SelectItem key={pkg.package_id} textValue={pkg.name}>
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-col">
+                      <span className="text-small">{pkg.name}</span>
+                      <span className="text-md">{formatRupiah(pkg.price)}</span>
+                    </div>
+                  </div>
+                </SelectItem>
+              )}
+            </Select>
+
+            <Input
+              type="number"
+              variant="flat"
+              label="Diskon (optional)"
+              labelPlacement="outside"
+              placeholder="Contoh: 10000"
+              name="discount_amount"
+              value={input.discount_amount.toString()}
+              onChange={(e) =>
+                handleChange("discount_amount", Number(e.target.value))
+              }
+              startContent={
+                <Tag weight="duotone" size={18} className="text-gray" />
+              }
+              classNames={customStyleInput}
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <h1 className="text-lg font-bold text-black">Preview Akses</h1>
+
+            <div className="grid flex-1 gap-2">
               {preview.map(([label, value], index) => (
                 <div
                   key={index}
