@@ -22,7 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { CheckCircle, Eye, XCircle } from "@phosphor-icons/react";
+import { CheckCircle, Eye, Plus, XCircle } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
@@ -155,6 +155,15 @@ export default function UsersPage({
             />
 
             <ModalExportDataUser {...{ token }} />
+
+            <Button
+              color="secondary"
+              startContent={<Plus weight="bold" size={18} />}
+              onClick={() => router.push("/users/batches")}
+              className="font-semibold"
+            >
+              Tambah Pengguna
+            </Button>
           </div>
 
           <div className="overflow-x-scroll scrollbar-hide">

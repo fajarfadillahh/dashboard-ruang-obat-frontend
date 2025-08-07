@@ -96,6 +96,7 @@ export default function ModalExportDataUser({ token }: { token: string }) {
   return (
     <>
       <Button
+        variant="light"
         color="secondary"
         startContent={<Export weight="duotone" size={18} />}
         onClick={onOpen}
