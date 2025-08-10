@@ -9,6 +9,7 @@ import {
   Microscope,
   Robot,
   User,
+  UserList,
   Users,
   Video,
 } from "@phosphor-icons/react";
@@ -149,6 +150,11 @@ export function SidebarOtherMenu(adminId?: string): SidebarMenuType[] {
       label: "Feedback",
       path: "/feedback",
       icon: ChatCircleText,
+    },
+    {
+      label: "Testimoni",
+      path: "/testimonials",
+      icon: UserList,
     },
   ];
 }
