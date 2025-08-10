@@ -115,9 +115,10 @@ export function SidebarOtherMenu(adminId?: string): SidebarMenuType[] {
       icon: ChartLine,
       path: "/statistics",
       items: [
+        { label: "Aktivitas Produk", path: "/statistics/products" },
         { label: "Aktivitas Login", path: "/statistics/login" },
-        { label: "Pendaftar", path: "/statistics/registered" },
-        { label: "ROSA (AI)", path: "/statistics/ai" },
+        { label: "Aktivitas Pendaftar", path: "/statistics/registered" },
+        { label: "Aktivitas ROSA (AI)", path: "/statistics/ai" },
       ],
     },
     {
