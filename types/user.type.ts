@@ -31,6 +31,7 @@ export type DetailsUserResponse = {
   email: string;
   phone_number: string;
   gender: string;
+  entry_year: string;
   university: string;
   created_at: string;
   is_verified: boolean;
