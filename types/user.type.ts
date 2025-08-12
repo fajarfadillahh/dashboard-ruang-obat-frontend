@@ -2,6 +2,7 @@ export type User = {
   user_id: string;
   fullname: string;
   university: string;
+  entry_year: string;
   email: string;
   phone_number: string;
   is_verified: boolean;

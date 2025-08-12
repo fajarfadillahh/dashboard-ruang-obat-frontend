@@ -52,6 +52,7 @@ export default function UsersPage({
     { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
     { name: "Asal Kampus", uid: "university" },
+    { name: "Tahun Masuk Kuliah", uid: "entry_year" },
     { name: "Email", uid: "email" },
     { name: "No. Telpon", uid: "phone_number" },
     { name: "Status", uid: "is_verified" },
@@ -67,9 +68,23 @@ export default function UsersPage({
           <div className="w-max font-medium text-black">{user.user_id}</div>
         );
       case "fullname":
-        return <div className="font-medium text-black">{user.fullname}</div>;
+        return (
+          <div className="w-[200px] font-medium text-black">
+            {user.fullname}
+          </div>
+        );
       case "university":
-        return <div className="font-medium text-black">{user.university}</div>;
+        return (
+          <div className="w-[200px] font-medium text-black">
+            {user.university}
+          </div>
+        );
+      case "entry_year":
+        return (
+          <div className="font-medium text-black">
+            {user.entry_year ? user.entry_year : "-"}
+          </div>
+        );
       case "email":
         return <div className="font-medium text-black">{user.email}</div>;
       case "phone_number":
