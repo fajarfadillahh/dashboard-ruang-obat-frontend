@@ -256,7 +256,7 @@ export default function TestimonialListPage({
                     alt="testimonial image"
                     width={500}
                     height={500}
-                    className="size-full rounded-lg object-cover object-center"
+                    className="aspect-square size-full rounded-lg object-cover object-center"
                     priority
                   />
 
@@ -277,6 +277,7 @@ export default function TestimonialListPage({
               </div>
             )}
           </div>
+
           {!isLoading && data?.data.testimonials.length ? (
             <Pagination
               isCompact
