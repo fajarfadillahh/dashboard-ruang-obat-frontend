@@ -120,7 +120,7 @@ export default function DetailsTryoutPage({
                     className="flex items-start gap-6 rounded-xl border-2 border-gray/20 p-6"
                   >
                     <div className="font-extrabold text-purple">
-                      {index + 1}.
+                      {question.number}.
                     </div>
 
                     <div className="grid flex-1 gap-4">
