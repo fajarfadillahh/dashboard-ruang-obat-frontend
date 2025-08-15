@@ -151,7 +151,11 @@ export default function DetailsUserPage({
                   ["No. Telpon", `${data?.data.phone_number}`],
                   ["Asal Kampus", `${data?.data.university}`],
                   [
-                    "Dibuat Pada",
+                    "Tahun Masuk Kuliah",
+                    `${data?.data.entry_year ? data?.data.entry_year : "-"}`,
+                  ],
+                  [
+                    "Bergabung Pada",
                     `${formatDate(data?.data.created_at ?? "-")}`,
                   ],
                   [
