@@ -8,10 +8,20 @@ import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
+import { customStyleInput } from "@/utils/customStyleInput";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
+import { handleKeyDown } from "@/utils/handleKeyDown";
 import {
   Button,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Pagination,
   Spinner,
   Table,
@@ -20,11 +30,13 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
+  useDisclosure,
 } from "@nextui-org/react";
 import { PencilLine, Plus, Trash } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useQueryState } from "nuqs";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
@@ -50,8 +62,16 @@ export default function TopicsArticlePage({
   const [page, setPage] = useQueryState("page", { defaultValue: "" });
   const [searchValue] = useDebounce(search, 800);
 
+  const { isOpen, onOpenChange, onClose, onOpen } = useDisclosure();
+  const [name, setName] = useState<string>("");
+  const [topicNameId, setTopicNameId] = useState<string>("");
+  const [typeModal, setTypeModal] = useState<"create" | "edit">("create");
+  const [loading, setLoading] = useState(false);
+
   const divRef = useRef<HTMLDivElement | null>(null);
-  const { data, error, isLoading } = useSWR<SuccessResponse<TopicsResponse>>({
+  const { data, error, isLoading, mutate } = useSWR<
+    SuccessResponse<TopicsResponse>
+  >({
     url: getUrl("/topics", {
       q: searchValue,
       page,
@@ -67,12 +87,14 @@ export default function TopicsArticlePage({
     { name: "Aksi", uid: "action" },
   ];
 
-  function renderCellUsers(topic: Topic, columnKey: React.Key) {
+  function renderCellTopics(topic: Topic, columnKey: React.Key) {
     const cellValue = topic[columnKey as keyof Topic];
 
     switch (columnKey) {
       case "name":
-        return <div className="w-max font-medium text-black">{topic.name}</div>;
+        return (
+          <div className="w-[200px] font-medium text-black">{topic.name}</div>
+        );
       case "first_letter":
         return (
           <div className="w-max font-medium text-black">
@@ -88,14 +110,32 @@ export default function TopicsArticlePage({
       case "action":
         return (
           <div className="inline-flex w-max items-center gap-1">
-            <Button isIconOnly variant="light" size="sm" color="secondary">
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              color="secondary"
+              onClick={() => {
+                onOpen();
+                setTypeModal("edit");
+
+                setName(topic.name);
+                setTopicNameId(topic.topic_id);
+              }}
+            >
               <CustomTooltip content="Edit Topik">
                 <PencilLine weight="duotone" size={18} />
               </CustomTooltip>
             </Button>
 
             {topic.can_delete ? (
-              <Button isIconOnly variant="light" size="sm" color="danger">
+              <Button
+                isIconOnly
+                variant="light"
+                size="sm"
+                color="danger"
+                onClick={() => alert("Fitur ini belum tersedia!")}
+              >
                 <CustomTooltip content="Hapus Topik">
                   <Trash weight="duotone" size={18} />
                 </CustomTooltip>
@@ -106,6 +146,63 @@ export default function TopicsArticlePage({
 
       default:
         return cellValue;
+    }
+  }
+
+  async function handleAddTopic() {
+    setLoading(true);
+
+    try {
+      await fetcher({
+        url: "/topics",
+        method: "POST",
+        data: {
+          name,
+        },
+        token,
+      });
+
+      mutate();
+      onClose();
+      setName("");
+
+      toast.success("Topik berhasil ditambahkan!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
+
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleEditTopic() {
+    setLoading(true);
+
+    try {
+      await fetcher({
+        url: "/topics",
+        method: "PATCH",
+        data: {
+          topic_id: topicNameId,
+          name,
+        },
+        token,
+      });
+
+      mutate();
+      onClose();
+      setName("");
+
+      toast.success("Topik berhasil di edit!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
+
+      setLoading(false);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -138,17 +235,95 @@ export default function TopicsArticlePage({
             <SearchInput
               placeholder="Cari Topik Artikel atau ID Topik..."
               defaultValue={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage("1");
+              }}
               onClear={() => setSearch("")}
             />
 
             <Button
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
+              onClick={() => {
+                onOpen();
+                setTypeModal("create");
+              }}
               className="font-semibold"
             >
               Tambah Topik
             </Button>
+
+            <Modal
+              isDismissable={false}
+              isOpen={isOpen}
+              onOpenChange={onOpenChange}
+              scrollBehavior="inside"
+              onClose={() => {
+                setName("");
+              }}
+              size="sm"
+            >
+              <ModalContent>
+                {(onClose) => (
+                  <>
+                    <ModalHeader className="font-bold text-black">
+                      {typeModal == "create" ? "Tambah" : "Edit"} Topik
+                    </ModalHeader>
+
+                    <ModalBody className="gap-8 scrollbar-hide">
+                      <Input
+                        isRequired
+                        type="text"
+                        variant="flat"
+                        label="Nama Topik"
+                        labelPlacement="outside"
+                        placeholder="Contoh: Amoxcilin"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        onKeyDown={(e) =>
+                          handleKeyDown(
+                            e,
+                            typeModal === "create"
+                              ? handleAddTopic
+                              : handleEditTopic,
+                          )
+                        }
+                        classNames={customStyleInput}
+                      />
+                    </ModalBody>
+
+                    <ModalFooter>
+                      <Button
+                        color="danger"
+                        variant="light"
+                        onPress={() => {
+                          onClose();
+                          setName("");
+                        }}
+                        className="font-semibold"
+                      >
+                        Tutup
+                      </Button>
+
+                      <Button
+                        isLoading={loading}
+                        isDisabled={!name.trim() || loading}
+                        color="secondary"
+                        onClick={() => {
+                          typeModal === "create"
+                            ? handleAddTopic()
+                            : handleEditTopic();
+                        }}
+                        className="font-semibold"
+                      >
+                        {typeModal === "create" ? "Tambah" : "Simpan"}
+                      </Button>
+                    </ModalFooter>
+                  </>
+                )}
+              </ModalContent>
+            </Modal>
           </div>
 
           <div className="overflow-x-scroll scrollbar-hide">
@@ -177,7 +352,9 @@ export default function TopicsArticlePage({
                 {(topic: Topic) => (
                   <TableRow key={topic.topic_id}>
                     {(columnKey) => (
-                      <TableCell>{renderCellUsers(topic, columnKey)}</TableCell>
+                      <TableCell>
+                        {renderCellTopics(topic, columnKey)}
+                      </TableCell>
                     )}
                   </TableRow>
                 )}
