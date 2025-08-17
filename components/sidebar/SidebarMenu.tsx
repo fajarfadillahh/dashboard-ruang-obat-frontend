@@ -1,4 +1,5 @@
 import {
+  Article,
   BookBookmark,
   Books,
   ChartLine,
@@ -8,6 +9,7 @@ import {
   Icon,
   Microscope,
   Robot,
+  TextT,
   User,
   UserList,
   Users,
@@ -102,6 +104,26 @@ export function SidebarMenuClass(): SidebarMenuType[] {
         { label: "Paket Berlangganan", path: "/apotekerclass/subscriptions" },
         { label: "Access List", path: "/apotekerclass/accesses" },
       ],
+    },
+  ];
+}
+
+export function SidebarMenuArticle(): SidebarMenuType[] {
+  return [
+    {
+      label: "Artikel",
+      path: "/articles",
+      icon: Article,
+    },
+    {
+      label: "Topik",
+      path: "/topics",
+      icon: TextT,
+    },
+    {
+      label: "Ads",
+      path: "/ads",
+      icon: ClipboardText,
     },
   ];
 }

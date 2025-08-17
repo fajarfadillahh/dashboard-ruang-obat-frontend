@@ -1,5 +1,6 @@
 import ButtonSidebar from "@/components/button/ButtonSidebar";
 import {
+  SidebarMenuArticle,
   SidebarMenuClass,
   SidebarMenuTryout,
   SidebarOtherMenu,
@@ -28,6 +29,7 @@ export default function Sidebar() {
 
   const tryoutMenu = SidebarMenuTryout();
   const classMenu = SidebarMenuClass();
+  const articleMenu = SidebarMenuArticle();
   const otherMenu = SidebarOtherMenu(session.data?.user.admin_id || "");
 
   const defaultStyle = {
@@ -190,6 +192,31 @@ export default function Sidebar() {
                       ))}
                     </AccordionItem>
                   </Accordion>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <span className="text-[10px] font-extrabold uppercase tracking-[2px] text-gray">
+                Menu Artikel
+              </span>
+
+              <div className="grid gap-0.5">
+                {articleMenu.map((item, index) => (
+                  <ButtonSidebar
+                    key={index}
+                    label={item.label as string}
+                    path={item.path as string}
+                    icon={
+                      <item.icon
+                        weight={
+                          router.asPath.includes(item.path as string)
+                            ? "fill"
+                            : "duotone"
+                        }
+                      />
+                    }
+                  />
                 ))}
               </div>
             </div>
