@@ -8,7 +8,9 @@ import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
+import { fetcher } from "@/utils/fetcher";
 import { formatDate } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Chip,
@@ -29,6 +31,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
 import { useRef } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 
 type AdsResponse = {
@@ -44,13 +47,6 @@ type Ad = {
   type: "homepage" | "detailpage";
   img_url: string;
   created_at: string;
-};
-
-type InputType = {
-  title: string;
-  description: string;
-  type: string;
-  link: string;
 };
 
 export default function AdsPage({
@@ -73,6 +69,22 @@ export default function AdsPage({
     method: "GET",
     token,
   });
+
+  async function handleDeleteAd(ad_id: string) {
+    try {
+      await fetcher({
+        url: `/ads/${ad_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      toast.success("Ads berhasil dihapus!");
+      mutate();
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
+    }
+  }
 
   if (error) {
     return (
@@ -239,13 +251,17 @@ export default function AdsPage({
                             <Button
                               color="danger"
                               variant="light"
-                              onPress={onClose}
+                              onClick={onClose}
                               className="font-semibold"
                             >
                               Tutup
                             </Button>
 
-                            <Button color="danger" className="font-semibold">
+                            <Button
+                              color="danger"
+                              onClick={() => handleDeleteAd(ad.ad_id)}
+                              className="font-semibold"
+                            >
                               Ya, Hapus
                             </Button>
                           </>
