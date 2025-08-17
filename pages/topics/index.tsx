@@ -1,6 +1,7 @@
 import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -129,17 +130,47 @@ export default function TopicsArticlePage({
             </Button>
 
             {topic.can_delete ? (
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                color="danger"
-                onClick={() => alert("Fitur ini belum tersedia!")}
-              >
-                <CustomTooltip content="Hapus Topik">
-                  <Trash weight="duotone" size={18} />
-                </CustomTooltip>
-              </Button>
+              <ModalConfirm
+                trigger={
+                  <Button isIconOnly variant="light" color="danger" size="sm">
+                    <Trash weight="bold" size={18} className="text-danger" />
+                  </Button>
+                }
+                header={<h1 className="font-bold text-black">Hapus Topik</h1>}
+                body={
+                  <div className="grid gap-3 text-sm font-medium">
+                    <p className="leading-[170%] text-gray">
+                      Apakah anda ingin menghapus topik{" "}
+                      <strong className="font-bold text-danger">
+                        {topic.name}
+                      </strong>{" "}
+                      ?
+                    </p>
+                  </div>
+                }
+                footer={(onClose: any) => (
+                  <>
+                    <Button
+                      color="danger"
+                      variant="light"
+                      onPress={onClose}
+                      className="font-bold"
+                    >
+                      Tutup
+                    </Button>
+
+                    <Button
+                      color="danger"
+                      className="font-bold"
+                      onClick={() => {
+                        handleDeleteTopic(topic.topic_id);
+                      }}
+                    >
+                      Ya, Hapus
+                    </Button>
+                  </>
+                )}
+              />
             ) : null}
           </div>
         );
@@ -203,6 +234,26 @@ export default function TopicsArticlePage({
       setLoading(false);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDeleteTopic(topic_id: string) {
+    try {
+      await fetcher({
+        url: `/topics/${topic_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      if (data?.data.topics.length === 1 && Number(page) > 1) {
+        setPage(`${Number(page) - 1}`);
+      }
+
+      toast.success("Topik berhasil dihapus!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
     }
   }
 
