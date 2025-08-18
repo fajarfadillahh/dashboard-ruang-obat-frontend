@@ -9,7 +9,6 @@ import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
 import { fetcher } from "@/utils/fetcher";
-import { formatDate } from "@/utils/formatDate";
 import { getError } from "@/utils/getError";
 import {
   Button,
@@ -46,6 +45,8 @@ type Ad = {
   title: string;
   type: "homepage" | "detailpage";
   img_url: string;
+  link: string;
+  is_active: boolean;
   created_at: string;
 };
 
@@ -204,8 +205,8 @@ export default function AdsPage({
                         {ad.type === "homepage" ? "Homepage" : "Detailpage"}
                       </Chip>
 
-                      <p className="text-sm font-medium text-gray">
-                        {formatDate(ad.created_at)}
+                      <p className="line-clamp-2 text-sm font-medium text-gray">
+                        {ad.title}
                       </p>
                     </div>
 
@@ -215,6 +216,18 @@ export default function AdsPage({
                         variant="light"
                         size="sm"
                         color="secondary"
+                        onClick={() =>
+                          router.push({
+                            pathname: `/ads/${ad.ad_id}/edit`,
+                            query: {
+                              title: ad.title,
+                              type: ad.type,
+                              img_url: ad.img_url,
+                              link: ad.link,
+                              is_active: ad.is_active,
+                            },
+                          })
+                        }
                       >
                         <CustomTooltip content="Edit Ads">
                           <PencilLine weight="duotone" size={18} />
