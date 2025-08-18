@@ -1,5 +1,6 @@
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
+import ModalConfirm from "@/components/modal/ModalConfirm";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -7,7 +8,9 @@ import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
+import { fetcher } from "@/utils/fetcher";
 import { formatDateWithoutTime } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import {
   Button,
   Pagination,
@@ -21,6 +24,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
 import { useRef } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
@@ -67,6 +71,26 @@ export default function ArticlesPage({
     method: "GET",
     token,
   });
+
+  async function handleDeleteArticle(article_id: string) {
+    try {
+      await fetcher({
+        url: `/articles/${article_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      if (data?.data.articles.length === 1 && Number(page) > 1) {
+        setPage(`${Number(page) - 1}`);
+      }
+
+      toast.success("Artikel berhasil dihapus!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
+    }
+  }
 
   if (error) {
     return (
@@ -162,17 +186,57 @@ export default function ArticlesPage({
                       <PencilLine weight="duotone" size={18} />
                     </Button>
 
-                    <Button
+                    <ModalConfirm
+                      trigger={
+                        <Button isIconOnly size="sm" color="danger">
+                          <Trash weight="duotone" size={18} />
+                        </Button>
+                      }
+                      header={
+                        <h1 className="font-bold text-black">Hapus Artikel</h1>
+                      }
+                      body={
+                        <div className="grid gap-3 text-sm font-medium">
+                          <p className="leading-[170%] text-gray">
+                            Apakah anda ingin menghapus artikel ini?
+                          </p>
+                        </div>
+                      }
+                      footer={(onClose: any) => (
+                        <>
+                          <Button
+                            color="danger"
+                            variant="light"
+                            onPress={onClose}
+                            className="font-bold"
+                          >
+                            Tutup
+                          </Button>
+
+                          <Button
+                            color="danger"
+                            className="font-bold"
+                            onClick={() =>
+                              handleDeleteArticle(article.article_id)
+                            }
+                          >
+                            Ya, Hapus
+                          </Button>
+                        </>
+                      )}
+                    />
+
+                    {/* <Button
                       isIconOnly
                       size="sm"
                       color="danger"
                       onClick={(e) => {
                         e.stopPropagation();
-                        alert(`delete btn clicked: ${article.article_id}`);
+                        handleDeleteArticle(article.article_id);
                       }}
                     >
                       <Trash weight="duotone" size={18} />
-                    </Button>
+                    </Button> */}
                   </div>
 
                   <div className="aspect-video overflow-hidden">
