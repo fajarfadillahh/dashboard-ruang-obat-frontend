@@ -9,6 +9,7 @@ import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
+import { Topic, TopicsResponse } from "@/types/topics/topic.type";
 import { customStyleInput } from "@/utils/customStyleInput";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
@@ -40,21 +41,6 @@ import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
-
-export interface TopicsResponse {
-  topics: Topic[];
-  page: number;
-  total_topics: number;
-  total_pages: number;
-}
-
-export interface Topic {
-  topic_id: string;
-  name: string;
-  first_letter: string;
-  created_at: string;
-  can_delete: boolean;
-}
 
 export default function TopicsArticlePage({
   token,
