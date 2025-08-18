@@ -170,7 +170,7 @@ export default function ArticlesPage({
               data?.data.articles.map((article) => (
                 <div
                   key={article.article_id}
-                  onClick={() => alert(`area detail clicked`)}
+                  onClick={() => router.push(`/articles/${article.article_id}`)}
                   className="group relative isolate grid overflow-hidden rounded-xl hover:cursor-pointer"
                 >
                   <div className="absolute right-4 top-4 z-10 hidden items-center gap-2 group-hover:inline-flex">
