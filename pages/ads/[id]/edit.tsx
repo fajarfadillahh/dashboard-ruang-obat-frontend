@@ -8,7 +8,7 @@ import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
 import { onCropComplete } from "@/utils/onCropComplete";
-import { Button, Input, Select, SelectItem } from "@nextui-org/react";
+import { Button, Input, Select, SelectItem, Switch } from "@nextui-org/react";
 import { FloppyDisk } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
@@ -20,6 +20,7 @@ type InputType = {
   title: string;
   type: string;
   link: string;
+  is_active?: boolean;
 };
 
 export default function EditAdPage({
@@ -30,6 +31,7 @@ export default function EditAdPage({
     title: (router.query.title as string) || "",
     type: (router.query.type as string) || "",
     link: (router.query.link as string) || "",
+    is_active: router.query.is_active === "true" ? false : true,
   });
   const [file, setFile] = useState<string | ArrayBuffer | null>(
     (router.query.img_url as string) || "",
@@ -63,6 +65,7 @@ export default function EditAdPage({
       formData.append("title", input.title);
       formData.append("type", input.type);
       formData.append("link", input.link);
+      formData.append("is_active", String(!input.is_active));
 
       await fetcher({
         url: "/ads",
@@ -214,6 +217,18 @@ export default function EditAdPage({
               onChange={(e) => setInput({ ...input, link: e.target.value })}
               classNames={customStyleInput}
             />
+
+            <Switch
+              size="sm"
+              color="secondary"
+              isSelected={input.is_active}
+              onValueChange={() =>
+                setInput({ ...input, is_active: !input.is_active })
+              }
+              className="text-sm font-semibold text-black"
+            >
+              Nonaktifkan Ads
+            </Switch>
 
             <Button
               isLoading={loading}
