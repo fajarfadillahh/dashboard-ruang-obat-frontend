@@ -40,6 +40,20 @@
   @apply pl-4;
 }
 
+.ck-content .image-style-align-left {
+  @apply float-left mr-2 !important;
+}
+.ck-content .image-style-align-right {
+  @apply float-right ml-2 !important;
+}
+.ck-content .image-style-align-center {
+  @apply mx-auto block !important;
+}
+
+.preventif-overlaps-text {
+  overflow-wrap: anywhere;
+}
+
 .preventive-table table {
   table-layout: auto;
   width: 100%;
