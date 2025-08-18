@@ -180,7 +180,7 @@ export default function ArticlesPage({
                       color="default"
                       onClick={(e) => {
                         e.stopPropagation();
-                        alert(`edit btn clicked: ${article.article_id}`);
+                        router.push(`/articles/${article.article_id}/edit`);
                       }}
                     >
                       <PencilLine weight="duotone" size={18} />
@@ -225,18 +225,6 @@ export default function ArticlesPage({
                         </>
                       )}
                     />
-
-                    {/* <Button
-                      isIconOnly
-                      size="sm"
-                      color="danger"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteArticle(article.article_id);
-                      }}
-                    >
-                      <Trash weight="duotone" size={18} />
-                    </Button> */}
                   </div>
 
                   <div className="aspect-video overflow-hidden">
