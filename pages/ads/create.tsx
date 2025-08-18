@@ -8,17 +8,16 @@ import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
 import { onCropComplete } from "@/utils/onCropComplete";
-import { Button, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
+import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { FloppyDisk } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Cropper from "react-easy-crop";
 import toast from "react-hot-toast";
 
 type InputType = {
   title: string;
-  description: string;
   type: string;
   link: string;
 };
@@ -29,7 +28,6 @@ export default function CreateAdPage({
   const router = useRouter();
   const [input, setInput] = useState<InputType>({
     title: "",
-    description: "",
     type: "",
     link: "",
   });
@@ -41,7 +39,6 @@ export default function CreateAdPage({
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(true);
 
   async function handleCreateAd() {
     setLoading(true);
@@ -58,7 +55,6 @@ export default function CreateAdPage({
       formData.append("ads", fileConvert);
 
       formData.append("title", input.title);
-      formData.append("description", input.description);
       formData.append("type", input.type);
       formData.append("link", input.link);
 
@@ -82,18 +78,6 @@ export default function CreateAdPage({
     }
   }
 
-  useEffect(() => {
-    const isInputValid = [
-      file,
-      input.title,
-      input.type,
-      input.description,
-      input.link,
-    ].every(Boolean);
-
-    setIsButtonDisabled(!isInputValid);
-  }, [input]);
-
   return (
     <Layout title="Buat Ads">
       <Container>
@@ -105,14 +89,14 @@ export default function CreateAdPage({
           className="border-b-2 border-dashed border-gray/20 py-8"
         />
 
-        <div className="grid grid-cols-[400px_1fr] items-start gap-16 pt-8">
+        <div className="grid max-w-[900px] grid-cols-2 items-start gap-16 pt-8">
           <div className="grid gap-6">
             <div className="grid gap-1.5">
               <p className="text-center text-sm font-medium text-gray">
                 <strong className="mr-1 text-danger">*</strong>ratio gambar 16:9
               </p>
 
-              <div className="aspect-video h-full w-[400px] rounded-xl border-2 border-dashed border-gray/20 p-1">
+              <div className="aspect-video h-full w-full rounded-xl border-2 border-dashed border-gray/20 p-1">
                 <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-xl bg-gray/20">
                   <Cropper
                     image={file as string}
@@ -148,7 +132,7 @@ export default function CreateAdPage({
                   return;
                 }
 
-                const validTypes = ["image/png", "image/jpg", "image/jpeg"];
+                const validTypes = ["image/png", "image/jpg"];
 
                 if (!validTypes.includes(e.target.files[0].type)) {
                   toast.error("Ekstensi file harus png atau jpg");
@@ -185,7 +169,7 @@ export default function CreateAdPage({
               isRequired
               type="text"
               variant="flat"
-              label="Judul"
+              label="Judul Ads"
               labelPlacement="outside"
               placeholder="Contoh: Ruang Masuk Apoteker"
               name="title"
@@ -194,64 +178,52 @@ export default function CreateAdPage({
               classNames={customStyleInput}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <Select
-                isRequired
-                aria-label="type"
-                size="md"
-                variant="flat"
-                label="Tipe"
-                labelPlacement="outside"
-                placeholder="Pilih Tipe Ads"
-                selectedKeys={[input.type]}
-                onChange={(e) => setInput({ ...input, type: e.target.value })}
-                classNames={{
-                  value: "font-semibold text-gray",
-                }}
-              >
-                <SelectItem key="homepage">Homepage</SelectItem>
-                <SelectItem key="detailpage">Detailpage</SelectItem>
-              </Select>
-
-              <Input
-                isRequired
-                type="text"
-                variant="flat"
-                label="Link"
-                labelPlacement="outside"
-                placeholder="Contoh: Link ke Halaman Ruang Masuk Apoteker"
-                name="link"
-                value={input.link}
-                onChange={(e) => setInput({ ...input, link: e.target.value })}
-                classNames={customStyleInput}
-              />
-            </div>
-
-            <Textarea
+            <Select
               isRequired
+              aria-label="type"
+              size="md"
               variant="flat"
-              label="Deskripsi"
+              label="Tipe Ads"
               labelPlacement="outside"
-              placeholder="Contoh: Ayo kunjungi Program Ruang Masuk Apoteker..."
-              value={input.description}
-              onChange={(e) => {
-                setInput({
-                  ...input,
-                  description: e.target.value,
-                });
+              placeholder="Pilih Tipe Ads"
+              selectedKeys={[input.type]}
+              onChange={(e) => setInput({ ...input, type: e.target.value })}
+              classNames={{
+                value: "font-semibold text-gray",
               }}
+            >
+              <SelectItem key="homepage">Homepage</SelectItem>
+              <SelectItem key="detailpage">Detailpage</SelectItem>
+            </Select>
+
+            <Input
+              isRequired
+              type="text"
+              variant="flat"
+              label="Link Ads"
+              labelPlacement="outside"
+              placeholder="Contoh: Link ke Halaman Ruang Masuk Apoteker"
+              name="link"
+              value={input.link}
+              onChange={(e) => setInput({ ...input, link: e.target.value })}
               classNames={customStyleInput}
             />
 
             <Button
               isLoading={loading}
-              isDisabled={isButtonDisabled}
+              isDisabled={
+                loading ||
+                !file ||
+                !input.title.trim() ||
+                !input.type.trim() ||
+                !input.link.trim()
+              }
               color="secondary"
               startContent={
                 !loading && <FloppyDisk weight="duotone" size={18} />
               }
               onClick={handleCreateAd}
-              className="mt-8 justify-self-end font-semibold"
+              className="mt-12 justify-self-end font-semibold"
             >
               {loading ? "Tunggu Sebentar..." : "Buat Ads"}
             </Button>
