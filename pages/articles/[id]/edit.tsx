@@ -125,7 +125,7 @@ export default function EditArticlePage({
       });
 
       toast.success("Artikel berhasil diedit!");
-      router.push("/articles");
+      router.back();
     } catch (error: any) {
       console.error(error);
       toast.error(getError(error));
@@ -139,7 +139,7 @@ export default function EditArticlePage({
   return (
     <Layout title="Edit Artikel">
       <Container>
-        <ButtonBack href="/articles" />
+        <ButtonBack />
 
         <TitleText
           title="Edit Artikel ✏️"
