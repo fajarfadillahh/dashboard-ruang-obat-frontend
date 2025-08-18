@@ -178,7 +178,11 @@ export default function AdsPage({
               data?.data.ads.map((ad) => (
                 <div
                   key={ad.ad_id}
-                  className="flex items-center gap-4 rounded-xl border-2 border-gray/10 p-4 hover:cursor-pointer hover:bg-purple/10"
+                  className={`flex items-center gap-4 rounded-xl border-2 p-4 hover:cursor-pointer ${
+                    ad.is_active
+                      ? "border-purple/10 hover:border-purple hover:bg-purple/10"
+                      : "border-danger bg-danger/5 hover:bg-danger/10"
+                  } `}
                   onClick={() => window.open(`${ad.img_url}`, "_blank")}
                 >
                   <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-xl bg-purple/10">
@@ -187,7 +191,7 @@ export default function AdsPage({
                       alt="ads image"
                       width={500}
                       height={500}
-                      className="size-full object-cover object-center"
+                      className={`size-full object-cover object-center ${ad.is_active ? "grayscale-0" : "grayscale"}`}
                       priority
                     />
                   </div>
