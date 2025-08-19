@@ -79,9 +79,7 @@ export default function CKEditor({ value, onChange, token }: CKEditorProps) {
       }}
       data={value}
       onChange={(event, editor) => {
-        // onChange(decodeHtmlEntities(editor.getData()));
-        const data = editor.getData();
-        onChange(data);
+        onChange(editor.getData());
       }}
     />
   );
