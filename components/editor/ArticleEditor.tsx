@@ -1,4 +1,3 @@
-import { decodeHtmlEntities } from "@/utils/decodeHtml";
 import { CKEditor as CKEditorComponent } from "@ckeditor/ckeditor5-react";
 import {
   Alignment,
@@ -96,7 +95,7 @@ export default function ArticleEditor({
           HorizontalLine,
         ],
         simpleUpload: {
-          uploadUrl: `https://${process.env.NEXT_PUBLIC_MODE === "prod" ? "api" : "dev"}.ruangobat.id/api/questions/image`,
+          uploadUrl: `https://${process.env.NEXT_PUBLIC_MODE === "prod" ? "api" : "dev"}.ruangobat.id/api/articles/image`,
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -107,7 +106,7 @@ export default function ArticleEditor({
       }}
       data={value}
       onChange={(event, editor) => {
-        onChange(decodeHtmlEntities(editor.getData()));
+        onChange(editor.getData());
       }}
     />
   );

@@ -1,4 +1,3 @@
-import { decodeHtmlEntities } from "@/utils/decodeHtml";
 import { CKEditor as CKEditorComponent } from "@ckeditor/ckeditor5-react";
 import {
   Bold,
@@ -80,7 +79,7 @@ export default function CKEditor({ value, onChange, token }: CKEditorProps) {
       }}
       data={value}
       onChange={(event, editor) => {
-        onChange(decodeHtmlEntities(editor.getData()));
+        onChange(editor.getData());
       }}
     />
   );
