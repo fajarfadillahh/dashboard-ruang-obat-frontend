@@ -120,11 +120,6 @@ export function SidebarMenuArticle(): SidebarMenuType[] {
       path: "/topics",
       icon: TextT,
     },
-    {
-      label: "Ads",
-      path: "/ads",
-      icon: ClipboardText,
-    },
   ];
 }
 
