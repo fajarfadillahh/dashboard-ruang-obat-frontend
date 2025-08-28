@@ -14,7 +14,6 @@ import {
   UserList,
   Users,
   Video,
-  VideoCamera,
 } from "@phosphor-icons/react";
 
 type SidebarMenuType = {
@@ -140,11 +139,11 @@ export function SidebarOtherMenu(adminId?: string): SidebarMenuType[] {
         { label: "Aktivitas ROSA (AI)", path: "/statistics/ai" },
       ],
     },
-    {
-      label: "Live Teaching",
-      path: "/live",
-      icon: VideoCamera,
-    },
+    // {
+    //   label: "Live Teaching",
+    //   path: "/live",
+    //   icon: VideoCamera,
+    // },
     {
       label: "Rosa (AI)",
       path: "/ai",
