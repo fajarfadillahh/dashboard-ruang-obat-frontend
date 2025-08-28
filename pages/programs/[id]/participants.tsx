@@ -199,7 +199,7 @@ export default function ParticipantsPage({
                 <div className="grid gap-3 text-sm font-medium">
                   <p className="leading-[170%] text-gray">
                     Apakah anda ingin menghapus partisipan{" "}
-                    <strong className="font-extrabold text-purple">
+                    <strong className="font-extrabold text-danger">
                       {participant.fullname}
                     </strong>
                     ?
