@@ -789,14 +789,6 @@ export default function DetailVideoCourse({
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
               onClick={() => {
-                // router.push({
-                //   pathname: `/videocourse/content/${router.query.sub_category_id}/segment`,
-                //   query: {
-                //     sub_category_id: router.query.sub_category_id,
-                //     course_id: data?.data.course_id,
-                //     course_title: data?.data.title,
-                //   },
-                // });
                 onOpenSegment();
                 setTypeSegmentModal("create");
               }}
@@ -842,6 +834,18 @@ export default function DetailVideoCourse({
 
                       <DropdownMenu
                         aria-label="Static Actions"
+                        disabledKeys={[
+                          ...(segment?.contents.some(
+                            (c) => c.test_type === "pre",
+                          )
+                            ? ["new_pre_test"]
+                            : []),
+                          ...(segment?.contents.some(
+                            (c) => c.test_type === "post",
+                          )
+                            ? ["new_post_test"]
+                            : []),
+                        ]}
                         itemClasses={{
                           title: "font-semibold",
                         }}
