@@ -7,7 +7,6 @@ import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
 import {
   Button,
-  getKeyValue,
   Modal,
   ModalBody,
   ModalContent,
@@ -105,7 +104,9 @@ export default function ModalAddParticipant({
       });
 
       mutate();
-      toast.success("Berhasil menambahkan partisipan");
+      onClose();
+
+      toast.success("Berhasil menambahkan partisipan!");
     } catch (error: any) {
       setLoading(false);
       console.error(error);
@@ -117,9 +118,42 @@ export default function ModalAddParticipant({
   const columnsUser = [
     { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
+    { name: "Universitas", uid: "university" },
     { name: "Email", uid: "email" },
     { name: "No. Telpon", uid: "phone_number" },
   ];
+
+  function renderCellUsers(user: User, columnKey: React.Key) {
+    const cellValue = user[columnKey as keyof User];
+
+    switch (columnKey) {
+      case "user_id":
+        return (
+          <div className="w-max font-medium text-black">{user.user_id}</div>
+        );
+      case "fullname":
+        return (
+          <div className="w-[200px] font-medium text-black">
+            {user.fullname}
+          </div>
+        );
+      case "university":
+        return (
+          <div className="w-[200px] font-medium text-black">
+            {user.university}
+          </div>
+        );
+      case "email":
+        return <div className="font-medium text-black">{user.email}</div>;
+      case "phone_number":
+        return (
+          <div className="font-medium text-black">{user.phone_number}</div>
+        );
+
+      default:
+        return cellValue;
+    }
+  }
 
   return (
     <>
@@ -142,6 +176,7 @@ export default function ModalAddParticipant({
           setValue(new Set([]));
           setSearch("");
           setLoading(false);
+          onClose();
         }}
         size="4xl"
       >
@@ -152,75 +187,73 @@ export default function ModalAddParticipant({
                 Daftar Pengguna
               </ModalHeader>
 
-              <ModalBody className="scrollbar-hide">
-                <div className="grid gap-6">
-                  <p className="max-w-[500px] text-sm font-medium leading-[170%] text-gray">
-                    Cari pengguna untuk ditambahkan pada program ini, pastikan
-                    ID pengguna yang anda cari sudah benar!
-                  </p>
+              <ModalBody className="grid gap-6 scrollbar-hide">
+                <p className="max-w-[500px] text-sm font-medium leading-[170%] text-gray">
+                  Cari pengguna untuk ditambahkan pada program ini, pastikan ID
+                  pengguna yang anda cari sudah benar!
+                </p>
 
-                  <div className="grid gap-4">
-                    <SearchInput
-                      placeholder="Cari Nama Pengguna atau ID Pengguna..."
-                      onChange={(e) => setSearch(e.target.value)}
-                      onClear={() => setSearch("")}
-                      className="max-w-[500px]"
-                    />
+                <div className="grid gap-4">
+                  <SearchInput
+                    placeholder="Cari Nama Pengguna atau ID Pengguna..."
+                    onChange={(e) => setSearch(e.target.value)}
+                    onClear={() => setSearch("")}
+                    className="max-w-[500px]"
+                  />
 
-                    <div className="max-h-[300px] overflow-x-scroll scrollbar-hide">
-                      <Table
-                        isStriped
-                        aria-label="users table"
-                        color="secondary"
-                        selectionMode="multiple"
-                        selectedKeys={value}
-                        onSelectionChange={setValue}
-                        classNames={customStyleTable}
-                        className="scrollbar-hide"
+                  <div className="max-h-[350px] overflow-x-scroll scrollbar-hide">
+                    <Table
+                      isStriped
+                      aria-label="users table"
+                      color="secondary"
+                      selectionMode="multiple"
+                      selectedKeys={value}
+                      onSelectionChange={setValue}
+                      classNames={customStyleTable}
+                      className="scrollbar-hide"
+                    >
+                      <TableHeader columns={columnsUser}>
+                        {(column) => (
+                          <TableColumn key={column.uid}>
+                            {column.name}
+                          </TableColumn>
+                        )}
+                      </TableHeader>
+
+                      <TableBody
+                        items={users?.users ? users.users : []}
+                        emptyContent={
+                          <span className="text-sm font-semibold italic text-gray">
+                            Pengguna tidak ditemukan!
+                          </span>
+                        }
                       >
-                        <TableHeader columns={columnsUser}>
-                          {(column) => (
-                            <TableColumn key={column.uid}>
-                              {column.name}
-                            </TableColumn>
-                          )}
-                        </TableHeader>
-
-                        <TableBody
-                          items={users?.users ? users.users : []}
-                          emptyContent={
-                            <span className="text-sm font-semibold italic text-gray">
-                              Pengguna tidak ditemukan!
-                            </span>
-                          }
-                        >
-                          {(item: User) => (
-                            <TableRow key={item.user_id}>
-                              {(columnKey) => (
-                                <TableCell>
-                                  {getKeyValue(item, columnKey)}
-                                </TableCell>
-                              )}
-                            </TableRow>
-                          )}
-                        </TableBody>
-                      </Table>
-                    </div>
-
-                    {users?.users.length ? (
-                      <Pagination
-                        isCompact
-                        showControls
-                        page={users?.page as number}
-                        total={users?.total_pages as number}
-                        onChange={(e) => setPage(e)}
-                        className="justify-self-center"
-                        classNames={{
-                          cursor: "bg-purple text-white",
-                        }}
-                      />
-                    ) : null}
+                        {(item: User) => (
+                          <TableRow key={item.user_id}>
+                            {(columnKey) => (
+                              <TableCell>
+                                {renderCellUsers(item, columnKey)}
+                              </TableCell>
+                            )}
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
                   </div>
+
+                  {users?.users.length ? (
+                    <Pagination
+                      isCompact
+                      showControls
+                      page={users?.page as number}
+                      total={users?.total_pages as number}
+                      onChange={(e) => setPage(e)}
+                      className="justify-self-center"
+                      classNames={{
+                        cursor: "bg-purple text-white",
+                      }}
+                    />
+                  ) : null}
                 </div>
               </ModalBody>
 
@@ -242,12 +275,7 @@ export default function ModalAddParticipant({
                 <Button
                   isLoading={loading}
                   color="secondary"
-                  onClick={() => {
-                    handleInviteParticipant();
-                    setTimeout(() => {
-                      onClose();
-                    }, 500);
-                  }}
+                  onClick={handleInviteParticipant}
                   className="font-semibold"
                 >
                   Tambah Partisipan

@@ -120,11 +120,6 @@ export function SidebarMenuArticle(): SidebarMenuType[] {
       path: "/topics",
       icon: TextT,
     },
-    {
-      label: "Ads",
-      path: "/ads",
-      icon: ClipboardText,
-    },
   ];
 }
 
@@ -144,6 +139,11 @@ export function SidebarOtherMenu(adminId?: string): SidebarMenuType[] {
         { label: "Aktivitas ROSA (AI)", path: "/statistics/ai" },
       ],
     },
+    // {
+    //   label: "Live Teaching",
+    //   path: "/live",
+    //   icon: VideoCamera,
+    // },
     {
       label: "Rosa (AI)",
       path: "/ai",

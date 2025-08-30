@@ -787,14 +787,6 @@ export default function DetailApotekerClassCourse({
               color="secondary"
               startContent={<Plus weight="bold" size={18} />}
               onClick={() => {
-                // router.push({
-                //   pathname: `/apotekerclass/content/${router.query.category_id}/segment`,
-                //   query: {
-                //     category_id: router.query.category_id,
-                //     course_id: data?.data.course_id,
-                //     course_title: data?.data.title,
-                //   },
-                // });
                 onOpenSegment();
                 setTypeSegmentModal("create");
               }}
@@ -840,6 +832,18 @@ export default function DetailApotekerClassCourse({
 
                       <DropdownMenu
                         aria-label="Static Actions"
+                        disabledKeys={[
+                          ...(segment?.contents.some(
+                            (c) => c.test_type === "pre",
+                          )
+                            ? ["new_pre_test"]
+                            : []),
+                          ...(segment?.contents.some(
+                            (c) => c.test_type === "post",
+                          )
+                            ? ["new_post_test"]
+                            : []),
+                        ]}
                         itemClasses={{
                           title: "font-semibold",
                         }}

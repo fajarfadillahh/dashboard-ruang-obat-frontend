@@ -2,15 +2,17 @@ import ButtonBack from "@/components/button/ButtonBack";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import { withToken } from "@/lib/getToken";
 import getCroppedImg from "@/utils/cropImage";
 import { customStyleInput } from "@/utils/customStyleInput";
-import { fetcher } from "@/utils/fetcher";
-import { getError } from "@/utils/getError";
 import { onCropComplete } from "@/utils/onCropComplete";
-import { Button, Input, Select, SelectItem } from "@nextui-org/react";
-import { FloppyDisk } from "@phosphor-icons/react";
-import { InferGetServerSidePropsType } from "next";
+import {
+  CalendarDate,
+  getLocalTimeZone,
+  today,
+  ZonedDateTime,
+} from "@internationalized/date";
+import { Button, DatePicker, Input, TimeInput } from "@nextui-org/react";
+import { Calendar, Clock, FloppyDisk } from "@phosphor-icons/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Cropper from "react-easy-crop";
@@ -18,78 +20,75 @@ import toast from "react-hot-toast";
 
 type InputType = {
   title: string;
-  type: string;
   link: string;
+  date: CalendarDate | null;
+  start: ZonedDateTime | null;
+  end: ZonedDateTime | null;
 };
 
-export default function CreateAdPage({
-  token,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function EditLivePage() {
   const router = useRouter();
   const [input, setInput] = useState<InputType>({
     title: "",
-    type: "",
     link: "",
+    date: null,
+    start: null,
+    end: null,
   });
+
   const [file, setFile] = useState<string | ArrayBuffer | null>();
   const [filename, setFilename] = useState<string>("");
   const [type, setType] = useState<string>("");
   const [zoomImage, setZoomImage] = useState<number>(1);
   const [cropImage, setCropImage] = useState({ x: 0, y: 0 });
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
-
   const [loading, setLoading] = useState<boolean>(false);
 
-  async function handleCreateAd() {
-    setLoading(true);
+  function handleInputChange(
+    field: keyof InputType,
+    value: string | ZonedDateTime | CalendarDate | null,
+  ) {
+    setInput((prev) => ({ ...prev, [field]: value }));
+  }
 
-    try {
-      const formData = new FormData();
+  async function handleEditLive() {
+    const formData = new FormData();
 
-      const croppedImage = await getCroppedImg(file, croppedAreaPixels);
-      const response = await fetch(croppedImage as string);
-      const blob = await response.blob();
-      const fileConvert = new File([blob], `${filename}`, {
-        type,
-      });
-      formData.append("ads", fileConvert);
+    const croppedImage = await getCroppedImg(file, croppedAreaPixels);
+    const response = await fetch(croppedImage as string);
+    const blob = await response.blob();
+    const fileConvert = new File([blob], `${filename}`, {
+      type,
+    });
+    formData.append("thumbnail", fileConvert);
 
-      formData.append("title", input.title);
-      formData.append("type", input.type);
-      formData.append("link", input.link);
-
-      await fetcher({
-        url: "/ads",
-        method: "POST",
-        data: formData,
-        file: true,
-        token,
-      });
-
-      toast.success("Ads berhasil dibuat!");
-      router.push("/ads");
-    } catch (error: any) {
-      console.error(error);
-      toast.error(getError(error));
-
-      setLoading(false);
-    } finally {
-      setLoading(false);
+    formData.append("title", input.title);
+    formData.append("link", input.link);
+    if (input.date) {
+      formData.append("date", input.date.toString());
     }
+    if (input.start) {
+      formData.append("start", input.start.toString());
+    }
+    if (input.end) {
+      formData.append("end", input.end.toString());
+    }
+
+    console.log(Object.fromEntries(formData.entries()));
   }
 
   return (
-    <Layout title="Buat Ads">
+    <Layout title="Buat Live Teaching">
       <Container>
-        <ButtonBack href="/ads" />
+        <ButtonBack />
 
         <TitleText
-          title="Buat Ads ✏️"
-          text="Ads artikel bertujuan untuk meningkatkan visibilitas produk atau layanan Anda."
+          title="Buat Live Teaching 🎥"
+          text="Saatnya buat live yang menarik untuk para mahasiswa"
           className="border-b-2 border-dashed border-gray/20 py-8"
         />
 
-        <div className="grid max-w-[900px] grid-cols-2 items-start gap-16 pt-8">
+        <div className="grid grid-cols-[450px_1fr] items-start gap-16 pt-8">
           <div className="grid gap-6">
             <div className="grid gap-1.5">
               <p className="text-center text-sm font-medium text-gray">
@@ -118,7 +117,7 @@ export default function CreateAdPage({
               type="file"
               accept="image/jpg, image/png"
               variant="flat"
-              label="Gambar Ads"
+              label="Thumbnail Live"
               labelPlacement="outside"
               classNames={{
                 input:
@@ -169,63 +168,76 @@ export default function CreateAdPage({
               isRequired
               type="text"
               variant="flat"
-              label="Judul Ads"
+              label="Judul Live"
               labelPlacement="outside"
-              placeholder="Contoh: Ruang Masuk Apoteker"
+              placeholder="Contoh: Meet The Expert Researcher..."
               name="title"
               value={input.title}
-              onChange={(e) => setInput({ ...input, title: e.target.value })}
+              onChange={(e) => handleInputChange("title", e.target.value)}
               classNames={customStyleInput}
             />
-
-            <Select
-              isRequired
-              aria-label="type"
-              size="md"
-              variant="flat"
-              label="Tipe Ads"
-              labelPlacement="outside"
-              placeholder="Pilih Tipe Ads"
-              selectedKeys={[input.type]}
-              onChange={(e) => setInput({ ...input, type: e.target.value })}
-              classNames={{
-                value: "font-semibold text-gray",
-              }}
-            >
-              <SelectItem key="homepage">Homepage</SelectItem>
-              <SelectItem key="detailpage">Detailpage</SelectItem>
-            </Select>
 
             <Input
               isRequired
               type="text"
               variant="flat"
-              label="Link Ads"
+              label="Link Live"
               labelPlacement="outside"
-              placeholder="Contoh: Link ke Halaman Ruang Masuk Apoteker"
+              placeholder="Contoh: https://www.youtube.com/xxxxxx"
               name="link"
               value={input.link}
-              onChange={(e) => setInput({ ...input, link: e.target.value })}
+              onChange={(e) => handleInputChange("link", e.target.value)}
               classNames={customStyleInput}
             />
 
+            <div className="flex items-center gap-4">
+              <DatePicker
+                isRequired
+                hideTimeZone
+                variant="flat"
+                label="Tanggal Live"
+                labelPlacement="outside"
+                endContent={<Calendar weight="duotone" size={20} />}
+                minValue={today(getLocalTimeZone())}
+                value={input.date}
+                onChange={(value) => handleInputChange("date", value)}
+              />
+
+              <TimeInput
+                isRequired
+                variant="flat"
+                label="Jam Mulai"
+                labelPlacement="outside"
+                endContent={<Clock weight="duotone" size={20} />}
+                granularity="minute"
+                hourCycle={24}
+                value={input.start}
+                onChange={(value) => handleInputChange("start", value)}
+              />
+
+              <TimeInput
+                isRequired
+                variant="flat"
+                label="Jam Selesai"
+                labelPlacement="outside"
+                endContent={<Clock weight="duotone" size={20} />}
+                granularity="minute"
+                hourCycle={24}
+                value={input.end}
+                onChange={(value) => handleInputChange("end", value)}
+              />
+            </div>
+
             <Button
               isLoading={loading}
-              isDisabled={
-                loading ||
-                !file ||
-                !input.title.trim() ||
-                !input.type.trim() ||
-                !input.link.trim()
-              }
               color="secondary"
               startContent={
                 !loading && <FloppyDisk weight="duotone" size={18} />
               }
-              onClick={handleCreateAd}
+              onClick={handleEditLive}
               className="mt-12 justify-self-end font-semibold"
             >
-              {loading ? "Tunggu Sebentar..." : "Buat Ads"}
+              {loading ? "Tunggu Sebentar..." : "Simpan Perubahan"}
             </Button>
           </div>
         </div>
@@ -233,5 +245,3 @@ export default function CreateAdPage({
     </Layout>
   );
 }
-
-export const getServerSideProps = withToken();

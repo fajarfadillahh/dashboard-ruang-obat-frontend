@@ -170,7 +170,14 @@ export default function ArticlesPage({
               data?.data.articles.map((article) => (
                 <div
                   key={article.article_id}
-                  onClick={() => router.push(`/articles/${article.article_id}`)}
+                  onClick={() =>
+                    window.open(
+                      process.env.NEXT_PUBLIC_MODE == "prod"
+                        ? `https://ruangobat.id/artikel/${article.slug}`
+                        : `https://devmain.ruangobat.id/artikel/${article.slug}`,
+                      "_blank",
+                    )
+                  }
                   className="group relative isolate grid overflow-hidden rounded-xl hover:cursor-pointer"
                 >
                   <div className="absolute right-4 top-4 z-10 hidden items-center gap-2 group-hover:inline-flex">
