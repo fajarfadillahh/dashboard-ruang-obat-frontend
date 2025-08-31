@@ -207,8 +207,14 @@ export default function CreateApotekerClassAccess({
           <div className="grid gap-4">
             <SearchInput
               placeholder="Cari Pengguna..."
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch("")}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage("1");
+              }}
+              onClear={() => {
+                setSearch("");
+                setPage("");
+              }}
               defaultValue={search}
               className="max-w-[500px]"
             />
@@ -389,7 +395,7 @@ export default function CreateApotekerClassAccess({
             onClick={handleCreateAccess}
             className="w-max justify-self-end font-semibold"
           >
-            {isLoading ? "Tunggu Sebentar..." : "Tambah Paket"}
+            {isLoading ? "Tunggu Sebentar..." : "Tambah Akses"}
           </Button>
         </div>
       </Container>

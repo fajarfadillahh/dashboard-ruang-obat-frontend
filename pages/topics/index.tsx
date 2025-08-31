@@ -276,7 +276,10 @@ export default function TopicsArticlePage({
                 setSearch(e.target.value);
                 setPage("1");
               }}
-              onClear={() => setSearch("")}
+              onClear={() => {
+                setSearch("");
+                setPage("");
+              }}
             />
 
             <Button

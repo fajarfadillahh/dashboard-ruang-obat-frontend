@@ -84,8 +84,14 @@ export default function TestsPage({
             <SearchInput
               placeholder="Cari Nama Ujian atau ID Ujian..."
               defaultValue={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch("")}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage("1");
+              }}
+              onClear={() => {
+                setSearch("");
+                setPage("");
+              }}
             />
 
             <Select

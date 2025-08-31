@@ -134,8 +134,14 @@ export default function ProductsStatisticsPage({
             <SearchInput
               placeholder="Cari Nama Pengguna atau ID Pengguna atau Nama Produk"
               defaultValue={search}
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch("")}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage("1");
+              }}
+              onClear={() => {
+                setSearch("");
+                setPage("");
+              }}
             />
           </div>
 
