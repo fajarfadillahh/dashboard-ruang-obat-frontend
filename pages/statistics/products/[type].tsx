@@ -9,10 +9,14 @@ import { getUrl } from "@/lib/getUrl";
 import { products } from "@/lib/products";
 import { SuccessResponse } from "@/types/global.type";
 import { customStyleTable } from "@/utils/customStyleTable";
+import { formatDate } from "@/utils/formatDate";
 
 import {
+  Button,
   Chip,
   Pagination,
+  Select,
+  SelectItem,
   Spinner,
   Table,
   TableBody,
@@ -21,6 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
+import { Funnel, Link } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
@@ -30,11 +35,13 @@ import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
 type ProductLog = {
+  user_id: string;
+  fullname: string;
+  phone_number: string;
   product_name: string;
   product_type: string;
   action: "click" | "view";
-  user_id: string;
-  fullname: string;
+  created_at: string;
 };
 
 type ProductsResponse = {
@@ -51,6 +58,7 @@ export default function ProductsStatisticsPage({
   const router = useRouter();
   const [search, setSearch] = useQueryState("q", { defaultValue: "" });
   const [page, setPage] = useQueryState("page", { defaultValue: "" });
+  const [sort, setSort] = useQueryState("sort", { defaultValue: "" });
   const [searchValue] = useDebounce(search, 800);
   const divRef = useRef<HTMLDivElement | null>(null);
 
@@ -58,6 +66,7 @@ export default function ProductsStatisticsPage({
     url: getUrl(`/activities/products/${params.type}`, {
       q: searchValue,
       page,
+      sort,
     }),
     method: "GET",
     token,
@@ -65,8 +74,9 @@ export default function ProductsStatisticsPage({
 
   const columnsProduct = [
     { name: "Nama Produk", uid: "product_name" },
-    { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Pengguna", uid: "fullname" },
+    { name: "No. Telp", uid: "phone_number" },
+    { name: "Dibuat Pada", uid: "created_at" },
     { name: "Aksi", uid: "action" },
   ];
 
@@ -74,12 +84,43 @@ export default function ProductsStatisticsPage({
     switch (columnKey) {
       case "product_name":
         return (
-          <div className="font-medium text-black">{product.product_name}</div>
+          <div className="w-[300px] font-medium text-black">
+            {product.product_name}
+          </div>
         );
-      case "user_id":
-        return <div className="font-medium text-black">{product.user_id}</div>;
       case "fullname":
         return <div className="font-medium text-black">{product.fullname}</div>;
+      case "phone_number":
+        return (
+          <div className="inline-flex items-center gap-2">
+            <div className="font-medium text-black">{product.phone_number}</div>
+
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              color="secondary"
+              onClick={() => {
+                const formattedNumber = product.phone_number.replace(
+                  /^0/,
+                  "62",
+                );
+                window.open(
+                  `https://api.whatsapp.com/send?phone=${formattedNumber}`,
+                  "_blank",
+                );
+              }}
+            >
+              <Link weight="duotone" size={18} />
+            </Button>
+          </div>
+        );
+      case "created_at":
+        return (
+          <div className="font-medium text-black">
+            {formatDate(product.created_at)}
+          </div>
+        );
       case "action":
         return (
           <Chip
@@ -126,7 +167,8 @@ export default function ProductsStatisticsPage({
 
         <TitleText
           title={`Aktivitas Produk ${products.find((p) => p.code === params.type)?.label} 📦`}
-          text=""
+          text="Pantau aktivitas pengguna ketika melihat produk RuangObat"
+          className="max-w-[500px]"
         />
 
         <div className="grid" ref={divRef}>
@@ -143,6 +185,25 @@ export default function ProductsStatisticsPage({
                 setPage("");
               }}
             />
+
+            <Select
+              aria-label="sort"
+              size="md"
+              variant="flat"
+              startContent={
+                <Funnel weight="duotone" size={18} className="text-gray" />
+              }
+              placeholder="Sort"
+              selectedKeys={[sort]}
+              onChange={(e) => setSort(e.target.value)}
+              className="max-w-[180px] text-gray"
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              <SelectItem key="created_at.desc">Terbaru</SelectItem>
+              <SelectItem key="created_at.asc">Terlama</SelectItem>
+            </Select>
           </div>
 
           <div className="overflow-x-scroll scrollbar-hide">
@@ -169,7 +230,7 @@ export default function ProductsStatisticsPage({
                 }
               >
                 {(product: ProductLog) => (
-                  <TableRow key={product.product_name + product.user_id}>
+                  <TableRow key={product.created_at}>
                     {(columnKey) => (
                       <TableCell>
                         {renderCellProduct(product, columnKey)}
