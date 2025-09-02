@@ -20,7 +20,7 @@ export default function ModalLogout({ isOpen, onClose }: ModalLogoutProps) {
 
   function handleLogout() {
     setLoading(true);
-    toast.success("Berhasil Logout");
+    toast.success("Berhasil logout!");
 
     setTimeout(() => {
       signOut();

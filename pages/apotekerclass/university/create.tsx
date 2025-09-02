@@ -280,8 +280,14 @@ export default function CreateUniversityPage({
                   <SearchInput
                     placeholder="Cari Nama Tryout atau ID Tryout..."
                     defaultValue={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    onClear={() => setSearch("")}
+                    onChange={(e) => {
+                      setSearch(e.target.value);
+                      setPage("1");
+                    }}
+                    onClear={() => {
+                      setSearch("");
+                      setPage("");
+                    }}
                   />
 
                   <Table

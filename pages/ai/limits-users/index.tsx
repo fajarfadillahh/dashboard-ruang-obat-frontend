@@ -184,8 +184,14 @@ export default function AILimitsCustomPage({
             <SearchInput
               placeholder="Cari Nama Pengguna atau ID Pengguna..."
               defaultValue={query.q as string}
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch("")}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage("1");
+              }}
+              onClear={() => {
+                setSearch("");
+                setPage("");
+              }}
             />
 
             <Button

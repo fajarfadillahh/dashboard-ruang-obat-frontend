@@ -15,9 +15,10 @@ export default function ProductsStatisticsPage() {
         />
 
         <div className="grid">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-3 gap-4">
             {products.map((product) => {
               const Icon = product.icon;
+
               return (
                 <div
                   key={product.code}
