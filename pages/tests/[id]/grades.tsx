@@ -8,7 +8,6 @@ import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
-import useSearch from "@/hooks/useSearch";
 import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { SuccessResponse } from "@/types/global.type";
@@ -30,35 +29,36 @@ import {
 import { Eye, Trash, XCircle } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useQueryState } from "nuqs";
+import { useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import useSWR from "swr";
+import { useDebounce } from "use-debounce";
 
 export default function GradeUsersPage({
   token,
-  query,
   id,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
-  const { setSearch, searchValue } = useSearch(800);
+  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [page, setPage] = useQueryState("page", { defaultValue: "" });
+
+  const [searchValue] = useDebounce(search, 800);
+  const divRef = useRef<HTMLDivElement | null>(null);
   const { data, error, isLoading, mutate } = useSWR<
     SuccessResponse<GradeTestResponse>
   >({
-    url: getUrl(`/admin/tests/results/${encodeURIComponent(id)}`, query),
+    url: getUrl(`/admin/tests/results/${encodeURIComponent(id)}`, {
+      q: searchValue,
+      page,
+    }),
     method: "GET",
     token,
   });
 
   useEffect(() => {
     if (searchValue) {
-      router.push({
-        pathname: `/tests/${id}/grades`,
-        query: {
-          q: searchValue,
-        },
-      });
-    } else {
-      router.push(`/tests/${id}/grades`);
+      divRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [searchValue]);
 
@@ -229,9 +229,15 @@ export default function GradeUsersPage({
           <div className="sticky left-0 top-0 z-50 flex items-center justify-between gap-4 bg-white pb-4">
             <SearchInput
               placeholder="Cari Nama Pengguna atau ID Pengguna..."
-              defaultValue={query.q as string}
-              onChange={(e) => setSearch(e.target.value)}
-              onClear={() => setSearch("")}
+              defaultValue={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage("1");
+              }}
+              onClear={() => {
+                setSearch("");
+                setPage("");
+              }}
             />
 
             <p className="text-sm font-medium text-gray">
@@ -285,13 +291,8 @@ export default function GradeUsersPage({
             page={data.data.page as number}
             total={data.data.total_pages as number}
             onChange={(e) => {
-              router.push({
-                pathname: `/tests/grades/${id}`,
-                query: {
-                  ...router.query,
-                  page: e,
-                },
-              });
+              setPage(`${e}`);
+              divRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
             className="justify-self-center"
             classNames={{
@@ -306,11 +307,9 @@ export default function GradeUsersPage({
 
 export const getServerSideProps = withToken(async (ctx) => {
   const id = ctx.params?.id as string;
-  const query = ctx.query;
 
   return {
     props: {
-      query,
       id,
     },
   };
