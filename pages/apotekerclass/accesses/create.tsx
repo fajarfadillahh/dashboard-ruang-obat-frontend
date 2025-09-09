@@ -52,7 +52,12 @@ export default function CreateApotekerClassAccess({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [page, setPage] = useQueryState("page", { defaultValue: "" });
-  const [search, setSearch] = useQueryState("q", { defaultValue: "" });
+  const [search, setSearch] = useQueryState("q", {
+    defaultValue:
+      router.query.from == "statistics_products"
+        ? decodeURIComponent(router.query.user_id as string)
+        : "",
+  });
   const [searchValue] = useDebounce(search, 800);
 
   const { data: dataUser, isLoading: isLoadingUsers } = useSWR<
@@ -84,7 +89,9 @@ export default function CreateApotekerClassAccess({
     token,
   });
 
-  const [userId, setUserId] = useState<Selection>(new Set([]));
+  const [userId, setUserId] = useState<Selection>(
+    new Set([router.query.user_id as string]),
+  );
   const [packageId, setPackageId] = useState<Selection>(new Set([]));
   const [universities, setUniversities] = useState<Selection>(new Set([]));
 
@@ -133,6 +140,26 @@ export default function CreateApotekerClassAccess({
       setIsLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (
+      router.query.from === "statistics_products" &&
+      router.query.product_name &&
+      dataSubscriptions?.data.packages
+    ) {
+      const decodedPackage = decodeURIComponent(
+        router.query.product_name as string,
+      );
+
+      const foundPackage = dataSubscriptions.data.packages.find(
+        (p) => p.name === decodedPackage,
+      );
+
+      if (foundPackage) {
+        setPackageId(new Set([foundPackage.package_id]));
+      }
+    }
+  }, [router.query.package, dataSubscriptions]);
 
   useEffect(() => {
     let key = localStorage.getItem("idempotency_key");
