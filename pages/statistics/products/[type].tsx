@@ -1,4 +1,5 @@
 import ButtonBack from "@/components/button/ButtonBack";
+import CustomTooltip from "@/components/CustomTooltip";
 import EmptyData from "@/components/EmptyData";
 import ErrorPage from "@/components/ErrorPage";
 import SearchInput from "@/components/SearchInput";
@@ -25,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@nextui-org/react";
-import { Funnel, Link } from "@phosphor-icons/react";
+import { Funnel, Link, PencilLine } from "@phosphor-icons/react";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
@@ -123,20 +124,46 @@ export default function ProductsStatisticsPage({
         );
       case "action":
         return (
-          <Chip
-            variant="flat"
-            size="sm"
-            color={
-              product.action === "click"
-                ? "success"
-                : product.action === "view"
-                  ? "danger"
-                  : "warning"
-            }
-            classNames={{ base: "px-2 gap-1", content: "font-bold capitalize" }}
-          >
-            {product.action}
-          </Chip>
+          <div className="inline-flex items-center gap-2">
+            <Chip
+              variant="flat"
+              size="sm"
+              color={
+                product.action === "click"
+                  ? "success"
+                  : product.action === "view"
+                    ? "danger"
+                    : "warning"
+              }
+              classNames={{
+                base: "px-2 gap-1",
+                content: "font-bold capitalize",
+              }}
+            >
+              {product.action}
+            </Chip>
+
+            <Button
+              isIconOnly
+              size="sm"
+              color="secondary"
+              variant="light"
+              onClick={() =>
+                router.push({
+                  pathname: `/${router.query.type}/accesses/create`,
+                  query: {
+                    user_id: encodeURIComponent(product.user_id),
+                    product_name: encodeURIComponent(product.product_name),
+                    from: "statistics_products",
+                  },
+                })
+              }
+            >
+              <CustomTooltip content="Invite Pengguna">
+                <PencilLine weight="duotone" size={18} />
+              </CustomTooltip>
+            </Button>
+          </div>
         );
 
       default:
