@@ -13,6 +13,7 @@ export type LogsAI = {
   source: string;
   question: string;
   answer: string;
+  images: { image_id: string; img_url: string }[];
   total_tokens: number;
   total_cost: number;
   created_at: string;
