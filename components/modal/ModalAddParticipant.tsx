@@ -104,14 +104,20 @@ export default function ModalAddParticipant({
       });
 
       mutate();
-      onClose();
+
+      setPage(1);
+      setSearch("");
+      setValue(new Set([]));
 
       toast.success("Berhasil menambahkan partisipan!");
+      onClose();
     } catch (error: any) {
       setLoading(false);
       console.error(error);
 
       toast.error(getError(error));
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -172,11 +178,11 @@ export default function ModalAddParticipant({
         onOpenChange={onOpenChange}
         scrollBehavior="inside"
         onClose={() => {
+          onClose();
           setPage(1);
-          setValue(new Set([]));
           setSearch("");
           setLoading(false);
-          onClose();
+          setValue(new Set([]));
         }}
         size="4xl"
       >
@@ -264,8 +270,9 @@ export default function ModalAddParticipant({
                   onPress={() => {
                     onClose();
                     setPage(1);
-                    setValue(new Set([]));
                     setSearch("");
+                    setLoading(false);
+                    setValue(new Set([]));
                   }}
                   className="font-semibold"
                 >
