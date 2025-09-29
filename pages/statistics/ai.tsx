@@ -20,19 +20,21 @@ import useSWR from "swr";
 
 type LoginStatistics = {
   remaining_credits: number;
-  today: Today;
-  last_seven_days: LastSevenDay[];
+  today: DayType;
+  last_seven_days: DayType[];
+  one_month: DayType[];
   months: Month[];
+  summary: {
+    one_month: {
+      average_cost: number;
+      average_tokens: number;
+      average_chat: number;
+      total_days: number;
+    };
+  };
 };
 
-type Today = {
-  day: string;
-  total_tokens: number;
-  total_cost: number;
-  total_chat: number;
-};
-
-type LastSevenDay = {
+type DayType = {
   day: string;
   total_tokens: number;
   total_cost: number;
@@ -100,8 +102,8 @@ export default function AIStatistics({
     <Layout title="Aktivitas AI" className="scrollbar-hide">
       <Container className="gap-8">
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-          <div className="col-span-full mb-2 text-center text-lg font-bold text-gray-600">
-            {data?.data.today.day ?? "-"}
+          <div className="col-span-full mb-2 text-left text-lg font-bold text-gray-600">
+            Hari ini {data?.data.today.day ?? "-"}
           </div>
           <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
             <span className="mb-1 text-xs font-semibold text-gray-500">
@@ -143,6 +145,50 @@ export default function AIStatistics({
             </span>
             <span className="text-2xl font-bold text-secondary">
               {data?.data.today.total_tokens.toLocaleString("id-ID") ?? 0}
+            </span>
+          </div>
+        </div>
+
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="col-span-full mb-2 text-left text-lg font-bold text-gray-600">
+            1 {new Date().toLocaleString("id-ID", { month: "long" })} sampai{" "}
+            {new Date().toLocaleDateString("id-ID", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            }) ?? "-"}
+          </div>
+          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
+            <span className="mb-1 text-xs font-semibold text-gray-500">
+              Rata-rata cost
+            </span>
+            <span className="text-2xl font-bold text-secondary">
+              {rates
+                ? formatRupiah(
+                    Math.round(
+                      (data?.data.summary.one_month.average_cost as number) *
+                        rates,
+                    ),
+                  )
+                : (data?.data.summary.one_month.average_cost ?? 0)}
+            </span>
+          </div>
+          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
+            <span className="mb-1 text-xs font-semibold text-gray-500">
+              Rata-rata jumlah chat per hari
+            </span>
+            <span className="text-2xl font-bold text-secondary">
+              {data?.data.summary.one_month.average_chat ?? 0}
+            </span>
+          </div>
+          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
+            <span className="mb-1 text-xs font-semibold text-gray-500">
+              Rata-rata penggunaan token
+            </span>
+            <span className="text-2xl font-bold text-secondary">
+              {data?.data.summary.one_month.average_tokens.toLocaleString(
+                "id-ID",
+              ) ?? 0}
             </span>
           </div>
         </div>
