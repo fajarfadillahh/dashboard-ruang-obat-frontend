@@ -182,13 +182,13 @@ export default function CardTest({ test, token, mutate }: TestProps) {
             Edit Ujian
           </DropdownItem>
 
-          {/* <DropdownItem
+          <DropdownItem
             key="grades_test"
             startContent={<Eye weight="duotone" size={18} />}
             onClick={() => router.push(`/tests/${test.test_id}/grades`)}
           >
             Lihat Nilai Ujian
-          </DropdownItem> */}
+          </DropdownItem>
 
           <DropdownItem
             key="active_inactive"
