@@ -1,4 +1,5 @@
 import EmptyData from "@/components/EmptyData";
+import ErrorPage from "@/components/ErrorPage";
 import SearchInput from "@/components/SearchInput";
 import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
@@ -56,14 +57,16 @@ export default function CostsRosaAIPage({
   const [searchValue] = useDebounce(search, 800);
 
   const divRef = useRef<HTMLDivElement | null>(null);
-  const { data, isLoading } = useSWR<SuccessResponse<CostsRosaResponse>>({
-    url: getUrl("/statistics/ai/users/costs", {
-      q: searchValue,
-      page,
-    }),
-    method: "GET",
-    token,
-  });
+  const { data, isLoading, error } = useSWR<SuccessResponse<CostsRosaResponse>>(
+    {
+      url: getUrl("/statistics/ai/users/costs", {
+        q: searchValue,
+        page,
+      }),
+      method: "GET",
+      token,
+    },
+  );
 
   const columnsUser = [
     { name: "ID Pengguna", uid: "user_id" },
@@ -141,6 +144,22 @@ export default function CostsRosaAIPage({
       value: data?.average_chats_per_user ?? "-",
     },
   ];
+
+  if (error) {
+    return (
+      <Layout title="Aktivitas Biaya ROSA (AI)">
+        <Container>
+          <ErrorPage
+            {...{
+              status_code: error.status_code,
+              message: error.error.message,
+              name: error.error.name,
+            }}
+          />
+        </Container>
+      </Layout>
+    );
+  }
 
   return (
     <Layout title="Aktivitas Biaya ROSA (AI)" className="scrollbar-hide">
@@ -270,7 +289,7 @@ function SummaryCardUser({
         {title}
       </span>
 
-      <div className="grid gap-4">
+      <div className="grid gap-8">
         <div className="flex flex-col items-center">
           <span className="text-xl font-extrabold text-secondary">
             {user?.fullname}
