@@ -137,6 +137,9 @@ export function SidebarOtherMenu(adminId?: string): SidebarMenuType[] {
         { label: "Aktivitas Login", path: "/statistics/login" },
         { label: "Aktivitas Pendaftar", path: "/statistics/registered" },
         { label: "Aktivitas ROSA (AI)", path: "/statistics/ai" },
+        { label: "Biaya ROSA", path: "/statistics/costs" },
+        { label: "Limit Harian ROSA", path: "/statistics/today-reached" },
+        { label: "Capaian Limit ROSA", path: "/statistics/ever-reached" },
       ],
     },
     // {
