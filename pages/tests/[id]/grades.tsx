@@ -14,6 +14,7 @@ import { SuccessResponse } from "@/types/global.type";
 import { GradeTest, GradeTestResponse } from "@/types/test.type";
 import { customStyleTable } from "@/utils/customStyleTable";
 import { fetcher } from "@/utils/fetcher";
+import { formatDateWithMiliseconds } from "@/utils/formatDate";
 import { getError } from "@/utils/getError";
 import {
   Button,
@@ -66,6 +67,7 @@ export default function GradeUsersPage({
     { name: "ID Pengguna", uid: "user_id" },
     { name: "Nama Lengkap", uid: "fullname" },
     { name: "Asal Kampus", uid: "university" },
+    { name: "Dikumpulkan Pada", uid: "created_at" },
     { name: "Nilai", uid: "score" },
     { name: "Kategori", uid: "category" },
     { name: "Aksi", uid: "action" },
@@ -86,6 +88,12 @@ export default function GradeUsersPage({
       case "university":
         return (
           <div className="w-max font-medium text-black">{user.university}</div>
+        );
+      case "created_at":
+        return (
+          <div className="w-max font-medium text-black">
+            {formatDateWithMiliseconds(user.created_at)}
+          </div>
         );
       case "score":
         return (

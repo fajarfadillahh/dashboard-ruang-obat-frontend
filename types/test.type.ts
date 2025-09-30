@@ -17,6 +17,7 @@ export type GradeTest = {
   university: string;
   score: number;
   score_category: string;
+  created_at: string;
 };
 
 export type TestsResponse = {

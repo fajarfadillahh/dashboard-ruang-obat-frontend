@@ -57,3 +57,17 @@ export function formatDateSimple(dateProps: string, withTime = false): string {
     ? `${day}/${month}/${year} ${hours}:${minutes}`
     : `${day}/${month}/${year}`;
 }
+
+export function formatDateWithMiliseconds(dateProp: string) {
+  const date = new Date(dateProp);
+  const day = date.getDate() < 10 ? `0${date.getDate()}` : date.getDate();
+  const month = date.getMonth();
+  const year = date.getFullYear();
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  const milliseconds = String(date.getMilliseconds()).padStart(3, "0");
+
+  return `${day} ${months[month]} ${year} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
