@@ -114,7 +114,7 @@ export default function CostsRosaAIPage({
     }
   }
 
-  const summaryItems = (data: any, rates?: number) => [
+  const summaryItems = (data: CostsRosaResponse["summary"], rates?: number) => [
     {
       key: "Total seluruh biaya",
       value: data?.total_cost_all_users
@@ -171,7 +171,10 @@ export default function CostsRosaAIPage({
 
         <div className="grid gap-4 pb-12">
           <div className="grid grid-cols-4 items-start gap-4">
-            {summaryItems(data?.data.summary, rates).map((item, index) => (
+            {summaryItems(
+              data?.data.summary as CostsRosaResponse["summary"],
+              rates,
+            ).map((item, index) => (
               <div
                 key={index}
                 className="flex flex-col items-center rounded-xl border-2 border-gray/10 p-6"
