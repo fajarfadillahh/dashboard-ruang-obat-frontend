@@ -1,5 +1,6 @@
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/loading/LoadingScreen";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
@@ -60,7 +61,7 @@ export default function AIStatistics({
 
   if (error) {
     return (
-      <Layout title="Mentor">
+      <Layout title="Aktivitas ROSA (AI)">
         <Container>
           <ErrorPage
             {...{
@@ -98,102 +99,117 @@ export default function AIStatistics({
       })
     : [];
 
+  const summaryTodayItems = (data: LoginStatistics, rates?: number) => [
+    {
+      key: "Sisa Kredit",
+      value: rates
+        ? formatRupiah(Math.round((data?.remaining_credits as number) * rates))
+        : (data?.remaining_credits ?? "-"),
+    },
+    {
+      key: "Total Chat Hari Ini",
+      value: data?.today.total_chat ?? "-",
+    },
+    {
+      key: "Total Cost Hari Ini (IDR)",
+      value: rates
+        ? formatRupiah(Math.round((data?.today.total_cost as number) * rates))
+        : (data?.today.total_cost ?? "-"),
+    },
+    {
+      key: "Total Token Hari Ini",
+      value: data?.today.total_tokens.toLocaleString("id-ID") ?? "-",
+    },
+  ];
+
+  const summaryMonthItems = (
+    data: LoginStatistics["summary"],
+    rates?: number,
+  ) => [
+    {
+      key: "Rata-rata cost",
+      value: rates
+        ? formatRupiah(
+            Math.round((data?.one_month.average_cost as number) * rates),
+          )
+        : (data?.one_month.average_cost ?? "-"),
+    },
+    {
+      key: "Rata-rata jumlah chat per hari",
+      value: data?.one_month.average_chat ?? "-",
+    },
+    {
+      key: "Rata-rata penggunaan token",
+      value: data?.one_month.average_tokens.toLocaleString("id-ID") ?? "-",
+    },
+  ];
+
   return (
-    <Layout title="Aktivitas AI" className="scrollbar-hide">
+    <Layout title="Aktivitas ROSA (AI)" className="scrollbar-hide">
       <Container className="gap-8">
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4">
-          <div className="col-span-full mb-2 text-left text-lg font-bold text-gray-600">
-            Hari ini {data?.data.today.day ?? "-"}
+        <TitleText
+          title="Aktifitas ROSA (AI) 🤖"
+          text="Pantau aktifitas penggunaan ROSA (AI)"
+        />
+
+        <div className="grid gap-4 pb-12">
+          <div className="grid gap-8 rounded-xl border-2 border-gray/10 p-8">
+            <h2 className="text-center font-bold text-black">
+              Hari ini {data?.data.today.day ?? "-"} ☀️
+            </h2>
+
+            <div className="flex items-center justify-between gap-4 divide-x-2 divide-gray/10">
+              {summaryTodayItems(data?.data as LoginStatistics, rates).map(
+                (item, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-1 flex-col items-center"
+                  >
+                    <span className="mb-1 text-xs capitalize text-gray">
+                      {item.key}
+                    </span>
+
+                    <span className="text-2xl font-bold text-secondary">
+                      {item.value}
+                    </span>
+                  </div>
+                ),
+              )}
+            </div>
           </div>
-          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
-            <span className="mb-1 text-xs font-semibold text-gray-500">
-              Sisa Kredit
-            </span>
-            <span className="text-2xl font-bold text-secondary">
-              {rates
-                ? formatRupiah(
-                    Math.round(
-                      (data?.data.remaining_credits as number) * rates,
-                    ),
-                  )
-                : (data?.data.remaining_credits ?? 0)}
-            </span>
-          </div>
-          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
-            <span className="mb-1 text-xs font-semibold text-gray-500">
-              Total Chat Hari Ini
-            </span>
-            <span className="text-2xl font-bold text-secondary">
-              {data?.data.today.total_chat ?? 0}
-            </span>
-          </div>
-          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
-            <span className="mb-1 text-xs font-semibold text-gray-500">
-              Total Cost Hari Ini (IDR)
-            </span>
-            <span className="text-2xl font-bold text-secondary">
-              {rates
-                ? formatRupiah(
-                    Math.round((data?.data.today.total_cost as number) * rates),
-                  )
-                : (data?.data.today.total_cost ?? 0)}
-            </span>
-          </div>
-          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
-            <span className="mb-1 text-xs font-semibold text-gray-500">
-              Total Token Hari Ini
-            </span>
-            <span className="text-2xl font-bold text-secondary">
-              {data?.data.today.total_tokens.toLocaleString("id-ID") ?? 0}
-            </span>
+
+          <div className="grid gap-8 rounded-xl border-2 border-gray/10 p-8">
+            <h2 className="text-center font-bold text-black">
+              1 {new Date().toLocaleString("id-ID", { month: "long" })}{" "}
+              <span className="text-sm">s/d</span>{" "}
+              {new Date().toLocaleDateString("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              }) ?? "-"}{" "}
+              🗓️
+            </h2>
+
+            <div className="flex items-center justify-between gap-4 divide-x-2 divide-gray/10">
+              {summaryMonthItems(
+                data?.data.summary as LoginStatistics["summary"],
+                rates,
+              ).map((item, index) => (
+                <div key={index} className="flex flex-1 flex-col items-center">
+                  <span className="mb-1 text-xs capitalize text-gray">
+                    {item.key}
+                  </span>
+
+                  <span className="text-2xl font-bold text-secondary">
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="col-span-full mb-2 text-left text-lg font-bold text-gray-600">
-            1 {new Date().toLocaleString("id-ID", { month: "long" })} sampai{" "}
-            {new Date().toLocaleDateString("id-ID", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            }) ?? "-"}
-          </div>
-          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
-            <span className="mb-1 text-xs font-semibold text-gray-500">
-              Rata-rata cost
-            </span>
-            <span className="text-2xl font-bold text-secondary">
-              {rates
-                ? formatRupiah(
-                    Math.round(
-                      (data?.data.summary.one_month.average_cost as number) *
-                        rates,
-                    ),
-                  )
-                : (data?.data.summary.one_month.average_cost ?? 0)}
-            </span>
-          </div>
-          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
-            <span className="mb-1 text-xs font-semibold text-gray-500">
-              Rata-rata jumlah chat per hari
-            </span>
-            <span className="text-2xl font-bold text-secondary">
-              {data?.data.summary.one_month.average_chat ?? 0}
-            </span>
-          </div>
-          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
-            <span className="mb-1 text-xs font-semibold text-gray-500">
-              Rata-rata penggunaan token
-            </span>
-            <span className="text-2xl font-bold text-secondary">
-              {data?.data.summary.one_month.average_tokens.toLocaleString(
-                "id-ID",
-              ) ?? 0}
-            </span>
-          </div>
-        </div>
-
-        <div className="grid gap-4 rounded-xl border-[2px] border-default-200 p-8">
+        <div className="grid gap-4 rounded-xl border-2 border-gray/10 p-8">
           <h1 className="text-md font-semibold text-gray-500">
             7 Hari Terakhir
           </h1>
@@ -265,7 +281,7 @@ export default function AIStatistics({
           </div>
         </div>
 
-        <div className="grid gap-8 overflow-scroll rounded-xl border-[2px] border-default-200 p-8">
+        <div className="grid gap-8 overflow-scroll rounded-xl border-2 border-gray/10 p-8">
           <h1 className="text-md font-semibold text-gray-500">
             Beberapa Bulan
           </h1>
