@@ -146,7 +146,7 @@ export default function EverReachedRosaPage({
     }
   }
 
-  const summaryItems = (data: any) => [
+  const summaryItems = (data: Summary) => [
     {
       key: "Total Pengguna Yang Pernah Mencapai Limit 👥",
       value: data?.total_users_ever_reached_limit ?? "-",
@@ -161,7 +161,10 @@ export default function EverReachedRosaPage({
     },
   ];
 
-  const summaryUserLimit = (data: any, rates?: number) => [
+  const summaryUserLimit = (
+    data: Summary["most_frequent_limit_reacher"],
+    rates?: number,
+  ) => [
     {
       key: "Total Biaya",
       value: data?.total_cost
@@ -225,7 +228,7 @@ export default function EverReachedRosaPage({
 
         <div className="grid gap-4 pb-12">
           <div className="grid grid-cols-3 items-start gap-4">
-            {summaryItems(data?.data.summary).map((item, index) => (
+            {summaryItems(data?.data.summary as Summary).map((item, index) => (
               <div
                 key={index}
                 className="flex flex-col items-center rounded-xl border-2 border-gray/10 p-6"
@@ -259,7 +262,8 @@ export default function EverReachedRosaPage({
 
               <div className="flex items-center justify-between divide-x-2 divide-gray/10">
                 {summaryUserLimit(
-                  data?.data.summary.most_frequent_limit_reacher,
+                  data?.data.summary
+                    .most_frequent_limit_reacher as Summary["most_frequent_limit_reacher"],
                   rates,
                 ).map((item, index) => (
                   <div
