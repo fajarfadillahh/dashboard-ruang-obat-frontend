@@ -121,7 +121,8 @@ export default function Sidebar() {
                     icon={
                       <item.icon
                         weight={
-                          router.asPath.includes(item.path as string)
+                          router.asPath === item.path ||
+                          router.asPath.startsWith(item.path + "/")
                             ? "fill"
                             : "duotone"
                         }
@@ -173,7 +174,8 @@ export default function Sidebar() {
                               : "text-gray"
                           }
                           weight={
-                            router.asPath.includes(path as string)
+                            router.asPath === path ||
+                            router.asPath.startsWith(path + "/")
                               ? "fill"
                               : "duotone"
                           }
@@ -210,7 +212,8 @@ export default function Sidebar() {
                     icon={
                       <item.icon
                         weight={
-                          router.asPath.includes(item.path as string)
+                          router.asPath === item.path ||
+                          router.asPath.startsWith(item.path + "/")
                             ? "fill"
                             : "duotone"
                         }
@@ -264,7 +267,8 @@ export default function Sidebar() {
                                   : "text-gray"
                               }
                               weight={
-                                router.asPath.includes(item.path as string)
+                                router.asPath === item.path ||
+                                router.asPath.startsWith(item.path + "/")
                                   ? "fill"
                                   : "duotone"
                               }
@@ -293,9 +297,7 @@ export default function Sidebar() {
                         icon={
                           <item.icon
                             weight={
-                              router.asPath.includes(item.path as string)
-                                ? "fill"
-                                : "duotone"
+                              router.asPath === item.path ? "fill" : "duotone"
                             }
                           />
                         }
