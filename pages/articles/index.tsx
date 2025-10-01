@@ -179,8 +179,8 @@ export default function ArticlesPage({
                   onClick={() =>
                     window.open(
                       process.env.NEXT_PUBLIC_MODE == "prod"
-                        ? `https://ruangobat.id/artikel/${article.slug}`
-                        : `https://devmain.ruangobat.id/artikel/${article.slug}`,
+                        ? `https://ruangobat.id/articles/${article.slug}`
+                        : `https://devmain.ruangobat.id/articles/${article.slug}`,
                       "_blank",
                     )
                   }
