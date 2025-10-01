@@ -172,7 +172,7 @@ export default function EventTestApotekerclassPage({
                 return (
                   <div
                     key={event.event_id}
-                    className="group relative isolate grid overflow-hidden rounded-xl hover:cursor-pointer"
+                    className="group relative isolate grid overflow-hidden rounded-xl border-2 border-purple/10 hover:cursor-pointer hover:border-purple"
                   >
                     <div className="absolute right-4 top-4 z-10 hidden items-center gap-2 group-hover:inline-flex">
                       <Button
@@ -241,7 +241,7 @@ export default function EventTestApotekerclassPage({
                       />
                     </div>
 
-                    <div className="grid gap-2 rounded-b-xl border-x-2 border-b-2 border-purple/10 p-4 group-hover:border-purple group-hover:bg-purple/10">
+                    <div className="grid gap-2 p-4 group-hover:bg-purple/10">
                       <Chip
                         size="sm"
                         variant="flat"
@@ -260,7 +260,7 @@ export default function EventTestApotekerclassPage({
                         {status}
                       </Chip>
 
-                      <h1 className="mb-4 line-clamp-2 text-lg font-extrabold text-black">
+                      <h1 className="mb-4 line-clamp-2 font-extrabold text-black">
                         {event.title}
                       </h1>
 
