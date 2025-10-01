@@ -1,5 +1,6 @@
 import ErrorPage from "@/components/ErrorPage";
 import LoadingScreen from "@/components/loading/LoadingScreen";
+import TitleText from "@/components/TitleText";
 import Container from "@/components/wrapper/Container";
 import Layout from "@/components/wrapper/Layout";
 import { withToken } from "@/lib/getToken";
@@ -68,14 +69,21 @@ export default function LoginStatistics({
   return (
     <Layout title="Aktivitas Login" className="scrollbar-hide">
       <Container className="gap-8">
-        <div className="mb-8 flex flex-col items-center justify-center gap-4">
-          <div className="mb-2 text-center text-lg font-bold text-gray-600">
-            {data?.data.today.day ?? "-"}
-          </div>
-          <div className="flex flex-col items-center rounded-xl border-2 border-default-200 bg-white p-6">
-            <span className="mb-1 text-xs font-semibold text-gray-500">
+        <TitleText
+          title="Aktifitas Login 🔐"
+          text="Pantau aktifitas login pengguna ruangobat.id"
+        />
+
+        <div className="mb-12 grid w-full max-w-md gap-1 justify-self-center rounded-xl border-2 border-gray/10 p-6">
+          <h2 className="text-center text-lg font-bold text-black">
+            {data?.data.today.day ?? "-"} 🗓️
+          </h2>
+
+          <div className="flex flex-col items-center gap-4">
+            <span className="text-xs capitalize text-gray">
               Total Aktivitas Login Hari Ini
             </span>
+
             <span className="text-2xl font-bold text-secondary">
               {data?.data.today.value.toLocaleString("id-ID") ?? 0}
             </span>
