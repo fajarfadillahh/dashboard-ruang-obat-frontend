@@ -9,7 +9,9 @@ import { withToken } from "@/lib/getToken";
 import { getUrl } from "@/lib/getUrl";
 import { EventTestApotekerclass } from "@/types/event.type";
 import { SuccessResponse } from "@/types/global.type";
+import { fetcher } from "@/utils/fetcher";
 import { formatDateWithoutTime } from "@/utils/formatDate";
+import { getError } from "@/utils/getError";
 import { getStatusEvent } from "@/utils/getStatus";
 import {
   Button,
@@ -25,6 +27,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import { useQueryState } from "nuqs";
 import { useRef } from "react";
+import toast from "react-hot-toast";
 import useSWR from "swr";
 import { useDebounce } from "use-debounce";
 
@@ -45,17 +48,37 @@ export default function EventTestApotekerclassPage({
   const [searchValue] = useDebounce(search, 800);
 
   const divRef = useRef<HTMLDivElement | null>(null);
-  const { data, isLoading, error } = useSWR<SuccessResponse<EventTestResponse>>(
-    {
-      url: getUrl("/events", {
-        q: searchValue,
-        sort,
-        page,
-      }),
-      method: "GET",
-      token,
-    },
-  );
+  const { data, isLoading, error, mutate } = useSWR<
+    SuccessResponse<EventTestResponse>
+  >({
+    url: getUrl("/events", {
+      q: searchValue,
+      sort,
+      page,
+    }),
+    method: "GET",
+    token,
+  });
+
+  async function handleDeleteEvent(event_id: string) {
+    try {
+      await fetcher({
+        url: `/events/${event_id}`,
+        method: "DELETE",
+        token,
+      });
+
+      mutate();
+      if (data?.data.events.length === 1 && Number(page) > 1) {
+        setPage(`${Number(page) - 1}`);
+      }
+
+      toast.success("Event ujian berhasil dihapus!");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(getError(error));
+    }
+  }
 
   if (error) {
     return (
@@ -198,9 +221,7 @@ export default function EventTestApotekerclassPage({
                             <Button
                               color="danger"
                               className="font-bold"
-                              // onClick={() =>
-                              //   handleDeleteEvent(event.event_id)
-                              // }
+                              onClick={() => handleDeleteEvent(event.event_id)}
                             >
                               Ya, Hapus
                             </Button>
@@ -233,7 +254,7 @@ export default function EventTestApotekerclassPage({
                         }
                         classNames={{
                           base: "px-2 gap-1",
-                          content: "font-bold",
+                          content: "font-bold capitalize",
                         }}
                       >
                         {status}
