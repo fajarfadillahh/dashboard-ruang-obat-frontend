@@ -75,6 +75,8 @@ export default function Sidebar() {
     setActiveMenu(updatedState);
   }, [router]);
 
+  const currentPath = router.asPath.split("?")[0];
+
   return (
     <div className="static left-0 top-0 z-50 grid h-screen min-w-[250px] grid-rows-[24px_1fr] gap-8 border-r border-gray/15 bg-gray/5 [padding:2rem_1rem_0]">
       <Link
@@ -121,8 +123,8 @@ export default function Sidebar() {
                     icon={
                       <item.icon
                         weight={
-                          router.asPath === item.path ||
-                          router.asPath.startsWith(item.path + "/")
+                          currentPath === item.path ||
+                          currentPath.startsWith(item.path + "/")
                             ? "fill"
                             : "duotone"
                         }
@@ -174,8 +176,8 @@ export default function Sidebar() {
                               : "text-gray"
                           }
                           weight={
-                            router.asPath === path ||
-                            router.asPath.startsWith(path + "/")
+                            currentPath === path ||
+                            currentPath.startsWith(path + "/")
                               ? "fill"
                               : "duotone"
                           }
@@ -212,8 +214,8 @@ export default function Sidebar() {
                     icon={
                       <item.icon
                         weight={
-                          router.asPath === item.path ||
-                          router.asPath.startsWith(item.path + "/")
+                          currentPath === item.path ||
+                          currentPath.startsWith(item.path + "/")
                             ? "fill"
                             : "duotone"
                         }
@@ -267,8 +269,8 @@ export default function Sidebar() {
                                   : "text-gray"
                               }
                               weight={
-                                router.asPath === item.path ||
-                                router.asPath.startsWith(item.path + "/")
+                                currentPath === item.path ||
+                                currentPath.startsWith(item.path + "/")
                                   ? "fill"
                                   : "duotone"
                               }
@@ -297,7 +299,10 @@ export default function Sidebar() {
                         icon={
                           <item.icon
                             weight={
-                              router.asPath === item.path ? "fill" : "duotone"
+                              currentPath === item.path ||
+                              currentPath.startsWith(item.path + "/")
+                                ? "fill"
+                                : "duotone"
                             }
                           />
                         }
