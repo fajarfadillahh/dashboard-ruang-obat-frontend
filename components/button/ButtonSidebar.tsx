@@ -17,11 +17,13 @@ export default function ButtonSidebar({
 }: ButtonSidebarProps) {
   const router = useRouter();
 
+  const currentPath = router.asPath.split("?")[0];
+
   return (
     <Link
       href={path}
       className={`flex h-10 items-center justify-between rounded-xl [padding:0.5rem_1rem] ${className} ${
-        router.asPath === path || router.asPath.startsWith(path + "/")
+        currentPath === path || currentPath.startsWith(path + "/")
           ? "bg-purple text-white hover:bg-purple/90"
           : "bg-transparent text-gray hover:bg-gray/10"
       }`}

@@ -103,6 +103,7 @@ export function SidebarMenuClass(): SidebarMenuType[] {
         { label: "Universitas", path: "/apotekerclass/university" },
         { label: "Paket Berlangganan", path: "/apotekerclass/subscriptions" },
         { label: "Access List", path: "/apotekerclass/accesses" },
+        { label: "Event Ujian", path: "/apotekerclass/events" },
       ],
     },
   ];
