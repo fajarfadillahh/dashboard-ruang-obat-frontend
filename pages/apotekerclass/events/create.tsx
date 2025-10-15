@@ -9,13 +9,14 @@ import { customStyleInput } from "@/utils/customStyleInput";
 import { fetcher } from "@/utils/fetcher";
 import { getError } from "@/utils/getError";
 import { onCropComplete } from "@/utils/onCropComplete";
-import { getLocalTimeZone, today } from "@internationalized/date";
 import {
   Autocomplete,
   AutocompleteItem,
   Button,
   DatePicker,
   Input,
+  Select,
+  SelectItem,
 } from "@nextui-org/react";
 import { Calendar, FloppyDisk } from "@phosphor-icons/react";
 import { InferGetServerSidePropsType } from "next";
@@ -37,18 +38,21 @@ type InputType = {
   title: string;
   content: string;
   university_name: string;
+  province: string;
   start_registration: string;
   end_registration: string;
 };
 
 export default function CreateEventTestApotekerclassPage({
   token,
+  provicesData,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const [input, setInput] = useState<InputType>({
     title: "",
     content: "",
     university_name: "",
+    province: "",
     start_registration: "",
     end_registration: "",
   });
@@ -119,6 +123,7 @@ export default function CreateEventTestApotekerclassPage({
       formData.append("title", input.title);
       formData.append("content", input.content);
       formData.append("university_name", searchUniversities);
+      formData.append("province", input.province);
       formData.append(
         "registration_date",
         `${input.start_registration} - ${input.end_registration}`,
@@ -186,7 +191,6 @@ export default function CreateEventTestApotekerclassPage({
             <Input
               isRequired
               type="file"
-              accept="image/jpg, image/png"
               variant="flat"
               label="Logo Universitas"
               labelPlacement="outside"
@@ -196,16 +200,6 @@ export default function CreateEventTestApotekerclassPage({
               }}
               onChange={(e) => {
                 if (!e.target.files?.length) {
-                  setFile(null);
-                  setFilename("");
-                  setType("");
-                  return;
-                }
-
-                const validTypes = ["image/png", "image/jpg"];
-
-                if (!validTypes.includes(e.target.files[0].type)) {
-                  toast.error("Ekstensi file harus png atau jpg");
                   setFile(null);
                   setFilename("");
                   setType("");
@@ -288,6 +282,30 @@ export default function CreateEventTestApotekerclassPage({
               ))}
             </Autocomplete>
 
+            <Select
+              isRequired
+              variant="flat"
+              label="Provinsi"
+              labelPlacement="outside"
+              placeholder="Masukan Provinsi"
+              name="province"
+              selectedKeys={[input.province]}
+              onChange={(e) => setInput({ ...input, province: e.target.value })}
+              classNames={{
+                value: "font-semibold text-gray",
+              }}
+            >
+              {provicesData.map((province) => (
+                <SelectItem
+                  key={province.name}
+                  value={province.name}
+                  textValue={province.name}
+                >
+                  {province.name}
+                </SelectItem>
+              ))}
+            </Select>
+
             <div className="grid grid-cols-2 gap-4">
               <DatePicker
                 isRequired
@@ -298,7 +316,6 @@ export default function CreateEventTestApotekerclassPage({
                 labelPlacement="outside"
                 endContent={<Calendar weight="duotone" size={20} />}
                 hourCycle={24}
-                minValue={today(getLocalTimeZone())}
                 onChange={(e) => {
                   const value = e.toString();
                   const date = new Date(value);
@@ -318,7 +335,6 @@ export default function CreateEventTestApotekerclassPage({
                 label="Pendaftaran Ditutup"
                 labelPlacement="outside"
                 endContent={<Calendar weight="duotone" size={20} />}
-                minValue={today(getLocalTimeZone()).add({ days: 1 })}
                 onChange={(e) => {
                   const value = e.toString();
                   const date = new Date(value);
@@ -372,4 +388,15 @@ export default function CreateEventTestApotekerclassPage({
   );
 }
 
-export const getServerSideProps = withToken();
+export const getServerSideProps = withToken(async () => {
+  const response = await fetch(
+    "https://ruangobat.is3.cloudhost.id/statics/provinces.json",
+  );
+  let provicesData: { name: string }[] = await response.json();
+
+  return {
+    props: {
+      provicesData,
+    },
+  };
+});
