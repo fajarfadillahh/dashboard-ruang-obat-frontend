@@ -4,6 +4,7 @@ export type EventTestApotekerclass = {
   slug: string;
   img_url: string;
   content?: string;
+  province?: string;
   registration_date: string;
   university_name: string;
   created_at: string;
