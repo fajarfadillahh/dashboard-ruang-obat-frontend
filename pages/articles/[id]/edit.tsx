@@ -111,7 +111,13 @@ export default function EditArticlePage({
       }
 
       formData.append("article_id", router.query.id as string);
-      formData.append("topic_id", input.topic as string);
+      formData.append(
+        "topic_id",
+        topics
+          ? (topics.data.topics.find((topic) => topic.name === input.topic)
+              ?.topic_id as string)
+          : "",
+      );
       formData.append("title", input.title);
       formData.append("description", input.description);
       formData.append("content", input.content);
