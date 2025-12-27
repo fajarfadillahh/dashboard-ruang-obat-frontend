@@ -1,0 +1,43 @@
+name: Build Docker Image
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: Production
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        run: |
+          echo "IMAGE_TAG=$(date +%Y%m%d-%H%M)-${GITHUB_SHA::7}" >> $GITHUB_ENV
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.OWNER_NAME }}
+          password: ${{ secrets.OWNER_PAT }}
+
+      - name: Build image
+        run: |
+          docker build \
+          --build-arg NEXT_PUBLIC_MODE=${{ vars.NEXT_PUBLIC_MODE }} \
+          -t ghcr.io/${{ secrets.OWNER_NAME }}/roadmin:${{ env.IMAGE_TAG }} .
+
+      - name: Push versioned image
+        run: |
+          docker push ghcr.io/${{ secrets.OWNER_NAME }}/roadmin:${{ env.IMAGE_TAG }}
+
+      - name: Tag & push latest
+        run: |
+          docker tag ghcr.io/${{ secrets.OWNER_NAME }}/roadmin:${{ env.IMAGE_TAG }} ghcr.io/${{ secrets.OWNER_NAME }}/roadmin:latest
+          docker push ghcr.io/${{ secrets.OWNER_NAME }}/roadmin:latest
