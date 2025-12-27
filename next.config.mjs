@@ -49,6 +49,7 @@ const nextConfig = {
       "framer-motion",
     ],
   },
+  output: "standalone",
 };
 
 export default bundleAnalyzer(nextConfig);
