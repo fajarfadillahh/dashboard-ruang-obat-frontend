@@ -1,13 +1,12 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-ARG NEXT_PUBLIC_MODE
-ENV NEXT_PUBLIC_MODE=${NEXT_PUBLIC_MODE}
-
 COPY package*.json ./
 RUN npm ci
 
 COPY . .
+ARG NEXT_PUBLIC_MODE
+ENV NEXT_PUBLIC_MODE=${NEXT_PUBLIC_MODE}
 RUN npm run build
 
 FROM node:20-alpine AS runner
